@@ -181,6 +181,28 @@ class SoundController {
     osc.stop(now + 0.25);
   }
 
+  // Error buzzer / Spam lockout sound
+  playBuzzer() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(130, now);
+    osc.frequency.setValueAtTime(110, now + 0.1);
+
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.28);
+  }
+
   // Victory fanfare
   playVictory() {
     if (!this.soundEnabled || !this.ctx) return;

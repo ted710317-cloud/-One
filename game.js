@@ -57,7 +57,13 @@
       { label: '🚶 標準心算', mult: 1.0 },
       { label: '🐢 悠閒慢速', mult: 0.65 },
       { label: '⚡ 挑戰快速', mult: 1.45 }
-    ]
+    ],
+    // Anti-spamming / Anti-mashing controls
+    isOverheated: false,
+    overheatTimer: null,
+    lastShootTime: 0,
+    recentClicks: [],
+    consecutiveMisses: 0,
   };
 
   // --- DOM Elements ---
@@ -73,6 +79,11 @@
   const comboBanner = document.getElementById('combo-banner');
   const equationBanner = document.getElementById('equation-banner');
   const warningBubble = document.getElementById('warning-bubble');
+
+  // Console & Buttons for Anti-Spam
+  const cannonConsole = document.getElementById('cannon-console');
+  const consoleHint = document.querySelector('.console-hint');
+  const primeBtns = document.querySelectorAll('.prime-btn');
 
   // Modals
   const modalStart = document.getElementById('modal-start');
@@ -485,6 +496,7 @@
       state.totalShots++;
       state.correctShots++;
       state.combo++;
+      state.consecutiveMisses = 0; // Reset consecutive misses on correct answer!
       if (state.combo > state.maxCombo) state.maxCombo = state.combo;
 
       const prevVal = monster.currentValue;
@@ -555,16 +567,23 @@
       // --- INCORRECT FACTOR (MISSED / REBOUND) ---
       state.totalShots++;
       state.combo = 0; // Combo reset!
+      state.consecutiveMisses++;
       window.soundManager.playDeflect();
       screenShake = 6;
 
       // Deflection sparks
       spawnExplosion(monster.x, monster.y, '#ff0055', 12);
-      showWarningBubble(`❌ ${monster.currentValue} 不能被 ${prime} 整除！`);
+
+      // Escalating Overheat Lockout: Penalize spamming with cooling delay!
+      let lockMs = 1200;
+      if (state.consecutiveMisses === 2) lockMs = 2000;
+      else if (state.consecutiveMisses >= 3) lockMs = 3000;
+
+      triggerOverheat(lockMs, `❌ ${monster.currentValue} 不能被 ${prime} 整除！砲台過熱 ${(lockMs / 1000).toFixed(1)} 秒，請先心算！`);
 
       // Shield penalty (except in practice mode)
       if (state.mode !== 'practice') {
-        damageShield(6);
+        damageShield(6 + state.consecutiveMisses * 2);
       }
     }
 
@@ -627,13 +646,13 @@
     const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
     sumAccuracy.textContent = `${acc}%`;
 
-    // Grade
+    // Grade & Accuracy Evaluation
     let grade = 'B';
-    if (acc >= 90 && state.score >= 5000) grade = 'SSS (數學天才)';
-    else if (acc >= 85 && state.score >= 3000) grade = 'S (質數大師)';
-    else if (acc >= 75) grade = 'A (優良)';
+    if (acc >= 90 && state.score >= 5000) grade = 'SSS (心算天才)';
+    else if (acc >= 85 && state.score >= 3000) grade = 'S (質數神射手)';
+    else if (acc >= 75) grade = 'A (優良心算)';
     else if (acc >= 60) grade = 'B (合格)';
-    else grade = 'C (需多練習除法)';
+    else grade = 'C (注意：盲目亂按過多，請先心算)';
     sumBadge.textContent = `評等：${grade}`;
 
     // Populate Review List
@@ -702,9 +721,58 @@
     }
   }
 
+  // --- Trigger Overheat & Anti-Spam Lockout ---
+  function triggerOverheat(durationMs, message) {
+    state.isOverheated = true;
+    if (cannonConsole) cannonConsole.classList.add('overheated');
+    if (primeBtns) primeBtns.forEach(b => b.classList.add('locked'));
+
+    window.soundManager.playBuzzer();
+    showWarningBubble(message);
+
+    if (consoleHint) {
+      consoleHint.classList.add('overheat-banner');
+      consoleHint.innerHTML = `⚠️ <strong>砲台過熱冷卻中！請先觀察心算，請勿盲目猜測！</strong>`;
+    }
+
+    if (state.overheatTimer) clearTimeout(state.overheatTimer);
+    state.overheatTimer = setTimeout(() => {
+      state.isOverheated = false;
+      if (cannonConsole) cannonConsole.classList.remove('overheated');
+      if (primeBtns) primeBtns.forEach(b => b.classList.remove('locked'));
+      if (consoleHint) {
+        consoleHint.classList.remove('overheat-banner');
+        consoleHint.innerHTML = `<span>鍵盤快捷鍵：<strong>1~6</strong> 或直接點擊下方質數砲彈發射！</span>`;
+      }
+    }, durationMs);
+  }
+
   // --- Cannon Shooting Action ---
   function fireCannon(prime) {
     if (state.isGameOver || state.isPaused || state.isWaveTransition) return;
+
+    // Check if cannon is overheated / locked
+    if (state.isOverheated) {
+      window.soundManager.playBuzzer();
+      showWarningBubble('⚠️ 砲台冷卻中！請先看清數字心算，不要亂按！');
+      return;
+    }
+
+    const now = Date.now();
+    // Anti-Spam: detect rapid random mashing (3 clicks within 750ms)
+    state.recentClicks.push(now);
+    state.recentClicks = state.recentClicks.filter(t => now - t <= 750);
+    if (state.recentClicks.length >= 3) {
+      state.recentClicks = [];
+      triggerOverheat(2500, '🛑 偵測到連續亂按！砲台強制冷卻 2.5 秒，請先心算再出擊！');
+      return;
+    }
+
+    // Minimum shot cooldown (280ms)
+    if (now - state.lastShootTime < 280) {
+      return;
+    }
+    state.lastShootTime = now;
 
     // Check target
     if (!state.activeTarget) {
@@ -802,6 +870,19 @@
     state.bossSpawned = false;
     state.spawnTimer = 0;
     state.spawnInterval = 280; // Slower spawn pace for comfortable mental math
+
+    // Reset anti-spam state
+    state.isOverheated = false;
+    if (state.overheatTimer) clearTimeout(state.overheatTimer);
+    state.consecutiveMisses = 0;
+    state.recentClicks = [];
+    state.lastShootTime = 0;
+    if (cannonConsole) cannonConsole.classList.remove('overheated');
+    if (primeBtns) primeBtns.forEach(b => b.classList.remove('locked'));
+    if (consoleHint) {
+      consoleHint.classList.remove('overheat-banner');
+      consoleHint.innerHTML = `<span>鍵盤快捷鍵：<strong>1~6</strong> 或直接點擊下方質數砲彈發射！</span>`;
+    }
 
     monsters = [];
     projectiles = [];
