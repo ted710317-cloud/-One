@@ -48,10 +48,16 @@
     isWaveTransition: false,
     learningHistory: [], // stores { number, factors: [] }
     spawnTimer: 0,
-    spawnInterval: 180, // frames between spawns
+    spawnInterval: 280, // frames between spawns (slower & more relaxed)
     waveMonstersRemaining: 10,
     waveMonstersTotal: 10,
     bossSpawned: false,
+    speedIndex: 0,
+    speedLevels: [
+      { label: '🚶 標準心算', mult: 1.0 },
+      { label: '🐢 悠閒慢速', mult: 0.65 },
+      { label: '⚡ 挑戰快速', mult: 1.45 }
+    ]
   };
 
   // --- DOM Elements ---
@@ -75,6 +81,7 @@
   const modalSummary = document.getElementById('modal-summary');
 
   // Buttons
+  const btnSpeed = document.getElementById('btn-speed');
   const btnSound = document.getElementById('btn-sound');
   const btnBgm = document.getElementById('btn-bgm');
   const btnRule = document.getElementById('btn-rule');
@@ -176,10 +183,11 @@
       this.x = Math.random() * (canvas.width - this.radius * 2.5) + this.radius * 1.25;
       this.y = -this.radius;
       
-      // Speed scales gently with wave
-      let baseSpeed = isBoss ? 0.35 : (0.55 + (state.wave - 1) * 0.12);
+      // Speed scales gently with wave (optimized for elementary mental math!)
+      let baseSpeed = isBoss ? 0.16 : (0.24 + (state.wave - 1) * 0.035);
       if (state.mode === 'practice') baseSpeed *= 0.75;
-      this.speed = baseSpeed + Math.random() * 0.2;
+      this.speed = baseSpeed + Math.random() * 0.05;
+      this.staggerTimer = 0; // Pause when hit to give mental math time!
 
       this.hitFlash = 0;
       this.angle = 0;
@@ -188,7 +196,12 @@
     }
 
     update() {
-      this.y += this.speed;
+      const mult = state.speedLevels[state.speedIndex].mult;
+      if (this.staggerTimer > 0) {
+        this.staggerTimer--;
+      } else {
+        this.y += this.speed * mult;
+      }
       this.angle += this.rotationSpeed;
       this.pulsePhase += 0.05;
       if (this.hitFlash > 0) this.hitFlash--;
@@ -483,6 +496,10 @@
       particles.push(new Particle(monster.x, monster.y - 20, '#00ff88', `÷ ${prime} = ${nextVal}`));
       spawnExplosion(monster.x, monster.y, PRIME_COLORS[prime], 10);
 
+      // Educational Stagger & Recoil: pause for ~0.8s and float back slightly for mental math!
+      monster.staggerTimer = 48;
+      monster.y = Math.max(monster.radius, monster.y - 14);
+
       // Audio feedback
       window.soundManager.playHit(state.combo);
 
@@ -582,7 +599,7 @@
       state.waveMonstersTotal = 10 + state.wave * 2;
       state.waveMonstersRemaining = state.waveMonstersTotal;
       state.bossSpawned = false;
-      state.spawnInterval = Math.max(90, 180 - state.wave * 18);
+      state.spawnInterval = Math.max(180, 280 - state.wave * 15);
       state.shield = Math.min(100, state.shield + 25); // Repair shield on wave clear
       state.isWaveTransition = false;
       updateHUD();
@@ -784,7 +801,7 @@
     state.waveMonstersRemaining = 10;
     state.bossSpawned = false;
     state.spawnTimer = 0;
-    state.spawnInterval = 160;
+    state.spawnInterval = 280; // Slower spawn pace for comfortable mental math
 
     monsters = [];
     projectiles = [];
@@ -828,6 +845,16 @@
   btnPause.addEventListener('click', togglePause);
   btnResume.addEventListener('click', togglePause);
 
+  // Speed Mode toggle
+  if (btnSpeed) {
+    btnSpeed.addEventListener('click', () => {
+      state.speedIndex = (state.speedIndex + 1) % state.speedLevels.length;
+      const current = state.speedLevels[state.speedIndex];
+      btnSpeed.textContent = current.label;
+      showComboBanner(`速度設定：${current.label}`);
+    });
+  }
+
   // Sound & BGM toggles
   btnSound.addEventListener('click', () => {
     const on = window.soundManager.toggleSound();
@@ -856,9 +883,13 @@
 
     // --- 1. Update Game Logic ---
     if (!state.isGameOver && !state.isWaveTransition && modalStart.classList.contains('hidden')) {
-      // Spawn new monsters
+      // Spawn new monsters (Pedagogical limit: max 2 monsters on screen for early waves)
       state.spawnTimer++;
-      const shouldSpawn = state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length);
+      let maxOnScreen = state.wave <= 2 ? 2 : (state.wave <= 4 ? 3 : 4);
+      if (state.bossSpawned) maxOnScreen = 1;
+
+      const shouldSpawn = (monsters.length < maxOnScreen) && 
+        (state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
       if (shouldSpawn && state.spawnTimer >= state.spawnInterval) {
         state.spawnTimer = 0;
