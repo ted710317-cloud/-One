@@ -100,10 +100,18 @@
   // --- Canvas Resizing ---
   function resizeCanvas() {
     const wrapper = document.getElementById('canvas-wrapper');
+    if (!wrapper) return;
     canvas.width = wrapper.clientWidth;
     canvas.height = wrapper.clientHeight;
   }
   window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(resizeCanvas, 150);
+    setTimeout(resizeCanvas, 400);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resizeCanvas);
+  }
   resizeCanvas();
 
   // --- Starfield Background ---

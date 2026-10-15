@@ -25,18 +25,28 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
+  position: fixed;
+  inset: 0;
   background-color: var(--bg-dark);
   color: var(--text-light);
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
 }
 
 /* Master Game Container */
 #game-container {
   display: flex;
   flex-direction: column;
-  width: 100vw;
-  height: 100vh;
-  position: relative;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   background: radial-gradient(circle at 50% 20%, #15223e 0%, #080d19 100%);
 }
 
@@ -45,13 +55,15 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 16px;
+  padding-top: max(8px, env(safe-area-inset-top));
   background: var(--bg-panel);
   border-bottom: 2px solid var(--border-neon);
   box-shadow: 0 4px 20px rgba(0, 243, 255, 0.15);
   z-index: 20;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 .hud-item {
@@ -137,7 +149,9 @@ html, body {
 
 /* Canvas Area */
 #canvas-wrapper {
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -265,11 +279,13 @@ html, body {
   background: var(--bg-panel);
   border-top: 2px solid var(--border-neon);
   box-shadow: 0 -4px 20px rgba(0, 243, 255, 0.15);
-  padding: 10px 16px 14px 16px;
+  padding: 8px 12px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  z-index: 20;
+  gap: 6px;
+  z-index: 25;
+  flex-shrink: 0; /* CRITICAL: Never allow console to be pushed off-screen */
 }
 
 .console-hint {
@@ -285,7 +301,7 @@ html, body {
 .prime-buttons-container {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  gap: clamp(6px, 1.2vw, 12px);
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
@@ -296,7 +312,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 4px;
+  padding: clamp(6px, 1.3vh, 12px) 2px;
   border-radius: 12px;
   background: linear-gradient(180deg, #1e2a48 0%, #111a33 100%);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -305,6 +321,7 @@ html, body {
   position: relative;
   transition: all 0.12s ease-in-out;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .prime-btn:hover {
@@ -344,7 +361,7 @@ html, body {
 }
 
 .prime-num {
-  font-size: 28px;
+  font-size: clamp(20px, 3.8vh, 28px);
   font-weight: 900;
   line-height: 1;
 }
@@ -672,28 +689,73 @@ html, body {
   flex: 1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Responsive adjustments for iPad & Mobile */
+@media (max-width: 900px), (max-height: 750px) {
+  .console-hint {
+    display: none;
+  }
+  .key-badge {
+    display: none;
+  }
+}
+
+@media (max-height: 650px) {
   #hud {
-    padding: 8px 12px;
+    padding: 4px 10px;
+    padding-top: max(4px, env(safe-area-inset-top));
   }
   .hud-item {
-    min-width: 65px;
+    min-width: 60px;
   }
   .hud-value {
     font-size: 16px;
   }
+  .hud-label {
+    font-size: 10px;
+  }
   .shield-bar-outer {
-    width: 90px;
+    height: 10px;
+    width: 80px;
+  }
+  #cannon-console {
+    padding: 6px 10px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .prime-tip {
+    display: none;
+  }
+  .prime-btn {
+    padding: 4px 2px;
+  }
+  .prime-num {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  #hud {
+    padding: 6px 10px;
+  }
+  .hud-item {
+    min-width: 60px;
+  }
+  .hud-value {
+    font-size: 15px;
+  }
+  .hud-label {
+    font-size: 10px;
+  }
+  .shield-bar-outer {
+    width: 80px;
   }
   .prime-buttons-container {
     gap: 6px;
   }
   .prime-btn {
-    padding: 8px 2px;
+    padding: 6px 2px;
   }
   .prime-num {
-    font-size: 22px;
+    font-size: 20px;
   }
   .key-badge {
     display: none;
@@ -706,5 +768,15 @@ html, body {
   }
   .logo-title {
     font-size: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .prime-buttons-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .prime-tip {
+    display: none;
   }
 }
