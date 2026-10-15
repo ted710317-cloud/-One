@@ -52,6 +52,8 @@
     waveMonstersRemaining: 10,
     waveMonstersTotal: 10,
     bossSpawned: false,
+    endlessLevel: 1,
+    endlessProgress: 0,
     speedIndex: 0,
     speedLevels: [
       { label: '🚶 標準心算', mult: 1.0 },
@@ -205,6 +207,18 @@
     };
   }
 
+  // --- Wave Speed Multiplier Progression ---
+  function getWaveSpeedMultiplier() {
+    if (state.mode === 'endless') {
+      return 1.0 + (state.endlessLevel - 1) * 0.16;
+    } else if (state.mode === 'campaign') {
+      // Wave 1: 1.0x, Wave 2: 1.25x (+25%), Wave 3: 1.55x (+55%), Wave 4: 1.90x (+90%), Wave 5: 2.30x (+130%)
+      const multipliers = [1.0, 1.25, 1.55, 1.90, 2.30];
+      return multipliers[Math.min(state.wave - 1, multipliers.length - 1)];
+    }
+    return 1.0;
+  }
+
   // --- Monster Class ---
   class Monster {
     constructor(val, isBoss = false, bossName = '') {
@@ -217,10 +231,11 @@
       this.x = Math.random() * (canvas.width - this.radius * 2.5) + this.radius * 1.25;
       this.y = -this.radius;
       
-      // Speed scales gently with wave (optimized for elementary mental math!)
-      let baseSpeed = isBoss ? 0.16 : (0.24 + (state.wave - 1) * 0.035);
+      // Speed scales progressively with each wave to increase excitement!
+      const waveMult = getWaveSpeedMultiplier();
+      let baseSpeed = isBoss ? 0.17 : 0.23;
       if (state.mode === 'practice') baseSpeed *= 0.75;
-      this.speed = baseSpeed + Math.random() * 0.05;
+      this.speed = (baseSpeed * waveMult + Math.random() * 0.04);
       this.staggerTimer = 0; // Pause when hit to give mental math time!
 
       this.hitFlash = 0;
@@ -584,6 +599,17 @@
             monsters.push(spawnBoss(state.wave));
             showComboBanner(`⚠️ 魔王出現！注意分解！`);
           }
+        } else if (state.mode === 'endless') {
+          // Endless Mode Progression: Accelerate every 6 monsters destroyed!
+          state.endlessProgress++;
+          if (state.endlessProgress >= 6) {
+            state.endlessProgress = 0;
+            state.endlessLevel++;
+            window.soundManager.playSpeedUp();
+            showEquationBanner(`⚡ 無盡關卡升級！進入 Level ${state.endlessLevel}！怪獸速度提升！🚀`);
+            screenShake = 12;
+            updateHUD();
+          }
         }
       }
     } else {
@@ -634,14 +660,19 @@
     }
 
     state.isWaveTransition = true;
-    showEquationBanner(`🏆 第 ${state.wave} 關完成！準備進入第 ${state.wave + 1} 關！`);
+    const nextWave = state.wave + 1;
+    const speedPercentBonus = [0, 25, 55, 90, 130];
+    const bonusText = speedPercentBonus[nextWave - 1] || (nextWave * 25);
+
+    showEquationBanner(`🏆 第 ${state.wave} 關突破！第 ${nextWave} 關啟動：怪獸速度提升 +${bonusText}%！🔥`);
+    window.soundManager.playSpeedUp();
 
     setTimeout(() => {
       state.wave++;
       state.waveMonstersTotal = 10 + state.wave * 2;
       state.waveMonstersRemaining = state.waveMonstersTotal;
       state.bossSpawned = false;
-      state.spawnInterval = Math.max(180, 280 - state.wave * 15);
+      state.spawnInterval = Math.max(160, 280 - state.wave * 25);
       state.shield = Math.min(100, state.shield + 25); // Repair shield on wave clear
       state.isWaveTransition = false;
       updateHUD();
@@ -747,7 +778,16 @@
   // --- Update HUD ---
   function updateHUD() {
     hudScore.textContent = state.score.toLocaleString();
-    hudWave.textContent = state.mode === 'endless' ? '無盡模式' : (state.mode === 'practice' ? '自由練習' : `第 ${state.wave} 關`);
+    const waveMult = getWaveSpeedMultiplier();
+    const speedLabel = `${waveMult.toFixed(1)}x`;
+
+    if (state.mode === 'endless') {
+      hudWave.textContent = `無盡 Lv.${state.endlessLevel} (${speedLabel})`;
+    } else if (state.mode === 'practice') {
+      hudWave.textContent = '自由練習';
+    } else {
+      hudWave.textContent = `第 ${state.wave} 關 (${speedLabel})`;
+    }
     hudCombo.textContent = `x${state.combo}`;
 
     // Shield UI
@@ -903,6 +943,8 @@
     state.isGameOver = false;
     state.isPaused = false;
     state.isWaveTransition = false;
+    state.endlessLevel = 1;
+    state.endlessProgress = 0;
     state.learningHistory = [];
     state.waveMonstersTotal = 10;
     state.waveMonstersRemaining = 10;
@@ -1206,9 +1248,10 @@
       }
     }
 
-    // Update Starfield
+    // Update Starfield (accelerates with wave for immersive speed sensation!)
+    const starSpeedMult = getWaveSpeedMultiplier();
     for (let s of stars) {
-      s.y += s.speed;
+      s.y += s.speed * starSpeedMult;
       if (s.y > canvas.height) {
         s.y = 0;
         s.x = Math.random() * canvas.width;

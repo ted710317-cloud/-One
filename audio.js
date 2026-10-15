@@ -226,6 +226,29 @@ class SoundController {
     });
   }
 
+  // Speed Up Warp sound
+  playSpeedUp() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(260, now);
+    osc.frequency.exponentialRampToValueAtTime(1100, now + 0.4);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.45);
+  }
+
   // Background Synth Loop
   startBgm() {
     if (!this.bgmEnabled) return;
