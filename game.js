@@ -64,6 +64,12 @@
     lastShootTime: 0,
     recentClicks: [],
     consecutiveMisses: 0,
+    // Player Profile Info
+    player: {
+      class: '',
+      seat: '',
+      name: ''
+    }
   };
 
   // --- DOM Elements ---
@@ -85,13 +91,30 @@
   const consoleHint = document.querySelector('.console-hint');
   const primeBtns = document.querySelectorAll('.prime-btn');
 
+  // Player Profile Inputs
+  const inputClass = document.getElementById('player-class');
+  const inputSeat = document.getElementById('player-seat');
+  const inputName = document.getElementById('player-name');
+  const profileError = document.getElementById('profile-error');
+
   // Modals
   const modalStart = document.getElementById('modal-start');
   const modalRules = document.getElementById('modal-rules');
   const modalPause = document.getElementById('modal-pause');
   const modalSummary = document.getElementById('modal-summary');
+  const modalLeaderboard = document.getElementById('modal-leaderboard');
 
   // Buttons
+  const btnLeaderboard = document.getElementById('btn-leaderboard');
+  const btnViewLeaderboard = document.getElementById('btn-view-leaderboard');
+  const btnSummaryLb = document.getElementById('btn-summary-lb');
+  const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
+  const btnClearLeaderboard = document.getElementById('btn-clear-leaderboard');
+  const tabLbCampaign = document.getElementById('tab-lb-campaign');
+  const tabLbEndless = document.getElementById('tab-lb-endless');
+  const lbTbody = document.getElementById('leaderboard-tbody');
+  const summaryLbRank = document.getElementById('summary-lb-rank');
+
   const btnSpeed = document.getElementById('btn-speed');
   const btnSound = document.getElementById('btn-sound');
   const btnBgm = document.getElementById('btn-bgm');
@@ -671,6 +694,22 @@
       });
     }
 
+    // Submit to Local Leaderboard
+    if (state.mode !== 'practice') {
+      const rank = recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
+      if (rank >= 0 && rank < 10) {
+        if (summaryLbRank) {
+          const modeName = state.mode === 'endless' ? '無盡挑戰' : '關卡模式';
+          summaryLbRank.textContent = `🎉 太厲害了！榮登 ${modeName} 排行榜第 ${rank + 1} 名！`;
+          summaryLbRank.classList.remove('hidden');
+        }
+      } else if (summaryLbRank) {
+        summaryLbRank.classList.add('hidden');
+      }
+    } else if (summaryLbRank) {
+      summaryLbRank.classList.add('hidden');
+    }
+
     modalSummary.classList.remove('hidden');
   }
 
@@ -899,11 +938,161 @@
     updateHUD();
   }
 
-  btnModeCampaign.addEventListener('click', () => startGame('campaign'));
-  btnModeEndless.addEventListener('click', () => startGame('endless'));
-  btnModePractice.addEventListener('click', () => startGame('practice'));
+  // --- Player Profile Validation & Persistence ---
+  function loadPlayerProfile() {
+    try {
+      const saved = localStorage.getItem('prime_player_profile');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.class && inputClass) inputClass.value = data.class;
+        if (data.seat && inputSeat) inputSeat.value = data.seat;
+        if (data.name && inputName) inputName.value = data.name;
+        state.player = data;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function savePlayerProfile() {
+    const pClass = inputClass ? inputClass.value.trim() : '';
+    const pSeat = inputSeat ? inputSeat.value.trim() : '';
+    const pName = inputName ? inputName.value.trim() : '';
+
+    if (!pClass || !pSeat) {
+      if (profileError) profileError.classList.remove('hidden');
+      if (!pClass && inputClass) inputClass.focus();
+      else if (!pSeat && inputSeat) inputSeat.focus();
+      return false;
+    }
+
+    if (profileError) profileError.classList.add('hidden');
+    state.player = { class: pClass, seat: pSeat, name: pName };
+    try {
+      localStorage.setItem('prime_player_profile', JSON.stringify(state.player));
+    } catch (e) {}
+    return true;
+  }
+
+  // --- Leaderboard Storage & Rendering ---
+  function getLeaderboard(mode) {
+    const key = `prime_lb_${mode}`;
+    try {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLeaderboard(mode, list) {
+    const key = `prime_lb_${mode}`;
+    try {
+      localStorage.setItem(key, JSON.stringify(list.slice(0, 15)));
+    } catch (e) {}
+  }
+
+  function recordScoreToLeaderboard(mode, score, maxCombo, accuracy) {
+    if (mode === 'practice') return -1;
+    const list = getLeaderboard(mode);
+    const pClass = state.player.class || '未知';
+    const pSeat = state.player.seat || '0';
+    const pName = state.player.name ? ` (${state.player.name})` : '';
+    const playerLabel = `${pClass}班 ${pSeat}號${pName}`;
+    const dateStr = new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
+
+    const newEntry = {
+      player: playerLabel,
+      score: score,
+      combo: maxCombo,
+      accuracy: accuracy,
+      date: dateStr,
+      timestamp: Date.now()
+    };
+
+    list.push(newEntry);
+    list.sort((a, b) => b.score - a.score || b.accuracy - a.accuracy);
+    const rank = list.indexOf(newEntry);
+    saveLeaderboard(mode, list);
+    return rank;
+  }
+
+  let currentLbTab = 'campaign';
+  function renderLeaderboard(tab = 'campaign') {
+    currentLbTab = tab;
+    if (tabLbCampaign) tabLbCampaign.classList.toggle('active', tab === 'campaign');
+    if (tabLbEndless) tabLbEndless.classList.toggle('active', tab === 'endless');
+
+    const list = getLeaderboard(tab);
+    if (!lbTbody) return;
+    lbTbody.innerHTML = '';
+    if (list.length === 0) {
+      lbTbody.innerHTML = `<tr><td colspan="5" style="color: #8b9bb4; padding: 25px;">尚無英雄紀錄，快來進行第一場戰鬥奪下第 1 名！</td></tr>`;
+      return;
+    }
+
+    list.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      let rankHtml = `${index + 1}`;
+      if (index === 0) rankHtml = `<span class="rank-badge rank-1">🥇 1</span>`;
+      else if (index === 1) rankHtml = `<span class="rank-badge rank-2">🥈 2</span>`;
+      else if (index === 2) rankHtml = `<span class="rank-badge rank-3">🥉 3</span>`;
+
+      tr.innerHTML = `
+        <td>${rankHtml}</td>
+        <td class="lb-player-tag">${item.player}</td>
+        <td class="lb-score-tag">${item.score.toLocaleString()}</td>
+        <td style="color: #ffe600; font-weight: bold;">x${item.combo}</td>
+        <td style="color: #00f3ff; font-weight: bold;">${item.accuracy}%</td>
+      `;
+      lbTbody.appendChild(tr);
+    });
+  }
+
+  function openLeaderboard(tab = 'campaign') {
+    renderLeaderboard(tab);
+    if (modalLeaderboard) modalLeaderboard.classList.remove('hidden');
+  }
+
+  function closeLeaderboard() {
+    if (modalLeaderboard) modalLeaderboard.classList.add('hidden');
+  }
+
+  // Bind Mode Buttons with Profile Check
+  btnModeCampaign.addEventListener('click', () => {
+    if (savePlayerProfile()) startGame('campaign');
+  });
+  btnModeEndless.addEventListener('click', () => {
+    if (savePlayerProfile()) startGame('endless');
+  });
+  btnModePractice.addEventListener('click', () => {
+    if (savePlayerProfile()) startGame('practice');
+  });
   btnPlayAgain.addEventListener('click', () => startGame(state.mode));
   btnRestart.addEventListener('click', () => startGame(state.mode));
+
+  // Leaderboard Buttons
+  if (btnLeaderboard) btnLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
+  if (btnViewLeaderboard) btnViewLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
+  if (btnSummaryLb) {
+    btnSummaryLb.addEventListener('click', () => openLeaderboard(state.mode === 'endless' ? 'endless' : 'campaign'));
+  }
+  if (btnCloseLeaderboard) btnCloseLeaderboard.addEventListener('click', closeLeaderboard);
+  if (tabLbCampaign) tabLbCampaign.addEventListener('click', () => renderLeaderboard('campaign'));
+  if (tabLbEndless) tabLbEndless.addEventListener('click', () => renderLeaderboard('endless'));
+
+  if (btnClearLeaderboard) {
+    btnClearLeaderboard.addEventListener('click', () => {
+      if (confirm('確定要清除所有本機排行榜英雄紀錄嗎？此動作無法復原。')) {
+        localStorage.removeItem('prime_lb_campaign');
+        localStorage.removeItem('prime_lb_endless');
+        renderLeaderboard(currentLbTab);
+      }
+    });
+  }
+
+  // Load profile on startup
+  loadPlayerProfile();
 
   btnBackMenu.addEventListener('click', () => {
     modalSummary.classList.add('hidden');

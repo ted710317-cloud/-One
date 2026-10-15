@@ -31,6 +31,7 @@
         </div>
       </div>
       <div class="hud-controls">
+        <button id="btn-leaderboard" class="hud-btn" title="查看英雄排行榜">🏆 排行</button>
         <button id="btn-speed" class="hud-btn" title="切換遊戲速度（悠閒慢速/標準/挑戰快速）">🚶 標準</button>
         <button id="btn-sound" class="hud-btn" title="開關音效" aria-label="音效開關">🔊</button>
         <button id="btn-bgm" class="hud-btn" title="開關音樂" aria-label="音樂開關">🎵</button>
@@ -128,10 +129,31 @@
           </div>
         </div>
 
+        <!-- Player Profile Input Form -->
+        <div class="player-profile-form">
+          <div class="profile-form-title">📝 請輸入防衛官資訊（成績將登錄排行榜）</div>
+          <div class="profile-input-grid">
+            <div class="input-field">
+              <label for="player-class">班級：</label>
+              <input type="text" id="player-class" placeholder="例: 601" maxlength="10">
+            </div>
+            <div class="input-field">
+              <label for="player-seat">座號：</label>
+              <input type="number" id="player-seat" placeholder="例: 15" min="1" max="99">
+            </div>
+            <div class="input-field">
+              <label for="player-name">姓名/暱稱：</label>
+              <input type="text" id="player-name" placeholder="例: 小明 (可選填)" maxlength="10">
+            </div>
+          </div>
+          <div id="profile-error" class="profile-error hidden">⚠️ 請輸入班級與座號才能啟動任務喔！</div>
+        </div>
+
         <div class="mode-select-box">
           <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階）</button>
           <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（快速刷分）</button>
           <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力）</button>
+          <button class="btn-play quaternary-btn" id="btn-view-leaderboard">🏆 查看英雄排行榜</button>
         </div>
       </div>
     </div>
@@ -218,9 +240,45 @@
           </div>
         </div>
 
+        <div id="summary-lb-rank" class="summary-lb-rank hidden"></div>
+
         <div class="summary-actions">
           <button class="primary-btn" id="btn-play-again">🔄 再玩一次</button>
-          <button class="secondary-btn" id="btn-back-menu">🏠 回主選單</button>
+          <button class="secondary-btn" id="btn-summary-lb">🏆 查看英雄榜</button>
+          <button class="tertiary-btn" id="btn-back-menu">🏠 主選單</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD MODAL -->
+    <div id="modal-leaderboard" class="modal-overlay hidden">
+      <div class="modal-card leaderboard-card">
+        <h2 class="lb-title">🏆 質因數保衛戰 - 班級英雄排行榜</h2>
+        <div class="leaderboard-tabs">
+          <button class="lb-tab active" id="tab-lb-campaign" data-tab="campaign">🚀 關卡模式榜</button>
+          <button class="lb-tab" id="tab-lb-endless" data-tab="endless">⚡ 無盡挑戰榜</button>
+        </div>
+
+        <div class="leaderboard-table-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th style="width: 14%;">排名</th>
+                <th style="width: 32%;">防衛官（班級座號）</th>
+                <th style="width: 20%;">得分</th>
+                <th style="width: 16%;">最高連擊</th>
+                <th style="width: 18%;">命中率</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <!-- Dynamically populated by game.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="leaderboard-actions">
+          <button class="primary-btn" id="btn-close-leaderboard">關閉英雄榜</button>
+          <button class="tertiary-btn btn-danger-action" id="btn-clear-leaderboard">🗑️ 清除本機紀錄</button>
         </div>
       </div>
     </div>

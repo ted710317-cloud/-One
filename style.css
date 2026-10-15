@@ -802,3 +802,204 @@ html, body {
     display: none;
   }
 }
+
+/* Player Profile Input Form */
+.player-profile-form {
+  background: rgba(0, 243, 255, 0.05);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.profile-form-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--cyan-glow);
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.profile-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 10px;
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-field label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.input-field input {
+  background: rgba(10, 20, 42, 0.9);
+  border: 1.5px solid rgba(0, 243, 255, 0.4);
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-field input:focus {
+  border-color: var(--cyan-glow);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.profile-error {
+  margin-top: 8px;
+  color: #ff3366;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  animation: shake 0.4s ease-out;
+}
+
+/* Quaternary Golden Leaderboard Button */
+.quaternary-btn {
+  background: linear-gradient(90deg, #ffe600, #ff9100);
+  color: #1a1000 !important;
+  box-shadow: 0 4px 15px rgba(255, 230, 0, 0.35);
+  font-weight: 900;
+}
+
+.quaternary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 230, 0, 0.5);
+}
+
+/* Leaderboard Modal Styles */
+.leaderboard-card {
+  max-width: 760px;
+}
+
+.lb-title {
+  color: var(--yellow-glow);
+  font-size: 26px;
+  text-shadow: 0 0 15px rgba(255, 230, 0, 0.4);
+  margin-bottom: 16px;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.lb-tab {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lb-tab.active {
+  background: var(--cyan-glow);
+  color: #05132b;
+  border-color: var(--cyan-glow);
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+
+.leaderboard-table-container {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 14px;
+}
+
+.leaderboard-table th {
+  background: rgba(0, 243, 255, 0.15);
+  color: var(--cyan-glow);
+  padding: 10px 8px;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.leaderboard-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-table tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rank-badge {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.rank-1 { color: #ffe600; text-shadow: 0 0 10px #ffe600; font-size: 18px; }
+.rank-2 { color: #e0e0e0; text-shadow: 0 0 10px #ffffff; font-size: 17px; }
+.rank-3 { color: #ff9100; text-shadow: 0 0 10px #ff9100; font-size: 16px; }
+
+.lb-player-tag {
+  font-weight: bold;
+  color: #fff;
+}
+
+.lb-score-tag {
+  font-weight: 800;
+  color: var(--green-glow);
+}
+
+.leaderboard-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-danger-action {
+  color: #ff4d6d !important;
+  border-color: rgba(255, 77, 109, 0.3) !important;
+  font-size: 14px;
+}
+
+.btn-danger-action:hover {
+  background: rgba(255, 77, 109, 0.2) !important;
+}
+
+.summary-lb-rank {
+  margin: 12px 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(255, 230, 0, 0.15);
+  border: 1px solid var(--yellow-glow);
+  color: #ffe600;
+  font-size: 16px;
+  font-weight: 900;
+  animation: popScale 0.6s ease-out;
+}
+
+@media (max-width: 600px) {
+  .profile-input-grid {
+    grid-template-columns: 1fr;
+  }
+}
