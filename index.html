@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>質數砲台保衛戰 - 國小六年級質因數分解練習遊戲</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Top HUD Bar -->
+    <header id="hud">
+      <div class="hud-item" id="score-box">
+        <span class="hud-label">得分</span>
+        <span class="hud-value" id="hud-score">0</span>
+      </div>
+      <div class="hud-item" id="wave-box">
+        <span class="hud-label">關卡</span>
+        <span class="hud-value" id="hud-wave">第 1 波</span>
+      </div>
+      <div class="hud-item" id="combo-box">
+        <span class="hud-label">連擊 (COMBO)</span>
+        <span class="hud-value" id="hud-combo">x0</span>
+      </div>
+      <div class="hud-item" id="shield-box">
+        <span class="hud-label">基地護盾</span>
+        <div class="shield-bar-outer">
+          <div id="shield-bar-inner"></div>
+        </div>
+      </div>
+      <div class="hud-controls">
+        <button id="btn-sound" class="hud-btn" title="開關音效" aria-label="音效開關">🔊</button>
+        <button id="btn-bgm" class="hud-btn" title="開關音樂" aria-label="音樂開關">🎵</button>
+        <button id="btn-rule" class="hud-btn" title="除法秘笈與規則">📖 秘笈</button>
+        <button id="btn-pause" class="hud-btn" title="暫停遊戲">⏸️</button>
+      </div>
+    </header>
+
+    <!-- Canvas Game Area -->
+    <div id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+      
+      <!-- Current Target Indicator & Factorization Trail -->
+      <div id="target-detail-panel" class="hidden">
+        <div class="target-title">鎖定目標</div>
+        <div class="target-number-display" id="target-num">60</div>
+        <div class="target-history" id="target-history">
+          <!-- e.g. 60 ÷ 2 = 30 -->
+        </div>
+      </div>
+
+      <!-- Combo Alert Overlay -->
+      <div id="combo-banner" class="hidden"></div>
+      <!-- Factorization Success Callout -->
+      <div id="equation-banner" class="hidden"></div>
+      <!-- Rebound / Miss Warning -->
+      <div id="warning-bubble" class="hidden"></div>
+    </div>
+
+    <!-- Bottom Defense Base & Prime Cannon Console -->
+    <footer id="cannon-console">
+      <div class="console-hint">
+        <span>鍵盤快捷鍵：<strong>1~6</strong> 或直接點擊下方質數砲彈發射！</span>
+      </div>
+      <div class="prime-buttons-container">
+        <button class="prime-btn" data-prime="2" data-key="1">
+          <span class="prime-num">2</span>
+          <span class="key-badge">鍵盤 [1]</span>
+          <span class="prime-tip">偶數必除</span>
+        </button>
+        <button class="prime-btn" data-prime="3" data-key="2">
+          <span class="prime-num">3</span>
+          <span class="key-badge">鍵盤 [2]</span>
+          <span class="prime-tip">各數字和</span>
+        </button>
+        <button class="prime-btn" data-prime="5" data-key="3">
+          <span class="prime-num">5</span>
+          <span class="key-badge">鍵盤 [3]</span>
+          <span class="prime-tip">尾數0或5</span>
+        </button>
+        <button class="prime-btn" data-prime="7" data-key="4">
+          <span class="prime-num">7</span>
+          <span class="key-badge">鍵盤 [4]</span>
+          <span class="prime-tip">嘗試除算</span>
+        </button>
+        <button class="prime-btn" data-prime="11" data-key="5">
+          <span class="prime-num">11</span>
+          <span class="key-badge">鍵盤 [5]</span>
+          <span class="prime-tip">奇偶位差</span>
+        </button>
+        <button class="prime-btn" data-prime="13" data-key="6">
+          <span class="prime-num">13</span>
+          <span class="key-badge">鍵盤 [6]</span>
+          <span class="prime-tip">進階質因數</span>
+        </button>
+      </div>
+    </footer>
+
+    <!-- START / TITLE MODAL -->
+    <div id="modal-start" class="modal-overlay">
+      <div class="modal-card">
+        <div class="game-logo">
+          <div class="logo-sub">國小六年級數學科教具遊戲</div>
+          <h1 class="logo-title">質數砲台保衛戰</h1>
+          <div class="logo-tag">PRIME FACTOR DEFENDER</div>
+        </div>
+
+        <p class="modal-intro">
+          外星複合數母艦正侵入地球軌道！<br>
+          唯一擊潰它們的方法，就是發射正確的<strong>「質因數砲彈」</strong>將它們徹底分解為 <strong>1</strong>！
+        </p>
+
+        <div class="rule-quick-guide">
+          <div class="guide-item">
+            <span class="guide-icon">🎯</span>
+            <div><strong>鎖定怪獸</strong>：點選怪獸或按自動鎖定最近的威脅。</div>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">💥</span>
+            <div><strong>因數除算</strong>：發射能整除它的質數（例如對 24 射 2 變成 12，再射 2 變 6...）。</div>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">🛡️</span>
+            <div><strong>小心彈刀</strong>：若射出非因數會反彈扣除護盾！完全分解後可取得標準分解式加分！</div>
+          </div>
+        </div>
+
+        <div class="mode-select-box">
+          <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階）</button>
+          <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（快速刷分）</button>
+          <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力）</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RULES & CHEAT SHEET MODAL -->
+    <div id="modal-rules" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2>📖 六年級質因數分解小秘笈</h2>
+        <div class="cheat-content">
+          <div class="cheat-row">
+            <span class="cheat-badge badge-2">2 的倍數</span>
+            <span class="cheat-desc">個位數字是 <strong>0、2、4、6、8</strong>（偶數）。</span>
+          </div>
+          <div class="cheat-row">
+            <span class="cheat-badge badge-3">3 的倍數</span>
+            <span class="cheat-desc">各個數位數字相加的和，可以被 3 整除。（如 72：7+2=9）</span>
+          </div>
+          <div class="cheat-row">
+            <span class="cheat-badge badge-5">5 的倍數</span>
+            <span class="cheat-desc">個位數字是 <strong>0 或 5</strong>。</span>
+          </div>
+          <div class="cheat-row">
+            <span class="cheat-badge badge-7">7 的倍數</span>
+            <span class="cheat-desc">常見熟記：14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98。</span>
+          </div>
+          <div class="cheat-row">
+            <span class="cheat-badge badge-11">11 的倍數</span>
+            <span class="cheat-desc">奇數位數字和與偶數位數字和的差，是 0 或 11 的倍數。（如 121, 132, 143）</span>
+          </div>
+          <div class="cheat-row">
+            <span class="cheat-badge badge-13">13 的倍數</span>
+            <span class="cheat-desc">常見熟記：26, 39, 52, 65, 78, 91, 104, 117, 130, 143, 169。</span>
+          </div>
+          <div class="cheat-note">
+            💡 <strong>解題策略小訣竅</strong>：先看尾數！是偶數就先用 <strong>2</strong> 狂除；尾數是 5 就用 <strong>5</strong> 除；如果是 0 可以 2 或 5 連發！
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btn-close-rules">我知道了，回戰場！</button>
+      </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="modal-pause" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2>戰事暫停中</h2>
+        <p>整理好思緒，準備好隨時迎戰！</p>
+        <div class="modal-buttons">
+          <button class="primary-btn" id="btn-resume">繼續作戰</button>
+          <button class="secondary-btn" id="btn-restart">重新開始</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER / VICTORY SUMMARY MODAL -->
+    <div id="modal-summary" class="modal-overlay hidden">
+      <div class="modal-card summary-card">
+        <h2 id="summary-title">任務結束</h2>
+        <div id="summary-badge" class="result-badge">評價：S</div>
+        
+        <div class="summary-stats-grid">
+          <div class="stat-box">
+            <div class="stat-lbl">最終得分</div>
+            <div class="stat-val" id="sum-score">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">擊潰怪獸數</div>
+            <div class="stat-val" id="sum-destroyed">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">最高連擊</div>
+            <div class="stat-val" id="sum-maxcombo">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">命中正確率</div>
+            <div class="stat-val" id="sum-accuracy">100%</div>
+          </div>
+        </div>
+
+        <!-- Learning Review List -->
+        <div class="review-section">
+          <h3>📚 本局質因數分解學習歷程清單</h3>
+          <div class="review-list" id="review-list">
+            <!-- populated by game.js: e.g. 72 = 2 × 2 × 2 × 3 × 3 = 2³ × 3² -->
+          </div>
+        </div>
+
+        <div class="summary-actions">
+          <button class="primary-btn" id="btn-play-again">🔄 再玩一次</button>
+          <button class="secondary-btn" id="btn-back-menu">🏠 回主選單</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Audio synthesizers & Core Game Engine -->
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
