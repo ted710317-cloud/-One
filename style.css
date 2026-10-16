@@ -998,6 +998,56 @@ html, body {
   animation: popScale 0.6s ease-out;
 }
 
+.summary-cloud-status {
+  margin: 10px 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.summary-cloud-status.syncing {
+  background: rgba(0, 243, 255, 0.15);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  animation: pulseSync 1.2s infinite ease-in-out;
+}
+
+.summary-cloud-status.success {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid #00ff88;
+  color: #00ff88;
+}
+
+.summary-cloud-status.warning {
+  background: rgba(255, 145, 0, 0.15);
+  border: 1px solid #ff9100;
+  color: #ff9100;
+}
+
+.btn-retry-sync {
+  background: rgba(255, 230, 0, 0.25);
+  border: 1px solid #ffe600;
+  color: #ffe600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: all 0.2s;
+}
+
+.btn-retry-sync:hover {
+  background: rgba(255, 230, 0, 0.5);
+  transform: scale(1.05);
+}
+
 /* Cloud Leaderboard Status Bar */
 .lb-cloud-bar {
   display: flex;

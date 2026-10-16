@@ -117,6 +117,7 @@
   const tabLbEndless = document.getElementById('tab-lb-endless');
   const lbTbody = document.getElementById('leaderboard-tbody');
   const summaryLbRank = document.getElementById('summary-lb-rank');
+  const summaryCloudStatus = document.getElementById('summary-cloud-status');
 
   // Cloud Leaderboard Elements
   const lbCloudBadge = document.getElementById('lb-cloud-badge');
@@ -1030,6 +1031,9 @@
   }
 
   // --- Leaderboard Storage & Cloud Synchronization ---
+  // --- Leaderboard Storage & Cloud Synchronization ---
+  const DEFAULT_CLOUD_API_URL = 'https://script.google.com/macros/s/AKfycbx-NTWBubdRZwapN4_6OyuIr-VlChbcH9oyihMOHHkkFA51jtMG5ytsO0RKOUA6Yl-J/exec';
+
   const GOOGLE_APPS_SCRIPT_TEMPLATE = `function doGet(e) {
   var params = e ? e.parameter : {};
   var action = params.action;
@@ -1052,17 +1056,42 @@
     }
 
     var rows = data.slice(1);
-    var formattedList = rows.map(function(row) {
-      return {
-        date: String(row[0] || ''),
-        class: String(row[1] || ''),
-        seat: String(row[2] || ''),
-        name: String(row[3] || ''),
-        score: Number(row[4]) || 0,
-        combo: Number(row[5]) || 0,
-        accuracy: Number(row[6]) || 0,
-        player: String(row[7] || (row[1] + '班 ' + row[2] + '號' + (row[3] ? ' (' + row[3] + ')' : '')))
+    var bestScoresMap = {};
+    rows.forEach(function(row) {
+      var pClass = String(row[1] || '').trim();
+      var pSeat = String(row[2] || '').trim();
+      var pName = String(row[3] || '').trim();
+      var pPlayer = String(row[7] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+      var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || pName || 'player');
+
+      var score = Number(row[4]) || 0;
+      var combo = Number(row[5]) || 0;
+      var accuracy = Number(row[6]) || 0;
+      var date = String(row[0] || '');
+
+      var entry = {
+        date: date,
+        class: pClass,
+        seat: pSeat,
+        name: pName,
+        score: score,
+        combo: combo,
+        accuracy: accuracy,
+        player: pPlayer
       };
+
+      if (!bestScoresMap[uniqueKey]) {
+        bestScoresMap[uniqueKey] = entry;
+      } else {
+        var cur = bestScoresMap[uniqueKey];
+        if (score > cur.score || (score === cur.score && accuracy > cur.accuracy)) {
+          bestScoresMap[uniqueKey] = entry;
+        }
+      }
+    });
+
+    var formattedList = Object.keys(bestScoresMap).map(function(k) {
+      return bestScoresMap[k];
     });
 
     formattedList.sort(function(a, b) {
@@ -1073,7 +1102,7 @@
     return createJsonResponse({
       status: 'success',
       mode: mode,
-      leaderboard: formattedList.slice(0, 25)
+      leaderboard: formattedList.slice(0, 50)
     });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
@@ -1081,6 +1110,13 @@
 }
 
 function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+  } catch (lockErr) {
+    return createJsonResponse({ status: 'error', message: '伺服器寫入排隊超時，請稍後重試' });
+  }
+
   try {
     var raw = e.postData.contents;
     var data = JSON.parse(raw);
@@ -1091,32 +1127,55 @@ function doPost(e) {
 
     var now = new Date();
     var timeStr = Utilities.formatDate(now, "GMT+8", "yyyy/MM/dd HH:mm");
-    var pClass = String(data.class || '');
-    var pSeat = String(data.seat || '');
-    var pName = String(data.name || '');
+    var pClass = String(data.class || '').trim();
+    var pSeat = String(data.seat || '').trim();
+    var pName = String(data.name || '').trim();
     var score = Number(data.score) || 0;
     var combo = Number(data.combo) || 0;
     var accuracy = Number(data.accuracy) || 0;
-    var player = String(data.player || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : '')));
+    var player = String(data.player || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
 
     sheet.appendRow([timeStr, pClass, pSeat, pName, score, combo, accuracy, player]);
 
     var allRows = sheet.getDataRange().getValues().slice(1);
-    var betterCount = 0;
+    var bestMap = {};
     for (var i = 0; i < allRows.length; i++) {
+      var rClass = String(allRows[i][1] || '').trim();
+      var rSeat = String(allRows[i][2] || '').trim();
+      var rPlayer = String(allRows[i][7] || '').trim();
+      var rKey = (rClass && rSeat) ? (rClass + '_' + rSeat) : rPlayer;
+
       var rScore = Number(allRows[i][4]) || 0;
       var rAcc = Number(allRows[i][6]) || 0;
-      if (rScore > score || (rScore === score && rAcc > accuracy)) {
-        betterCount++;
+
+      if (!bestMap[rKey] || rScore > bestMap[rKey].score || (rScore === bestMap[rKey].score && rAcc > bestMap[rKey].acc)) {
+        bestMap[rKey] = { score: rScore, acc: rAcc };
       }
     }
+
+    var currentRank = 1;
+    var myKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : player;
+    var myBestScore = bestMap[myKey] ? bestMap[myKey].score : score;
+    var myBestAcc = bestMap[myKey] ? bestMap[myKey].acc : accuracy;
+
+    Object.keys(bestMap).forEach(function(k) {
+      if (k !== myKey) {
+        var other = bestMap[k];
+        if (other.score > myBestScore || (other.score === myBestScore && other.acc > myBestAcc)) {
+          currentRank++;
+        }
+      }
+    });
+
     return createJsonResponse({
       status: 'success',
-      rank: betterCount + 1,
+      rank: currentRank,
       message: '成績已同步記錄至全班英雄榜！'
     });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
+  } finally {
+    lock.releaseLock();
   }
 }
 
@@ -1145,7 +1204,7 @@ function createJsonResponse(obj) {
     if (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl && window.GAME_CONFIG.cloudApiUrl.trim()) {
       return window.GAME_CONFIG.cloudApiUrl.trim();
     }
-    return '';
+    return DEFAULT_CLOUD_API_URL;
   }
 
   function setCloudApiUrl(url) {
@@ -1183,6 +1242,54 @@ function createJsonResponse(obj) {
     }
   }
 
+  // --- Offline Pending Scores Queue (離線自動補傳佇列) ---
+  function getPendingScores() {
+    try {
+      const raw = localStorage.getItem('prime_pending_scores');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addPendingScore(payload) {
+    try {
+      const list = getPendingScores();
+      if (!list.some(item => item.timestamp === payload.timestamp)) {
+        list.push(payload);
+        localStorage.setItem('prime_pending_scores', JSON.stringify(list.slice(-25)));
+      }
+    } catch (e) {}
+  }
+
+  function removePendingScore(timestamp) {
+    try {
+      let list = getPendingScores();
+      list = list.filter(item => item.timestamp !== timestamp);
+      localStorage.setItem('prime_pending_scores', JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  let isFlushingQueue = false;
+  async function flushPendingScores() {
+    if (isFlushingQueue || !isCloudEnabled()) return;
+    const pending = getPendingScores();
+    if (!pending || pending.length === 0) return;
+
+    isFlushingQueue = true;
+    for (const item of pending) {
+      try {
+        const res = await sendScoreToCloud(item, false);
+        if (res !== null) {
+          removePendingScore(item.timestamp);
+        }
+      } catch (e) {
+        break;
+      }
+    }
+    isFlushingQueue = false;
+  }
+
   let cloudCache = {
     campaign: null,
     endless: null,
@@ -1201,7 +1308,8 @@ function createJsonResponse(obj) {
     updateCloudStatusUI(true, '正在下載全班最新排名...');
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 9000);
+      // Concurrency tolerant: 25s timeout for fetching
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
 
       const res = await fetch(`${cloudUrl}?mode=${mode}&t=${Date.now()}`, {
         signal: controller.signal
@@ -1236,13 +1344,20 @@ function createJsonResponse(obj) {
     }
   }
 
-  async function sendScoreToCloud(payload) {
+  async function sendScoreToCloud(payload, canQueue = true) {
     const cloudUrl = getCloudApiUrl();
     if (!isCloudEnabled()) return null;
 
+    if (summaryCloudStatus) {
+      summaryCloudStatus.className = 'summary-cloud-status syncing';
+      summaryCloudStatus.innerHTML = '☁️ 正在連線同步成績至全班試算表...';
+      summaryCloudStatus.classList.remove('hidden');
+    }
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 9000);
+      // Increase timeout to 30s to allow Google Apps Script concurrent lock queueing
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const res = await fetch(cloudUrl, {
         method: 'POST',
@@ -1258,10 +1373,31 @@ function createJsonResponse(obj) {
       const result = await res.json();
       if (result && result.status === 'success') {
         cloudCache.lastFetched = 0; // Invalidate cache
+        if (summaryCloudStatus) {
+          summaryCloudStatus.className = 'summary-cloud-status success';
+          summaryCloudStatus.innerHTML = `✅ 成績已同步登錄至全班試算表！(全班即時第 ${result.rank} 名)`;
+          summaryCloudStatus.classList.remove('hidden');
+        }
         return result.rank;
+      } else {
+        throw new Error(result.message || '寫入失敗');
       }
     } catch (e) {
       console.warn('Failed to upload score to cloud:', e);
+      if (canQueue) {
+        addPendingScore(payload);
+      }
+      if (summaryCloudStatus) {
+        summaryCloudStatus.className = 'summary-cloud-status warning';
+        summaryCloudStatus.innerHTML = `⚠️ 網路微延遲，成績已安全暫存本機，恢復連線時將自動補傳！<button class="btn-retry-sync" id="btn-manual-retry">🔄 立即重試</button>`;
+        summaryCloudStatus.classList.remove('hidden');
+        const retryBtn = document.getElementById('btn-manual-retry');
+        if (retryBtn) {
+          retryBtn.onclick = () => {
+            sendScoreToCloud(payload, false);
+          };
+        }
+      }
     }
     return null;
   }
@@ -1279,7 +1415,7 @@ function createJsonResponse(obj) {
   function saveLeaderboard(mode, list) {
     const key = `prime_lb_${mode}`;
     try {
-      localStorage.setItem(key, JSON.stringify(list.slice(0, 20)));
+      localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
     } catch (e) {}
   }
 
@@ -1400,6 +1536,7 @@ function createJsonResponse(obj) {
   }
 
   function openLeaderboard(tab = 'campaign') {
+    flushPendingScores();
     renderLeaderboard(tab);
     if (modalLeaderboard) modalLeaderboard.classList.remove('hidden');
   }
@@ -1516,7 +1653,13 @@ function createJsonResponse(obj) {
     if (savePlayerProfile()) startGame('practice');
   });
   btnPlayAgain.addEventListener('click', () => startGame(state.mode));
-  btnRestart.addEventListener('click', () => startGame(state.mode));
+  btnRestart.addEventListener('click', () => {
+    if (!state.isGameOver && state.score > 0 && state.mode !== 'practice') {
+      const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
+      recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
+    }
+    startGame(state.mode);
+  });
 
   // Leaderboard Buttons
   if (btnLeaderboard) btnLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
@@ -1546,10 +1689,15 @@ function createJsonResponse(obj) {
   if (btnCopyGasCode) btnCopyGasCode.addEventListener('click', copyAppsScriptCode);
   if (btnClearCloudUrl) btnClearCloudUrl.addEventListener('click', clearCloudUrl);
 
-  // Load profile on startup
+  // Load profile & flush pending offline queue on startup
   loadPlayerProfile();
+  flushPendingScores();
 
   btnBackMenu.addEventListener('click', () => {
+    if (!state.isGameOver && state.score > 0 && state.mode !== 'practice') {
+      const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
+      recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
+    }
     modalSummary.classList.add('hidden');
     modalPause.classList.add('hidden');
     modalStart.classList.remove('hidden');

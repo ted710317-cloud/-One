@@ -1,20 +1,16 @@
 /**
  * ============================================================================
- * 質因數保衛戰 - Google Apps Script 雲端即時排行榜後端程式碼
+ * 質數砲台保衛戰 - Google Apps Script 雲端即時排行榜後端程式碼 (高並發防撞鎖定升級版)
  * ============================================================================
  * 
- * 📌 【給老師的 4 步驟部屬教學】：
- * 1. 打開 Google 雲端硬碟，新建一個「Google 試算表」，命名為「質因數保衛戰-班級排行榜」。
- * 2. 點選試算表上方選單的【擴充功能】 > 【Apps Script】。
- * 3. 把 Apps Script 編輯器中原本的代碼全部刪除，換成複製貼上這份檔案的所有內容。
- * 4. 點選右上角藍色的【部署】 > 【新增部署作業】：
- *    - 種類選擇：【網頁應用程式】（Web app）
- *    - 執行身分：【我】（Me）
- *    - 誰可以存取：【任何人】（Anyone） ⭐ 特別重要，學生平板才不用登入 Google 帳號！
- *    - 點選【部署】，並在彈出視窗點選「核准存取權」完成授權。
- *    - 複製最後產生的「網頁應用程式網址 (以 /exec 結尾)」！
- * 
- * 把取得的網址貼回遊戲中的「雲端設定」或填入 config.js 中，全班即時線上排行榜就大功告成！
+ * 💡 本次優化亮點：
+ * 1. 【高並發防撞鎖定 (LockService)】：全班 20~30 位學生同時陣亡或通關送出成績時，
+ *    自動依序排隊安全寫入試算表，徹底解決「連線衝突、試算表被鎖定而漏存」的問題！
+ * 2. 【每位同學個人最佳成績去重 (Best Score Deduplication)】：
+ *    排行榜自動保留每位同學的個人歷史最高分，不再被少數幾位高手重複上傳霸榜，
+ *    讓全班每位努力過關的孩子都能在英雄榜上看見自己的名字與排名！
+ * 3. 【試算表保留完整歷程】：Google 試算表內部依然完整記錄每一次作戰的每一列明細，
+ *    方便老師課後查核學生的學習歷程與命中率。
  * ============================================================================
  */
 
@@ -31,14 +27,13 @@ function doGet(e) {
     });
   }
 
-  // 2. 獲取排行榜資料
+  // 2. 獲取排行榜資料 (支援多學生並發讀取)
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
     var sheet = getOrCreateSheet(ss, sheetName);
 
     var data = sheet.getDataRange().getValues();
-    // 如果只有標題列
     if (data.length <= 1) {
       return createJsonResponse({
         status: 'success',
@@ -47,21 +42,50 @@ function doGet(e) {
       });
     }
 
-    // 排除標題列 (Header: 時間, 班級, 座號, 姓名, 得分, 最高連擊, 命中率, 防衛官)
+    // 排除標題列
     var rows = data.slice(1);
 
-    // 格式化資料
-    var formattedList = rows.map(function(row) {
-      return {
-        date: String(row[0] || ''),
-        class: String(row[1] || ''),
-        seat: String(row[2] || ''),
-        name: String(row[3] || ''),
-        score: Number(row[4]) || 0,
-        combo: Number(row[5]) || 0,
-        accuracy: Number(row[6]) || 0,
-        player: String(row[7] || (row[1] + '班 ' + row[2] + '號' + (row[3] ? ' (' + row[3] + ')' : '')))
+    // 去除同一學生多次刷分的重複紀錄，每位同學只保留「個人最高分 (Best Score)」
+    var bestScoresMap = {};
+    rows.forEach(function(row) {
+      var pClass = String(row[1] || '').trim();
+      var pSeat = String(row[2] || '').trim();
+      var pName = String(row[3] || '').trim();
+      var pPlayer = String(row[7] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+      
+      // 以班級+座號為唯一鍵值，若無座號則以玩家標籤或姓名為鍵
+      var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || pName || 'player');
+
+      var score = Number(row[4]) || 0;
+      var combo = Number(row[5]) || 0;
+      var accuracy = Number(row[6]) || 0;
+      var date = String(row[0] || '');
+
+      var entry = {
+        date: date,
+        class: pClass,
+        seat: pSeat,
+        name: pName,
+        score: score,
+        combo: combo,
+        accuracy: accuracy,
+        player: pPlayer
       };
+
+      if (!bestScoresMap[uniqueKey]) {
+        bestScoresMap[uniqueKey] = entry;
+      } else {
+        // 若已有該同學紀錄，比較得分與命中率取較優者
+        var current = bestScoresMap[uniqueKey];
+        if (score > current.score || (score === current.score && accuracy > current.accuracy)) {
+          bestScoresMap[uniqueKey] = entry;
+        }
+      }
+    });
+
+    // 轉為陣列
+    var formattedList = Object.keys(bestScoresMap).map(function(k) {
+      return bestScoresMap[k];
     });
 
     // 依照 得分 (降冪) > 正確率 (降冪) 排序
@@ -70,8 +94,8 @@ function doGet(e) {
       return b.accuracy - a.accuracy;
     });
 
-    // 取前 25 名
-    var topList = formattedList.slice(0, 25);
+    // 取前 50 名，確保全班同學都能看見自己的排名
+    var topList = formattedList.slice(0, 50);
 
     return createJsonResponse({
       status: 'success',
@@ -87,6 +111,18 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  // 核心安全機制：使用 LockService 避免全班幾十位學生同時送出成績時造成寫入衝突與漏單
+  var lock = LockService.getScriptLock();
+  try {
+    // 最多等待 30 秒排隊鎖定
+    lock.waitLock(30000);
+  } catch (lockErr) {
+    return createJsonResponse({
+      status: 'error',
+      message: '伺服器寫入排隊超時，請稍後重試'
+    });
+  }
+
   try {
     var raw = e.postData.contents;
     var data = JSON.parse(raw);
@@ -98,15 +134,15 @@ function doPost(e) {
 
     var now = new Date();
     var timeStr = Utilities.formatDate(now, "GMT+8", "yyyy/MM/dd HH:mm");
-    var pClass = String(data.class || '');
-    var pSeat = String(data.seat || '');
-    var pName = String(data.name || '');
+    var pClass = String(data.class || '').trim();
+    var pSeat = String(data.seat || '').trim();
+    var pName = String(data.name || '').trim();
     var score = Number(data.score) || 0;
     var combo = Number(data.combo) || 0;
     var accuracy = Number(data.accuracy) || 0;
-    var player = String(data.player || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : '')));
+    var player = String(data.player || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
 
-    // 寫入試算表新列
+    // 寫入試算表新列 (保留所有歷史紀錄)
     sheet.appendRow([
       timeStr,
       pClass,
@@ -118,17 +154,36 @@ function doPost(e) {
       player
     ]);
 
-    // 計算在該模式下的最新全班即時排名
+    // 計算在該模式下的最新全班即時去重個人排名
     var allRows = sheet.getDataRange().getValues().slice(1);
-    var betterCount = 0;
+    var bestMap = {};
     for (var i = 0; i < allRows.length; i++) {
+      var rClass = String(allRows[i][1] || '').trim();
+      var rSeat = String(allRows[i][2] || '').trim();
+      var rPlayer = String(allRows[i][7] || '').trim();
+      var rKey = (rClass && rSeat) ? (rClass + '_' + rSeat) : rPlayer;
+
       var rScore = Number(allRows[i][4]) || 0;
       var rAcc = Number(allRows[i][6]) || 0;
-      if (rScore > score || (rScore === score && rAcc > accuracy)) {
-        betterCount++;
+
+      if (!bestMap[rKey] || rScore > bestMap[rKey].score || (rScore === bestMap[rKey].score && rAcc > bestMap[rKey].acc)) {
+        bestMap[rKey] = { score: rScore, acc: rAcc };
       }
     }
-    var currentRank = betterCount + 1;
+
+    var currentRank = 1;
+    var myKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : player;
+    var myBestScore = bestMap[myKey] ? bestMap[myKey].score : score;
+    var myBestAcc = bestMap[myKey] ? bestMap[myKey].acc : accuracy;
+
+    Object.keys(bestMap).forEach(function(k) {
+      if (k !== myKey) {
+        var other = bestMap[k];
+        if (other.score > myBestScore || (other.score === myBestScore && other.acc > myBestAcc)) {
+          currentRank++;
+        }
+      }
+    });
 
     return createJsonResponse({
       status: 'success',
@@ -141,6 +196,9 @@ function doPost(e) {
       status: 'error',
       message: err.toString()
     });
+  } finally {
+    // 釋放排隊鎖定
+    lock.releaseLock();
   }
 }
 
