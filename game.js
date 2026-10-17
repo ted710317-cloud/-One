@@ -127,6 +127,7 @@
   const btnClearLeaderboard = document.getElementById('btn-clear-leaderboard');
   const tabLbCampaign = document.getElementById('tab-lb-campaign');
   const tabLbEndless = document.getElementById('tab-lb-endless');
+  const lbTabHint = document.getElementById('lb-tab-hint');
   const lbTbody = document.getElementById('leaderboard-tbody');
   const summaryLbRank = document.getElementById('summary-lb-rank');
   const summaryCloudStatus = document.getElementById('summary-cloud-status');
@@ -151,8 +152,12 @@
   const btnPause = document.getElementById('btn-pause');
   const btnResume = document.getElementById('btn-resume');
   const btnRestart = document.getElementById('btn-restart');
+  const btnPauseQuit = document.getElementById('btn-pause-quit');
   const btnPlayAgain = document.getElementById('btn-play-again');
   const btnBackMenu = document.getElementById('btn-back-menu');
+
+  let activeScoreUploadPromise = null;
+  let lastPlayedMode = 'campaign';
 
   // Mode Buttons
   const btnModeCampaign = document.getElementById('btn-mode-campaign');
@@ -1093,6 +1098,7 @@
 
   // --- Start Game Mode Initializers ---
   function startGame(mode) {
+    lastPlayedMode = mode;
     state.mode = mode;
     state.wave = 1;
     state.score = 0;
@@ -1501,9 +1507,11 @@ function createJsonResponse(obj) {
     const cloudUrl = getCloudApiUrl();
     if (!isCloudEnabled()) return null;
 
+    const sheetTabName = payload.mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+
     if (summaryCloudStatus) {
       summaryCloudStatus.className = 'summary-cloud-status syncing';
-      summaryCloudStatus.innerHTML = '☁️ 正在連線同步成績至全班試算表...';
+      summaryCloudStatus.innerHTML = `☁️ 正在連線同步成績至 Google 試算表【${sheetTabName}】...`;
       summaryCloudStatus.classList.remove('hidden');
     }
 
@@ -1526,9 +1534,10 @@ function createJsonResponse(obj) {
       const result = await res.json();
       if (result && result.status === 'success') {
         cloudCache.lastFetched = 0; // Invalidate cache
+        cloudCache[payload.mode] = null;
         if (summaryCloudStatus) {
           summaryCloudStatus.className = 'summary-cloud-status success';
-          summaryCloudStatus.innerHTML = `✅ 成績已同步登錄至全班試算表！(全班即時第 ${result.rank} 名)`;
+          summaryCloudStatus.innerHTML = `✅ 成績已成功寫入 Google 試算表【${sheetTabName}】！(全班即時第 ${result.rank} 名)`;
           summaryCloudStatus.classList.remove('hidden');
         }
         return result.rank;
@@ -1542,12 +1551,12 @@ function createJsonResponse(obj) {
       }
       if (summaryCloudStatus) {
         summaryCloudStatus.className = 'summary-cloud-status warning';
-        summaryCloudStatus.innerHTML = `⚠️ 網路微延遲，成績已安全暫存本機，恢復連線時將自動補傳！<button class="btn-retry-sync" id="btn-manual-retry">🔄 立即重試</button>`;
+        summaryCloudStatus.innerHTML = `⚠️ 網路微延遲，成績已安全暫存本機，恢復連線時將自動補傳至【${sheetTabName}】！<button class="btn-retry-sync" id="btn-manual-retry">🔄 立即重試</button>`;
         summaryCloudStatus.classList.remove('hidden');
         const retryBtn = document.getElementById('btn-manual-retry');
         if (retryBtn) {
           retryBtn.onclick = () => {
-            sendScoreToCloud(payload, false);
+            activeScoreUploadPromise = sendScoreToCloud(payload, false);
           };
         }
       }
@@ -1618,12 +1627,13 @@ function createJsonResponse(obj) {
         date: dateStr,
         timestamp: Date.now()
       };
-      sendScoreToCloud(payload).then(cloudRank => {
+      activeScoreUploadPromise = sendScoreToCloud(payload).then(cloudRank => {
         if (cloudRank !== null && summaryLbRank) {
           const modeName = mode === 'endless' ? '無盡挑戰' : '關卡模式';
-          summaryLbRank.textContent = `🎉 太厲害了！你榮登全班線上英雄榜第 ${cloudRank} 名！`;
+          summaryLbRank.textContent = `🎉 太厲害了！你榮登【${modeName}】全班線上英雄榜第 ${cloudRank} 名！`;
           summaryLbRank.classList.remove('hidden');
         }
+        return cloudRank;
       });
     }
 
@@ -1637,6 +1647,12 @@ function createJsonResponse(obj) {
     currentLbTab = tab;
     if (tabLbCampaign) tabLbCampaign.classList.toggle('active', tab === 'campaign');
     if (tabLbEndless) tabLbEndless.classList.toggle('active', tab === 'endless');
+
+    if (lbTabHint) {
+      const sheetName = tab === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+      const modeLabel = tab === 'endless' ? '⚡ 30 秒無盡挑戰模式' : '🚀 闖關關卡模式';
+      lbTabHint.innerHTML = `📋 目前檢視：<strong>${modeLabel}</strong> ｜ 對應 Google 試算表工作表：<strong>【${sheetName}】</strong><br><small style="color:#8b9bb4;">（提示：試算表會為每位同學保留個人歷史最高得分）</small>`;
+    }
 
     if (!lbTbody) return;
 
@@ -1688,10 +1704,18 @@ function createJsonResponse(obj) {
     });
   }
 
-  function openLeaderboard(tab = 'campaign') {
-    flushPendingScores();
-    renderLeaderboard(tab);
+  async function openLeaderboard(tab = null) {
+    if (!tab) {
+      tab = (state.mode === 'endless' || lastPlayedMode === 'endless') ? 'endless' : 'campaign';
+    }
     if (modalLeaderboard) modalLeaderboard.classList.remove('hidden');
+    flushPendingScores();
+    if (activeScoreUploadPromise) {
+      try {
+        await activeScoreUploadPromise;
+      } catch (e) {}
+    }
+    renderLeaderboard(tab, true);
   }
 
   function closeLeaderboard() {
@@ -1815,8 +1839,8 @@ function createJsonResponse(obj) {
   });
 
   // Leaderboard Buttons
-  if (btnLeaderboard) btnLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
-  if (btnViewLeaderboard) btnViewLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
+  if (btnLeaderboard) btnLeaderboard.addEventListener('click', () => openLeaderboard(lastPlayedMode === 'endless' ? 'endless' : 'campaign'));
+  if (btnViewLeaderboard) btnViewLeaderboard.addEventListener('click', () => openLeaderboard(lastPlayedMode === 'endless' ? 'endless' : 'campaign'));
   if (btnSummaryLb) {
     btnSummaryLb.addEventListener('click', () => openLeaderboard(state.mode === 'endless' ? 'endless' : 'campaign'));
   }
@@ -1871,6 +1895,21 @@ function createJsonResponse(obj) {
 
   btnPause.addEventListener('click', togglePause);
   btnResume.addEventListener('click', togglePause);
+  if (btnPauseQuit) {
+    btnPauseQuit.addEventListener('click', () => {
+      modalPause.classList.add('hidden');
+      state.isPaused = false;
+      triggerGameOver(false, '🛑 中途結算 - 任務結束');
+    });
+  }
+
+  // Auto-save on page hide / tab close
+  window.addEventListener('pagehide', () => {
+    if (!state.isGameOver && state.score > 0 && state.mode !== 'practice') {
+      const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
+      recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
+    }
+  });
 
   // Speed Mode toggle
   if (btnSpeed) {

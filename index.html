@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>質因數砲台保衛戰 - 國小六年級質因數分解練習遊戲</title>
-  <link rel="stylesheet" href="style.css?v=20261017_1745">
+  <link rel="stylesheet" href="style.css?v=20261017_1820">
 </head>
 <body>
   <div id="game-container">
@@ -219,6 +219,7 @@
         <div class="modal-buttons">
           <button class="primary-btn" id="btn-resume">繼續作戰</button>
           <button class="secondary-btn" id="btn-restart">重新開始</button>
+          <button class="tertiary-btn" id="btn-pause-quit">結算成績並回主選單</button>
         </div>
       </div>
     </div>
@@ -286,6 +287,7 @@
           <button class="lb-tab active" id="tab-lb-campaign" data-tab="campaign">🚀 關卡模式榜</button>
           <button class="lb-tab" id="tab-lb-endless" data-tab="endless">⚡ 無盡挑戰榜</button>
         </div>
+        <div id="lb-tab-hint" class="lb-tab-hint"></div>
 
         <div class="leaderboard-table-container">
           <table class="leaderboard-table">
@@ -362,8 +364,8 @@
   </div>
 
   <!-- Audio synthesizers & Core Game Engine -->
-  <script src="audio.js?v=20261017_1745"></script>
-  <script src="config.js?v=20261017_1745"></script>
-  <script src="game.js?v=20261017_1745"></script>
+  <script src="audio.js?v=20261017_1820"></script>
+  <script src="config.js?v=20261017_1820"></script>
+  <script src="game.js?v=20261017_1820"></script>
 </body>
 </html>

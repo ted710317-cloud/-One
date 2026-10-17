@@ -962,6 +962,22 @@ html, body {
   box-shadow: 0 0 12px var(--cyan-glow);
 }
 
+.lb-tab-hint {
+  font-size: 13px;
+  color: #8b9bb4;
+  text-align: center;
+  margin: -6px 0 14px 0;
+  background: rgba(0, 243, 255, 0.05);
+  border: 1px dashed rgba(0, 243, 255, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.5;
+}
+
+.lb-tab-hint strong {
+  color: var(--cyan-glow);
+}
+
 .leaderboard-table-container {
   max-height: 280px;
   overflow-y: auto;
