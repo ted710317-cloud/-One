@@ -122,7 +122,6 @@
   const modalPause = document.getElementById('modal-pause');
   const modalSummary = document.getElementById('modal-summary');
   const modalLeaderboard = document.getElementById('modal-leaderboard');
-  const modalCloudSetup = document.getElementById('modal-cloud-setup');
 
   // HUD Buttons
   const btnSpeed = document.getElementById('btn-speed');
@@ -151,7 +150,6 @@
   const sumBadge = document.getElementById('summary-badge');
   const reviewList = document.getElementById('review-list');
   const summaryLbRank = document.getElementById('summary-lb-rank');
-  const summaryCloudStatus = document.getElementById('summary-cloud-status');
   const btnPlayAgain = document.getElementById('btn-play-again');
   const btnSummaryLb = document.getElementById('btn-summary-lb');
   const btnBackMenu = document.getElementById('btn-back-menu');
@@ -160,20 +158,8 @@
   const tabLbCampaign = document.getElementById('tab-lb-campaign');
   const tabLbEndless = document.getElementById('tab-lb-endless');
   const lbTbody = document.getElementById('leaderboard-tbody');
-  const lbCloudBadge = document.getElementById('lb-cloud-badge');
-  const lbCloudHint = document.getElementById('lb-cloud-hint');
-  const btnRefreshLb = document.getElementById('btn-refresh-lb');
-  const btnOpenCloudSetup = document.getElementById('btn-open-cloud-setup');
   const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
   const btnClearLeaderboard = document.getElementById('btn-clear-leaderboard');
-
-  // Cloud Setup Elements
-  const inputCloudUrl = document.getElementById('input-cloud-url');
-  const cloudSetupMsg = document.getElementById('cloud-setup-msg');
-  const btnTestSaveCloud = document.getElementById('btn-test-save-cloud');
-  const btnCopyGasCode = document.getElementById('btn-copy-gas-code');
-  const btnClearCloudUrl = document.getElementById('btn-clear-cloud-url');
-  const btnCloseCloudSetup = document.getElementById('btn-close-cloud-setup');
 
   // Entities
   let monsters = [];
@@ -183,23 +169,23 @@
   let stars = [];
   let screenShake = 0;
 
-  // --- Resize Canvas for Retina & High-DPI Screens ---
+  // --- Resize Canvas for Crisp 1:1 Native Resolution ---
   function resizeCanvas() {
     const wrapper = document.getElementById('canvas-wrapper');
     if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    canvas.logicalWidth = rect.width;
-    canvas.logicalHeight = rect.height;
-    canvas.dpr = dpr;
+    canvas.width = wrapper.clientWidth;
+    canvas.height = wrapper.clientHeight;
+    canvas.logicalWidth = wrapper.clientWidth;
+    canvas.logicalHeight = wrapper.clientHeight;
   }
   window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(resizeCanvas, 150);
+    setTimeout(resizeCanvas, 400);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resizeCanvas);
+  }
   resizeCanvas();
 
   // --- Starfield Initialization ---
@@ -369,19 +355,19 @@
     }
 
     draw(c) {
+      const drawX = Math.round(this.x);
+      const drawY = Math.round(this.y);
+
       c.save();
-      c.translate(this.x, this.y);
+      c.translate(drawX, drawY);
 
       const color = NUM_COLORS[this.factorA] || '#00f3ff';
-      const pulse = 1 + Math.sin(this.pulsePhase) * 0.03;
-      const w = this.width * pulse;
-      const h = this.height * pulse;
+      const w = this.width;
+      const h = this.height;
 
-      // 1. Descending Jet Thruster Flames (Gives genuine "FALLING DOWN" action feel!)
-      const flameH = 9 + Math.sin(this.pulsePhase * 4) * 4;
+      // 1. Descending Jet Thruster Flames (Clean, fast vector rendering)
+      const flameH = 8 + Math.sin(this.pulsePhase * 3) * 3;
       c.fillStyle = color;
-      c.shadowColor = color;
-      c.shadowBlur = 8;
       // Left thruster
       c.beginPath();
       c.moveTo(-w * 0.35, h * 0.45);
@@ -394,14 +380,11 @@
       c.lineTo(w * 0.28, h * 0.45 + flameH);
       c.lineTo(w * 0.35, h * 0.45);
       c.fill();
-      c.shadowBlur = 0;
 
       // 2. Target Reticle if activeTarget
       if (state.activeTarget === this) {
         c.strokeStyle = '#00f3ff';
         c.lineWidth = 2.5;
-        c.shadowColor = '#00f3ff';
-        c.shadowBlur = 12;
 
         const reticleR = Math.max(w, h) * 0.62 + 8;
         c.beginPath();
@@ -416,11 +399,10 @@
         c.beginPath(); c.moveTo(offset - bSize, -offset); c.lineTo(offset, -offset); c.lineTo(offset, -offset + bSize); c.stroke();
         c.beginPath(); c.moveTo(-offset, offset - bSize); c.lineTo(-offset, offset); c.lineTo(-offset + bSize, offset); c.stroke();
         c.beginPath(); c.moveTo(offset - bSize, offset); c.lineTo(offset, offset); c.lineTo(offset, offset - bSize); c.stroke();
-        c.shadowBlur = 0;
       }
 
       // 3. Cute Monster Top Antennae / Horns
-      const wobble = Math.sin(this.antennaWobble) * 5;
+      const wobble = Math.sin(this.antennaWobble) * 4;
       c.strokeStyle = color;
       c.lineWidth = 2.5;
       c.lineCap = 'round';
@@ -449,31 +431,24 @@
 
       if (this.hitFlash > 0) {
         c.fillStyle = '#ffffff';
-        c.shadowColor = '#00ff88';
-        c.shadowBlur = 18;
       } else if (this.wrongFlash > 0) {
-        c.fillStyle = 'rgba(255, 0, 85, 0.9)';
-        c.shadowColor = '#ff0055';
-        c.shadowBlur = 18;
+        c.fillStyle = 'rgba(255, 0, 85, 0.95)';
       } else {
-        c.fillStyle = 'rgba(16, 26, 48, 0.94)';
-        c.shadowColor = color;
-        c.shadowBlur = this.isBoss ? 16 : 8;
+        c.fillStyle = 'rgba(16, 26, 48, 0.96)';
       }
       c.fill();
 
       c.lineWidth = this.isBoss ? 3.5 : 2.5;
       c.strokeStyle = this.wrongFlash > 0 ? '#ff0055' : (this.hitFlash > 0 ? '#ffffff' : color);
       c.stroke();
-      c.shadowBlur = 0;
 
       // 5. Expressive Cyber Eyes (Follow player cannon at bottom center)
       const eyeY = -h * 0.24;
       const eyeSpacing = w * 0.22;
       const eyeR = this.isBoss ? 7.5 : 5.5;
 
-      const cannonX = (canvas.logicalWidth || 800) / 2;
-      const cannonY = (canvas.logicalHeight || 600) - 10;
+      const cannonX = (canvas.logicalWidth || canvas.width || 800) / 2;
+      const cannonY = (canvas.logicalHeight || canvas.height || 600) - 10;
       const lookAngle = Math.atan2(cannonY - this.y, cannonX - this.x);
       const pupilOffset = 2;
       const pupilX = Math.cos(lookAngle) * pupilOffset;
@@ -1260,106 +1235,7 @@
     return true;
   }
 
-  // --- Leaderboard & Cloud Sync ---
-  const DEFAULT_CLOUD_API_URL = (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl) || '';
-
-  function getCloudApiUrl() {
-    return localStorage.getItem('multi_cloud_url') || DEFAULT_CLOUD_API_URL;
-  }
-
-  function setCloudApiUrl(url) {
-    if (url) {
-      localStorage.setItem('multi_cloud_url', url);
-    } else {
-      localStorage.removeItem('multi_cloud_url');
-    }
-  }
-
-  function isCloudEnabled() {
-    const url = getCloudApiUrl();
-    return url && url.startsWith('https://script.google.com/macros/');
-  }
-
-  const cloudCache = {
-    campaign: null,
-    endless: null,
-    lastFetched: 0
-  };
-
-  async function fetchCloudLeaderboard(mode = 'campaign', forceRefresh = false) {
-    const cloudUrl = getCloudApiUrl();
-    if (!isCloudEnabled()) return null;
-
-    const now = Date.now();
-    if (!forceRefresh && cloudCache[mode] && (now - cloudCache.lastFetched < 30000)) {
-      return cloudCache[mode];
-    }
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-      const url = `${cloudUrl}${cloudUrl.includes('?') ? '&' : '?'}mode=${mode}&t=${now}`;
-
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data && data.status === 'success' && Array.isArray(data.leaderboard)) {
-        cloudCache[mode] = data.leaderboard;
-        cloudCache.lastFetched = now;
-        return data.leaderboard;
-      }
-    } catch (e) {
-      console.warn('Cloud fetch failed, using local cache/storage:', e);
-    }
-    return null;
-  }
-
-  async function sendScoreToCloud(payload) {
-    const cloudUrl = getCloudApiUrl();
-    if (!isCloudEnabled()) return null;
-
-    if (summaryCloudStatus) {
-      summaryCloudStatus.className = 'summary-cloud-status syncing';
-      summaryCloudStatus.innerHTML = '☁️ 正在連線同步成績至全班試算表...';
-      summaryCloudStatus.classList.remove('hidden');
-    }
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 18000);
-
-      const res = await fetch(cloudUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const result = await res.json();
-      if (result && result.status === 'success') {
-        cloudCache.lastFetched = 0;
-        if (summaryCloudStatus) {
-          summaryCloudStatus.className = 'summary-cloud-status success';
-          summaryCloudStatus.innerHTML = `✅ 成績已同步登錄至全班試算表！(全班即時第 ${result.rank} 名)`;
-          summaryCloudStatus.classList.remove('hidden');
-        }
-        return result.rank;
-      }
-    } catch (e) {
-      console.warn('Failed to upload score to cloud:', e);
-      if (summaryCloudStatus) {
-        summaryCloudStatus.className = 'summary-cloud-status warning';
-        summaryCloudStatus.innerHTML = `⚠️ 網路微延遲，成績已安全保存在本機！`;
-        summaryCloudStatus.classList.remove('hidden');
-      }
-    }
-    return null;
-  }
-
+  // --- Leaderboard (100% Local Storage - Standalone & Fast) ---
   function getLeaderboard(mode) {
     const key = `multi_lb_${mode}`;
     try {
@@ -1405,68 +1281,30 @@
     const localRank = list.indexOf(newEntry);
     saveLeaderboard(mode, list);
 
-    if (isCloudEnabled()) {
-      const payload = {
-        mode: mode,
-        class: state.player.class || '',
-        seat: state.player.seat || '',
-        name: state.player.name || '',
-        player: playerLabel,
-        score: score,
-        combo: maxCombo,
-        accuracy: accuracy,
-        date: dateStr,
-        timestamp: Date.now()
-      };
-      sendScoreToCloud(payload).then(cloudRank => {
-        if (cloudRank !== null && summaryLbRank) {
-          const modeName = mode === 'endless' ? '無盡挑戰' : '關卡模式';
-          summaryLbRank.textContent = `🎉 太厲害了！你榮登全班線上英雄榜第 ${cloudRank} 名！`;
-          summaryLbRank.classList.remove('hidden');
-        }
-      });
+    if (summaryLbRank) {
+      summaryLbRank.textContent = `🎉 太厲害了！你榮登英雄排行榜第 ${localRank + 1} 名！`;
+      summaryLbRank.classList.remove('hidden');
     }
 
     return localRank;
   }
 
   let currentLbTab = 'campaign';
-  let lbFetchCounter = 0;
 
-  async function renderLeaderboard(tab = 'campaign', forceRefresh = false) {
+  function renderLeaderboard(tab = 'campaign') {
     currentLbTab = tab;
     if (tabLbCampaign) tabLbCampaign.classList.toggle('active', tab === 'campaign');
     if (tabLbEndless) tabLbEndless.classList.toggle('active', tab === 'endless');
 
     if (!lbTbody) return;
-
-    if (isCloudEnabled()) {
-      const currentCallId = ++lbFetchCounter;
-      updateCloudStatusUI(true);
-      lbTbody.innerHTML = `<tr><td colspan="5" style="color: #00f3ff; padding: 25px;"><span class="cloud-badge cloud-syncing">🔄 連線同步中</span><br><br>正在獲取全班最新英雄戰報...</td></tr>`;
-
-      const cloudList = await fetchCloudLeaderboard(tab, forceRefresh);
-      if (currentCallId !== lbFetchCounter) return;
-
-      if (cloudList && Array.isArray(cloudList)) {
-        renderTableRows(cloudList, true);
-        return;
-      }
-    } else {
-      updateCloudStatusUI(false);
-    }
-
     const localList = getLeaderboard(tab);
-    renderTableRows(localList, false);
+    renderTableRows(localList);
   }
 
-  function renderTableRows(list, isCloud) {
+  function renderTableRows(list) {
     lbTbody.innerHTML = '';
     if (!list || list.length === 0) {
-      const emptyMsg = isCloud
-        ? '雲端尚無英雄紀錄，快來進行第一場戰鬥奪下全班第 1 名！'
-        : '本機尚無英雄紀錄，快來進行第一場戰鬥奪下第 1 名！';
-      lbTbody.innerHTML = `<tr><td colspan="5" style="color: #8b9bb4; padding: 25px;">${emptyMsg}</td></tr>`;
+      lbTbody.innerHTML = `<tr><td colspan="5" style="color: #8b9bb4; padding: 25px;">尚無英雄紀錄，快來進行第一場戰鬥奪下第 1 名！</td></tr>`;
       return;
     }
 
@@ -1486,19 +1324,6 @@
       `;
       lbTbody.appendChild(tr);
     });
-  }
-
-  function updateCloudStatusUI(isOnline) {
-    if (!lbCloudBadge || !lbCloudHint) return;
-    if (isOnline) {
-      lbCloudBadge.className = 'cloud-badge cloud-online';
-      lbCloudBadge.textContent = '🟢 雲端同步中';
-      lbCloudHint.textContent = '已連接 Google 試算表';
-    } else {
-      lbCloudBadge.className = 'cloud-badge cloud-local';
-      lbCloudBadge.textContent = '🟡 本機模式';
-      lbCloudHint.textContent = '未連接 Google 試算表';
-    }
   }
 
   // --- Event Listeners: Console Buttons & Keyboard ---
@@ -1593,155 +1418,7 @@
   tabLbCampaign.addEventListener('click', () => renderLeaderboard('campaign'));
   tabLbEndless.addEventListener('click', () => renderLeaderboard('endless'));
 
-  btnRefreshLb.addEventListener('click', () => renderLeaderboard(currentLbTab, true));
 
-  btnOpenCloudSetup.addEventListener('click', () => {
-    inputCloudUrl.value = getCloudApiUrl();
-    modalCloudSetup.classList.remove('hidden');
-  });
-
-  btnCloseCloudSetup.addEventListener('click', () => {
-    modalCloudSetup.classList.add('hidden');
-  });
-
-  btnTestSaveCloud.addEventListener('click', async () => {
-    const url = inputCloudUrl.value.trim();
-    if (!url) {
-      cloudSetupMsg.className = 'cloud-setup-msg error';
-      cloudSetupMsg.textContent = '⚠️ 請輸入 Google Apps Script 網頁應用程式網址！';
-      cloudSetupMsg.classList.remove('hidden');
-      return;
-    }
-
-    cloudSetupMsg.className = 'cloud-setup-msg loading';
-    cloudSetupMsg.textContent = '⏳ 正在測試 Google 試算表連線中...';
-    cloudSetupMsg.classList.remove('hidden');
-
-    try {
-      const testUrl = `${url}${url.includes('?') ? '&' : '?'}action=test&t=${Date.now()}`;
-      const res = await fetch(testUrl);
-      const data = await res.json();
-      if (data && data.status === 'success') {
-        setCloudApiUrl(url);
-        cloudSetupMsg.className = 'cloud-setup-msg success';
-        cloudSetupMsg.textContent = '🎉 恭喜！Google 試算表雲端排行榜連線測試成功並已儲存！';
-        updateCloudStatusUI(true);
-      } else {
-        throw new Error();
-      }
-    } catch (e) {
-      cloudSetupMsg.className = 'cloud-setup-msg error';
-      cloudSetupMsg.textContent = '⚠️ 連線失敗！請確認網址正確且權限已設為「任何人 (Anyone)」。';
-    }
-  });
-
-  if (btnCopyGasCode) {
-    btnCopyGasCode.addEventListener('click', async () => {
-      try {
-        const gasCode = `function doGet(e) {
-  var params = e ? e.parameter : {};
-  var action = params.action;
-  var mode = (params.mode || 'campaign').toLowerCase();
-
-  if (action === 'test') {
-    return createJsonResponse({ status: 'success', message: '🎉 Google 試算表連線成功！' });
-  }
-
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
-    var sheet = getOrCreateSheet(ss, sheetName);
-    var data = sheet.getDataRange().getValues();
-    if (data.length <= 1) {
-      return createJsonResponse({ status: 'success', mode: mode, leaderboard: [] });
-    }
-
-    var rows = data.slice(1);
-    var bestScoresMap = {};
-    rows.forEach(function(row) {
-      var pClass = String(row[1] || '').trim();
-      var pSeat = String(row[2] || '').trim();
-      var pName = String(row[3] || '').trim();
-      var pPlayer = String(row[7] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
-      var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || 'player');
-
-      var score = Number(row[4]) || 0;
-      var combo = Number(row[5]) || 0;
-      var accuracy = Number(row[6]) || 0;
-      var date = String(row[0] || '');
-
-      var entry = { date: date, class: pClass, seat: pSeat, name: pName, score: score, combo: combo, accuracy: accuracy, player: pPlayer };
-      if (!bestScoresMap[uniqueKey] || score > bestScoresMap[uniqueKey].score) {
-        bestScoresMap[uniqueKey] = entry;
-      }
-    });
-
-    var formattedList = Object.keys(bestScoresMap).map(function(k) { return bestScoresMap[k]; });
-    formattedList.sort(function(a, b) { return b.score - a.score || b.accuracy - a.accuracy; });
-
-    return createJsonResponse({ status: 'success', mode: mode, leaderboard: formattedList.slice(0, 50) });
-  } catch (err) {
-    return createJsonResponse({ status: 'error', message: err.toString() });
-  }
-}
-
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(15000);
-    var raw = e ? e.postData.contents : '';
-    var payload = JSON.parse(raw);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheetName = (payload.mode || 'campaign') === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
-    var sheet = getOrCreateSheet(ss, sheetName);
-
-    var nowStr = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm:ss');
-    sheet.appendRow([nowStr, payload.class || '', payload.seat || '', payload.name || '', payload.score || 0, payload.combo || 0, payload.accuracy || 0, payload.player || '']);
-
-    var data = sheet.getDataRange().getValues();
-    var scores = data.slice(1).map(function(r) { return Number(r[4]) || 0; });
-    scores.sort(function(a, b) { return b - a; });
-    var rank = scores.indexOf(Number(payload.score) || 0) + 1;
-
-    return createJsonResponse({ status: 'success', rank: rank > 0 ? rank : 1 });
-  } catch (err) {
-    return createJsonResponse({ status: 'error', message: err.toString() });
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function getOrCreateSheet(ss, name) {
-  var sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    sheet.appendRow(['時間', '班級', '座號', '姓名', '得分', '最高連擊', '命中率', '防衛官識別']);
-    sheet.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#1a2942').setFontColor('#ffffff');
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-
-function createJsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-}`;
-        await navigator.clipboard.writeText(gasCode);
-        cloudSetupMsg.className = 'cloud-setup-msg success';
-        cloudSetupMsg.textContent = '📋 Apps Script 程式碼已成功複製到剪貼簿！可直接至 Google 試算表貼上。';
-        cloudSetupMsg.classList.remove('hidden');
-      } catch (err) {
-        alert('請手動至 google_apps_script.js 複製程式碼');
-      }
-    });
-  }
-
-  btnClearCloudUrl.addEventListener('click', () => {
-    setCloudApiUrl('');
-    inputCloudUrl.value = '';
-    cloudSetupMsg.className = 'cloud-setup-msg success';
-    cloudSetupMsg.textContent = '已切回本機模式！';
-    updateCloudStatusUI(false);
-  });
 
   btnClearLeaderboard.addEventListener('click', () => {
     if (confirm('確定要清除本機所有排行榜歷史紀錄嗎？')) {
@@ -1817,9 +1494,8 @@ function createJsonResponse(data) {
 
     if (state.isPaused) return;
 
-    const screenW = canvas.logicalWidth || 800;
-    const screenH = canvas.logicalHeight || 600;
-    const dpr = canvas.dpr || 1;
+    const screenW = canvas.width;
+    const screenH = canvas.height;
 
     // --- 1. Logic Update ---
     if (!state.isGameOver && !state.isWaveTransition && modalStart.classList.contains('hidden')) {
@@ -1927,9 +1603,8 @@ function createJsonResponse(data) {
     if (state.cannonRecoil > 0) state.cannonRecoil *= 0.80;
     if (state.cannonRecoil < 0.2) state.cannonRecoil = 0;
 
-    // --- 2. Render Screen (Precise DPR Transform & Zero Leaks) ---
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, screenW, screenH);
+    // --- 2. Render Screen (Crisp 1:1 Native Buffer Clearing) ---
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     if (screenShake > 0) {

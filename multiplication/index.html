@@ -289,7 +289,6 @@
         </div>
 
         <div id="summary-lb-rank" class="summary-lb-rank hidden"></div>
-        <div id="summary-cloud-status" class="summary-cloud-status hidden"></div>
 
         <div class="summary-actions">
           <button class="primary-btn" id="btn-play-again">🔄 再玩一次</button>
@@ -302,17 +301,7 @@
     <!-- LEADERBOARD MODAL -->
     <div id="modal-leaderboard" class="modal-overlay hidden">
       <div class="modal-card leaderboard-card">
-        <h2 class="lb-title">🏆 九九乘法砲台保衛戰 - 班級英雄排行榜</h2>
-        <div class="lb-cloud-bar">
-          <div class="lb-cloud-status">
-            <span id="lb-cloud-badge" class="cloud-badge cloud-local">🟡 本機模式</span>
-            <span id="lb-cloud-hint" class="cloud-hint">未連接 Google 試算表</span>
-          </div>
-          <div class="lb-cloud-controls">
-            <button class="btn-cloud-sm" id="btn-refresh-lb" title="重新整理最新排行榜">🔄 刷新</button>
-            <button class="btn-cloud-sm" id="btn-open-cloud-setup" title="設定 Google 試算表雲端同步">⚙️ 雲端設定</button>
-          </div>
-        </div>
+        <h2 class="lb-title">🏆 九九乘法砲台保衛戰 - 英雄排行榜</h2>
 
         <div class="leaderboard-tabs">
           <button class="lb-tab active" id="tab-lb-campaign" data-tab="campaign">🚀 關卡模式榜</button>
@@ -339,54 +328,6 @@
         <div class="leaderboard-actions">
           <button class="primary-btn" id="btn-close-leaderboard">關閉英雄榜</button>
           <button class="tertiary-btn btn-danger-action" id="btn-clear-leaderboard">🗑️ 清除本機紀錄</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CLOUD SETUP MODAL -->
-    <div id="modal-cloud-setup" class="modal-overlay hidden">
-      <div class="modal-card cloud-setup-card">
-        <h2>☁️ Google 試算表線上排行榜設定</h2>
-        <p class="cloud-setup-desc">
-          串接 Google 試算表，全班不同台平板隨時即時同步最新戰報與榮譽榜！
-        </p>
-
-        <div class="cloud-setup-form">
-          <label for="input-cloud-url">Google Apps Script 網頁應用程式網址 (Web App URL)：</label>
-          <div class="url-input-wrap">
-            <input type="url" id="input-cloud-url" placeholder="https://script.google.com/macros/s/.../exec" spellcheck="false" autocomplete="off">
-          </div>
-          <div id="cloud-setup-msg" class="cloud-setup-msg hidden"></div>
-
-          <div class="cloud-setup-actions">
-            <button class="primary-btn" id="btn-test-save-cloud">💾 測試連線並儲存</button>
-            <button class="secondary-btn" id="btn-copy-gas-code">📋 複製 Apps Script 程式碼</button>
-            <button class="tertiary-btn" id="btn-clear-cloud-url">❌ 清除網址 (切回本機)</button>
-          </div>
-        </div>
-
-        <!-- Collapsible guide for teacher -->
-        <details class="cloud-guide-details" open>
-          <summary>💡 如何 3 分鐘免費取得 Google Apps Script 網址？（點此查看步驟）</summary>
-          <ol class="cloud-steps-list">
-            <li><strong>建立試算表</strong>：打開 Google 雲端硬碟，建立空白「Google 試算表」，命名為「九九乘法砲台保衛戰 - 班級英雄排行榜」。</li>
-            <li><strong>開啟 Apps Script</strong>：點選試算表上方選單【擴充功能】➔【Apps Script】。</li>
-            <li><strong>貼上程式碼</strong>：點擊上方「📋 複製 Apps Script 程式碼」按鈕，將編輯器原有程式碼全部清空後貼上，並按儲存（磁碟圖示）。</li>
-            <li><strong>發布為網頁應用程式</strong>：
-              <ul>
-                <li>點擊右上角藍色【部署】➔【新增部署作業】。</li>
-                <li>齒輪選擇【網頁應用程式】。</li>
-                <li>「執行身分」選：<strong>【我】(Me)</strong>。</li>
-                <li>「誰可以存取」選：<strong style="color: #00f3ff;">【任何人】(Anyone)</strong>（學生平板不用登入 Google 帳號就能連線！）。</li>
-                <li>點擊【部署】，核准權限後，複製產生的<strong>「網頁應用程式網址」</strong>（以 /exec 結尾）。</li>
-              </ul>
-            </li>
-            <li><strong>貼上並儲存</strong>：將網址貼到上方輸入框，按下「💾 測試連線並儲存」即刻完成全班連線！</li>
-          </ol>
-        </details>
-
-        <div class="modal-buttons" style="margin-top: 15px;">
-          <button class="tertiary-btn" id="btn-close-cloud-setup" style="width: 100%;">返回排行榜</button>
         </div>
       </div>
     </div>
