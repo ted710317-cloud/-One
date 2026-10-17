@@ -2,11 +2,12 @@
 // 九九乘法砲台保衛戰 (三年級) - 全域遊戲設定檔 (Game Global Configuration)
 // ============================================================================
 // 💡 說明：
-// 目前三年級九九乘法遊戲排行榜以純本機模式 (localStorage) 運作，
+// 三年級專屬之 Google 試算表雲端排行榜服務已完成連結。
 // 與六年級質數遊戲之 Google 試算表完全獨立隔開，絕不互相影響。
-// 後續若有獨立建立的三年級專屬試算表，可再另行配置。
 // ============================================================================
 
 window.GAME_CONFIG = {
-  version: "1.2.0"
+  version: "1.3.0",
+  cloudApiUrl: "https://script.google.com/macros/s/AKfycbxSPbdVAJL8H5LlZud8neRCAH5VdlqtwGl-Vd0msoylDQuoJmhdUKFNZTbjzmwzsOps/exec",
+  spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1qeqaPjYObqFhjqkMYmUiavPTMNPsY4Rt6_n4a7wWuu0/edit"
 };
