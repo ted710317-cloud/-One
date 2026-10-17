@@ -131,14 +131,15 @@
   // 調整畫布尺寸 (高 DPI 銳利繪製，動態適配平板高度)
   function resizeCanvas() {
     const wrapper = document.getElementById('canvasWrapper');
+    if (!wrapper) return;
     const width = wrapper.clientWidth;
     const isKeypadVisible = keypadPanel && !keypadPanel.classList.contains('hidden');
 
-    // 動態計算可用垂直高度，預留頂部與底部工具列空間，確保平板上一眼可見
+    // 動態計算可用垂直高度，預留頂部卡片、底部超大鍵盤與道具列空間，確保平板直向/橫向免捲動
     const windowH = window.innerHeight;
-    const overhead = isKeypadVisible ? 380 : 240;
+    const overhead = isKeypadVisible ? 510 : 250;
     const maxAvailH = Math.max(260, windowH - overhead);
-    const height = Math.min(Math.floor(width * 1.15), maxAvailH, 480);
+    const height = Math.min(Math.floor(width * 1.05), maxAvailH, 460);
 
     dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;

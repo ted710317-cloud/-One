@@ -70,30 +70,39 @@
       <div id="comboBadge" class="combo-badge">3 連擊! 🔥</div>
     </section>
 
-    <!-- 遊戲主畫布與警戒區域 -->
-    <div class="canvas-wrapper" id="canvasWrapper">
-      <div class="rain-timer-bar" id="rainTimerBar"></div>
-      <div class="danger-warning-overlay" id="dangerOverlay"></div>
-      <canvas id="gameCanvas" width="480" height="600"></canvas>
-    </div>
-
-    <!-- 平板專屬虛擬數字鍵盤 (專為觸控螢幕優化) -->
-    <section class="virtual-keypad-panel" id="virtualKeypad">
-      <div class="keypad-grid">
-        <button class="key-btn" data-key="1">1</button>
-        <button class="key-btn" data-key="2">2</button>
-        <button class="key-btn" data-key="3">3</button>
-        <button class="key-btn" data-key="4">4</button>
-        <button class="key-btn" data-key="5">5</button>
-        <button class="key-btn" data-key="6">6</button>
-        <button class="key-btn" data-key="7">7</button>
-        <button class="key-btn" data-key="8">8</button>
-        <button class="key-btn" data-key="9">9</button>
-        <button class="key-btn action-key clear-key" data-action="clear" title="清除輸入">C</button>
-        <button class="key-btn" data-key="0">0</button>
-        <button class="key-btn action-key back-key" data-action="back" title="倒退刪除">⌫</button>
+    <!-- 糖果雨核心遊戲機台 (上方落下欄位 + 正下方超大果凍鍵盤) -->
+    <div class="arcade-cabinet">
+      <!-- 糖果雨落下欄位 -->
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <div class="rain-timer-bar" id="rainTimerBar"></div>
+        <div class="danger-warning-overlay" id="dangerOverlay"></div>
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
       </div>
-    </section>
+
+      <!-- 直接位於落下欄位最下方的超大 Q 萌果凍鍵盤 (大按鍵防誤觸) -->
+      <section class="virtual-keypad-panel" id="virtualKeypad">
+        <div class="keypad-grid">
+          <button class="key-btn candy-1" data-key="1">1</button>
+          <button class="key-btn candy-2" data-key="2">2</button>
+          <button class="key-btn candy-3" data-key="3">3</button>
+          <button class="key-btn candy-4" data-key="4">4</button>
+          <button class="key-btn candy-5" data-key="5">5</button>
+          <button class="key-btn candy-6" data-key="6">6</button>
+          <button class="key-btn candy-7" data-key="7">7</button>
+          <button class="key-btn candy-8" data-key="8">8</button>
+          <button class="key-btn candy-9" data-key="9">9</button>
+          <button class="key-btn action-key clear-key" data-action="clear" title="清空重算">
+            <span class="key-label-sub">清空</span>
+            <span class="key-label-main">C</span>
+          </button>
+          <button class="key-btn candy-0" data-key="0">0</button>
+          <button class="key-btn action-key back-key" data-action="back" title="倒退刪除">
+            <span class="key-label-sub">退格</span>
+            <span class="key-label-main">⌫</span>
+          </button>
+        </div>
+      </section>
+    </div>
 
     <!-- 底部輔助道具與技能列 -->
     <footer class="bottom-toolbar">
