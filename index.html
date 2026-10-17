@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>國小數學數位教具遊戲平台 - 砲台保衛戰系列</title>
+  <title>朕的遊戲吧</title>
+  <meta name="description" content="朕的遊戲吧 - 國小互動數學教具遊戲大廳，精選因數保衛戰、九九乘法表保衛戰、糖果雨消消樂！">
   <style>
     :root {
-      --bg-dark: #070c1a;
-      --card-bg: rgba(14, 23, 47, 0.85);
+      --bg-dark: #070b18;
+      --card-bg: rgba(13, 22, 45, 0.88);
+      --gold: #ffe600;
+      --gold-glow: rgba(255, 230, 0, 0.4);
+      --royal-gold: #ffc400;
       --cyan: #00f3ff;
       --pink: #ff007f;
-      --yellow: #ffe600;
-      --green: #00ff88;
-      --text: #e2e8f0;
-      --text-muted: #8b9bb4;
+      --candy-purple: #c084fc;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
     }
 
     * {
@@ -24,27 +27,27 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      background: radial-gradient(circle at 50% 20%, #152244 0%, var(--bg-dark) 75%);
+      background: radial-gradient(circle at 50% 10%, #1a2752 0%, var(--bg-dark) 80%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      padding: 28px 16px 40px;
       overflow-x: hidden;
       position: relative;
     }
 
-    /* Ambient animated glow background */
+    /* Ambient animated lighting */
     body::before {
       content: '';
       position: absolute;
-      top: -20%;
-      left: 20%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(0, 243, 255, 0.08) 0%, transparent 70%);
+      top: -15%;
+      left: 15%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.09) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -52,72 +55,94 @@
     body::after {
       content: '';
       position: absolute;
-      bottom: -20%;
-      right: 20%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 70%);
+      bottom: -15%;
+      right: 15%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(0, 243, 255, 0.08) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
     .container {
-      max-width: 960px;
+      max-width: 1160px;
       width: 100%;
       z-index: 1;
       text-align: center;
     }
 
+    /* Header */
     .header {
-      margin-bottom: 36px;
+      margin-bottom: 40px;
+      position: relative;
     }
 
-    .platform-sub {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--cyan);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+    .crown-icon {
+      font-size: clamp(38px, 6vw, 54px);
+      display: inline-block;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 0 16px rgba(255, 230, 0, 0.6));
+      animation: crownBob 2.5s ease-in-out infinite alternate;
     }
 
-    .platform-title {
-      font-size: clamp(28px, 5vw, 42px);
+    @keyframes crownBob {
+      0% { transform: translateY(0) rotate(-3deg); }
+      100% { transform: translateY(-8px) rotate(3deg); }
+    }
+
+    .hall-title {
+      font-size: clamp(32px, 6vw, 52px);
       font-weight: 900;
-      background: linear-gradient(135deg, #ffffff 30%, #a5f3fc 70%, var(--cyan) 100%);
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 15%, #ffe600 60%, #ff9100 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
-      text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+      margin-bottom: 8px;
+      text-shadow: 0 0 35px rgba(255, 230, 0, 0.35);
     }
 
-    .platform-desc {
+    .hall-sub {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .hall-desc {
       font-size: 15px;
       color: var(--text-muted);
-      max-width: 620px;
+      max-width: 680px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
-    /* Game Selection Grid */
+    /* 3-Column Games Grid */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
       margin-bottom: 36px;
+    }
+
+    @media (max-width: 960px) {
+      .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      }
     }
 
     .game-card {
       background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
-      padding: 30px 24px;
+      border-radius: 20px;
+      padding: 28px 22px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       text-align: left;
-      backdrop-filter: blur(12px);
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      backdrop-filter: blur(14px);
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
       position: relative;
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -133,37 +158,45 @@
       transition: all 0.3s;
     }
 
-    /* Grade 6 Theme */
+    /* Card 1: Factor Defender */
     .card-factor::before {
-      background: linear-gradient(90deg, var(--cyan), #0077ff);
+      background: linear-gradient(90deg, var(--cyan), #0066ff);
     }
-
     .card-factor:hover {
-      transform: translateY(-6px);
-      border-color: rgba(0, 243, 255, 0.5);
-      box-shadow: 0 16px 40px rgba(0, 243, 255, 0.25);
+      transform: translateY(-8px);
+      border-color: rgba(0, 243, 255, 0.6);
+      box-shadow: 0 16px 40px rgba(0, 243, 255, 0.28);
     }
 
-    /* Grade 3 Theme */
+    /* Card 2: Multiplication Defender */
     .card-multi::before {
-      background: linear-gradient(90deg, var(--pink), #ff9100);
+      background: linear-gradient(90deg, var(--pink), #ff5500);
+    }
+    .card-multi:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 0, 127, 0.6);
+      box-shadow: 0 16px 40px rgba(255, 0, 127, 0.28);
     }
 
-    .card-multi:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255, 0, 127, 0.5);
-      box-shadow: 0 16px 40px rgba(255, 0, 127, 0.25);
+    /* Card 3: Candy Multiplier */
+    .card-candy::before {
+      background: linear-gradient(90deg, #ec4899, #8b5cf6);
+    }
+    .card-candy:hover {
+      transform: translateY(-8px);
+      border-color: rgba(192, 132, 252, 0.6);
+      box-shadow: 0 16px 40px rgba(192, 132, 252, 0.28);
     }
 
     .card-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       padding: 4px 12px;
       border-radius: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       width: fit-content;
     }
 
@@ -179,30 +212,37 @@
       border: 1px solid rgba(255, 0, 127, 0.3);
     }
 
+    .badge-candy {
+      background: rgba(192, 132, 252, 0.15);
+      color: #e9d5ff;
+      border: 1px solid rgba(192, 132, 252, 0.35);
+    }
+
     .game-name {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
-      color: #fff;
-      margin-bottom: 6px;
+      color: #ffffff;
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .game-en {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: var(--text-muted);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       text-transform: uppercase;
     }
 
     .game-summary {
-      font-size: 14px;
+      font-size: 13.5px;
       color: #cbd5e1;
       line-height: 1.6;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
+      min-height: 64px;
     }
 
     .feature-list {
@@ -210,19 +250,21 @@
       margin-bottom: 24px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
 
     .feature-item {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 8px;
+      line-height: 1.4;
     }
 
     .feature-icon {
       font-size: 14px;
+      flex-shrink: 0;
     }
 
     .btn-enter {
@@ -231,9 +273,9 @@
       justify-content: center;
       gap: 8px;
       width: 100%;
-      padding: 14px 20px;
+      padding: 13px 18px;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       text-decoration: none;
       transition: all 0.2s;
@@ -242,11 +284,10 @@
     }
 
     .btn-factor {
-      background: linear-gradient(135deg, var(--cyan) 0%, #0077ff 100%);
+      background: linear-gradient(135deg, var(--cyan) 0%, #0066ff 100%);
       color: #031024;
       box-shadow: 0 4px 18px rgba(0, 243, 255, 0.4);
     }
-
     .btn-factor:hover {
       box-shadow: 0 6px 25px rgba(0, 243, 255, 0.7);
       filter: brightness(1.1);
@@ -257,9 +298,18 @@
       color: #ffffff;
       box-shadow: 0 4px 18px rgba(255, 0, 127, 0.4);
     }
-
     .btn-multi:hover {
       box-shadow: 0 6px 25px rgba(255, 0, 127, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .btn-candy {
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(192, 132, 252, 0.4);
+    }
+    .btn-candy:hover {
+      box-shadow: 0 6px 25px rgba(192, 132, 252, 0.7);
       filter: brightness(1.1);
     }
 
@@ -267,78 +317,103 @@
       font-size: 13px;
       color: var(--text-muted);
       background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 12px 20px;
+      border: 1px dashed rgba(255, 230, 0, 0.3);
+      border-radius: 12px;
+      padding: 14px 22px;
       display: inline-block;
-      max-width: 680px;
-      line-height: 1.5;
+      max-width: 760px;
+      line-height: 1.6;
     }
 
     .footer-note strong {
-      color: var(--cyan);
+      color: var(--gold);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <div class="platform-sub">Elementary Math Interactive Defense Platform</div>
-      <h1 class="platform-title">國小數學科數位教具遊戲平台</h1>
-      <p class="platform-desc">
-        針對國小不同年級量身打造的沉浸式數學砲台防衛戰！透過直覺趣味的遊戲化機制，幫助孩子輕鬆精熟數學概念。
+      <div class="crown-icon">👑</div>
+      <div class="hall-sub">Imperial Math Game Arcade</div>
+      <h1 class="hall-title">朕的遊戲吧</h1>
+      <p class="hall-desc">
+        歡迎御駕光臨「朕的遊戲吧」！精選國小六年級與三年級數學互動數位教具，在刺激的砲台保衛戰與甜蜜消消樂中，將質因數分解與九九乘法玩出超強心算力！
       </p>
     </header>
 
     <div class="games-grid">
-      <!-- Grade 6: Prime Factor Defender -->
+
+      <!-- Game 1: 因數保衛戰 (Grade 6) -->
       <div class="game-card card-factor">
         <div>
           <div class="card-badge badge-factor">🎓 國小六年級數學</div>
           <div class="game-name">
-            <span>🚀 質因數砲台保衛戰</span>
+            <span>🚀 因數保衛戰</span>
           </div>
           <div class="game-en">Prime Factor Defender</div>
           <p class="game-summary">
-            外星複合數母艦侵入地球軌道！發射正確的質因數砲彈（2、3、5、7...）將怪物連續除算分解至 1，徹底消滅威脅並產出標準分解式！
+            外星複合數母艦侵襲地球軌道！發射正確質數砲彈（2、3、5、7...）進行短除法分解直至消滅，自動整理標準分解式！
           </p>
           <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">⚡</span> 30 秒無盡挑戰模式（難度漸進 × 連擊狂熱）</li>
+            <li class="feature-item"><span class="feature-icon">⚡</span> 30 秒無盡挑戰（難度漸進 × 雙倍狂熱）</li>
             <li class="feature-item"><span class="feature-icon">📚</span> 產出標準分解式學習歷程複習清單</li>
-            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄排行榜即時同步</li>
+            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄榜即時同步</li>
           </ul>
         </div>
         <a href="./factor/" class="btn-enter btn-factor">
-          <span>🚀 進入六年級遊戲 (factor/)</span>
+          <span>🚀 進入《因數保衛戰》</span>
         </a>
       </div>
 
-      <!-- Grade 3: Multiplication Defender -->
+      <!-- Game 2: 九九乘法表保衛戰 (Grade 3) -->
       <div class="game-card card-multi">
         <div>
           <div class="card-badge badge-multi">🎒 國小三年級數學</div>
           <div class="game-name">
-            <span>💥 九九乘法砲台保衛戰</span>
+            <span>💥 九九乘法表保衛戰</span>
           </div>
           <div class="game-en">Multiplication Cannon Defender</div>
           <p class="game-summary">
-            怪獸群帶著乘法謎題降臨！支援「填空模式（逆向除法思維）」與「乘積模式（正向求積運算）」，雙位數答案自動裝填發射，徹底熟練九九乘法表！
+            怪獸群帶著乘法謎題降臨！支援「填空模式（求乘數）」與「乘積模式（求答案）」，雙位數自動裝填發射，熟練九九乘法口訣！
           </p>
           <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🎯</span> 雙重教學題型：填空求乘數 / 乘積直覺運算</li>
-            <li class="feature-item"><span class="feature-icon">🛡️</span> 1~9 自選乘數練習（可指定精練 7, 8, 9 魔王段）</li>
-            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄排行榜即時同步</li>
+            <li class="feature-item"><span class="feature-icon">🎯</span> 雙重題型：填空求乘數 / 乘積直覺運算</li>
+            <li class="feature-item"><span class="feature-icon">🛡️</span> 1~9 自選乘數特訓（魔王段 7, 8, 9 專攻）</li>
+            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄榜即時同步</li>
           </ul>
         </div>
         <a href="./multiplication/" class="btn-enter btn-multi">
-          <span>🎒 進入三年級遊戲 (multiplication/)</span>
+          <span>💥 進入《九九乘法表保衛戰》</span>
         </a>
       </div>
+
+      <!-- Game 3: 糖果雨消消樂 (Grade 3) -->
+      <div class="game-card card-candy">
+        <div>
+          <div class="card-badge badge-candy">🍬 國小三年級數學</div>
+          <div class="game-name">
+            <span>🍭 糖果雨消消樂</span>
+          </div>
+          <div class="game-en">Candy Multiplier Adventure</div>
+          <p class="game-summary">
+            下起甜蜜糖果雨！融合九九乘法速算與超人氣三消掉落連鎖機制，搭配視覺化點子陣列提示，邊消邊練、愈玩愈上癮！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">🍬</span> 刺激連鎖消除機制與掉落連續得分</li>
+            <li class="feature-item"><span class="feature-icon">💡</span> 視覺化點子陣列提示，建立幾何乘法直覺</li>
+            <li class="feature-item"><span class="feature-icon">📖</span> 內建九九乘法表隨時對照學習複習</li>
+          </ul>
+        </div>
+        <a href="./candy-multiplier/" class="btn-enter btn-candy">
+          <span>🍬 進入《糖果雨消消樂》</span>
+        </a>
+      </div>
+
     </div>
 
     <div class="footer-note">
-      💡 <strong>教師使用提示</strong>：兩款遊戲皆為獨立專案。<br>
-      老師可將 <strong>六年級專屬網址（.../factor/）</strong> 或 <strong>三年級專屬網址（.../multiplication/）</strong> 直接分發給對應班級，學生介面各自純淨無干擾！
+      👑 <strong>教師課堂指引提示</strong>：大廳三大遊戲皆具備各自獨立運作能力。<br>
+      老師可以直接將個別遊戲專屬網址（<strong>.../factor/</strong>、<strong>.../multiplication/</strong>、<strong>.../candy-multiplier/</strong>）分發給班級孩子，也可以分享「朕的遊戲吧」大廳網址讓孩子自由選擇挑戰！
     </div>
   </div>
 </body>
