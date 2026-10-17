@@ -848,17 +848,92 @@
     // Update target HUD details
     if (state.activeTarget) {
       targetDetailPanel.classList.remove('hidden');
-      targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
+      if (state.mathMode === 'product') {
+        targetEqText.textContent = `${state.activeTarget.factorA} × ${state.activeTarget.factorB} = [ ? ]`;
+      } else {
+        targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
+      }
     } else {
       targetDetailPanel.classList.add('hidden');
     }
+  }
+
+  // --- Ammo Buffer UI Update (Product Mode) ---
+  function updateBufferUI() {
+    if (!bufferDisplay) return;
+    if (state.mathMode === 'product') {
+      if (state.inputBuffer.length === 0) {
+        bufferDisplay.textContent = '[ _ _ ]';
+      } else if (state.inputBuffer.length === 1) {
+        bufferDisplay.textContent = `[ ${state.inputBuffer} _ ]`;
+      } else {
+        bufferDisplay.textContent = `[ ${state.inputBuffer} ]`;
+      }
+    }
+  }
+
+  // --- Switch Math Mode (🎯 填空模式 vs 💥 乘積模式) ---
+  function setMathMode(newMode) {
+    state.mathMode = newMode;
+    state.inputBuffer = '';
+    if (state.bufferTimer) {
+      clearTimeout(state.bufferTimer);
+      state.bufferTimer = null;
+    }
+    updateBufferUI();
+
+    if (hudMathMode) {
+      hudMathMode.textContent = newMode === 'product' ? '💥 乘積模式' : '🎯 填空模式';
+    }
+
+    if (tabMathFill) tabMathFill.classList.toggle('active', newMode === 'fill_blank');
+    if (tabMathProduct) tabMathProduct.classList.toggle('active', newMode === 'product');
+
+    if (gameContainer) {
+      if (newMode === 'product') {
+        gameContainer.classList.add('mode-product');
+        gameContainer.classList.remove('mode-fill-blank');
+      } else {
+        gameContainer.classList.add('mode-fill-blank');
+        gameContainer.classList.remove('mode-product');
+      }
+    }
+
+    if (cannonConsole) {
+      if (newMode === 'product') {
+        cannonConsole.classList.add('mode-product');
+        cannonConsole.classList.remove('mode-fill-blank');
+      } else {
+        cannonConsole.classList.add('mode-fill-blank');
+        cannonConsole.classList.remove('mode-product');
+      }
+    }
+
+    if (ammoBufferBar) {
+      if (newMode === 'product') ammoBufferBar.classList.remove('hidden');
+      else ammoBufferBar.classList.add('hidden');
+    }
+
+    if (consoleHint) {
+      if (newMode === 'product') {
+        consoleHint.innerHTML = '<span>乘積模式：請輸入答案砲彈 (例如 <strong>1</strong> 和 <strong>6</strong> 組合 <strong>16</strong> 自動發射)！退位請按 <strong>⌫</strong></span>';
+      } else {
+        consoleHint.innerHTML = '<span>填空模式：鍵盤快捷鍵 <strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
+      }
+    }
+
+    updateTarget();
   }
 
   // --- Projectile Hit Logic: 9x9 Multiplication Matching ---
   function handleProjectileHit(shotNum, monster) {
     monster.hitFlash = 6;
 
-    if (shotNum === monster.factorB) {
+    const isCorrect = (state.mathMode === 'product')
+      ? (shotNum === monster.product)
+      : (shotNum === monster.factorB);
+
+    if (isCorrect) {
       // === CORRECT ANSWER ===
       state.totalShots++;
       state.correctShots++;
@@ -881,7 +956,7 @@
       monster.solvedNumber = shotNum;
 
       particles.push(new Particle(monster.x, monster.y - 20, '#00ff88', `✨ ${equationStr}`));
-      spawnExplosion(monster.x, monster.y, NUM_COLORS[shotNum], 14);
+      spawnExplosion(monster.x, monster.y, NUM_COLORS[shotNum % 10] || '#ffe600', 14);
 
       window.soundManager.playHit(state.combo);
 
@@ -908,7 +983,10 @@
         monster.solvedNumber = null;
         monster.staggerTimer = 35;
         monster.y = Math.max(monster.height, monster.y - 15);
-        showEquationBanner(`💥 階段突破！下一題：${monster.factorA} × [ ] = ${monster.product}`);
+        const nextEqHint = state.mathMode === 'product'
+          ? `${monster.factorA} × ${monster.factorB} = [ ? ]`
+          : `${monster.factorA} × [ ] = ${monster.product}`;
+        showEquationBanner(`💥 階段突破！下一題：${nextEqHint}`);
         window.soundManager.playExplosion();
         screenShake = 10;
         updateHUD();
@@ -978,8 +1056,12 @@
       screenShake = 5;
       spawnExplosion(monster.x, monster.y, '#ff0055', 10);
 
-      const studentResult = monster.factorA * shotNum;
-      showWarningBubble(`⚠️ ${monster.factorA} × ${shotNum} = ${studentResult} ❌ (應該是 ${monster.factorA} × ${monster.factorB} = ${monster.product})`);
+      if (state.mathMode === 'product') {
+        showWarningBubble(`⚠️ ${monster.factorA} × ${monster.factorB} = ${monster.product} ❌ (你輸入了砲彈 ${shotNum})`);
+      } else {
+        const studentResult = monster.factorA * shotNum;
+        showWarningBubble(`⚠️ ${monster.factorA} × ${shotNum} = ${studentResult} ❌ (應該是 ${monster.factorA} × ${monster.factorB} = ${monster.product})`);
+      }
 
       if (state.mode === 'endless') {
         state.endlessTimeLeft = Math.max(0, state.endlessTimeLeft - 3);
@@ -997,9 +1079,68 @@
     updateHUD();
   }
 
-  // --- Cannon Shooting Action (Instant response) ---
-  function shoot(num) {
-    if (state.isPaused || state.isGameOver || modalStart.classList.contains('hidden') === false) return;
+  // --- Cannon Input Gathering & Shooting ---
+  function shoot(num, action = null) {
+    if (state.isPaused || state.isGameOver || (modalStart && !modalStart.classList.contains('hidden'))) return;
+
+    if (action === 'backspace') {
+      if (state.mathMode === 'product') {
+        state.inputBuffer = '';
+        if (state.bufferTimer) {
+          clearTimeout(state.bufferTimer);
+          state.bufferTimer = null;
+        }
+        updateBufferUI();
+        window.soundManager.playShoot(1);
+      }
+      return;
+    }
+
+    if (num === null || isNaN(num)) return;
+
+    if (state.mathMode === 'fill_blank') {
+      // 🎯 填空模式: 直接發射 1~9
+      if (num < 1 || num > 9) return;
+      fireProjectile(num);
+    } else {
+      // 💥 乘積模式: 緩衝十位與個位 (例如 1 和 6 -> 16 自動發射)
+      if (state.inputBuffer.length === 0) {
+        // 如果目前目標為個位數答案 (例如 2x3=6) 且輸入相符，直接零延遲發射
+        if (state.activeTarget && state.activeTarget.product === num) {
+          fireProjectile(num);
+          return;
+        }
+
+        state.inputBuffer = String(num);
+        updateBufferUI();
+
+        // 550ms 智慧定時器：若為單純個位數且學生停頓，自動發射該個位數
+        if (state.bufferTimer) clearTimeout(state.bufferTimer);
+        state.bufferTimer = setTimeout(() => {
+          if (state.inputBuffer.length > 0) {
+            const assembled = parseInt(state.inputBuffer, 10);
+            state.inputBuffer = '';
+            updateBufferUI();
+            fireProjectile(assembled);
+          }
+        }, 550);
+      } else {
+        // 第二個數字到位，立刻組合為雙位數自動發射！
+        if (state.bufferTimer) {
+          clearTimeout(state.bufferTimer);
+          state.bufferTimer = null;
+        }
+        const assembled = parseInt(state.inputBuffer + String(num), 10);
+        state.inputBuffer = '';
+        updateBufferUI();
+        fireProjectile(assembled);
+      }
+    }
+  }
+
+  // --- Physical Laser Orb Projectile Launch ---
+  function fireProjectile(shotVal) {
+    if (state.isPaused || state.isGameOver || (modalStart && !modalStart.classList.contains('hidden'))) return;
 
     // Forgiving anti-spam safeguard (does not choke rapid typing)
     const now = Date.now();
@@ -1017,13 +1158,13 @@
     state.cannonRecoil = 8;
 
     // Sound synthesis
-    window.soundManager.playShoot(num);
+    window.soundManager.playShoot(shotVal % 10 || 1);
 
     // Fire laser projectile immediately towards active target
     if (state.activeTarget) {
-      projectiles.push(new Projectile(num, state.activeTarget));
+      projectiles.push(new Projectile(shotVal, state.activeTarget));
     } else {
-      window.soundManager.playShoot(num);
+      window.soundManager.playShoot(shotVal % 10 || 1);
     }
   }
 
@@ -1053,7 +1194,11 @@
       if (ammoBtns) ammoBtns.forEach(b => b.classList.remove('locked'));
       if (consoleHint) {
         consoleHint.classList.remove('overheat-banner');
-        consoleHint.innerHTML = '<span>鍵盤快捷鍵：<strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
+        if (state.mathMode === 'product') {
+          consoleHint.innerHTML = '<span>乘積模式：請輸入答案砲彈 (例如 <strong>1</strong> 和 <strong>6</strong> 組合 <strong>16</strong> 自動發射)！退位請按 <strong>⌫</strong></span>';
+        } else {
+          consoleHint.innerHTML = '<span>填空模式：鍵盤快捷鍵 <strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
+        }
       }
     }, 1000);
   }
@@ -1297,6 +1442,12 @@
     state.consecutiveMisses = 0;
     state.recentClicks = [];
     state.lastShootTime = 0;
+    state.inputBuffer = '';
+    if (state.bufferTimer) {
+      clearTimeout(state.bufferTimer);
+      state.bufferTimer = null;
+    }
+    updateBufferUI();
     if (cannonConsole) cannonConsole.classList.remove('overheated');
     if (ammoBtns) ammoBtns.forEach(b => b.classList.remove('locked'));
 
@@ -1451,7 +1602,16 @@
   ammoBtns.forEach(btn => {
     const handlePress = e => {
       e.preventDefault();
-      const num = parseInt(btn.dataset.num || btn.dataset.prime, 10);
+      const action = btn.dataset.action;
+      if (action === 'backspace') {
+        btn.classList.add('active-press');
+        setTimeout(() => btn.classList.remove('active-press'), 100);
+        shoot(null, 'backspace');
+        return;
+      }
+
+      const numVal = btn.dataset.num !== undefined ? btn.dataset.num : btn.dataset.prime;
+      const num = parseInt(numVal, 10);
       btn.classList.add('active-press');
       setTimeout(() => btn.classList.remove('active-press'), 100);
       shoot(num);
@@ -1459,16 +1619,29 @@
     btn.addEventListener('pointerdown', handlePress);
   });
 
-  // Keyboard shortcut listener (1~9 and Numpad 1~9)
+  // Keyboard shortcut listener (0~9, Numpad 0~9, Backspace, Delete)
   window.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      if (state.mathMode === 'product' && state.inputBuffer.length > 0) {
+        e.preventDefault();
+        const targetBtn = document.querySelector('.btn-action-backspace');
+        if (targetBtn) {
+          targetBtn.classList.add('active-press');
+          setTimeout(() => targetBtn.classList.remove('active-press'), 100);
+        }
+        shoot(null, 'backspace');
+      }
+      return;
+    }
+
     let num = null;
-    if (e.key >= '1' && e.key <= '9') {
+    if (e.key >= '0' && e.key <= '9') {
       num = parseInt(e.key, 10);
     } else if (e.code.startsWith('Numpad') && e.code.length === 7) {
       const digit = parseInt(e.code.slice(6), 10);
-      if (digit >= 1 && digit <= 9) num = digit;
+      if (digit >= 0 && digit <= 9) num = digit;
     }
 
     if (num !== null) {
@@ -1482,6 +1655,18 @@
       togglePause();
     }
   });
+
+  if (btnBufferClear) {
+    btnBufferClear.addEventListener('click', () => shoot(null, 'backspace'));
+  }
+
+  if (tabMathFill) {
+    tabMathFill.addEventListener('click', () => setMathMode('fill_blank'));
+  }
+
+  if (tabMathProduct) {
+    tabMathProduct.addEventListener('click', () => setMathMode('product'));
+  }
 
   // Touch / Click on canvas to manually select target
   canvas.addEventListener('pointerdown', e => {
@@ -1825,8 +2010,9 @@
     c.restore();
   }
 
-  // Initialize profile on load
+  // Initialize profile & math mode on load
   loadPlayerProfile();
+  setMathMode('fill_blank');
 
   // Start animation loop
   requestAnimationFrame(loop);

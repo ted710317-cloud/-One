@@ -478,16 +478,20 @@ html, body {
 }
 
 /* 11 columns in Product Mode */
-#cannon-console.mode-product .ammo-buttons-container {
+#cannon-console.mode-product .ammo-buttons-container,
+.mode-product #cannon-console .ammo-buttons-container {
   grid-template-columns: repeat(11, 1fr);
 }
 
 /* Hide 0 & Backspace in Fill Blank Mode */
 #cannon-console.mode-fill-blank .btn-num-0,
-#cannon-console.mode-fill-blank .btn-action-backspace {
-  display: none;
+#cannon-console.mode-fill-blank .btn-action-backspace,
+.mode-fill-blank #cannon-console .btn-num-0,
+.mode-fill-blank #cannon-console .btn-action-backspace {
+  display: none !important;
 }
-#cannon-console.mode-fill-blank .ammo-buttons-container {
+#cannon-console.mode-fill-blank .ammo-buttons-container,
+.mode-fill-blank #cannon-console .ammo-buttons-container {
   grid-template-columns: repeat(9, 1fr);
 }
 
