@@ -20,11 +20,11 @@
 
   // Preset multiplier stages for Grade 3 curriculum
   const STAGE_CONFIG = {
-    1: { factors: [2, 3, 5], total: 10, speedMult: 0.95, name: '【新手基地啟動】2, 3, 5 的乘法' },
-    2: { factors: [4, 6, 8], total: 10, speedMult: 1.15, name: '【偶數巡航戰隊】4, 6, 8 的乘法' },
-    3: { factors: [7, 9],    total: 12, speedMult: 1.35, name: '【魔王星雲突破】7, 9 的乘法 (易錯大關)' },
-    4: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 12, speedMult: 1.60, name: '【全面星空防衛】全乘法隨機大亂鬥' },
-    5: { factors: [6, 7, 8, 9], total: 10, speedMult: 1.90, name: '【乘法母艦決戰】菁英怪 + 究極三階母艦 BOSS' }
+    1: { factors: [2, 3, 5], total: 10, speedMult: 1.0, name: '【新手基地啟動】2, 3, 5 的乘法' },
+    2: { factors: [4, 6, 8], total: 10, speedMult: 1.18, name: '【偶數巡航戰隊】4, 6, 8 的乘法' },
+    3: { factors: [7, 9],    total: 12, speedMult: 1.38, name: '【魔王星雲突破】7, 9 的乘法 (易錯大關)' },
+    4: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 12, speedMult: 1.58, name: '【全面星空防衛】全乘法隨機大亂鬥' },
+    5: { factors: [6, 7, 8, 9], total: 10, speedMult: 1.80, name: '【乘法母艦決戰】菁英怪 + 究極三階母艦 BOSS' }
   };
 
   // --- Game State ---
@@ -46,7 +46,7 @@
     isWaveTransition: false,
     learningHistory: [], // stores { equation, factorA, factorB, product, timeSec, wasWrong }
     spawnTimer: 0,
-    spawnInterval: 260, // frames between spawns
+    spawnInterval: 220, // frames between spawns
     waveMonstersRemaining: 10,
     waveMonstersTotal: 10,
     bossSpawned: false,
@@ -60,12 +60,12 @@
     speedIndex: 0,
     speedLevels: [
       { label: '🚶 標準心算', mult: 1.0 },
-      { label: '🐢 悠閒慢速', mult: 0.65 },
+      { label: '🐢 悠閒慢速', mult: 0.70 },
       { label: '⚡ 挑戰快速', mult: 1.45 }
     ],
     // Practice mode customizable factors (2~9)
     practiceFactors: [2, 3, 4, 5, 6, 7, 8, 9],
-    // Anti-spamming / Anti-mashing controls
+    // Anti-spamming / Anti-mashing controls (forgiving for 3rd graders)
     isOverheated: false,
     overheatTimer: null,
     lastShootTime: 0,
@@ -190,14 +190,14 @@
     const rect = wrapper.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
     canvas.style.width = `${rect.width}px`;
     canvas.style.height = `${rect.height}px`;
 
     canvas.logicalWidth = rect.width;
     canvas.logicalHeight = rect.height;
+    canvas.dpr = dpr;
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
@@ -205,7 +205,7 @@
   // --- Starfield Initialization ---
   function initStars() {
     stars = [];
-    const count = 75;
+    const count = 50; // Optimized count for smooth rendering
     const w = canvas.logicalWidth || 800;
     const h = canvas.logicalHeight || 600;
     for (let i = 0; i < count; i++) {
@@ -214,7 +214,7 @@
         y: Math.random() * h,
         size: Math.random() * 2 + 1,
         speed: Math.random() * 0.8 + 0.3,
-        opacity: Math.random() * 0.7 + 0.3
+        opacity: Math.random() * 0.6 + 0.25
       });
     }
   }
@@ -235,8 +235,8 @@
     if (feverBox) feverBox.classList.remove('hidden');
     window.soundManager.playFeverStart();
     showComboBanner('🔥 FEVER TIME 啟動！得分雙倍 + 補時加碼！🔥');
-    addFloatingText('🔥 10 COMBO FEVER! 雙倍得分 🔥', canvas.logicalWidth / 2, canvas.logicalHeight * 0.45, '#ffe600', 26);
-    screenShake = 14;
+    addFloatingText('🔥 10 COMBO FEVER! 雙倍得分 🔥', canvas.logicalWidth / 2, canvas.logicalHeight * 0.45, '#ffe600', 24);
+    screenShake = 12;
     updateHUD();
   }
 
@@ -258,9 +258,9 @@
       this.color = color;
       this.fontSize = fontSize;
       this.alpha = 1.0;
-      this.vy = -1.2;
-      this.life = 60;
-      this.maxLife = 60;
+      this.vy = -1.4;
+      this.life = 50;
+      this.maxLife = 50;
     }
 
     update() {
@@ -273,12 +273,10 @@
       if (this.alpha <= 0) return;
       c.save();
       c.globalAlpha = this.alpha;
-      c.font = `900 ${this.fontSize}px 'Chakra Petch', 'Segoe UI', 'Noto Sans TC', sans-serif`;
+      c.font = `900 ${this.fontSize}px 'Chakra Petch', 'Segoe UI', monospace, sans-serif`;
       c.textAlign = 'center';
       c.textBaseline = 'middle';
-      c.shadowColor = this.color;
-      c.shadowBlur = 10;
-      c.lineWidth = 4;
+      c.lineWidth = 3;
       c.strokeStyle = 'rgba(0, 0, 0, 0.85)';
       c.strokeText(this.text, this.x, this.y);
       c.fillStyle = this.color;
@@ -288,7 +286,7 @@
   }
 
   function addFloatingText(text, x, y, color, fontSize) {
-    const safeX = Math.max(60, Math.min(canvas.logicalWidth - 60, x));
+    const safeX = Math.max(60, Math.min((canvas.logicalWidth || 800) - 60, x));
     floatingTexts.push(new FloatingText(text, safeX, y, color, fontSize));
   }
 
@@ -314,22 +312,23 @@
       this.currentPhaseIndex = 1;
       this.totalPhases = isBoss ? bossPhases.length + 1 : 1;
 
-      // Visual dimensions: rounded cyber capsule for Grade 3 kids
-      this.width = isBoss ? 160 : 124;
+      // Visual dimensions: rounded cyber capsule
+      this.width = isBoss ? 160 : 126;
       this.height = isBoss ? 76 : 58;
-      this.radius = isBoss ? 52 : 36; // Collision radius
+      this.radius = isBoss ? 52 : 36;
 
       const screenW = canvas.logicalWidth || 800;
       this.x = Math.random() * (screenW - this.width - 40) + this.width / 2 + 20;
-      this.y = -this.height;
+      // Start slightly visible at top so it glides smoothly down immediately
+      this.y = -10;
 
-      // Speed configuration
+      // Realistic, fun arcade falling speed for 3rd graders
       const waveMult = getWaveSpeedMultiplier();
-      let baseSpeed = isBoss ? 0.20 : 0.28;
-      if (state.mode === 'practice') baseSpeed *= 0.75;
-      this.speed = baseSpeed * waveMult + Math.random() * 0.05;
+      let baseSpeed = isBoss ? 0.95 : 1.35;
+      if (state.mode === 'practice') baseSpeed *= 0.8;
+      this.speed = baseSpeed * waveMult + Math.random() * 0.1;
 
-      this.staggerTimer = 0; // Pauses on hit
+      this.staggerTimer = 0;
       this.hitFlash = 0;
       this.wrongFlash = 0;
       this.solvedNumber = null;
@@ -352,7 +351,7 @@
         this.y += this.speed * mult;
       }
 
-      this.pulsePhase += 0.05;
+      this.pulsePhase += 0.06;
       this.antennaWobble += 0.08;
 
       if (this.hitFlash > 0) this.hitFlash--;
@@ -374,109 +373,114 @@
       c.translate(this.x, this.y);
 
       const color = NUM_COLORS[this.factorA] || '#00f3ff';
-      const pulse = 1 + Math.sin(this.pulsePhase) * 0.04;
+      const pulse = 1 + Math.sin(this.pulsePhase) * 0.03;
       const w = this.width * pulse;
       const h = this.height * pulse;
 
-      // 1. Target Reticle if activeTarget
-      if (state.activeTarget === this) {
-        c.save();
-        c.strokeStyle = '#00f3ff';
-        c.lineWidth = 3;
-        c.shadowColor = '#00f3ff';
-        c.shadowBlur = 16;
+      // 1. Descending Jet Thruster Flames (Gives genuine "FALLING DOWN" action feel!)
+      const flameH = 9 + Math.sin(this.pulsePhase * 4) * 4;
+      c.fillStyle = color;
+      c.shadowColor = color;
+      c.shadowBlur = 8;
+      // Left thruster
+      c.beginPath();
+      c.moveTo(-w * 0.35, h * 0.45);
+      c.lineTo(-w * 0.28, h * 0.45 + flameH);
+      c.lineTo(-w * 0.21, h * 0.45);
+      c.fill();
+      // Right thruster
+      c.beginPath();
+      c.moveTo(w * 0.21, h * 0.45);
+      c.lineTo(w * 0.28, h * 0.45 + flameH);
+      c.lineTo(w * 0.35, h * 0.45);
+      c.fill();
+      c.shadowBlur = 0;
 
-        const reticleR = Math.max(w, h) * 0.65 + 10;
+      // 2. Target Reticle if activeTarget
+      if (state.activeTarget === this) {
+        c.strokeStyle = '#00f3ff';
+        c.lineWidth = 2.5;
+        c.shadowColor = '#00f3ff';
+        c.shadowBlur = 12;
+
+        const reticleR = Math.max(w, h) * 0.62 + 8;
         c.beginPath();
         c.arc(0, 0, reticleR, 0, Math.PI * 2);
         c.stroke();
 
-        // 4 corner brackets
-        const bSize = 14;
-        const offset = reticleR + 4;
+        const bSize = 12;
+        const offset = reticleR + 3;
         c.lineWidth = 2;
-        // Top-left
+        // 4 corner notch brackets
         c.beginPath(); c.moveTo(-offset, -offset + bSize); c.lineTo(-offset, -offset); c.lineTo(-offset + bSize, -offset); c.stroke();
-        // Top-right
         c.beginPath(); c.moveTo(offset - bSize, -offset); c.lineTo(offset, -offset); c.lineTo(offset, -offset + bSize); c.stroke();
-        // Bottom-left
         c.beginPath(); c.moveTo(-offset, offset - bSize); c.lineTo(-offset, offset); c.lineTo(-offset + bSize, offset); c.stroke();
-        // Bottom-right
         c.beginPath(); c.moveTo(offset - bSize, offset); c.lineTo(offset, offset); c.lineTo(offset, offset - bSize); c.stroke();
-        c.restore();
+        c.shadowBlur = 0;
       }
 
-      // 2. Cute Monster Top Antennae / Horns
-      c.save();
-      const wobble = Math.sin(this.antennaWobble) * 6;
+      // 3. Cute Monster Top Antennae / Horns
+      const wobble = Math.sin(this.antennaWobble) * 5;
       c.strokeStyle = color;
-      c.lineWidth = 3;
+      c.lineWidth = 2.5;
       c.lineCap = 'round';
-
-      // Left antenna
+      // Left
       c.beginPath();
       c.moveTo(-w * 0.25, -h * 0.48);
       c.quadraticCurveTo(-w * 0.35 + wobble, -h * 0.75, -w * 0.3 + wobble, -h * 0.85);
       c.stroke();
       c.fillStyle = '#ffe600';
       c.beginPath();
-      c.arc(-w * 0.3 + wobble, -h * 0.85, 4, 0, Math.PI * 2);
+      c.arc(-w * 0.3 + wobble, -h * 0.85, 3.5, 0, Math.PI * 2);
       c.fill();
-
-      // Right antenna
+      // Right
       c.beginPath();
       c.moveTo(w * 0.25, -h * 0.48);
       c.quadraticCurveTo(w * 0.35 - wobble, -h * 0.75, w * 0.3 - wobble, -h * 0.85);
       c.stroke();
       c.fillStyle = '#ffe600';
       c.beginPath();
-      c.arc(w * 0.3 - wobble, -h * 0.85, 4, 0, Math.PI * 2);
+      c.arc(w * 0.3 - wobble, -h * 0.85, 3.5, 0, Math.PI * 2);
       c.fill();
-      c.restore();
 
-      // 3. Monster Body (Rounded Rectangle Capsule)
-      c.save();
+      // 4. Monster Body (Rounded Rectangle Capsule)
       c.beginPath();
-      const r = 16;
-      c.roundRect(-w / 2, -h / 2, w, h, r);
+      c.roundRect(-w / 2, -h / 2, w, h, 14);
 
       if (this.hitFlash > 0) {
         c.fillStyle = '#ffffff';
         c.shadowColor = '#00ff88';
-        c.shadowBlur = 25;
+        c.shadowBlur = 18;
       } else if (this.wrongFlash > 0) {
         c.fillStyle = 'rgba(255, 0, 85, 0.9)';
         c.shadowColor = '#ff0055';
-        c.shadowBlur = 25;
+        c.shadowBlur = 18;
       } else {
-        c.fillStyle = 'rgba(16, 26, 48, 0.92)';
+        c.fillStyle = 'rgba(16, 26, 48, 0.94)';
         c.shadowColor = color;
-        c.shadowBlur = this.isBoss ? 24 : 14;
+        c.shadowBlur = this.isBoss ? 16 : 8;
       }
       c.fill();
 
-      c.lineWidth = this.isBoss ? 4 : 3;
+      c.lineWidth = this.isBoss ? 3.5 : 2.5;
       c.strokeStyle = this.wrongFlash > 0 ? '#ff0055' : (this.hitFlash > 0 ? '#ffffff' : color);
       c.stroke();
-      c.restore();
+      c.shadowBlur = 0;
 
-      // 4. Expressive Cyber Eyes (Follow player cannon at bottom center)
-      c.save();
+      // 5. Expressive Cyber Eyes (Follow player cannon at bottom center)
       const eyeY = -h * 0.24;
       const eyeSpacing = w * 0.22;
-      const eyeR = this.isBoss ? 8 : 6;
+      const eyeR = this.isBoss ? 7.5 : 5.5;
 
-      // Track cannon angle
       const cannonX = (canvas.logicalWidth || 800) / 2;
       const cannonY = (canvas.logicalHeight || 600) - 10;
       const lookAngle = Math.atan2(cannonY - this.y, cannonX - this.x);
-      const pupilOffset = 2.2;
+      const pupilOffset = 2;
       const pupilX = Math.cos(lookAngle) * pupilOffset;
       const pupilY = Math.sin(lookAngle) * pupilOffset;
 
       [-eyeSpacing, eyeSpacing].forEach(ex => {
         if (this.isBlinking) {
-          // Blinking slit
           c.strokeStyle = '#ffffff';
           c.lineWidth = 2;
           c.beginPath();
@@ -484,112 +488,87 @@
           c.lineTo(ex + eyeR, eyeY);
           c.stroke();
         } else {
-          // Eyeball
           c.fillStyle = '#ffffff';
           c.beginPath();
           c.arc(ex, eyeY, eyeR, 0, Math.PI * 2);
           c.fill();
 
-          // Pupil
           c.fillStyle = color;
           c.beginPath();
           c.arc(ex + pupilX, eyeY + pupilY, eyeR * 0.55, 0, Math.PI * 2);
           c.fill();
-
-          // Pupil shine
-          c.fillStyle = '#ffffff';
-          c.beginPath();
-          c.arc(ex + pupilX - 1, eyeY + pupilY - 1, 1.5, 0, Math.PI * 2);
-          c.fill();
         }
       });
-      c.restore();
 
-      // 5. Educational Equation Badge: "2 × [ ] = 4"
-      c.save();
-      const eqY = h * 0.18;
-      c.textAlign = 'center';
+      // 6. Educational Equation Badge: "2 × [ ] = 4"
+      const eqY = h * 0.20;
+      const fontSize = this.isBoss ? 23 : 19;
+      c.font = `900 ${fontSize}px 'Chakra Petch', 'Segoe UI', monospace, sans-serif`;
       c.textBaseline = 'middle';
 
-      const fontSize = this.isBoss ? 24 : 20;
-      c.font = `900 ${fontSize}px 'Chakra Petch', 'Segoe UI', monospace, sans-serif`;
-
-      // Measure components for exact positioning: "a × " + "[ ]" + " = c"
       const prefix = `${this.factorA} × `;
       const suffix = ` = ${this.product}`;
-
       const boxW = this.isBoss ? 36 : 30;
-      const boxH = this.isBoss ? 28 : 24;
+      const boxH = this.isBoss ? 26 : 22;
 
       // Draw prefix (e.g. "2 × ")
       c.fillStyle = '#ffffff';
-      c.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      c.shadowBlur = 4;
       c.textAlign = 'right';
       c.fillText(prefix, -boxW / 2 - 3, eqY);
 
       // Draw middle [ ] slot box
       const boxX = -boxW / 2;
       const boxY = eqY - boxH / 2;
-
-      c.save();
       c.beginPath();
-      c.roundRect(boxX, boxY, boxW, boxH, 6);
+      c.roundRect(boxX, boxY, boxW, boxH, 5);
 
       if (this.solvedNumber !== null) {
-        // Solved state: green glow with filled number
-        c.fillStyle = 'rgba(0, 255, 136, 0.35)';
+        c.fillStyle = 'rgba(0, 255, 136, 0.4)';
         c.strokeStyle = '#00ff88';
-        c.lineWidth = 2.5;
+        c.lineWidth = 2;
         c.fill();
         c.stroke();
 
         c.fillStyle = '#00ff88';
-        c.font = `900 ${fontSize}px 'Chakra Petch', monospace, sans-serif`;
         c.textAlign = 'center';
         c.fillText(this.solvedNumber, 0, eqY);
       } else if (this.wrongNumber !== null && this.wrongFlash > 0) {
-        // Wrong state: red flash
-        c.fillStyle = 'rgba(255, 0, 85, 0.4)';
+        c.fillStyle = 'rgba(255, 0, 85, 0.45)';
         c.strokeStyle = '#ff0055';
-        c.lineWidth = 2.5;
+        c.lineWidth = 2;
         c.fill();
         c.stroke();
 
         c.fillStyle = '#ffffff';
-        c.font = `900 ${fontSize}px 'Chakra Petch', monospace, sans-serif`;
         c.textAlign = 'center';
         c.fillText(this.wrongNumber, 0, eqY);
       } else {
-        // Idle waiting state: pulsating cyan bracket
-        const boxPulse = 0.5 + Math.sin(this.pulsePhase * 2) * 0.3;
+        const boxPulse = 0.5 + Math.sin(this.pulsePhase * 2.5) * 0.4;
         c.fillStyle = 'rgba(0, 243, 255, 0.15)';
         c.strokeStyle = `rgba(0, 243, 255, ${0.5 + boxPulse * 0.5})`;
         c.lineWidth = 2;
         c.fill();
         c.stroke();
 
-        // Pulsating question mark inside [ ? ]
         c.fillStyle = '#ffe600';
-        c.font = `bold ${fontSize - 2}px 'Chakra Petch', monospace, sans-serif`;
         c.textAlign = 'center';
         c.fillText('?', 0, eqY);
       }
-      c.restore();
 
       // Draw suffix (e.g. " = 4")
       c.fillStyle = '#ffffff';
       c.textAlign = 'left';
       c.fillText(suffix, boxW / 2 + 3, eqY);
 
-      // 6. Boss Phase / Title Banner
+      // 7. Boss Phase Banner
       if (this.isBoss) {
-        c.font = 'bold 11px "Microsoft JhengHei", sans-serif';
+        c.font = 'bold 11px sans-serif';
         c.fillStyle = '#ffe600';
         c.textAlign = 'center';
         c.fillText(`👑 BOSS 階段 ${this.currentPhaseIndex}/${this.totalPhases}`, 0, -h * 0.46);
       }
 
+      // Restore outer translation cleanly (EXACTLY 1 SAVE, 1 RESTORE!)
       c.restore();
     }
   }
@@ -602,7 +581,7 @@
       this.target = target;
       this.x = (canvas.logicalWidth || 800) / 2;
       this.y = (canvas.logicalHeight || 600) - 15;
-      this.speed = 20;
+      this.speed = 36; // Fast and snappy (flight time ~0.15s)
       this.radius = 8;
       this.isAlive = true;
       this.trail = [];
@@ -619,7 +598,7 @@
       const dist = Math.hypot(dx, dy);
 
       this.trail.push({ x: this.x, y: this.y });
-      if (this.trail.length > 7) this.trail.shift();
+      if (this.trail.length > 5) this.trail.shift();
 
       if (dist < this.speed + this.target.radius) {
         this.isAlive = false;
@@ -649,9 +628,7 @@
       c.arc(this.x, this.y, this.radius + 2, 0, Math.PI * 2);
       c.fillStyle = '#ffffff';
       c.strokeStyle = this.color;
-      c.lineWidth = 3;
-      c.shadowColor = this.color;
-      c.shadowBlur = 15;
+      c.lineWidth = 2.5;
       c.fill();
       c.stroke();
 
@@ -672,11 +649,11 @@
       this.y = y;
       this.color = color;
       this.text = text;
-      this.vx = (Math.random() - 0.5) * (text ? 1.5 : 8);
-      this.vy = text ? -(Math.random() * 1.5 + 1.2) : (Math.random() - 0.5) * 8;
+      this.vx = (Math.random() - 0.5) * (text ? 1.5 : 7);
+      this.vy = text ? -(Math.random() * 1.5 + 1.2) : (Math.random() - 0.5) * 7;
       this.alpha = 1.0;
-      this.decay = text ? 0.022 : Math.random() * 0.03 + 0.02;
-      this.size = text ? 18 : Math.random() * 4 + 2;
+      this.decay = text ? 0.025 : Math.random() * 0.03 + 0.025;
+      this.size = text ? 17 : Math.random() * 4 + 2;
     }
 
     update() {
@@ -690,25 +667,21 @@
       c.save();
       c.globalAlpha = Math.max(0, this.alpha);
       if (this.text) {
-        c.font = `bold ${this.size}px "Chakra Petch", "Segoe UI", sans-serif`;
+        c.font = `bold ${this.size}px "Chakra Petch", sans-serif`;
         c.fillStyle = this.color;
-        c.shadowColor = this.color;
-        c.shadowBlur = 8;
         c.textAlign = 'center';
         c.fillText(this.text, this.x, this.y);
       } else {
         c.beginPath();
         c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         c.fillStyle = this.color;
-        c.shadowColor = this.color;
-        c.shadowBlur = 10;
         c.fill();
       }
       c.restore();
     }
   }
 
-  function spawnExplosion(x, y, color, count = 25) {
+  function spawnExplosion(x, y, color, count = 20) {
     for (let i = 0; i < count; i++) {
       particles.push(new Particle(x, y, color));
     }
@@ -740,7 +713,6 @@
   }
 
   function spawnBoss(wave) {
-    // Wave Bosses with multi-stage equations
     let phases = [];
     if (wave === 1) {
       phases = [
@@ -779,7 +751,6 @@
 
   // --- Auto Targeting ---
   function updateTarget() {
-    // Automatically locks onto closest monster to base
     if (!state.activeTarget || !monsters.includes(state.activeTarget)) {
       if (monsters.length > 0) {
         let lowest = monsters[0];
@@ -805,7 +776,6 @@
   function handleProjectileHit(shotNum, monster) {
     monster.hitFlash = 6;
 
-    // Check if shot number equals missing factor B
     if (shotNum === monster.factorB) {
       // === CORRECT ANSWER ===
       state.totalShots++;
@@ -817,7 +787,6 @@
       const elapsedSec = ((Date.now() - monster.spawnTime) / 1000).toFixed(1);
       const equationStr = `${monster.factorA} × ${monster.factorB} = ${monster.product}`;
 
-      // Save to learning review history
       state.learningHistory.push({
         equation: equationStr,
         factorA: monster.factorA,
@@ -827,27 +796,21 @@
         wasWrong: monster.hadWrongAttempt
       });
 
-      // Fill in [ ] on the monster with the correct number
       monster.solvedNumber = shotNum;
 
-      // Floating equation prompt
       particles.push(new Particle(monster.x, monster.y - 20, '#00ff88', `✨ ${equationStr}`));
-      spawnExplosion(monster.x, monster.y, NUM_COLORS[shotNum], 16);
+      spawnExplosion(monster.x, monster.y, NUM_COLORS[shotNum], 14);
 
-      // Audio feedback
       window.soundManager.playHit(state.combo);
 
-      // Score (Double in Fever Mode)
       const feverMultiplier = (state.mode === 'endless' && state.isFever) ? 2.0 : 1.0;
       const earnedScore = Math.round(100 * state.combo * feverMultiplier);
       state.score += earnedScore;
 
-      // Check Fever trigger at 10 Combo in Endless
       if (state.mode === 'endless' && state.combo >= state.feverTriggerCombo && !state.isFever) {
         triggerFever(10);
       }
 
-      // Combo alert
       if (state.combo >= 3 && state.combo % 3 === 0) {
         const feverTag = state.isFever ? ' (🔥FEVER x2!)' : '';
         showComboBanner(`🔥 ${state.combo} 連擊！x${state.combo}${feverTag}`);
@@ -861,51 +824,45 @@
         monster.factorB = nextPhase.factorB;
         monster.product = nextPhase.product;
         monster.solvedNumber = null;
-        monster.staggerTimer = 45;
-        monster.y = Math.max(monster.height, monster.y - 20);
+        monster.staggerTimer = 35;
+        monster.y = Math.max(monster.height, monster.y - 15);
         showEquationBanner(`💥 階段突破！下一題：${monster.factorA} × [ ] = ${monster.product}`);
         window.soundManager.playExplosion();
-        screenShake = 12;
+        screenShake = 10;
         updateHUD();
         return;
       }
 
       // MONSTER ELIMINATED!
       state.monstersDestroyed++;
-      spawnExplosion(monster.x, monster.y, '#ffe600', monster.isBoss ? 55 : 30);
+      spawnExplosion(monster.x, monster.y, '#ffe600', monster.isBoss ? 45 : 24);
       window.soundManager.playExplosion();
-      screenShake = monster.isBoss ? 20 : 10;
+      screenShake = monster.isBoss ? 16 : 8;
 
       showEquationBanner(`💥 算式成立！ ${equationStr}`);
 
-      // Endless Time Bonus on elimination (+3s normal, +5s in fever)
       if (state.mode === 'endless') {
         const timeBonus = state.isFever ? 5 : 3;
         state.endlessTimeLeft = Math.min(state.endlessMaxTime, state.endlessTimeLeft + timeBonus);
         window.soundManager.playTimeBonus();
-        addFloatingText(state.isFever ? `+5s FEVER補時!` : `+3s 補時!`, monster.x, monster.y - 30, state.isFever ? '#ffe600' : '#00f3ff', 24);
+        addFloatingText(state.isFever ? `+5s FEVER補時!` : `+3s 補時!`, monster.x, monster.y - 30, state.isFever ? '#ffe600' : '#00f3ff', 22);
       }
 
-      // Remove monster
       const idx = monsters.indexOf(monster);
       if (idx !== -1) monsters.splice(idx, 1);
       if (state.activeTarget === monster) state.activeTarget = null;
 
-      // Wave Progress Handling
       if (state.mode === 'campaign') {
         state.waveMonstersRemaining--;
         if (state.bossSpawned && monster.isBoss) {
-          // Boss defeated!
-          setTimeout(completeWave, 1200);
+          setTimeout(completeWave, 1000);
         } else if (!state.bossSpawned && state.waveMonstersRemaining <= 0) {
-          // Spawn Boss for this wave
           state.bossSpawned = true;
           monsters.push(spawnBoss(state.wave));
           showComboBanner(`⚠️ 魔王出現！請快速心算消除！`);
           window.soundManager.playDamage();
         }
       } else if (state.mode === 'endless') {
-        // Endless Mode: Scale difficulty every 5 monsters
         state.endlessProgress++;
         if (state.endlessProgress >= 5) {
           state.endlessProgress = 0;
@@ -921,7 +878,7 @@
           ];
           const title = lvlTitles[Math.min(state.endlessLevel, 5)] || '究極神算手';
           showEquationBanner(`⚡ 難度升級！Level ${state.endlessLevel}【${title}】！速度提升！🚀`);
-          screenShake = 12;
+          screenShake = 10;
           updateHUD();
         }
       }
@@ -932,28 +889,25 @@
       state.consecutiveMisses++;
       monster.hadWrongAttempt = true;
       monster.wrongNumber = shotNum;
-      monster.wrongFlash = 16;
-      monster.staggerTimer = 25;
+      monster.wrongFlash = 14;
+      monster.staggerTimer = 20;
 
       window.soundManager.playDeflect();
-      screenShake = 6;
-      spawnExplosion(monster.x, monster.y, '#ff0055', 12);
+      screenShake = 5;
+      spawnExplosion(monster.x, monster.y, '#ff0055', 10);
 
-      // Warning bubble with educational reminder
       const studentResult = monster.factorA * shotNum;
       showWarningBubble(`⚠️ ${monster.factorA} × ${shotNum} = ${studentResult} ❌ (應該是 ${monster.factorA} × ${monster.factorB} = ${monster.product})`);
 
-      // Endless Mode Time Penalty & Break Fever
       if (state.mode === 'endless') {
         state.endlessTimeLeft = Math.max(0, state.endlessTimeLeft - 3);
         window.soundManager.playTimePenalty();
-        addFloatingText(`-3s 答錯!`, monster.x, monster.y - 25, '#ff0055', 22);
+        addFloatingText(`-3s 答錯!`, monster.x, monster.y - 25, '#ff0055', 20);
         if (state.isFever) {
           endFever();
           showComboBanner('💔 連擊中斷，FEVER 結束！');
         }
       } else if (state.mode !== 'practice') {
-        // Campaign mode shield damage on wrong answer
         damageShield(5);
       }
     }
@@ -961,33 +915,32 @@
     updateHUD();
   }
 
-  // --- Cannon Shooting Action (Keyboard or Button) ---
+  // --- Cannon Shooting Action (Instant response) ---
   function shoot(num) {
     if (state.isPaused || state.isGameOver || modalStart.classList.contains('hidden') === false) return;
 
-    // Anti-spam safeguard
+    // Forgiving anti-spam safeguard (does not choke rapid typing)
     const now = Date.now();
     state.recentClicks.push(now);
     state.recentClicks = state.recentClicks.filter(t => now - t < 1000);
 
-    if (state.recentClicks.length > 7 || state.consecutiveMisses >= 5) {
+    if (state.recentClicks.length > 15 || state.consecutiveMisses >= 8) {
       triggerOverheat();
       return;
     }
 
     if (state.isOverheated) return;
 
-    // Trigger cannon recoil animation
+    // Cannon kickback recoil
     state.cannonRecoil = 8;
 
-    // Sound synthesis with pitch mapped to 1~9
+    // Sound synthesis
     window.soundManager.playShoot(num);
 
-    // Fire projectile towards active target
+    // Fire laser projectile immediately towards active target
     if (state.activeTarget) {
       projectiles.push(new Projectile(num, state.activeTarget));
     } else {
-      // If no monsters, fire upwards
       window.soundManager.playShoot(num);
     }
   }
@@ -1003,11 +956,11 @@
     if (ammoBtns) ammoBtns.forEach(b => b.classList.add('locked'));
 
     window.soundManager.playBuzzer();
-    showWarningBubble('⚠️ 砲台過熱！請冷靜心算後再射擊！');
+    showWarningBubble('⚠️ 砲台過熱！請看清楚算式後再射擊！');
 
     if (consoleHint) {
       consoleHint.classList.add('overheat-banner');
-      consoleHint.innerHTML = '⚠️ <strong>偵測到連續盲射！冷卻 1.5 秒中，請先看清楚算式喔！</strong>';
+      consoleHint.innerHTML = '⚠️ <strong>偵測到連續盲射！冷卻 1 秒中，請先看清楚算式喔！</strong>';
     }
 
     state.overheatTimer = setTimeout(() => {
@@ -1020,14 +973,14 @@
         consoleHint.classList.remove('overheat-banner');
         consoleHint.innerHTML = '<span>鍵盤快捷鍵：<strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
       }
-    }, 1500);
+    }, 1000);
   }
 
   // --- Shield Damage ---
   function damageShield(amount) {
     state.shield = Math.max(0, state.shield - amount);
     window.soundManager.playDamage();
-    screenShake = 14;
+    screenShake = 12;
 
     if (state.shield <= 0) {
       triggerGameOver(false, '💥 基地護盾耗盡！防衛線失守！');
@@ -1040,26 +993,26 @@
     state.isWaveTransition = true;
     window.soundManager.playVictory();
     showEquationBanner(`🎉 恭喜通過第 ${state.wave} 波守衛戰！`);
-    screenShake = 16;
+    screenShake = 14;
 
     setTimeout(() => {
       state.isWaveTransition = false;
       state.wave++;
 
       if (state.wave > state.maxWaves) {
-        // All 5 waves cleared! Grand Victory!
         triggerGameOver(true, '🏆 恭喜全數通關！你是九九乘法大守護神！');
       } else {
-        // Next wave setup
         const cfg = STAGE_CONFIG[state.wave];
         state.waveMonstersTotal = cfg.total;
         state.waveMonstersRemaining = cfg.total;
         state.bossSpawned = false;
-        state.shield = Math.min(state.maxShield, state.shield + 30); // Repair shield +30%
+        state.shield = Math.min(state.maxShield, state.shield + 30);
         showComboBanner(`🚀 進入第 ${state.wave} 波！${cfg.name}`);
         updateHUD();
+        // Immediately spawn first monster of new wave
+        monsters.push(generateQuestion(state.wave));
       }
-    }, 2000);
+    }, 1800);
   }
 
   // --- Game Over / Summary Trigger ---
@@ -1078,14 +1031,12 @@
     sumMaxCombo.textContent = `x${state.maxCombo}`;
     sumAccuracy.textContent = `${acc}%`;
 
-    // Rating Evaluation
     let grade = 'C';
     if (acc >= 90 && state.score >= 3000) grade = 'S 級神算';
     else if (acc >= 80 && state.score >= 1800) grade = 'A 級高手';
     else if (acc >= 65) grade = 'B 級精熟';
     sumBadge.textContent = `評等：${grade}`;
 
-    // Populate Learning Review List
     reviewList.innerHTML = '';
     if (state.learningHistory.length === 0) {
       reviewList.innerHTML = '<div style="color: #888; text-align: center; padding: 10px;">尚未成功完成任何乘法算式</div>';
@@ -1116,7 +1067,6 @@
       });
     }
 
-    // Submit to Local & Cloud Leaderboard
     if (state.mode !== 'practice') {
       const rank = recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
       if (rank >= 0 && rank < 10) {
@@ -1143,7 +1093,7 @@
     if (comboTimer) clearTimeout(comboTimer);
     comboTimer = setTimeout(() => {
       comboBanner.classList.add('hidden');
-    }, 900);
+    }, 850);
   }
 
   let eqTimer = null;
@@ -1153,7 +1103,7 @@
     if (eqTimer) clearTimeout(eqTimer);
     eqTimer = setTimeout(() => {
       equationBanner.classList.add('hidden');
-    }, 1800);
+    }, 1600);
   }
 
   let warnTimer = null;
@@ -1163,7 +1113,7 @@
     if (warnTimer) clearTimeout(warnTimer);
     warnTimer = setTimeout(() => {
       warningBubble.classList.add('hidden');
-    }, 1200);
+    }, 1100);
   }
 
   // --- Update HUD ---
@@ -1236,9 +1186,8 @@
     state.waveMonstersRemaining = 10;
     state.bossSpawned = false;
     state.spawnTimer = 0;
-    state.spawnInterval = 260;
+    state.spawnInterval = 220;
 
-    // Reset practice mode factors from checkboxes
     if (state.mode === 'practice') {
       const selected = [];
       multiCheckboxes.forEach(cb => {
@@ -1247,7 +1196,6 @@
       state.practiceFactors = selected.length > 0 ? selected : [2, 3, 4, 5, 6, 7, 8, 9];
     }
 
-    // Reset anti-spam
     state.isOverheated = false;
     if (state.overheatTimer) clearTimeout(state.overheatTimer);
     state.consecutiveMisses = 0;
@@ -1269,6 +1217,9 @@
 
     window.soundManager.init();
     window.soundManager.startBgm();
+
+    // Immediately spawn the very first monster on game launch!
+    monsters.push(generateQuestion(1));
 
     updateHUD();
   }
@@ -1310,7 +1261,7 @@
   }
 
   // --- Leaderboard & Cloud Sync ---
-  const DEFAULT_CLOUD_API_URL = (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl) || 'https://script.google.com/macros/s/AKfycbx-NTWBubdRZwapN4_6OyuIr-VlChbcH9oyihMOHHkkFA51jtMG5ytsO0RKOUA6Yl-J/exec';
+  const DEFAULT_CLOUD_API_URL = (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl) || '';
 
   function getCloudApiUrl() {
     return localStorage.getItem('multi_cloud_url') || DEFAULT_CLOUD_API_URL;
@@ -1377,7 +1328,7 @@
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const timeoutId = setTimeout(() => controller.abort(), 18000);
 
       const res = await fetch(cloudUrl, {
         method: 'POST',
@@ -1556,7 +1507,7 @@
       e.preventDefault();
       const num = parseInt(btn.dataset.num || btn.dataset.prime, 10);
       btn.classList.add('active-press');
-      setTimeout(() => btn.classList.remove('active-press'), 120);
+      setTimeout(() => btn.classList.remove('active-press'), 100);
       shoot(num);
     };
     btn.addEventListener('pointerdown', handlePress);
@@ -1564,7 +1515,6 @@
 
   // Keyboard shortcut listener (1~9 and Numpad 1~9)
   window.addEventListener('keydown', e => {
-    // If typing in input fields, ignore
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
     let num = null;
@@ -1579,7 +1529,7 @@
       const targetBtn = document.querySelector(`.ammo-btn[data-num="${num}"], .ammo-btn[data-key="${num}"]`);
       if (targetBtn) {
         targetBtn.classList.add('active-press');
-        setTimeout(() => targetBtn.classList.remove('active-press'), 120);
+        setTimeout(() => targetBtn.classList.remove('active-press'), 100);
       }
       shoot(num);
     } else if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
@@ -1595,7 +1545,7 @@
 
     for (let m of monsters) {
       const dist = Math.hypot(m.x - clickX, m.y - clickY);
-      if (dist < m.radius * 1.4) {
+      if (dist < m.radius * 1.5) {
         state.activeTarget = m;
         updateHUD();
         window.soundManager.playShoot(1);
@@ -1861,7 +1811,7 @@ function createJsonResponse(data) {
     window.soundManager.stopBgm();
   });
 
-  // --- Main Render & Game Loop ---
+  // --- Main Render & Game Loop (Optimized 60fps) ---
   function loop() {
     requestAnimationFrame(loop);
 
@@ -1869,6 +1819,7 @@ function createJsonResponse(data) {
 
     const screenW = canvas.logicalWidth || 800;
     const screenH = canvas.logicalHeight || 600;
+    const dpr = canvas.dpr || 1;
 
     // --- 1. Logic Update ---
     if (!state.isGameOver && !state.isWaveTransition && modalStart.classList.contains('hidden')) {
@@ -1890,17 +1841,17 @@ function createJsonResponse(data) {
         updateHUD();
       }
 
-      // Spawning Monsters (Max 2~4 on screen depending on wave)
+      // Spawning Monsters (Max 2~3 on screen to keep mental math focused)
       state.spawnTimer++;
       const effectiveWave = state.mode === 'endless' ? state.endlessLevel : state.wave;
-      let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 4);
+      let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 3);
       if (state.bossSpawned) maxOnScreen = 1;
 
       const shouldSpawn = (monsters.length < maxOnScreen) &&
         (state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
       const currentSpawnInterval = state.mode === 'endless'
-        ? Math.max(160, 260 - (state.endlessLevel - 1) * 20)
+        ? Math.max(140, 220 - (state.endlessLevel - 1) * 15)
         : state.spawnInterval;
 
       if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
@@ -1913,9 +1864,9 @@ function createJsonResponse(data) {
         const m = monsters[i];
         m.update();
 
-        // Check if monster hits the defense line
+        // Check if monster reaches defense line
         if (m.y >= screenH - 30) {
-          spawnExplosion(m.x, screenH - 30, '#ff0055', 30);
+          spawnExplosion(m.x, screenH - 30, '#ff0055', 25);
           monsters.splice(i, 1);
           if (state.activeTarget === m) state.activeTarget = null;
 
@@ -1960,7 +1911,7 @@ function createJsonResponse(data) {
 
     // Update Starfield
     let starSpeedMult = getWaveSpeedMultiplier();
-    if (state.mode === 'endless' && state.isFever) starSpeedMult *= 2.5;
+    if (state.mode === 'endless' && state.isFever) starSpeedMult *= 2.0;
 
     for (let s of stars) {
       s.y += s.speed * starSpeedMult;
@@ -1971,20 +1922,21 @@ function createJsonResponse(data) {
     }
 
     // Screen Shake & Recoil decay
-    if (screenShake > 0) screenShake *= 0.88;
+    if (screenShake > 0) screenShake *= 0.85;
     if (screenShake < 0.2) screenShake = 0;
-    if (state.cannonRecoil > 0) state.cannonRecoil *= 0.82;
+    if (state.cannonRecoil > 0) state.cannonRecoil *= 0.80;
     if (state.cannonRecoil < 0.2) state.cannonRecoil = 0;
 
-    // --- 2. Render Screen ---
+    // --- 2. Render Screen (Precise DPR Transform & Zero Leaks) ---
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, screenW, screenH);
+
     ctx.save();
     if (screenShake > 0) {
       const shakeX = (Math.random() - 0.5) * screenShake * 2;
       const shakeY = (Math.random() - 0.5) * screenShake * 2;
       ctx.translate(shakeX, shakeY);
     }
-
-    ctx.clearRect(0, 0, screenW, screenH);
 
     // Draw Starfield
     for (let s of stars) {
@@ -2046,18 +1998,14 @@ function createJsonResponse(data) {
     c.arc(cx, cy + 12, 34, Math.PI, 0, false);
     c.fillStyle = '#101a33';
     c.strokeStyle = '#00f3ff';
-    c.lineWidth = 3;
-    c.shadowColor = '#00f3ff';
-    c.shadowBlur = 12;
+    c.lineWidth = 2.5;
     c.fill();
     c.stroke();
 
     // Center Energy Core
     c.beginPath();
-    c.arc(cx, cy + 2, 12, 0, Math.PI * 2);
+    c.arc(cx, cy + 2, 11, 0, Math.PI * 2);
     c.fillStyle = '#ffe600';
-    c.shadowColor = '#ffe600';
-    c.shadowBlur = 15;
     c.fill();
 
     // Aim barrel towards active target if any
@@ -2072,8 +2020,6 @@ function createJsonResponse(data) {
     // Recoil kickback
     const recoilOffset = -state.cannonRecoil;
     c.fillStyle = '#00f3ff';
-    c.shadowColor = '#00f3ff';
-    c.shadowBlur = 10;
     c.fillRect(recoilOffset, -6, 28, 12);
 
     // Muzzle tip
