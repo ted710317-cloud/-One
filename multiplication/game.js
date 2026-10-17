@@ -20,11 +20,11 @@
 
   // Preset multiplier stages for Grade 3 curriculum
   const STAGE_CONFIG = {
-    1: { factors: [2, 3, 5], total: 10, speedMult: 1.0, name: '【新手基地啟動】2, 3, 5 的乘法' },
-    2: { factors: [4, 6, 8], total: 10, speedMult: 1.18, name: '【偶數巡航戰隊】4, 6, 8 的乘法' },
-    3: { factors: [7, 9],    total: 12, speedMult: 1.38, name: '【魔王星雲突破】7, 9 的乘法 (易錯大關)' },
-    4: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 12, speedMult: 1.58, name: '【全面星空防衛】全乘法隨機大亂鬥' },
-    5: { factors: [6, 7, 8, 9], total: 10, speedMult: 1.80, name: '【乘法母艦決戰】菁英怪 + 究極三階母艦 BOSS' }
+    1: { factors: [2, 3], total: 10, speedMult: 0.92, name: '【第 1 波】2 和 3 的乘法 (基礎起步)' },
+    2: { factors: [4, 5], total: 10, speedMult: 1.12, name: '【第 2 波】4 和 5 的乘法 (規律翻倍)' },
+    3: { factors: [6, 7], total: 12, speedMult: 1.32, name: '【第 3 波】6 和 7 的乘法 (精熟大挑戰)' },
+    4: { factors: [8, 9], total: 12, speedMult: 1.52, name: '【第 4 波】8 和 9 的乘法 (高階心算)' },
+    5: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 15, speedMult: 1.75, name: '【第 5 波】2 到 9 乘法大混合 (全面決戰)' }
   };
 
   // --- Game State ---
@@ -281,8 +281,13 @@
     if (state.mode === 'endless') {
       return 1.0 + (state.endlessLevel - 1) * 0.16;
     } else if (state.mode === 'campaign') {
-      const cfg = STAGE_CONFIG[state.wave];
-      return cfg ? cfg.speedMult : 1.0;
+      if (state.wave <= 5) {
+        const cfg = STAGE_CONFIG[state.wave];
+        return cfg ? cfg.speedMult : 1.0;
+      } else {
+        // 第 5 波之後，波次越高速度越來越快！每多一波 +0.15 倍速，上限 2.6 倍速（保護小三學生手速反應）
+        return Math.min(2.6, 1.75 + (state.wave - 5) * 0.15);
+      }
     }
     return 0.85; // practice mode
   }
@@ -668,16 +673,17 @@
   }
 
   function generateQuestion(waveLevel = 1) {
-    let factorPool = [2, 3, 5];
+    let factorPool = [2, 3];
     if (state.mode === 'practice') {
-      factorPool = state.practiceFactors.length > 0 ? state.practiceFactors : [2, 3, 5];
+      factorPool = state.practiceFactors.length > 0 ? state.practiceFactors : [2, 3];
     } else if (state.mode === 'endless') {
-      if (state.endlessLevel === 1) factorPool = [2, 3, 5];
-      else if (state.endlessLevel === 2) factorPool = [4, 6, 8];
-      else if (state.endlessLevel === 3) factorPool = [7, 9];
+      if (state.endlessLevel === 1) factorPool = [2, 3];
+      else if (state.endlessLevel === 2) factorPool = [4, 5];
+      else if (state.endlessLevel === 3) factorPool = [6, 7];
+      else if (state.endlessLevel === 4) factorPool = [8, 9];
       else factorPool = [2, 3, 4, 5, 6, 7, 8, 9];
     } else {
-      const cfg = STAGE_CONFIG[waveLevel] || STAGE_CONFIG[1];
+      const cfg = STAGE_CONFIG[waveLevel] || { factors: [2, 3, 4, 5, 6, 7, 8, 9] };
       factorPool = cfg.factors;
     }
 
@@ -691,36 +697,50 @@
     let phases = [];
     if (wave === 1) {
       phases = [
-        { factorA: 3, factorB: 9, product: 27 },
-        { factorA: 5, factorB: 8, product: 40 }
+        { factorA: 2, factorB: 8, product: 16 },
+        { factorA: 3, factorB: 9, product: 27 }
       ];
     } else if (wave === 2) {
       phases = [
-        { factorA: 4, factorB: 8, product: 32 },
-        { factorA: 6, factorB: 7, product: 42 }
+        { factorA: 4, factorB: 7, product: 28 },
+        { factorA: 5, factorB: 8, product: 40 }
       ];
     } else if (wave === 3) {
       phases = [
-        { factorA: 7, factorB: 8, product: 56 },
-        { factorA: 9, factorB: 7, product: 63 }
+        { factorA: 6, factorB: 7, product: 42 },
+        { factorA: 7, factorB: 8, product: 56 }
       ];
     } else if (wave === 4) {
       phases = [
         { factorA: 8, factorB: 9, product: 72 },
-        { factorA: 6, factorB: 8, product: 48 }
+        { factorA: 9, factorB: 7, product: 63 }
       ];
-    } else {
+    } else if (wave === 5) {
       // Wave 5: Grand Finale Boss (3 phases!)
       phases = [
-        { factorA: 7, factorB: 7, product: 49 },
-        { factorA: 8, factorB: 8, product: 64 },
+        { factorA: 6, factorB: 9, product: 54 },
+        { factorA: 7, factorB: 8, product: 56 },
         { factorA: 9, factorB: 9, product: 81 }
+      ];
+    } else {
+      // Wave 6+: EX Boss
+      const hardFactors = [6, 7, 8, 9];
+      const f1 = getRandomFactor(hardFactors);
+      const f2 = getRandomFactor(hardFactors);
+      const f3 = getRandomFactor(hardFactors);
+      const b1 = Math.floor(Math.random() * 5) + 5;
+      const b2 = Math.floor(Math.random() * 5) + 5;
+      const b3 = Math.floor(Math.random() * 5) + 5;
+      phases = [
+        { factorA: f1, factorB: b1, product: f1 * b1 },
+        { factorA: f2, factorB: b2, product: f2 * b2 },
+        { factorA: f3, factorB: b3, product: f3 * b3 }
       ];
     }
 
     const first = phases.shift();
     const boss = new Monster(first.factorA, first.factorB, true, phases);
-    boss.x = (canvas.logicalWidth || 800) / 2;
+    boss.x = (canvas.logicalWidth || canvas.width || 800) / 2;
     return boss;
   }
 
@@ -967,26 +987,34 @@
   function completeWave() {
     state.isWaveTransition = true;
     window.soundManager.playVictory();
-    showEquationBanner(`🎉 恭喜通過第 ${state.wave} 波守衛戰！`);
+
+    if (state.wave === 5) {
+      showEquationBanner('🏆 達成第 5 波全通關！即刻進入【極限超越戰】速度越來越快！🚀');
+      addFloatingText('🏆 5波通關！極限超越開始！', (canvas.logicalWidth || canvas.width || 800) / 2, (canvas.logicalHeight || canvas.height || 600) * 0.4, '#ffe600', 24);
+    } else if (state.wave > 5) {
+      showEquationBanner(`🔥 突破第 ${state.wave} 波！速度再次提升！🚀`);
+    } else {
+      showEquationBanner(`🎉 恭喜通過第 ${state.wave} 波守衛戰！`);
+    }
     screenShake = 14;
 
     setTimeout(() => {
       state.isWaveTransition = false;
       state.wave++;
 
-      if (state.wave > state.maxWaves) {
-        triggerGameOver(true, '🏆 恭喜全數通關！你是九九乘法大守護神！');
-      } else {
-        const cfg = STAGE_CONFIG[state.wave];
-        state.waveMonstersTotal = cfg.total;
-        state.waveMonstersRemaining = cfg.total;
-        state.bossSpawned = false;
-        state.shield = Math.min(state.maxShield, state.shield + 30);
-        showComboBanner(`🚀 進入第 ${state.wave} 波！${cfg.name}`);
-        updateHUD();
-        // Immediately spawn first monster of new wave
-        monsters.push(generateQuestion(state.wave));
-      }
+      const cfg = STAGE_CONFIG[state.wave] || {
+        factors: [2, 3, 4, 5, 6, 7, 8, 9],
+        total: 12,
+        name: `【第 ${state.wave} 波】極限超越戰 (2~9 全乘法混合 · 速度 ${Math.round(getWaveSpeedMultiplier() * 100)}% 🚀)`
+      };
+
+      state.waveMonstersTotal = cfg.total;
+      state.waveMonstersRemaining = cfg.total;
+      state.bossSpawned = false;
+      state.shield = Math.min(state.maxShield, state.shield + 25);
+      showComboBanner(`🚀 進入第 ${state.wave} 波！${cfg.name}`);
+      updateHUD();
+      monsters.push(generateQuestion(state.wave));
     }, 1800);
   }
 
@@ -997,7 +1025,11 @@
 
     const sumTitle = document.getElementById('summary-title');
     if (sumTitle) {
-      sumTitle.textContent = titleText || (isVictory ? '🎉 任務大獲全勝！' : '💥 任務結束');
+      if (state.mode === 'campaign' && state.wave > 5) {
+        sumTitle.textContent = `🏆 恭喜達成第 5 波全通關！(超越至第 ${state.wave} 波)`;
+      } else {
+        sumTitle.textContent = titleText || (isVictory ? '🎉 任務大獲全勝！' : '💥 任務結束');
+      }
     }
 
     const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
@@ -1120,8 +1152,10 @@
 
       if (state.mode === 'practice') {
         hudWave.textContent = '自由練習';
+      } else if (state.wave > 5) {
+        hudWave.textContent = `第 ${state.wave} 波 (EX極限 ${speedLabel})`;
       } else {
-        hudWave.textContent = `第 ${state.wave} 關 (${speedLabel})`;
+        hudWave.textContent = `第 ${state.wave} 波 (${speedLabel})`;
       }
     }
 
@@ -1528,7 +1562,7 @@
 
       const currentSpawnInterval = state.mode === 'endless'
         ? Math.max(140, 220 - (state.endlessLevel - 1) * 15)
-        : state.spawnInterval;
+        : (state.wave >= 5 ? Math.max(130, 200 - (state.wave - 5) * 12) : state.spawnInterval);
 
       if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
         state.spawnTimer = 0;
