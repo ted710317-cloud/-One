@@ -865,11 +865,11 @@
           window.soundManager.playSpeedUp();
           const lvlTitles = [
             '',
-            '基礎暖身 (2, 3, 5)',
-            '偶數巡航 (4, 6, 8)',
-            '魔王衝刺 (7, 9 的乘法)',
-            '全域大亂鬥 (1~9 全面隨機)',
-            '九九乘法極限神射手'
+            '基礎起步 (2, 3 的乘法)',
+            '規律翻倍 (4, 5 的乘法)',
+            '精熟挑戰 (6, 7 的乘法)',
+            '高階心算 (8, 9 的乘法)',
+            '九九乘法極限神射手 (2~9 全面混合)'
           ];
           const title = lvlTitles[Math.min(state.endlessLevel, 5)] || '究極神算手';
           showEquationBanner(`⚡ 難度升級！Level ${state.endlessLevel}【${title}】！速度提升！🚀`);
