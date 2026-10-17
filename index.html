@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>九九乘法砲台保衛戰 - 國小三年級九九乘法練習遊戲</title>
+  <title>質數砲台保衛戰 - 國小六年級質因數分解練習遊戲</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -45,8 +45,9 @@
         <button id="btn-speed" class="hud-btn" title="切換遊戲速度（悠閒慢速/標準/挑戰快速）">🚶 標準</button>
         <button id="btn-sound" class="hud-btn" title="開關音效" aria-label="音效開關">🔊</button>
         <button id="btn-bgm" class="hud-btn" title="開關音樂" aria-label="音樂開關">🎵</button>
-        <button id="btn-rule" class="hud-btn" title="九九乘法速算口訣與秘笈">📖 秘笈</button>
+        <button id="btn-rule" class="hud-btn" title="除法秘笈與規則">📖 秘笈</button>
         <button id="btn-pause" class="hud-btn" title="暫停遊戲">⏸️</button>
+        <a href="./multiplication/" class="hud-btn" style="text-decoration: none;" title="切換至三年級九九乘法保衛戰">🎒 三年級</a>
       </div>
     </header>
 
@@ -54,62 +55,58 @@
     <div id="canvas-wrapper">
       <canvas id="game-canvas"></canvas>
       
-      <!-- Current Target Indicator & Equation Display -->
+      <!-- Current Target Indicator & Factorization Trail -->
       <div id="target-detail-panel" class="hidden">
-        <div class="target-title">🎯 鎖定怪獸目標</div>
-        <div class="target-equation-display" id="target-eq-text">2 × [ ? ] = 4</div>
-        <div class="target-hint" id="target-hint">請按下方 <strong>1~9</strong> 砲彈發射填入 [ ]！</div>
+        <div class="target-title">鎖定目標</div>
+        <div class="target-number-display" id="target-num">60</div>
+        <div class="target-history" id="target-history">
+          <!-- e.g. 60 ÷ 2 = 30 -->
+        </div>
       </div>
 
       <!-- Combo Alert Overlay -->
       <div id="combo-banner" class="hidden"></div>
-      <!-- Equation Match Success Banner -->
+      <!-- Factorization Success Callout -->
       <div id="equation-banner" class="hidden"></div>
       <!-- Rebound / Miss Warning -->
       <div id="warning-bubble" class="hidden"></div>
     </div>
 
-    <!-- Bottom Defense Base & Number Cannon Console -->
+    <!-- Bottom Defense Base & Prime Cannon Console -->
     <footer id="cannon-console">
       <div class="console-hint">
-        <span>鍵盤快捷鍵：<strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>
+        <span>鍵盤快捷鍵：<strong>1~6</strong> 或直接點擊下方質數砲彈發射！</span>
       </div>
-      <div class="ammo-buttons-container">
-        <button class="ammo-btn btn-num-1" data-num="1" data-key="1">
-          <span class="ammo-num">1</span>
+      <div class="prime-buttons-container">
+        <button class="prime-btn" data-prime="2" data-key="1">
+          <span class="prime-num">2</span>
           <span class="key-badge">鍵盤 [1]</span>
+          <span class="prime-tip">偶數必除</span>
         </button>
-        <button class="ammo-btn btn-num-2" data-num="2" data-key="2">
-          <span class="ammo-num">2</span>
+        <button class="prime-btn" data-prime="3" data-key="2">
+          <span class="prime-num">3</span>
           <span class="key-badge">鍵盤 [2]</span>
+          <span class="prime-tip">各數字和</span>
         </button>
-        <button class="ammo-btn btn-num-3" data-num="3" data-key="3">
-          <span class="ammo-num">3</span>
+        <button class="prime-btn" data-prime="5" data-key="3">
+          <span class="prime-num">5</span>
           <span class="key-badge">鍵盤 [3]</span>
+          <span class="prime-tip">尾數0或5</span>
         </button>
-        <button class="ammo-btn btn-num-4" data-num="4" data-key="4">
-          <span class="ammo-num">4</span>
+        <button class="prime-btn" data-prime="7" data-key="4">
+          <span class="prime-num">7</span>
           <span class="key-badge">鍵盤 [4]</span>
+          <span class="prime-tip">嘗試除算</span>
         </button>
-        <button class="ammo-btn btn-num-5" data-num="5" data-key="5">
-          <span class="ammo-num">5</span>
+        <button class="prime-btn" data-prime="11" data-key="5">
+          <span class="prime-num">11</span>
           <span class="key-badge">鍵盤 [5]</span>
+          <span class="prime-tip">奇偶位差</span>
         </button>
-        <button class="ammo-btn btn-num-6" data-num="6" data-key="6">
-          <span class="ammo-num">6</span>
+        <button class="prime-btn" data-prime="13" data-key="6">
+          <span class="prime-num">13</span>
           <span class="key-badge">鍵盤 [6]</span>
-        </button>
-        <button class="ammo-btn btn-num-7" data-num="7" data-key="7">
-          <span class="ammo-num">7</span>
-          <span class="key-badge">鍵盤 [7]</span>
-        </button>
-        <button class="ammo-btn btn-num-8" data-num="8" data-key="8">
-          <span class="ammo-num">8</span>
-          <span class="key-badge">鍵盤 [8]</span>
-        </button>
-        <button class="ammo-btn btn-num-9" data-num="9" data-key="9">
-          <span class="ammo-num">9</span>
-          <span class="key-badge">鍵盤 [9]</span>
+          <span class="prime-tip">進階質因數</span>
         </button>
       </div>
     </footer>
@@ -118,33 +115,32 @@
     <div id="modal-start" class="modal-overlay">
       <div class="modal-card">
         <div class="game-logo">
-          <div class="logo-sub">國小三年級數學科教具遊戲</div>
-          <h1 class="logo-title">九九乘法砲台保衛戰</h1>
-          <div class="logo-tag">MULTIPLICATION CANNON DEFENDER</div>
+          <div class="logo-sub">國小六年級數學科教具遊戲</div>
+          <h1 class="logo-title">質數砲台保衛戰</h1>
+          <div class="logo-tag">PRIME FACTOR DEFENDER</div>
         </div>
 
         <p class="modal-intro">
-          外星乘法怪獸正入侵防衛基地！<br>
-          怪獸帶著未完成的乘法護盾（例如 <strong>2 × [ ] = 4</strong>），<br>
-          防衛官請發射正確的<strong>「數字砲彈」</strong>填入 <strong>[ ]</strong>，完成算式即可徹底消除怪獸！
+          外星複合數母艦正侵入地球軌道！<br>
+          唯一擊潰它們的方法，就是發射正確的<strong>「質因數砲彈」</strong>將它們徹底分解為 <strong>1</strong>！
         </p>
 
         <div class="rule-quick-guide">
           <div class="guide-item">
             <span class="guide-icon">🎯</span>
-            <div><strong>鎖定怪獸</strong>：系統會自動鎖定最靠近防衛線的怪獸，也可點擊畫面上怪獸手動切換。</div>
+            <div><strong>鎖定怪獸</strong>：點選怪獸或按自動鎖定最近的威脅。</div>
           </div>
           <div class="guide-item">
             <span class="guide-icon">💥</span>
-            <div><strong>填空射擊</strong>：敲擊鍵盤 <strong>1~9</strong> 或點擊下方砲彈按鈕（例如 <code>2 × [ ] = 4</code>，射出 <strong>2</strong> 即可消除！）。</div>
+            <div><strong>因數除算</strong>：發射能整除它的質數（例如對 24 射 2 變成 12，再射 2 變 6...）。</div>
           </div>
           <div class="guide-item">
             <span class="guide-icon">🛡️</span>
-            <div><strong>小心彈刀</strong>：若射出錯誤數字會反彈並損傷基地護盾，算式不會成立！</div>
+            <div><strong>小心彈刀</strong>：若射出非因數會反彈扣除護盾！完全分解後可取得標準分解式加分！</div>
           </div>
           <div class="guide-item">
             <span class="guide-icon">⚡</span>
-            <div><strong>無盡極速狂熱</strong>：⏱️ 30 秒極速倒數！擊潰怪獸補時 +3 秒；10 連擊觸發 🔥 FEVER 雙倍狂熱（補時 +5 秒）！答錯扣 3 秒、撞線扣 5 秒！</div>
+            <div><strong>無盡極速狂熱</strong>：⏱️ 30 秒倒數計時！題目難度隨擊潰數漸進升級！分解怪獸補時 +3 秒；10 連擊觸發🔥 FEVER 雙倍狂熱（補時 +5 秒）！答錯扣 3 秒、撞線扣 5 秒！</div>
           </div>
         </div>
 
@@ -154,7 +150,7 @@
           <div class="profile-input-grid">
             <div class="input-field">
               <label for="player-class">班級：</label>
-              <input type="text" id="player-class" placeholder="例: 301" maxlength="10">
+              <input type="text" id="player-class" placeholder="例: 601" maxlength="10">
             </div>
             <div class="input-field">
               <label for="player-seat">座號：</label>
@@ -168,30 +164,12 @@
           <div id="profile-error" class="profile-error hidden">⚠️ 請輸入班級與座號才能啟動任務喔！</div>
         </div>
 
-        <!-- Practice Multiplier Selection Box (Expanded during practice mode) -->
-        <div id="practice-options-box" class="practice-options-box hidden">
-          <div class="practice-options-title">🌱 自選練習乘數（可勾選只想加強的乘法表）：</div>
-          <div class="multiplier-checkboxes">
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="2" checked> 2 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="3" checked> 3 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="4" checked> 4 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="5" checked> 5 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="6" checked> 6 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="7" checked> 7 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="8" checked> 8 的乘法</label>
-            <label class="multi-check-label"><input type="checkbox" class="multi-check" value="9" checked> 9 的乘法</label>
-          </div>
-          <div class="practice-quick-actions">
-            <button type="button" class="btn-text-sm" id="btn-select-all-multi">全部勾選</button>
-            <button type="button" class="btn-text-sm" id="btn-select-789-multi">只練魔王 (7, 8, 9)</button>
-          </div>
-        </div>
-
         <div class="mode-select-box">
-          <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階 1~5 波）</button>
+          <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階）</button>
           <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（⏱️ 30秒極速心算 × 難度漸進 × 🔥 10連擊狂熱雙倍）</button>
-          <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力 × 自選乘數）</button>
+          <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力）</button>
           <button class="btn-play quaternary-btn" id="btn-view-leaderboard">🏆 查看英雄排行榜</button>
+          <a href="./multiplication/" class="btn-play tertiary-btn" style="text-decoration: none; text-align: center; background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.4); color: #00ff88;">🎒 前往三年級：九九乘法砲台保衛戰</a>
         </div>
       </div>
     </div>
@@ -199,42 +177,34 @@
     <!-- RULES & CHEAT SHEET MODAL -->
     <div id="modal-rules" class="modal-overlay hidden">
       <div class="modal-card">
-        <h2>📖 三年級九九乘法速記秘笈與口訣</h2>
+        <h2>📖 六年級質因數分解小秘笈</h2>
         <div class="cheat-content">
           <div class="cheat-row">
-            <span class="cheat-badge badge-2">2 的乘法</span>
-            <span class="cheat-desc"><strong>偶數超規律</strong>：個位數字永遠是 <strong>0、2、4、6、8</strong>！</span>
+            <span class="cheat-badge badge-2">2 的倍數</span>
+            <span class="cheat-desc">個位數字是 <strong>0、2、4、6、8</strong>（偶數）。</span>
           </div>
           <div class="cheat-row">
-            <span class="cheat-badge badge-3">3 的乘法</span>
-            <span class="cheat-desc"><strong>神秘數字和</strong>：個位數字與十位數字相加，也一定是 3 的倍數（如 24: 2+4=6）。</span>
+            <span class="cheat-badge badge-3">3 的倍數</span>
+            <span class="cheat-desc">各個數位數字相加的和，可以被 3 整除。（如 72：7+2=9）</span>
           </div>
           <div class="cheat-row">
-            <span class="cheat-badge badge-4">4 的乘法</span>
-            <span class="cheat-desc"><strong>雙重翻倍法</strong>：先乘以 2，再把答案乘以 2！（例如 4×6：6×2=12，12×2=24）。</span>
+            <span class="cheat-badge badge-5">5 的倍數</span>
+            <span class="cheat-desc">個位數字是 <strong>0 或 5</strong>。</span>
           </div>
           <div class="cheat-row">
-            <span class="cheat-badge badge-5">5 的乘法</span>
-            <span class="cheat-desc"><strong>時鐘指針法</strong>：個位數字不是 <strong>0 就是 5</strong>，就像看時鐘走 5 分鐘一樣！</span>
+            <span class="cheat-badge badge-7">7 的倍數</span>
+            <span class="cheat-desc">常見熟記：14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98。</span>
           </div>
           <div class="cheat-row">
-            <span class="cheat-badge badge-6">6 的乘法</span>
-            <span class="cheat-desc"><strong>偶數鏡子規律</strong>：乘以偶數時，尾數一定跟偶數相同！（6×2=1<strong>2</strong>, 6×4=2<strong>4</strong>, 6×6=3<strong>6</strong>, 6×8=4<strong>8</strong>）。</span>
+            <span class="cheat-badge badge-11">11 的倍數</span>
+            <span class="cheat-desc">奇數位數字和與偶數位數字和的差，是 0 或 11 的倍數。（如 121, 132, 143）</span>
           </div>
           <div class="cheat-row">
-            <span class="cheat-badge badge-7">7 的乘法</span>
-            <span class="cheat-desc"><strong>乘法表大魔王</strong>：熟記最容易考的四位大將：<strong>7×3=21、7×6=42、7×7=49、7×8=56</strong>！</span>
-          </div>
-          <div class="cheat-row">
-            <span class="cheat-badge badge-8">8 的乘法</span>
-            <span class="cheat-desc"><strong>連續三次翻倍</strong>：翻倍再翻倍！（例如 8×7：7×2=14，14×2=28，28×2=56！）。</span>
-          </div>
-          <div class="cheat-row">
-            <span class="cheat-badge badge-9">9 的乘法</span>
-            <span class="cheat-desc"><strong>十位個位和必為 9</strong>：十位數比乘數少 1，且兩位數加起來一定是 9！（如 9×6：十位是 5，個位是 4，答案 54！）。</span>
+            <span class="cheat-badge badge-13">13 的倍數</span>
+            <span class="cheat-desc">常見熟記：26, 39, 52, 65, 78, 91, 104, 117, 130, 143, 169。</span>
           </div>
           <div class="cheat-note">
-            💡 <strong>乘法交換律大絕招</strong>：如果遇到想不起來的算式（例如 <code>7 × 8</code>），倒過來想 <code>8 × 7 = 56</code>，答案一模一樣！
+            💡 <strong>解題策略小訣竅</strong>：先看尾數！是偶數就先用 <strong>2</strong> 狂除；尾數是 5 就用 <strong>5</strong> 除；如果是 0 可以 2 或 5 連發！
           </div>
         </div>
         <button class="btn-close-modal" id="btn-close-rules">我知道了，回戰場！</button>
@@ -280,9 +250,9 @@
 
         <!-- Learning Review List -->
         <div class="review-section">
-          <h3>📚 本局九九乘法學習歷程清單</h3>
+          <h3>📚 本局質因數分解學習歷程清單</h3>
           <div class="review-list" id="review-list">
-            <!-- Dynamically populated by game.js: e.g. 2 × 2 = 4 (⚡ 神速反射 1.2s) -->
+            <!-- populated by game.js: e.g. 72 = 2 × 2 × 2 × 3 × 3 = 2³ × 3² -->
           </div>
         </div>
 
@@ -300,7 +270,7 @@
     <!-- LEADERBOARD MODAL -->
     <div id="modal-leaderboard" class="modal-overlay hidden">
       <div class="modal-card leaderboard-card">
-        <h2 class="lb-title">🏆 九九乘法砲台保衛戰 - 班級英雄排行榜</h2>
+        <h2 class="lb-title">🏆 質數砲台保衛戰 - 班級英雄排行榜</h2>
         <div class="lb-cloud-bar">
           <div class="lb-cloud-status">
             <span id="lb-cloud-badge" class="cloud-badge cloud-local">🟡 本機模式</span>
@@ -367,7 +337,7 @@
         <details class="cloud-guide-details" open>
           <summary>💡 如何 3 分鐘免費取得 Google Apps Script 網址？（點此查看步驟）</summary>
           <ol class="cloud-steps-list">
-            <li><strong>建立試算表</strong>：打開 Google 雲端硬碟，建立空白「Google 試算表」，命名為「九九乘法砲台保衛戰 - 班級英雄排行榜」。</li>
+            <li><strong>建立試算表</strong>：打開 Google 雲端硬碟，建立空白「Google 試算表」，命名為「質數砲台保衛戰 - 班級英雄排行榜」。</li>
             <li><strong>開啟 Apps Script</strong>：點選試算表上方選單【擴充功能】➔【Apps Script】。</li>
             <li><strong>貼上程式碼</strong>：點擊上方「📋 複製 Apps Script 程式碼」按鈕，將編輯器原有程式碼全部清空後貼上，並按儲存（磁碟圖示）。</li>
             <li><strong>發布為網頁應用程式</strong>：
@@ -392,8 +362,8 @@
   </div>
 
   <!-- Audio synthesizers & Core Game Engine -->
-  <script src="audio.js?v=20261017"></script>
-  <script src="config.js?v=20261017"></script>
-  <script src="game.js?v=20261017"></script>
+  <script src="audio.js?v=20261016"></script>
+  <script src="config.js?v=20261016"></script>
+  <script src="game.js?v=20261016"></script>
 </body>
 </html>
