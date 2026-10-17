@@ -376,6 +376,128 @@ body::after {
   z-index: 5;
 }
 
+/* 平板專屬虛擬數字鍵盤 */
+.virtual-keypad-panel {
+  width: 100%;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 3px solid #ffbed6;
+  box-shadow: var(--shadow-card);
+  padding: 8px 10px;
+  transition: all 0.25s ease-in-out;
+}
+
+.virtual-keypad-panel.hidden {
+  display: none;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.key-btn {
+  height: 46px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff2f6 100%);
+  border: 2px solid #ffd1e1;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #3f1a4a;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #ebb5c8, 0 6px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.key-btn:hover {
+  background: #fff8fb;
+  border-color: #ff9cbd;
+}
+
+.key-btn:active, .key-btn.pressed {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #ebb5c8, 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ffe3ee;
+}
+
+/* 清除與退格特殊鍵 */
+.key-btn.clear-key {
+  background: linear-gradient(180deg, #fff7ea 0%, #ffe9c8 100%);
+  border-color: #ffd494;
+  color: #c96500;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 0 #e4b267, 0 6px 10px rgba(0, 0, 0, 0.06);
+}
+.key-btn.clear-key:active, .key-btn.clear-key.pressed {
+  box-shadow: 0 1px 0 #e4b267, 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ffe0b3;
+}
+
+.key-btn.back-key {
+  background: linear-gradient(180deg, #f0f4ff 0%, #dbe4ff 100%);
+  border-color: #bfd2ff;
+  color: #3b5fcc;
+  font-size: 1.35rem;
+  box-shadow: 0 4px 0 #a2b7eb, 0 6px 10px rgba(0, 0, 0, 0.06);
+}
+.key-btn.back-key:active, .key-btn.back-key.pressed {
+  box-shadow: 0 1px 0 #a2b7eb, 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ccd9ff;
+}
+
+/* 鍵盤按鍵開關按鈕啟動狀態樣式 */
+.circle-btn.active {
+  background: #ff4b8b;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* 題目輸入框狀態樣式 */
+.target-unknown.typing {
+  background: #ffe8f2;
+  border: 2px dashed #ff3377;
+  border-radius: 10px;
+  padding: 0 8px;
+  min-width: 44px;
+  display: inline-block;
+  text-align: center;
+  color: #ff1f6d;
+}
+
+.target-unknown.correct-flash {
+  background: #d4fcd6;
+  border: 2px solid #2ec4b6;
+  color: #1b8a5a;
+  animation: popSuccess 0.4s ease-out;
+}
+
+.target-unknown.wrong-shake {
+  background: #ffe0e6;
+  border: 2px solid #ff3366;
+  color: #d81159;
+  animation: shakeWrong 0.4s ease-in-out;
+}
+
+@keyframes popSuccess {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shakeWrong {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
 /* 底部操作與道具工具列 */
 .bottom-toolbar {
   width: 100%;
@@ -715,5 +837,19 @@ body::after {
   }
   .bottom-toolbar {
     margin-top: 6px;
+  }
+}
+
+/* 平板與橫/直向觸控螢幕優化 */
+@media (min-width: 540px) {
+  .app-container {
+    max-width: 560px;
+  }
+  .key-btn {
+    height: 50px;
+    font-size: 1.6rem;
+  }
+  .question-equation {
+    font-size: 2.1rem;
   }
 }

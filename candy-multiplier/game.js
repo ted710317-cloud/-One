@@ -66,6 +66,8 @@
   let isPaused = false;
   let gameStarted = false;
   let rushTimeRemaining = 60.0;
+  let inputBuffer = '';
+  let isInputProcessing = false;
 
   // 動畫與特效系統
   let particles = [];
@@ -85,6 +87,8 @@
   const elDangerOverlay = document.getElementById('dangerOverlay');
   const elRainTimerBar = document.getElementById('rainTimerBar');
   const elMascot = document.getElementById('mascotIcon');
+  const keypadPanel = document.getElementById('virtualKeypad');
+  const btnToggleKeypad = document.getElementById('btnToggleKeypad');
 
   // 道具按鈕
   const btnBomb = document.getElementById('btnItemBomb');
@@ -124,11 +128,17 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // 調整畫布尺寸 (高 DPI 銳利繪製)
+  // 調整畫布尺寸 (高 DPI 銳利繪製，動態適配平板高度)
   function resizeCanvas() {
     const wrapper = document.getElementById('canvasWrapper');
     const width = wrapper.clientWidth;
-    const height = Math.min(Math.floor(width * 1.25), 580);
+    const isKeypadVisible = keypadPanel && !keypadPanel.classList.contains('hidden');
+
+    // 動態計算可用垂直高度，預留頂部與底部工具列空間，確保平板上一眼可見
+    const windowH = window.innerHeight;
+    const overhead = isKeypadVisible ? 380 : 240;
+    const maxAvailH = Math.max(260, windowH - overhead);
+    const height = Math.min(Math.floor(width * 1.15), maxAvailH, 480);
 
     dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
@@ -265,10 +275,12 @@
       startTime: Date.now()
     };
 
-    // 更新題目 UI
+    // 更新題目 UI 與重設鍵盤輸入緩衝
+    inputBuffer = '';
+    isInputProcessing = false;
     elEquation.textContent = `${currentQuestion.a} × ${currentQuestion.b} = `;
     elUnknown.textContent = '?';
-    elUnknown.style.color = '#e61f67';
+    elUnknown.className = 'target-unknown';
 
     // 吉祥物開心表情
     const mascots = ['🐰', '🐻', '🐱', '🐹', '🐶'];
@@ -435,9 +447,78 @@
     checkStageClear();
   }
 
-  // --- 8. 玩家點擊與答題判定 ---
+  // --- 8. 答題判定核心 (支援點擊糖果與虛擬鍵盤雙模式) ---
+  function handleCorrectAnswer(col, row) {
+    const timeSpent = (Date.now() - currentQuestion.startTime) / 1000;
+    const equationStr = `${currentQuestion.a} × ${currentQuestion.b} = ${currentQuestion.answer}`;
+
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+    updateComboUI();
+
+    questionAttempts.push({
+      equation: equationStr,
+      a: currentQuestion.a,
+      b: currentQuestion.b,
+      answer: currentQuestion.answer,
+      time: timeSpent,
+      correct: true
+    });
+
+    elUnknown.textContent = currentQuestion.answer;
+    elUnknown.className = 'target-unknown correct-flash';
+
+    if (col !== null && row !== null) {
+      const blastList = popConnectedCandies(col, row);
+      executePop(blastList, true);
+    }
+
+    setTimeout(() => {
+      applyGravity();
+      generateNewQuestion();
+    }, 280);
+  }
+
+  function handleWrongAnswer(wrongNumber, candyToWiggle) {
+    combo = 0;
+    updateComboUI();
+
+    if (window.soundEngine) {
+      window.soundEngine.playWrong();
+    }
+
+    const timeSpent = (Date.now() - currentQuestion.startTime) / 1000;
+    const equationStr = `${currentQuestion.a} × ${currentQuestion.b} = ${currentQuestion.answer}`;
+
+    questionAttempts.push({
+      equation: equationStr,
+      a: currentQuestion.a,
+      b: currentQuestion.b,
+      answer: currentQuestion.answer,
+      wrongClicked: wrongNumber,
+      time: timeSpent,
+      correct: false
+    });
+
+    elUnknown.className = 'target-unknown wrong-shake';
+
+    if (candyToWiggle) {
+      candyToWiggle.scaleX = 1.35;
+      candyToWiggle.scaleY = 0.75;
+      spawnFloatingText(candyToWiggle.currentX + cellWidth / 2, candyToWiggle.currentY, '再想想看喔~', '#ff508c');
+    }
+
+    setTimeout(() => {
+      inputBuffer = '';
+      elUnknown.textContent = '?';
+      elUnknown.className = 'target-unknown';
+      isInputProcessing = false;
+    }, 450);
+  }
+
+  // 模式 A：直接點擊盤面糖果
   function processClick(clickX, clickY) {
-    if (isGameOver || isPaused || !gameStarted) return;
+    if (isGameOver || isPaused || !gameStarted || isInputProcessing) return;
 
     if (window.soundEngine && !window.soundEngine.bgmPlaying) {
       window.soundEngine.startBGM();
@@ -450,61 +531,78 @@
     const clickedCandy = grid[col][row];
     if (!clickedCandy || clickedCandy.isPopping) return;
 
-    // 答題判定
-    const timeSpent = (Date.now() - currentQuestion.startTime) / 1000;
-    const equationStr = `${currentQuestion.a} × ${currentQuestion.b} = ${currentQuestion.answer}`;
-
     if (clickedCandy.number === currentQuestion.answer) {
-      // === 答對！ ===
-      combo++;
-      if (combo > maxCombo) maxCombo = combo;
-      updateComboUI();
-
-      // 記錄學習成效 (答對)
-      questionAttempts.push({
-        equation: equationStr,
-        a: currentQuestion.a,
-        b: currentQuestion.b,
-        answer: currentQuestion.answer,
-        time: timeSpent,
-        correct: true
-      });
-
-      // 觸發相鄰同色連鎖大消除
-      const blastList = popConnectedCandies(col, row);
-      executePop(blastList, true);
-
-      // 換下一題
-      setTimeout(() => {
-        applyGravity();
-        generateNewQuestion();
-      }, 250);
-
+      handleCorrectAnswer(col, row);
     } else {
-      // === 點錯了 ===
-      combo = 0;
-      updateComboUI();
+      handleWrongAnswer(clickedCandy.number, clickedCandy);
+    }
+  }
 
-      // 播放溫和彈簧滑音
-      if (window.soundEngine) {
-        window.soundEngine.playWrong();
+  // 模式 B：使用平板虛擬鍵盤或實體數字鍵輸入
+  function handleKeypadInput(digit) {
+    if (isGameOver || isPaused || !gameStarted || isInputProcessing) return;
+
+    if (window.soundEngine && !window.soundEngine.bgmPlaying) {
+      window.soundEngine.startBGM();
+    }
+
+    const targetStr = currentQuestion.answer.toString();
+    if (inputBuffer.length >= targetStr.length) {
+      inputBuffer = '';
+    }
+
+    inputBuffer += digit;
+    elUnknown.textContent = inputBuffer;
+    elUnknown.className = 'target-unknown typing';
+
+    if (window.soundEngine) {
+      window.soundEngine.playKeyTap(parseInt(digit, 10));
+    }
+
+    // 當輸入位數達到題目答案長度時自動判斷 (1位數或2位數)
+    if (inputBuffer.length === targetStr.length) {
+      isInputProcessing = true;
+      const enteredNum = parseInt(inputBuffer, 10);
+
+      if (enteredNum === currentQuestion.answer) {
+        // 在盤面上尋找該數字對應的糖果引爆
+        let targetCol = null, targetRow = null;
+        for (let c = 0; c < COLS; c++) {
+          for (let r = 0; r < ROWS; r++) {
+            if (grid[c][r] && grid[c][r].number === currentQuestion.answer && !grid[c][r].isPopping) {
+              targetCol = c;
+              targetRow = r;
+              break;
+            }
+          }
+          if (targetCol !== null) break;
+        }
+
+        handleCorrectAnswer(targetCol, targetRow);
+        setTimeout(() => { isInputProcessing = false; }, 300);
+      } else {
+        handleWrongAnswer(enteredNum, null);
       }
+    }
+  }
 
-      // 紀錄答錯弱點
-      questionAttempts.push({
-        equation: equationStr,
-        a: currentQuestion.a,
-        b: currentQuestion.b,
-        answer: currentQuestion.answer,
-        wrongClicked: clickedCandy.number,
-        time: timeSpent,
-        correct: false
-      });
+  function handleKeypadClear() {
+    if (isInputProcessing) return;
+    inputBuffer = '';
+    elUnknown.textContent = '?';
+    elUnknown.className = 'target-unknown';
+    if (window.soundEngine) window.soundEngine.playPop(480);
+  }
 
-      // 搖晃動畫
-      clickedCandy.scaleX = 1.35;
-      clickedCandy.scaleY = 0.75;
-      spawnFloatingText(clickedCandy.currentX + cellWidth / 2, clickedCandy.currentY, '再想想看喔~', '#ff508c');
+  function handleKeypadBack() {
+    if (isInputProcessing) return;
+    if (inputBuffer.length > 0) {
+      inputBuffer = inputBuffer.slice(0, -1);
+      elUnknown.textContent = inputBuffer.length > 0 ? inputBuffer : '?';
+      if (inputBuffer.length === 0) {
+        elUnknown.className = 'target-unknown';
+      }
+      if (window.soundEngine) window.soundEngine.playPop(520);
     }
   }
 
@@ -1166,6 +1264,57 @@
     });
     document.getElementById('btnCloseTable').addEventListener('click', () => {
       modalTable.classList.remove('active');
+    });
+
+    // 虛擬鍵盤按鈕監聽 (針對平板觸控最佳化)
+    if (keypadPanel) {
+      keypadPanel.querySelectorAll('.key-btn').forEach(btn => {
+        let keyTouchTime = 0;
+        btn.addEventListener('touchstart', (e) => {
+          keyTouchTime = Date.now();
+          btn.classList.add('pressed');
+          const key = btn.getAttribute('data-key');
+          const action = btn.getAttribute('data-action');
+          if (key !== null) handleKeypadInput(key);
+          else if (action === 'clear') handleKeypadClear();
+          else if (action === 'back') handleKeypadBack();
+          e.preventDefault();
+        }, { passive: false });
+
+        btn.addEventListener('touchend', () => {
+          setTimeout(() => btn.classList.remove('pressed'), 100);
+        });
+
+        btn.addEventListener('click', () => {
+          if (Date.now() - keyTouchTime < 450) return;
+          const key = btn.getAttribute('data-key');
+          const action = btn.getAttribute('data-action');
+          if (key !== null) handleKeypadInput(key);
+          else if (action === 'clear') handleKeypadClear();
+          else if (action === 'back') handleKeypadBack();
+        });
+      });
+    }
+
+    // 虛擬鍵盤顯示/隱藏切換
+    if (btnToggleKeypad) {
+      btnToggleKeypad.addEventListener('click', () => {
+        const isHidden = keypadPanel.classList.toggle('hidden');
+        btnToggleKeypad.classList.toggle('active', !isHidden);
+        resizeCanvas();
+      });
+    }
+
+    // 電腦實體鍵盤支援 (Chromebook / 筆電數字鍵同步支援)
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver || isPaused || !gameStarted) return;
+      if (e.key >= '0' && e.key <= '9') {
+        handleKeypadInput(e.key);
+      } else if (e.key === 'Backspace') {
+        handleKeypadBack();
+      } else if (e.key === 'Escape' || e.key === 'Delete' || e.key === 'c' || e.key === 'C') {
+        handleKeypadClear();
+      }
     });
   }
 

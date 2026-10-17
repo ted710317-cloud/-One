@@ -20,6 +20,7 @@
         <span>糖果雨消消樂</span>
       </div>
       <div class="header-controls">
+        <button id="btnToggleKeypad" class="circle-btn active" title="開啟/關閉虛擬鍵盤">⌨️</button>
         <button id="btnHintMatrix" class="circle-btn" title="查看點子視覺提示">💡</button>
         <button id="btnTable" class="circle-btn" title="查看九九乘法表">📖</button>
         <button id="btnAudio" class="circle-btn" title="開關音效">🔊</button>
@@ -59,7 +60,7 @@
       <div class="mascot-box" id="mascotIcon">🐰</div>
       <div class="question-content">
         <div class="question-hint-title">
-          <span>🎯 請點擊盤面上的正確答案：</span>
+          <span>🎯 點擊盤面糖果 或 鍵盤輸入答案：</span>
         </div>
         <div class="question-equation">
           <span id="txtEquation">7 × 8 = </span>
@@ -75,6 +76,24 @@
       <div class="danger-warning-overlay" id="dangerOverlay"></div>
       <canvas id="gameCanvas" width="480" height="600"></canvas>
     </div>
+
+    <!-- 平板專屬虛擬數字鍵盤 (專為觸控螢幕優化) -->
+    <section class="virtual-keypad-panel" id="virtualKeypad">
+      <div class="keypad-grid">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn action-key clear-key" data-action="clear" title="清除輸入">C</button>
+        <button class="key-btn" data-key="0">0</button>
+        <button class="key-btn action-key back-key" data-action="back" title="倒退刪除">⌫</button>
+      </div>
+    </section>
 
     <!-- 底部輔助道具與技能列 -->
     <footer class="bottom-toolbar">

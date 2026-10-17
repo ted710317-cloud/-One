@@ -73,6 +73,28 @@ class SoundEngine {
     osc.stop(now + 0.09);
   }
 
+  // 1b. 虛擬鍵盤輕脆敲擊音效 (柔和木琴水滴感)
+  playKeyTap(num = 0) {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    const baseFreq = 520 + ((num || 0) % 10) * 32;
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.15, now + 0.05);
+
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(now);
+    osc.stop(now + 0.07);
+  }
+
   // 2. 答對乘法題：清脆甜美的馬林巴大和弦 (叮咚！✨)
   playCorrect() {
     if (!this.ctx || this.isMuted) return;
