@@ -20,6 +20,8 @@
     1: [4, 6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 30, 36, 40, 50],
     2: [14, 21, 28, 35, 42, 45, 49, 54, 56, 60, 63, 70, 72, 84, 90, 98],
     3: [22, 26, 33, 39, 44, 52, 55, 65, 75, 77, 88, 91, 100, 108, 110, 120, 126, 130, 140, 150],
+    4: [121, 132, 143, 144, 154, 156, 165, 168, 169, 175, 182, 195, 198, 200, 216, 220, 225, 234, 240, 252, 260],
+    5: [210, 270, 273, 280, 286, 300, 315, 330, 350, 360, 385, 390, 420, 429, 455, 462, 504, 546],
     bosses: [
       { val: 180, name: '三眼鋼鐵巨獸 180' },
       { val: 210, name: '四元核晶魔王 210' },
@@ -54,8 +56,8 @@
     bossSpawned: false,
     endlessLevel: 1,
     endlessProgress: 0,
-    endlessTimeLeft: 90,
-    endlessMaxTime: 180,
+    endlessTimeLeft: 30,
+    endlessMaxTime: 90,
     isFever: false,
     feverTimeLeft: 0,
     feverTriggerCombo: 10,
@@ -572,15 +574,9 @@
   }
 
   // --- Monster Generator ---
-  function generateComposite(wave) {
-    let pool;
-    if (wave === 1) {
-      pool = STAGE_PRESETS[1];
-    } else if (wave === 2) {
-      pool = STAGE_PRESETS[2];
-    } else {
-      pool = STAGE_PRESETS[3];
-    }
+  function generateComposite(lvl = 1) {
+    const clampedLvl = Math.max(1, Math.min(5, lvl));
+    const pool = STAGE_PRESETS[clampedLvl] || STAGE_PRESETS[5];
     const val = pool[Math.floor(Math.random() * pool.length)];
     return new Monster(val);
   }
@@ -712,13 +708,22 @@
             showComboBanner(`⚠️ 魔王出現！注意分解！`);
           }
         } else if (state.mode === 'endless') {
-          // Endless Mode Progression: Accelerate every 6 monsters destroyed!
+          // Endless Mode Progression: Scale difficulty and speed every 5 monsters destroyed!
           state.endlessProgress++;
-          if (state.endlessProgress >= 6) {
+          if (state.endlessProgress >= 5) {
             state.endlessProgress = 0;
             state.endlessLevel++;
             window.soundManager.playSpeedUp();
-            showEquationBanner(`⚡ 無盡關卡升級！進入 Level ${state.endlessLevel}！怪獸速度提升！🚀`);
+            const lvlTitles = [
+              '',
+              '基礎暖身 (2, 3, 5)',
+              '進階倍數 (含 7 的倍數)',
+              '跨百挑戰 (含 11, 13)',
+              '大師除算 (三位數多重除算)',
+              '極限魔王 (深層質因數)'
+            ];
+            const title = lvlTitles[Math.min(state.endlessLevel, 5)] || '究極神射手';
+            showEquationBanner(`⚡ 難度升級！進入 Level ${state.endlessLevel}【${title}】！題目更難、速度提升！🚀`);
             screenShake = 12;
             updateHUD();
           }
@@ -922,7 +927,7 @@
       if (timeBox) timeBox.classList.remove('hidden');
       if (hudTimer) {
         hudTimer.textContent = formatTimer(state.endlessTimeLeft);
-        if (state.endlessTimeLeft <= 15) {
+        if (state.endlessTimeLeft <= 10) {
           hudTimer.classList.add('timer-warning');
         } else {
           hudTimer.classList.remove('timer-warning');
@@ -1102,7 +1107,7 @@
     state.isWaveTransition = false;
     state.endlessLevel = 1;
     state.endlessProgress = 0;
-    state.endlessTimeLeft = 90;
+    state.endlessTimeLeft = 30;
     state.isFever = false;
     state.feverTimeLeft = 0;
     state.learningHistory = [];
@@ -1927,15 +1932,18 @@ function createJsonResponse(obj) {
 
       // Spawn new monsters (Pedagogical limit: max 2 monsters on screen for early waves)
       state.spawnTimer++;
-      let maxOnScreen = state.wave <= 2 ? 2 : (state.wave <= 4 ? 3 : 4);
+      const effectiveWave = state.mode === 'endless' ? state.endlessLevel : state.wave;
+      let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 4);
       if (state.bossSpawned) maxOnScreen = 1;
 
       const shouldSpawn = (monsters.length < maxOnScreen) && 
         (state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
-      if (shouldSpawn && state.spawnTimer >= state.spawnInterval) {
+      const currentSpawnInterval = state.mode === 'endless' ? Math.max(160, 260 - (state.endlessLevel - 1) * 20) : state.spawnInterval;
+
+      if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
         state.spawnTimer = 0;
-        monsters.push(generateComposite(state.wave));
+        monsters.push(generateComposite(effectiveWave));
       }
 
       // Update Monsters & Check Base Collision
