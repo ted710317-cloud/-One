@@ -1,0 +1,1175 @@
+// ============================================================================
+// 糖果雨消消樂：九九乘法大冒險 (Candy Multiplier Drop)
+// 專為國小三年級設計 - 核心遊戲引擎與教學分析邏輯
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // --- 1. 糖果樣式與色彩定義 ---
+  const CANDY_TYPES = [
+    { id: 0, name: '草莓軟糖', color: '#ff4d6d', bgGradient: ['#ff758f', '#ff4d6d'], textColor: '#ffffff', shape: 'heart' },
+    { id: 1, name: '檸檬星糖', color: '#ffb703', bgGradient: ['#ffd166', '#fb8500'], textColor: '#332200', shape: 'star' },
+    { id: 2, name: '青蘋果豆', color: '#2ec4b6', bgGradient: ['#52b788', '#1b4332'], textColor: '#ffffff', shape: 'apple' },
+    { id: 3, name: '藍莓水晶', color: '#3a86ff', bgGradient: ['#00b4d8', '#0077b6'], textColor: '#ffffff', shape: 'diamond' },
+    { id: 4, name: '葡萄果凍', color: '#8338ec', bgGradient: ['#9d4edd', '#5a189a'], textColor: '#ffffff', shape: 'jelly' },
+    { id: 5, name: '甜橙波波', color: '#fb5607', bgGradient: ['#ff9e00', '#e85d04'], textColor: '#ffffff', shape: 'circle' }
+  ];
+
+  // 關卡乘法設定
+  const STAGE_CONFIGS = [
+    { level: 1, name: '第 1 關：糖果花園', multipliers: [2, 3, 5], targetScore: 600, rainInterval: 8000 },
+    { level: 2, name: '第 2 關：甜甜圈山谷', multipliers: [4, 6, 8], targetScore: 1200, rainInterval: 7000 },
+    { level: 3, name: '第 3 關：魔法星空', multipliers: [7, 9], targetScore: 1800, rainInterval: 6500 },
+    { level: 4, name: '第 4 關：糖果狂歡節', multipliers: [2, 3, 4, 5, 6, 7, 8, 9], targetScore: 2600, rainInterval: 5500 },
+    { level: 5, name: '第 5 關：甜點魔王派對', multipliers: [6, 7, 8, 9], targetScore: 3600, rainInterval: 4800 }
+  ];
+
+  // --- 2. 遊戲狀態與全域變數 ---
+  const COLS = 6;
+  const ROWS = 8;
+  const DANGER_ROW = 1; // 頂部第 1 排為危險警戒線
+
+  let canvas, ctx;
+  let dpr = 1;
+  let cellWidth = 0;
+  let cellHeight = 0;
+  let gridOffsetX = 0;
+  let gridOffsetY = 0;
+
+  let grid = []; // grid[col][row]
+  let currentMode = 'stage'; // 'stage' | 'rush' | 'practice'
+  let currentStageIndex = 0;
+  let practiceMultipliers = [2, 3, 4, 5, 6, 7, 8, 9];
+
+  let score = 0;
+  let highScore = 0;
+  let combo = 0;
+  let maxCombo = 0;
+  let fever = 0; // 0 ~ 100
+  let isFeverActive = false;
+  let feverTimer = 0;
+
+  // 乘法任務
+  let currentQuestion = { a: 7, b: 8, answer: 56, startTime: Date.now() };
+  let questionAttempts = []; // 學習履歷紀錄
+
+  // 道具數量
+  let items = { bomb: 2, freeze: 1, reroll: 3 };
+  let freezeTimer = 0; // 冰凍落糖剩餘時間
+
+  // 落糖倒數計時器
+  let rainTimer = 0;
+  let currentRainInterval = 8000;
+  let dangerAlertTimer = 0;
+  let isGameOver = false;
+  let isPaused = false;
+  let gameStarted = false;
+  let rushTimeRemaining = 60.0;
+
+  // 動畫與特效系統
+  let particles = [];
+  let floatingTexts = [];
+  let screenShake = 0;
+  let lastFrameTime = performance.now();
+
+  // --- 3. DOM 元素快取 ---
+  const elScore = document.getElementById('txtScore');
+  const elHighScore = document.getElementById('txtHighScore');
+  const elStage = document.getElementById('txtStage');
+  const elFeverFill = document.getElementById('feverFill');
+  const elFeverStatusText = document.getElementById('feverStatusText');
+  const elEquation = document.getElementById('txtEquation');
+  const elUnknown = document.getElementById('txtUnknown');
+  const elComboBadge = document.getElementById('comboBadge');
+  const elDangerOverlay = document.getElementById('dangerOverlay');
+  const elRainTimerBar = document.getElementById('rainTimerBar');
+  const elMascot = document.getElementById('mascotIcon');
+
+  // 道具按鈕
+  const btnBomb = document.getElementById('btnItemBomb');
+  const btnFreeze = document.getElementById('btnItemFreeze');
+  const btnReroll = document.getElementById('btnItemReroll');
+  const countBomb = document.getElementById('countBomb');
+  const countFreeze = document.getElementById('countFreeze');
+  const countReroll = document.getElementById('countReroll');
+
+  // 視窗按鈕
+  const modalStart = document.getElementById('modalStart');
+  const modalPause = document.getElementById('modalPause');
+  const modalResult = document.getElementById('modalResult');
+  const modalDotMatrix = document.getElementById('modalDotMatrix');
+  const modalTable = document.getElementById('modalTable');
+
+  // --- 4. 初始化 ---
+  function init() {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+
+    // 讀取最高分
+    highScore = parseInt(localStorage.getItem('candy_multiplier_highscore') || '0', 10);
+    elHighScore.textContent = highScore.toLocaleString();
+
+    // 建立九九乘法查照卡內容
+    buildMultiplicationTable();
+
+    // 綁定所有 UI 與觸控事件
+    bindEvents();
+
+    // 自適應螢幕大小
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // 啟動主渲染迴圈
+    requestAnimationFrame(gameLoop);
+  }
+
+  // 調整畫布尺寸 (高 DPI 銳利繪製)
+  function resizeCanvas() {
+    const wrapper = document.getElementById('canvasWrapper');
+    const width = wrapper.clientWidth;
+    const height = Math.min(Math.floor(width * 1.25), 580);
+
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    ctx.scale(dpr, dpr);
+
+    cellWidth = width / COLS;
+    cellHeight = height / ROWS;
+    gridOffsetX = 0;
+    gridOffsetY = 0;
+  }
+
+  // --- 5. 網格與糖果生成邏輯 ---
+  function initGrid() {
+    grid = [];
+    for (let c = 0; c < COLS; c++) {
+      grid[c] = [];
+      // 初始每行隨機填入 4~5 顆糖果
+      const initialCount = 4 + Math.floor(Math.random() * 2);
+      for (let r = 0; r < ROWS; r++) {
+        if (r >= ROWS - initialCount) {
+          grid[c][r] = createRandomCandy(c, r, false);
+        } else {
+          grid[c][r] = null;
+        }
+      }
+    }
+  }
+
+  // 建立一顆新糖果
+  function createRandomCandy(col, row, isSpawningAtTop = false) {
+    const type = CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+    const activeMultipliers = getActiveMultipliers();
+    const a = activeMultipliers[Math.floor(Math.random() * activeMultipliers.length)];
+    const b = 1 + Math.floor(Math.random() * 9);
+    const number = a * b;
+
+    return {
+      type: type,
+      number: number,
+      col: col,
+      row: row,
+      currentX: col * cellWidth,
+      currentY: isSpawningAtTop ? -cellHeight * (1 + Math.random()) : row * cellHeight,
+      targetY: row * cellHeight,
+      scaleX: 1,
+      scaleY: 1,
+      opacity: 1,
+      isPopping: false,
+      popProgress: 0,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+  }
+
+  // 獲取當前模式下的可用乘數
+  function getActiveMultipliers() {
+    if (currentMode === 'stage') {
+      return STAGE_CONFIGS[currentStageIndex].multipliers;
+    } else if (currentMode === 'practice') {
+      return practiceMultipliers.length > 0 ? practiceMultipliers : [2, 3, 5];
+    }
+    return [2, 3, 4, 5, 6, 7, 8, 9];
+  }
+
+  // 產生一道符合當前盤面的新九九乘法題目 (保證盤面一定有答案！)
+  function generateNewQuestion() {
+    // 1. 收集盤面上所有存在的數字
+    const availableNumbers = [];
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        if (grid[c][r] && !grid[c][r].isPopping) {
+          availableNumbers.push(grid[c][r].number);
+        }
+      }
+    }
+
+    const activeMultipliers = getActiveMultipliers();
+    let pickedTarget = null;
+    let foundA = 1, foundB = 1;
+
+    // 2. 尋找盤面現存且符合當前乘數的答案
+    if (availableNumbers.length > 0) {
+      // 打亂順序
+      availableNumbers.sort(() => Math.random() - 0.5);
+      for (const num of availableNumbers) {
+        for (const m of activeMultipliers) {
+          if (num % m === 0 && (num / m) >= 1 && (num / m) <= 9) {
+            pickedTarget = num;
+            foundA = m;
+            foundB = num / m;
+            // 隨機反轉算式順序 (如 7×8 或 8×7)，加深九九乘法交換律概念
+            if (Math.random() > 0.5) {
+              const temp = foundA;
+              foundA = foundB;
+              foundB = temp;
+            }
+            break;
+          }
+        }
+        if (pickedTarget !== null) break;
+      }
+    }
+
+    // 3. 若盤面剛好沒有合適題目，挑選一個題目並「強制將盤面一顆糖果轉化為該答案」
+    if (pickedTarget === null) {
+      foundA = activeMultipliers[Math.floor(Math.random() * activeMultipliers.length)];
+      foundB = 1 + Math.floor(Math.random() * 9);
+      pickedTarget = foundA * foundB;
+
+      // 隨機找盤面一顆糖果換成該數字
+      const candies = [];
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          if (grid[c][r] && !grid[c][r].isPopping) {
+            candies.push(grid[c][r]);
+          }
+        }
+      }
+      if (candies.length > 0) {
+        const replaceCandy = candies[Math.floor(Math.random() * candies.length)];
+        replaceCandy.number = pickedTarget;
+      } else {
+        initGrid();
+      }
+    }
+
+    currentQuestion = {
+      a: foundA,
+      b: foundB,
+      answer: pickedTarget,
+      startTime: Date.now()
+    };
+
+    // 更新題目 UI
+    elEquation.textContent = `${currentQuestion.a} × ${currentQuestion.b} = `;
+    elUnknown.textContent = '?';
+    elUnknown.style.color = '#e61f67';
+
+    // 吉祥物開心表情
+    const mascots = ['🐰', '🐻', '🐱', '🐹', '🐶'];
+    elMascot.textContent = mascots[Math.floor(Math.random() * mascots.length)];
+  }
+
+  // --- 6. 糖果雨降落與重力機制 ---
+  function triggerCandyRain() {
+    if (freezeTimer > 0) return; // 處於冰凍狀態
+
+    // 檢查是否有任一列即將溢出最頂端
+    let overflowColumn = false;
+    for (let c = 0; c < COLS; c++) {
+      if (grid[c][0] !== null) {
+        overflowColumn = true;
+        break;
+      }
+    }
+
+    if (overflowColumn && currentMode !== 'practice') {
+      triggerGameOver();
+      return;
+    }
+
+    // 將所有糖果向下推一格
+    for (let c = 0; c < COLS; c++) {
+      for (let r = ROWS - 1; r > 0; r--) {
+        grid[c][r] = grid[c][r - 1];
+        if (grid[c][r]) {
+          grid[c][r].row = r;
+          grid[c][r].targetY = r * cellHeight;
+        }
+      }
+      // 頂部生成新糖果
+      grid[c][0] = createRandomCandy(c, 0, true);
+    }
+
+    if (window.soundEngine) {
+      window.soundEngine.playPop(350);
+    }
+    screenShake = 3;
+  }
+
+  // 物理重力下落填補空格
+  function applyGravity() {
+    let hasFalling = false;
+    for (let c = 0; c < COLS; c++) {
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (grid[c][r] === null) {
+          // 往上找第一顆非空糖果往下掉
+          for (let k = r - 1; k >= 0; k--) {
+            if (grid[c][k] !== null && !grid[c][k].isPopping) {
+              grid[c][r] = grid[c][k];
+              grid[c][r].row = r;
+              grid[c][r].targetY = r * cellHeight;
+              grid[c][k] = null;
+              hasFalling = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    return hasFalling;
+  }
+
+  // --- 7. 連鎖消除 (Connected Same-Color Blast) ---
+  function popConnectedCandies(startCol, startRow) {
+    const targetCandy = grid[startCol][startRow];
+    if (!targetCandy) return [];
+
+    const targetType = targetCandy.type.id;
+    const toPop = [];
+    const visited = Array.from({ length: COLS }, () => Array(ROWS).fill(false));
+    const queue = [{ c: startCol, r: startRow }];
+    visited[startCol][startRow] = true;
+
+    // 廣度優先搜尋 (BFS) 尋找相鄰同色糖果
+    while (queue.length > 0) {
+      const current = queue.shift();
+      toPop.push(grid[current.c][current.r]);
+
+      const neighbors = [
+        { c: current.c + 1, r: current.r },
+        { c: current.c - 1, r: current.r },
+        { c: current.c, r: current.r + 1 },
+        { c: current.c, r: current.r - 1 }
+      ];
+
+      for (const n of neighbors) {
+        if (n.c >= 0 && n.c < COLS && n.r >= 0 && n.r < ROWS) {
+          if (!visited[n.c][n.r] && grid[n.c][n.r] && !grid[n.c][n.r].isPopping) {
+            if (grid[n.c][n.r].type.id === targetType) {
+              visited[n.c][n.r] = true;
+              queue.push(n);
+            }
+          }
+        }
+      }
+    }
+
+    return toPop;
+  }
+
+  // 執行糖果爆炸動畫與加分
+  function executePop(candiesToPop, isCorrectAnswer = true) {
+    if (candiesToPop.length === 0) return;
+
+    const count = candiesToPop.length;
+    let baseScore = count * 50;
+
+    if (isFeverActive) {
+      baseScore *= 2;
+    }
+
+    // 連擊倍率
+    if (combo > 1) {
+      baseScore = Math.floor(baseScore * (1 + combo * 0.2));
+    }
+
+    score += baseScore;
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('candy_multiplier_highscore', highScore.toString());
+      elHighScore.textContent = highScore.toLocaleString();
+    }
+    elScore.textContent = score.toLocaleString();
+
+    // 播放音效
+    if (window.soundEngine) {
+      if (isCorrectAnswer) {
+        window.soundEngine.playCorrect();
+        window.soundEngine.playCombo(combo);
+      } else {
+        window.soundEngine.playBlast(1.0 + Math.min(count, 5) * 0.1);
+      }
+    }
+
+    // 畫面震動
+    screenShake = Math.min(count * 2, 8);
+
+    // 糖果噴發特效
+    candiesToPop.forEach((candy, idx) => {
+      candy.isPopping = true;
+      spawnCandyParticles(candy.currentX + cellWidth / 2, candy.currentY + cellHeight / 2, candy.type.color);
+
+      // 延遲移除網格引用
+      setTimeout(() => {
+        if (grid[candy.col][candy.row] === candy) {
+          grid[candy.col][candy.row] = null;
+        }
+      }, 120);
+    });
+
+    // 飄字分數特效
+    const first = candiesToPop[0];
+    const textMsg = combo > 1 ? `+${baseScore} (${combo} 連擊!)` : `+${baseScore}`;
+    spawnFloatingText(first.currentX + cellWidth / 2, first.currentY, textMsg, isFeverActive ? '#ff3377' : '#ffd154');
+
+    // 累積 Fever
+    addFever(count * 4 + 10);
+
+    // 檢查闖關模式是否達到過關分數
+    checkStageClear();
+  }
+
+  // --- 8. 玩家點擊與答題判定 ---
+  function processClick(clickX, clickY) {
+    if (isGameOver || isPaused || !gameStarted) return;
+
+    if (window.soundEngine && !window.soundEngine.bgmPlaying) {
+      window.soundEngine.startBGM();
+    }
+
+    const col = Math.floor(clickX / cellWidth);
+    const row = Math.floor(clickY / cellHeight);
+
+    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+    const clickedCandy = grid[col][row];
+    if (!clickedCandy || clickedCandy.isPopping) return;
+
+    // 答題判定
+    const timeSpent = (Date.now() - currentQuestion.startTime) / 1000;
+    const equationStr = `${currentQuestion.a} × ${currentQuestion.b} = ${currentQuestion.answer}`;
+
+    if (clickedCandy.number === currentQuestion.answer) {
+      // === 答對！ ===
+      combo++;
+      if (combo > maxCombo) maxCombo = combo;
+      updateComboUI();
+
+      // 記錄學習成效 (答對)
+      questionAttempts.push({
+        equation: equationStr,
+        a: currentQuestion.a,
+        b: currentQuestion.b,
+        answer: currentQuestion.answer,
+        time: timeSpent,
+        correct: true
+      });
+
+      // 觸發相鄰同色連鎖大消除
+      const blastList = popConnectedCandies(col, row);
+      executePop(blastList, true);
+
+      // 換下一題
+      setTimeout(() => {
+        applyGravity();
+        generateNewQuestion();
+      }, 250);
+
+    } else {
+      // === 點錯了 ===
+      combo = 0;
+      updateComboUI();
+
+      // 播放溫和彈簧滑音
+      if (window.soundEngine) {
+        window.soundEngine.playWrong();
+      }
+
+      // 紀錄答錯弱點
+      questionAttempts.push({
+        equation: equationStr,
+        a: currentQuestion.a,
+        b: currentQuestion.b,
+        answer: currentQuestion.answer,
+        wrongClicked: clickedCandy.number,
+        time: timeSpent,
+        correct: false
+      });
+
+      // 搖晃動畫
+      clickedCandy.scaleX = 1.35;
+      clickedCandy.scaleY = 0.75;
+      spawnFloatingText(clickedCandy.currentX + cellWidth / 2, clickedCandy.currentY, '再想想看喔~', '#ff508c');
+    }
+  }
+
+  // --- 9. FEVER 狂熱模式系統 ---
+  function addFever(amount) {
+    if (isFeverActive) return;
+    fever = Math.min(100, fever + amount);
+    elFeverFill.style.width = fever + '%';
+
+    if (fever >= 100) {
+      activateFever();
+    }
+  }
+
+  function activateFever() {
+    isFeverActive = true;
+    feverTimer = 8.0; // 狂熱模式 8 秒
+    elFeverStatusText.textContent = '🔥 狂熱彩虹派對！分數雙倍！';
+    elFeverStatusText.classList.add('fever-active-text');
+
+    if (window.soundEngine) {
+      window.soundEngine.playFever();
+    }
+  }
+
+  function updateFever(dt) {
+    if (isFeverActive) {
+      feverTimer -= dt;
+      fever = Math.max(0, (feverTimer / 8.0) * 100);
+      elFeverFill.style.width = fever + '%';
+
+      if (feverTimer <= 0) {
+        isFeverActive = false;
+        fever = 0;
+        elFeverFill.style.width = '0%';
+        elFeverStatusText.textContent = '連擊累積中...';
+        elFeverStatusText.classList.remove('fever-active-text');
+      }
+    }
+  }
+
+  // --- 10. 道具使用 (彩虹炸彈、冰凍、換題) ---
+  function useItemBomb() {
+    if (items.bomb <= 0 || isGameOver || isPaused) return;
+    items.bomb--;
+    countBomb.textContent = items.bomb;
+    btnBomb.disabled = items.bomb <= 0;
+
+    if (window.soundEngine) window.soundEngine.playItem('bomb');
+
+    // 隨機消除盤面上某一種顏色的所有糖果
+    const targetType = Math.floor(Math.random() * CANDY_TYPES.length);
+    const toPop = [];
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        if (grid[c][r] && grid[c][r].type.id === targetType && !grid[c][r].isPopping) {
+          toPop.push(grid[c][r]);
+        }
+      }
+    }
+
+    executePop(toPop, false);
+    setTimeout(() => {
+      applyGravity();
+      generateNewQuestion();
+    }, 280);
+  }
+
+  function useItemFreeze() {
+    if (items.freeze <= 0 || isGameOver || isPaused) return;
+    items.freeze--;
+    countFreeze.textContent = items.freeze;
+    btnFreeze.disabled = items.freeze <= 0;
+
+    if (window.soundEngine) window.soundEngine.playItem('freeze');
+    freezeTimer = 5.0; // 冰凍 5 秒
+
+    spawnFloatingText(canvas.width / (2 * dpr), 100, '❄️ 時間冰凍！暫停落糖 5 秒！', '#3bb2ff');
+  }
+
+  function useItemReroll() {
+    if (items.reroll <= 0 || isGameOver || isPaused) return;
+    items.reroll--;
+    countReroll.textContent = items.reroll;
+    btnReroll.disabled = items.reroll <= 0;
+
+    if (window.soundEngine) window.soundEngine.playItem('reroll');
+    generateNewQuestion();
+    spawnFloatingText(canvas.width / (2 * dpr), 80, '🔄 換題成功！', '#ff9f1c');
+  }
+
+  // --- 11. 遊戲流程控制 (開始、過關、結束) ---
+  function startNewGame() {
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    fever = 0;
+    isFeverActive = false;
+    isGameOver = false;
+    isPaused = false;
+    gameStarted = true;
+    questionAttempts = [];
+    rainTimer = 0;
+    freezeTimer = 0;
+    dangerAlertTimer = 0;
+
+    items = { bomb: 2, freeze: 1, reroll: 3 };
+    countBomb.textContent = items.bomb;
+    countFreeze.textContent = items.freeze;
+    countReroll.textContent = items.reroll;
+    btnBomb.disabled = false;
+    btnFreeze.disabled = false;
+    btnReroll.disabled = false;
+
+    elScore.textContent = '0';
+    elDangerOverlay.style.display = 'none';
+
+    if (currentMode === 'stage') {
+      currentStageIndex = 0;
+      currentRainInterval = STAGE_CONFIGS[currentStageIndex].rainInterval;
+      elStage.textContent = STAGE_CONFIGS[currentStageIndex].name.split('：')[0];
+    } else if (currentMode === 'rush') {
+      rushTimeRemaining = 60.0;
+      currentRainInterval = 5000;
+      elStage.textContent = '剩餘 60秒';
+    } else {
+      currentRainInterval = 10000;
+      elStage.textContent = '自由練習';
+    }
+
+    modalStart.classList.remove('active');
+    modalPause.classList.remove('active');
+    modalResult.classList.remove('active');
+
+    initGrid();
+    generateNewQuestion();
+
+    if (window.soundEngine) {
+      window.soundEngine.resume();
+      window.soundEngine.startBGM();
+    }
+  }
+
+  function checkStageClear() {
+    if (currentMode !== 'stage') return;
+    const config = STAGE_CONFIGS[currentStageIndex];
+    if (score >= config.targetScore) {
+      // 成功過關！
+      if (currentStageIndex < STAGE_CONFIGS.length - 1) {
+        currentStageIndex++;
+        currentRainInterval = STAGE_CONFIGS[currentStageIndex].rainInterval;
+        elStage.textContent = STAGE_CONFIGS[currentStageIndex].name.split('：')[0];
+        if (window.soundEngine) window.soundEngine.playVictory();
+        spawnFloatingText(canvas.width / (2 * dpr), 180, '🎉 恭喜通關！進入下一關！', '#48e5c2');
+      } else {
+        // 全破！
+        triggerGameSuccess();
+      }
+    }
+  }
+
+  function triggerGameSuccess() {
+    isGameOver = true;
+    if (window.soundEngine) window.soundEngine.playVictory();
+    showResultModal('🏆 全破！你是乘法大宗師！', '太神了！所有乘法大魔王都被你消滅啦！', '👑');
+  }
+
+  function triggerGameOver() {
+    if (isGameOver) return;
+    isGameOver = true;
+    if (window.soundEngine) window.soundEngine.playGameOver();
+    showResultModal('🍬 糖果滿出來啦！', '別灰心，每一次練習都會讓你算得更快！', '🧸');
+  }
+
+  // 結算與深度學習診斷清單
+  function showResultModal(title, subtitle, mascot) {
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultSubtitle').textContent = subtitle;
+    document.getElementById('resultMascot').textContent = mascot;
+
+    document.getElementById('resScore').textContent = score.toLocaleString();
+    document.getElementById('resCombo').textContent = `${maxCombo} 連擊`;
+
+    const totalCorrect = questionAttempts.filter(q => q.correct).length;
+    document.getElementById('resCorrect').textContent = `${totalCorrect} / ${questionAttempts.length} 題`;
+
+    const totalTime = questionAttempts.reduce((acc, cur) => acc + cur.time, 0);
+    const avgTime = questionAttempts.length > 0 ? (totalTime / questionAttempts.length).toFixed(1) : 0;
+    document.getElementById('resSpeed').textContent = `${avgTime} 秒 / 題`;
+
+    // 診斷弱點與熟練乘法
+    analyzeLearningRecords();
+
+    modalResult.classList.add('active');
+  }
+
+  function analyzeLearningRecords() {
+    const diagBox = document.getElementById('resDiagnosisContent');
+    if (questionAttempts.length === 0) {
+      diagBox.innerHTML = '<p>尚未有答題紀錄，隨時開始挑戰吧！</p>';
+      return;
+    }
+
+    // 找出答錯或耗時最長的題目
+    const incorrect = questionAttempts.filter(q => !q.correct);
+    const slowQuestions = questionAttempts.filter(q => q.correct && q.time > 3.5);
+    const fastQuestions = questionAttempts.filter(q => q.correct && q.time <= 2.0);
+
+    let html = '';
+
+    // 1. 熟練題目
+    if (fastQuestions.length > 0) {
+      const topFast = fastQuestions.slice(0, 3).map(q => `<span class="weak-tag" style="background:#d4fcd6; color:#186a24;">${q.equation} (${q.time.toFixed(1)}s)</span>`).join(' ');
+      html += `<div style="margin-bottom: 8px;"><b>🌟 反射神速題目：</b><br>${topFast}</div>`;
+    }
+
+    // 2. 需加強乘法 (答錯或反應時間較長)
+    const needPractice = [...incorrect, ...slowQuestions];
+    if (needPractice.length > 0) {
+      // 去重
+      const uniqueEquations = Array.from(new Set(needPractice.map(q => q.equation)));
+      const tags = uniqueEquations.slice(0, 4).map(eq => `<span class="weak-tag">${eq}</span>`).join(' ');
+      html += `<div><b>💡 建議再多複習的算式：</b><br>${tags}</div>`;
+    } else {
+      html += `<div style="color:#2ec4b6; font-weight:800;">🎉 表現無懈可擊！所有九九乘法幾乎都是 2 秒內秒答！</div>`;
+    }
+
+    diagBox.innerHTML = html;
+  }
+
+  // --- 12. 特效系統 (粒子與飄字) ---
+  function spawnCandyParticles(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 5;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        color: color,
+        size: 3 + Math.random() * 5,
+        alpha: 1,
+        life: 0.8
+      });
+    }
+  }
+
+  function spawnFloatingText(x, y, text, color) {
+    floatingTexts.push({
+      x: x,
+      y: y,
+      text: text,
+      color: color,
+      alpha: 1,
+      vy: -1.8,
+      life: 1.0
+    });
+  }
+
+  function updateParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.18; // 重力
+      p.alpha -= dt / p.life;
+      if (p.alpha <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+      const t = floatingTexts[i];
+      t.y += t.vy;
+      t.alpha -= dt / t.life;
+      if (t.alpha <= 0) {
+        floatingTexts.splice(i, 1);
+      }
+    }
+  }
+
+  // --- 13. Canvas 繪製核心迴圈 ---
+  function gameLoop(timestamp) {
+    const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.1);
+    lastFrameTime = timestamp;
+
+    if (!isPaused && gameStarted && !isGameOver) {
+      updateGame(dt);
+    }
+
+    render();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function updateGame(dt) {
+    updateFever(dt);
+    updateParticles(dt);
+
+    if (currentMode === 'rush') {
+      rushTimeRemaining -= dt;
+      elStage.textContent = `剩餘 ${Math.max(0, Math.ceil(rushTimeRemaining))}秒`;
+      if (rushTimeRemaining <= 0) {
+        triggerGameSuccess();
+        return;
+      }
+    }
+
+    if (freezeTimer > 0) {
+      freezeTimer -= dt;
+    } else {
+      // 落糖進度條更新
+      rainTimer += dt * 1000;
+      const progressPercent = Math.min(100, (rainTimer / currentRainInterval) * 100);
+      elRainTimerBar.style.width = (100 - progressPercent) + '%';
+
+      if (rainTimer >= currentRainInterval) {
+        rainTimer = 0;
+        triggerCandyRain();
+      }
+    }
+
+    // 檢查是否有糖果堆到危險區
+    let inDanger = false;
+    for (let c = 0; c < COLS; c++) {
+      if (grid[c][DANGER_ROW] !== null) {
+        inDanger = true;
+        break;
+      }
+    }
+    elDangerOverlay.style.display = inDanger ? 'block' : 'none';
+    if (inDanger) {
+      dangerAlertTimer += dt;
+      if (dangerAlertTimer > 1.2) {
+        dangerAlertTimer = 0;
+        if (window.soundEngine) window.soundEngine.playWarning();
+      }
+    }
+
+    // 重力下落檢測
+    applyGravity();
+
+    // 糖果平滑移動插值與彈跳縮放
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        const candy = grid[c][r];
+        if (candy) {
+          // Y 軸平滑落至目標位置
+          if (candy.currentY < candy.targetY) {
+            candy.currentY += (candy.targetY - candy.currentY) * 0.25 + 1.2;
+            if (candy.currentY >= candy.targetY) {
+              candy.currentY = candy.targetY;
+              // 著地 Q 彈動畫 (Squash and stretch)
+              candy.scaleX = 1.2;
+              candy.scaleY = 0.85;
+            }
+          }
+          // 縮放平滑復原
+          candy.scaleX += (1 - candy.scaleX) * 0.2;
+          candy.scaleY += (1 - candy.scaleY) * 0.2;
+        }
+      }
+    }
+
+    // 畫面震動遞減
+    if (screenShake > 0) {
+      screenShake -= dt * 15;
+      if (screenShake < 0) screenShake = 0;
+    }
+  }
+
+  // 繪製糖果與盤面
+  function render() {
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+    ctx.save();
+    if (screenShake > 0) {
+      const shakeX = (Math.random() - 0.5) * screenShake * 2;
+      const shakeY = (Math.random() - 0.5) * screenShake * 2;
+      ctx.translate(shakeX, shakeY);
+    }
+
+    // 繪製棋盤柔和底格線
+    drawGridBackground();
+
+    // 繪製頂部危險警戒虛線
+    drawDangerLine();
+
+    // 繪製所有糖果
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        const candy = grid[c][r];
+        if (candy && !candy.isPopping) {
+          drawCandy(candy);
+        }
+      }
+    }
+
+    // 繪製粒子與飄字
+    drawParticles();
+
+    ctx.restore();
+  }
+
+  function drawGridBackground() {
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
+
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        if ((c + r) % 2 === 0) {
+          ctx.fillStyle = 'rgba(255, 230, 240, 0.35)';
+          ctx.fillRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+        }
+      }
+    }
+  }
+
+  function drawDangerLine() {
+    const y = DANGER_ROW * cellHeight;
+    ctx.save();
+    ctx.strokeStyle = '#ff3366';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width / dpr, y);
+    ctx.stroke();
+
+    // 警戒字樣
+    ctx.fillStyle = '#ff3366';
+    ctx.font = 'bold 11px Nunito, sans-serif';
+    ctx.fillText('⚠️ 天花板警戒線', 10, y - 5);
+    ctx.restore();
+  }
+
+  // 繪製單顆 Q 萌糖果
+  function drawCandy(candy) {
+    const cx = candy.col * cellWidth + cellWidth / 2;
+    const cy = candy.currentY + cellHeight / 2;
+    const radius = Math.min(cellWidth, cellHeight) * 0.44;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(candy.scaleX, candy.scaleY);
+
+    // 1. 糖果柔和陰影
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 4;
+
+    // 2. 漸層糖果球體
+    const grad = ctx.createLinearGradient(0, -radius, 0, radius);
+    grad.addColorStop(0, candy.type.bgGradient[0]);
+    grad.addColorStop(1, candy.type.bgGradient[1]);
+    ctx.fillStyle = grad;
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. 糖果頂部反光弧光 (水潤果凍感)
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(0, -radius * 0.45, radius * 0.55, radius * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. 清晰易讀的乘法結果數字
+    ctx.fillStyle = candy.type.textColor;
+    ctx.font = `900 ${Math.floor(radius * 1.05)}px Nunito, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 數字外層深色筆觸（提升小螢幕辨識度）
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = 'rgba(40, 20, 50, 0.4)';
+    ctx.strokeText(candy.number, 0, 2);
+    ctx.fillText(candy.number, 0, 2);
+
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    // 糖果爆破碎屑
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // 飄字文字 (+100, 連擊提示)
+    floatingTexts.forEach(t => {
+      ctx.save();
+      ctx.globalAlpha = t.alpha;
+      ctx.fillStyle = t.color;
+      ctx.font = '900 16px Nunito, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#ffffff';
+      ctx.strokeText(t.text, t.x, t.y);
+      ctx.fillText(t.text, t.x, t.y);
+      ctx.restore();
+    });
+  }
+
+  function updateComboUI() {
+    if (combo >= 2) {
+      elComboBadge.style.display = 'block';
+      elComboBadge.textContent = `${combo} 連擊! 🔥`;
+    } else {
+      elComboBadge.style.display = 'none';
+    }
+  }
+
+  // --- 14. 視覺點子陣列提示 (乘法概念具象化) ---
+  function showDotMatrixModal() {
+    const a = currentQuestion.a;
+    const b = currentQuestion.b;
+    const total = currentQuestion.answer;
+
+    document.getElementById('hintExplanation').textContent =
+      `${a} × ${b} 代表「${a} 顆糖果一排，共有 ${b} 排」！`;
+    document.getElementById('hintTotalText').textContent =
+      `數一數：一共有 ${total} 顆糖果！`;
+
+    const dotGrid = document.getElementById('dotGrid');
+    dotGrid.innerHTML = '';
+    dotGrid.style.gridTemplateColumns = `repeat(${a}, 1fr)`;
+
+    for (let r = 0; r < b; r++) {
+      for (let c = 0; c < a; c++) {
+        const dot = document.createElement('div');
+        dot.className = 'candy-dot';
+        dotGrid.appendChild(dot);
+      }
+    }
+
+    modalDotMatrix.classList.add('active');
+  }
+
+  // --- 15. 九九乘法查照表產生器 ---
+  function buildMultiplicationTable() {
+    const container = document.getElementById('tableGridContainer');
+    container.innerHTML = '';
+
+    for (let i = 2; i <= 9; i++) {
+      const card = document.createElement('div');
+      card.style.background = '#fff4f8';
+      card.style.border = '2px solid #ffccd9';
+      card.style.borderRadius = '12px';
+      card.style.padding = '8px';
+      card.style.fontSize = '0.78rem';
+      card.style.textAlign = 'left';
+
+      let inner = `<div style="font-weight:900; color:#ff3377; margin-bottom:4px; text-align:center;">${i} 的乘法表</div>`;
+      for (let j = 1; j <= 9; j++) {
+        inner += `<div style="padding:1px 0; color:#44284b;">${i} × ${j} = <b>${i * j}</b></div>`;
+      }
+      card.innerHTML = inner;
+      container.appendChild(card);
+    }
+  }
+
+  // --- 16. 事件監聽綁定 ---
+  function bindEvents() {
+    let lastTouchTime = 0;
+    canvas.addEventListener('touchstart', (e) => {
+      lastTouchTime = Date.now();
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        processClick(touch.clientX - rect.left, touch.clientY - rect.top);
+      }
+      e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('click', (e) => {
+      if (Date.now() - lastTouchTime < 500) return;
+      const rect = canvas.getBoundingClientRect();
+      processClick(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    // 道具按鈕
+    btnBomb.addEventListener('click', useItemBomb);
+    btnFreeze.addEventListener('click', useItemFreeze);
+    btnReroll.addEventListener('click', useItemReroll);
+
+    // 頂部小按鈕
+    document.getElementById('btnHintMatrix').addEventListener('click', () => {
+      showDotMatrixModal();
+    });
+    document.getElementById('btnTable').addEventListener('click', () => {
+      modalTable.classList.add('active');
+    });
+    document.getElementById('btnAudio').addEventListener('click', (e) => {
+      if (window.soundEngine) {
+        window.soundEngine.resume();
+        const muted = window.soundEngine.toggleMute();
+        e.currentTarget.textContent = muted ? '🔇' : '🔊';
+      }
+    });
+    document.getElementById('btnPause').addEventListener('click', () => {
+      if (!isGameOver && gameStarted) {
+        isPaused = true;
+        modalPause.classList.add('active');
+      }
+    });
+
+    // 模式選擇切換
+    const modeCards = document.querySelectorAll('.mode-card');
+    modeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        modeCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        currentMode = card.getAttribute('data-mode');
+
+        const practiceSec = document.getElementById('practiceFilterSection');
+        practiceSec.style.display = currentMode === 'practice' ? 'block' : 'none';
+      });
+    });
+
+    // 自由練習乘數複選切換
+    const numBtns = document.querySelectorAll('.num-btn');
+    numBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        const num = parseInt(btn.getAttribute('data-num'), 10);
+        if (btn.classList.contains('active')) {
+          if (!practiceMultipliers.includes(num)) practiceMultipliers.push(num);
+        } else {
+          practiceMultipliers = practiceMultipliers.filter(n => n !== num);
+        }
+      });
+    });
+
+    // 模態視窗按鈕
+    document.getElementById('btnStartGame').addEventListener('click', startNewGame);
+    document.getElementById('btnResume').addEventListener('click', () => {
+      isPaused = false;
+      modalPause.classList.remove('active');
+    });
+    document.getElementById('btnRestart').addEventListener('click', startNewGame);
+    document.getElementById('btnQuit').addEventListener('click', () => {
+      modalPause.classList.remove('active');
+      modalStart.classList.add('active');
+    });
+    document.getElementById('btnPlayAgain').addEventListener('click', startNewGame);
+    document.getElementById('btnBackToHome').addEventListener('click', () => {
+      modalResult.classList.remove('active');
+      modalStart.classList.add('active');
+    });
+    document.getElementById('btnCloseHint').addEventListener('click', () => {
+      modalDotMatrix.classList.remove('active');
+    });
+    document.getElementById('btnCloseTable').addEventListener('click', () => {
+      modalTable.classList.remove('active');
+    });
+  }
+
+  // 視窗載入完成後啟動
+  window.addEventListener('DOMContentLoaded', init);
+
+})();

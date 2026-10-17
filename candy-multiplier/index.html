@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>糖果雨消消樂：九九乘法大冒險</title>
+  <meta name="description" content="專為國小三年級設計的九九乘法練習遊戲，融合消消樂與連鎖掉落機制，刺激、可愛又好玩！">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- 頂部標題與快速功能 -->
+    <header class="top-header">
+      <div class="brand-badge">
+        <span class="icon-spin">🍬</span>
+        <span>糖果雨消消樂</span>
+      </div>
+      <div class="header-controls">
+        <button id="btnHintMatrix" class="circle-btn" title="查看點子視覺提示">💡</button>
+        <button id="btnTable" class="circle-btn" title="查看九九乘法表">📖</button>
+        <button id="btnAudio" class="circle-btn" title="開關音效">🔊</button>
+        <button id="btnPause" class="circle-btn" title="暫停遊戲">⏸️</button>
+      </div>
+    </header>
+
+    <!-- 即時狀態面板 -->
+    <section class="stats-panel">
+      <div class="stat-item">
+        <span class="stat-label">關卡模式</span>
+        <span id="txtStage" class="stat-value stat-level">第 1 關</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">當前分數</span>
+        <span id="txtScore" class="stat-value stat-score">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">最高紀錄</span>
+        <span id="txtHighScore" class="stat-value">0</span>
+      </div>
+    </section>
+
+    <!-- 狂熱能量條 (Fever Bar) -->
+    <section class="fever-container">
+      <div class="fever-bar-wrap">
+        <div id="feverFill" class="fever-fill"></div>
+      </div>
+      <div class="fever-label">
+        <span>FEVER 狂熱能量</span>
+        <span id="feverStatusText">連擊累積中...</span>
+      </div>
+    </section>
+
+    <!-- 當前九九乘法任務看板 -->
+    <section class="question-card" id="questionCard">
+      <div class="mascot-box" id="mascotIcon">🐰</div>
+      <div class="question-content">
+        <div class="question-hint-title">
+          <span>🎯 請點擊盤面上的正確答案：</span>
+        </div>
+        <div class="question-equation">
+          <span id="txtEquation">7 × 8 = </span>
+          <span class="target-unknown" id="txtUnknown">?</span>
+        </div>
+      </div>
+      <div id="comboBadge" class="combo-badge">3 連擊! 🔥</div>
+    </section>
+
+    <!-- 遊戲主畫布與警戒區域 -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <div class="rain-timer-bar" id="rainTimerBar"></div>
+      <div class="danger-warning-overlay" id="dangerOverlay"></div>
+      <canvas id="gameCanvas" width="480" height="600"></canvas>
+    </div>
+
+    <!-- 底部輔助道具與技能列 -->
+    <footer class="bottom-toolbar">
+      <button class="item-btn" id="btnItemBomb" title="炸碎全螢幕同色糖果">
+        <span class="item-icon">💣</span>
+        <span class="item-name">彩虹炸彈</span>
+        <span class="item-count" id="countBomb">2</span>
+      </button>
+      <button class="item-btn" id="btnItemFreeze" title="凍結落糖 5 秒鐘">
+        <span class="item-icon">❄️</span>
+        <span class="item-name">冰凍時鐘</span>
+        <span class="item-count" id="countFreeze">1</span>
+      </button>
+      <button class="item-btn" id="btnItemReroll" title="跳過當前題目換一題">
+        <span class="item-icon">🔄</span>
+        <span class="item-name">換一題</span>
+        <span class="item-count" id="countReroll">3</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- ==================== 彈出視窗 1：首頁開始選擇模式 ==================== -->
+  <div class="modal-overlay active" id="modalStart">
+    <div class="modal-card">
+      <div class="modal-mascot">🍭</div>
+      <h2 class="modal-title">糖果雨消消樂</h2>
+      <p class="modal-subtitle">九九乘法大冒險！消除糖果引爆連鎖大爆炸！</p>
+
+      <div class="mode-selection-grid">
+        <div class="mode-card selected" data-mode="stage">
+          <div class="mode-card-icon">🌟</div>
+          <div class="mode-card-info">
+            <h4>冒險闖關模式</h4>
+            <p>5 個精緻關卡，從 2,3,5 到挑戰 7,8,9 大魔王！</p>
+          </div>
+        </div>
+
+        <div class="mode-card" data-mode="rush">
+          <div class="mode-card-icon">⚡</div>
+          <div class="mode-card-info">
+            <h4>60秒極速衝刺</h4>
+            <p>限時 60 秒！狂熱 Fever 刷出全班最高分！</p>
+          </div>
+        </div>
+
+        <div class="mode-card" data-mode="practice">
+          <div class="mode-card-icon">🎈</div>
+          <div class="mode-card-info">
+            <h4>自訂自由練習</h4>
+            <p>自由挑選想加強的乘數，無天花板壓力，輕鬆練習！</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自訂練習模式下的乘數選擇器 (預設隱藏) -->
+      <div id="practiceFilterSection" style="display: none; margin-bottom: 14px;">
+        <p style="font-size: 0.85rem; font-weight: 800; color: #ff3377; margin-bottom: 6px;">選擇要特訓的乘數表：</p>
+        <div class="number-filter-grid">
+          <button class="num-btn active" data-num="2">2 的乘法</button>
+          <button class="num-btn active" data-num="3">3 的乘法</button>
+          <button class="num-btn active" data-num="4">4 的乘法</button>
+          <button class="num-btn active" data-num="5">5 的乘法</button>
+          <button class="num-btn active" data-num="6">6 的乘法</button>
+          <button class="num-btn active" data-num="7">7 的乘法</button>
+          <button class="num-btn active" data-num="8">8 的乘法</button>
+          <button class="num-btn active" data-num="9">9 的乘法</button>
+        </div>
+      </div>
+
+      <button id="btnStartGame" class="jelly-btn">
+        <span>🎮 開始遊玩</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 彈出視窗 2：暫停選單 ==================== -->
+  <div class="modal-overlay" id="modalPause">
+    <div class="modal-card">
+      <div class="modal-mascot">⏸️</div>
+      <h2 class="modal-title">遊戲暫停中</h2>
+      <p class="modal-subtitle">深呼吸，活動一下手指再繼續出發！</p>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+        <button id="btnResume" class="jelly-btn">▶️ 繼續冒險</button>
+        <button id="btnRestart" class="jelly-btn btn-secondary">🔄 重新開始本局</button>
+        <button id="btnQuit" class="jelly-btn btn-outline">🏠 返回首頁選單</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 彈出視窗 3：結算與學習履歷分析 ==================== -->
+  <div class="modal-overlay" id="modalResult">
+    <div class="modal-card">
+      <div class="modal-mascot" id="resultMascot">🏆</div>
+      <h2 class="modal-title" id="resultTitle">闖關成功！</h2>
+      <p class="modal-subtitle" id="resultSubtitle">你太棒了！乘法小達人就是你！</p>
+
+      <div class="result-stats-card">
+        <div class="result-row">
+          <span>最終得分</span>
+          <span class="result-highlight" id="resScore">1,250</span>
+        </div>
+        <div class="result-row">
+          <span>最高連鎖 Combo</span>
+          <span id="resCombo">7 連擊</span>
+        </div>
+        <div class="result-row">
+          <span>總答對題數</span>
+          <span id="resCorrect">18 題</span>
+        </div>
+        <div class="result-row">
+          <span>平均答題速度</span>
+          <span id="resSpeed">1.8 秒 / 題</span>
+        </div>
+
+        <!-- 弱點與熟練乘法診斷分析 -->
+        <div class="weakness-box" id="resAnalyticsBox">
+          <div class="weakness-title">
+            <span>🔍 學習診斷分析：</span>
+          </div>
+          <div id="resDiagnosisContent" style="font-size: 0.8rem; line-height: 1.4; color: #553366;">
+            <!-- 動態生成診斷文字 -->
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button id="btnPlayAgain" class="jelly-btn">🔁 再玩一次</button>
+        <button id="btnBackToHome" class="jelly-btn btn-outline">🏠 回到主選單</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 彈出視窗 4：點子陣列視覺提示 (協助具象化) ==================== -->
+  <div class="modal-overlay" id="modalDotMatrix">
+    <div class="modal-card">
+      <div class="modal-mascot">💡</div>
+      <h2 class="modal-title">乘法視覺化小幫手</h2>
+      <p class="modal-subtitle" id="hintExplanation">7 × 8 代表有 7 排，每排有 8 顆糖果！</p>
+
+      <div class="dot-matrix-container">
+        <div id="dotGrid" class="dot-grid"></div>
+        <div style="font-weight: 900; color: #ff3377; font-size: 1.1rem;" id="hintTotalText">
+          總共有 56 顆糖果！
+        </div>
+      </div>
+
+      <button id="btnCloseHint" class="jelly-btn">我懂了，繼續挑戰！</button>
+    </div>
+  </div>
+
+  <!-- ==================== 彈出視窗 5：九九乘法查照卡 ==================== -->
+  <div class="modal-overlay" id="modalTable">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-mascot">📖</div>
+      <h2 class="modal-title">九九乘法表查照卡</h2>
+      <p class="modal-subtitle">點擊任意算式，可以快速查看答案喔！</p>
+
+      <div id="tableGridContainer" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 50vh; overflow-y: auto; padding: 4px; margin-bottom: 14px;">
+        <!-- JS 動態生成 2~9 的乘法表小卡片 -->
+      </div>
+
+      <button id="btnCloseTable" class="jelly-btn">關閉乘法表</button>
+    </div>
+  </div>
+
+  <!-- 音效與遊戲核心腳本 -->
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

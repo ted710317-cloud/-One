@@ -1,0 +1,719 @@
+/* ==========================================================================
+   糖果雨消消樂：九九乘法大冒險 (Candy Multiplier Drop)
+   專為國小三年級設計 - 可愛、刺激、粉嫩夢幻糖果風格 CSS
+   ========================================================================== */
+
+:root {
+  --primary-pink: #ff6b9d;
+  --secondary-pink: #ff8ebb;
+  --bubblegum: #ff4b8b;
+  --candy-yellow: #ffd154;
+  --mint-green: #48e5c2;
+  --sky-blue: #4db5ff;
+  --grape-purple: #9d65ff;
+  --sugar-white: #ffffff;
+  --bg-cream: #fff8f0;
+  --text-dark: #44284b;
+  --shadow-soft: 0 8px 24px rgba(255, 107, 157, 0.2);
+  --shadow-card: 0 10px 30px rgba(78, 38, 86, 0.12);
+  --jelly-btn-shadow: 0 6px 0 #d94073, 0 8px 16px rgba(0, 0, 0, 0.15);
+  --jelly-btn-active: 0 2px 0 #d94073, 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: 'Nunito', 'Quicksand', 'PingFang TC', 'Microsoft JhengHei UI', '微軟正黑體', sans-serif;
+  background: radial-gradient(circle at 50% 20%, #ffeaf1 0%, #ffd6e6 50%, #fbd5ed 100%);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 背景漂浮糖果裝飾 */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(40px);
+  opacity: 0.45;
+}
+body::before {
+  width: 320px;
+  height: 320px;
+  background: #ffc2dc;
+  top: -50px;
+  left: -50px;
+  animation: floatBg 12s infinite ease-in-out;
+}
+body::after {
+  width: 400px;
+  height: 400px;
+  background: #c7ebff;
+  bottom: -80px;
+  right: -80px;
+  animation: floatBg 15s infinite ease-in-out reverse;
+}
+
+@keyframes floatBg {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(30px) scale(1.08); }
+}
+
+/* 主遊戲容器 */
+.app-container {
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  padding: 8px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* 頂部導航列 */
+.top-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: #ff3377;
+  text-shadow: 1px 2px 0 rgba(255, 255, 255, 0.9);
+}
+.brand-badge .icon-spin {
+  display: inline-block;
+  animation: candyRoll 6s linear infinite;
+}
+@keyframes candyRoll {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #ffffff;
+  color: #553366;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.12s, background 0.2s;
+}
+.circle-btn:active {
+  transform: scale(0.92);
+}
+.circle-btn:hover {
+  background: #fff0f6;
+}
+
+/* 狀態儀表板 */
+.stats-panel {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-card);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #8c7194;
+  letter-spacing: 0.5px;
+}
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #3b1d44;
+}
+.stat-score {
+  color: #e0246a;
+}
+.stat-level {
+  color: #7b32d9;
+}
+
+/* 狂熱條 (Fever Bar) */
+.fever-container {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.fever-bar-wrap {
+  width: 100%;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+.fever-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff719a, #ffd43f, #3ee2b7, #3bb2ff, #a855f7);
+  background-size: 300% 100%;
+  border-radius: 8px;
+  transition: width 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: feverGradient 3s infinite linear;
+}
+@keyframes feverGradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+.fever-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #754b85;
+  margin-top: 2px;
+  padding: 0 4px;
+}
+.fever-active-text {
+  animation: pulseFever 0.8s infinite alternate;
+  color: #d81159;
+}
+@keyframes pulseFever {
+  from { transform: scale(1); filter: drop-shadow(0 0 2px #ff69b4); }
+  to { transform: scale(1.08); filter: drop-shadow(0 0 6px #ff1493); }
+}
+
+/* 核心題目卡片 (Question Banner) */
+.question-card {
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #fff3f8 100%);
+  border-radius: 20px;
+  border: 3px solid #ffb6d4;
+  box-shadow: 0 8px 20px rgba(255, 99, 153, 0.25);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: skewX(-20deg);
+  animation: shine 4s infinite;
+}
+@keyframes shine {
+  0% { left: -100%; }
+  25%, 100% { left: 200%; }
+}
+
+.mascot-box {
+  width: 58px;
+  height: 58px;
+  background: #ffe3ee;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 4px 10px rgba(255, 75, 139, 0.2);
+  flex-shrink: 0;
+  animation: mascotWiggle 3s infinite ease-in-out;
+}
+@keyframes mascotWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-5deg) scale(1.05); }
+  75% { transform: rotate(5deg) scale(1.05); }
+}
+
+.question-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.question-hint-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ff508c;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.question-equation {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #2e1738;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.question-equation .target-unknown {
+  color: #e61f67;
+  display: inline-block;
+  animation: bounceUnknown 1.2s infinite ease-in-out;
+}
+@keyframes bounceUnknown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.combo-badge {
+  background: linear-gradient(135deg, #ff9f1c, #ff3864);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  box-shadow: 0 3px 8px rgba(255, 56, 100, 0.35);
+  display: none;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 遊戲畫布與危機警戒線容器 */
+.canvas-wrapper {
+  width: 100%;
+  position: relative;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 22px;
+  border: 4px solid #ffffff;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+/* 警戒線光效 */
+.danger-warning-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(180deg, rgba(255, 51, 85, 0.25) 0%, transparent 100%);
+  pointer-events: none;
+  display: none;
+  animation: dangerPulse 0.8s infinite alternate;
+}
+@keyframes dangerPulse {
+  from { opacity: 0.3; }
+  to { opacity: 0.85; }
+}
+
+/* 糖果雨倒數進度條 */
+.rain-timer-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  background: #3bb2ff;
+  width: 100%;
+  transition: width 0.1s linear;
+  z-index: 5;
+}
+
+/* 底部操作與道具工具列 */
+.bottom-toolbar {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  background: #ffffff;
+  border: 2px solid #ffccd9;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s;
+  position: relative;
+}
+.item-btn:hover {
+  background: #fff4f7;
+  transform: translateY(-2px);
+}
+.item-btn:active {
+  transform: translateY(1px);
+}
+.item-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.item-icon {
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+.item-name {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #6d4b7c;
+  margin-top: 2px;
+}
+.item-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff3377;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* 彈出視窗 (Modal 系統) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(45, 18, 55, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 28px;
+  border: 4px solid #ffbed6;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  padding: 24px 20px;
+  text-align: center;
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-overlay.active .modal-card {
+  transform: scale(1);
+}
+
+.modal-mascot {
+  font-size: 3.5rem;
+  margin-bottom: 6px;
+  animation: bounceMascot 2s infinite ease-in-out;
+}
+@keyframes bounceMascot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ff3377;
+  margin-bottom: 6px;
+}
+.modal-subtitle {
+  font-size: 0.9rem;
+  color: #72507e;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+/* 遊戲模式卡片選擇區 */
+.mode-selection-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.mode-card {
+  background: linear-gradient(135deg, #fff7fb 0%, #fff0f5 100%);
+  border: 2px solid #ffd4e5;
+  border-radius: 18px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 10px rgba(255, 107, 157, 0.08);
+}
+.mode-card:hover {
+  border-color: #ff508c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(255, 80, 140, 0.2);
+}
+.mode-card.selected {
+  background: linear-gradient(135deg, #ffe0ed 0%, #ffd0e3 100%);
+  border-color: #ff2a74;
+  box-shadow: 0 6px 16px rgba(255, 42, 116, 0.28);
+}
+.mode-card-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+.mode-card-info h4 {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #3b1747;
+}
+.mode-card-info p {
+  font-size: 0.78rem;
+  color: #785885;
+  margin-top: 2px;
+}
+
+/* 果凍大按鈕 */
+.jelly-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #ff6596 0%, #e82e6c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 20px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: var(--jelly-btn-shadow);
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.jelly-btn:active {
+  transform: translateY(4px);
+  box-shadow: var(--jelly-btn-active);
+}
+.jelly-btn.btn-secondary {
+  background: linear-gradient(180deg, #6c8aff 0%, #4662d9 100%);
+  box-shadow: 0 6px 0 #324bb3, 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+.jelly-btn.btn-secondary:active {
+  box-shadow: 0 2px 0 #324bb3, 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.jelly-btn.btn-outline {
+  background: #ffffff;
+  color: #553366;
+  border: 2px solid #eed6e5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* 結算分析成績報告卡片 */
+.result-stats-card {
+  background: #fdf5f9;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  border: 2px dashed #ffb4cf;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f2e2eb;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #593563;
+}
+.result-row:last-child {
+  border-bottom: none;
+}
+.result-highlight {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #e61f67;
+}
+
+.weakness-box {
+  text-align: left;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  border: 1px solid #fed2e2;
+}
+.weakness-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #e0246a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.weakness-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.weak-tag {
+  background: #ffe3ed;
+  color: #b51750;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+/* 點子陣列視覺提示 Modal (幫助三年級具象化乘法) */
+.dot-matrix-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px 0;
+  border: 2px solid #ffd6e7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.dot-grid {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  background: #fff6fa;
+  border-radius: 12px;
+}
+.candy-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff508c;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* 自訂模式複選框樣式 */
+.number-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.num-btn {
+  padding: 8px 4px;
+  background: #ffffff;
+  border: 2px solid #ffd2e2;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #553366;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.num-btn.active {
+  background: #ff4785;
+  color: #ffffff;
+  border-color: #d81159;
+}
+
+/* RWD 響應式優化 */
+@media (max-height: 700px) {
+  .app-container {
+    padding: 4px 8px 10px;
+  }
+  .mascot-box {
+    width: 46px;
+    height: 46px;
+    font-size: 1.8rem;
+  }
+  .question-equation {
+    font-size: 1.55rem;
+  }
+  .stats-panel {
+    padding: 6px 12px;
+  }
+  .bottom-toolbar {
+    margin-top: 6px;
+  }
+}
