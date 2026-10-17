@@ -54,6 +54,11 @@
     bossSpawned: false,
     endlessLevel: 1,
     endlessProgress: 0,
+    endlessTimeLeft: 90,
+    endlessMaxTime: 180,
+    isFever: false,
+    feverTimeLeft: 0,
+    feverTriggerCombo: 10,
     speedIndex: 0,
     speedLevels: [
       { label: '🚶 標準心算', mult: 1.0 },
@@ -75,10 +80,15 @@
   };
 
   // --- DOM Elements ---
+  const gameContainer = document.getElementById('game-container');
   const canvas = document.getElementById('game-canvas');
   const ctx = canvas.getContext('2d');
   const hudScore = document.getElementById('hud-score');
   const hudWave = document.getElementById('hud-wave');
+  const timeBox = document.getElementById('time-box');
+  const hudTimer = document.getElementById('hud-timer');
+  const feverBox = document.getElementById('fever-box');
+  const hudFever = document.getElementById('hud-fever');
   const hudCombo = document.getElementById('hud-combo');
   const shieldBarInner = document.getElementById('shield-bar-inner');
   const targetDetailPanel = document.getElementById('target-detail-panel');
@@ -152,6 +162,7 @@
   let projectiles = [];
   let particles = [];
   let stars = [];
+  let floatingTexts = [];
   let screenShake = 0;
 
   // --- Canvas Resizing ---
@@ -219,6 +230,78 @@
       expanded: `${orig} = ${expanded}`,
       standard: `${orig} = ${standard}`
     };
+  }
+
+  // --- Timer & Fever Utilities ---
+  function formatTimer(sec) {
+    const total = Math.max(0, Math.ceil(sec));
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function triggerFever(durationSec = 10) {
+    state.isFever = true;
+    state.feverTimeLeft = durationSec;
+    if (gameContainer) gameContainer.classList.add('fever-mode-active');
+    if (feverBox) feverBox.classList.remove('hidden');
+    window.soundManager.playFeverStart();
+    showComboBanner('🔥 FEVER TIME 啟動！得分雙倍 + 補時加碼！🔥');
+    addFloatingText('🔥 10 COMBO FEVER! 雙倍得分 🔥', canvas.width / 2, canvas.height * 0.45, '#ffe600', 26);
+    screenShake = 14;
+    updateHUD();
+  }
+
+  function endFever() {
+    if (!state.isFever) return;
+    state.isFever = false;
+    state.feverTimeLeft = 0;
+    if (gameContainer) gameContainer.classList.remove('fever-mode-active');
+    if (feverBox) feverBox.classList.add('hidden');
+    updateHUD();
+  }
+
+  // --- Floating Combat Text Class ---
+  class FloatingText {
+    constructor(text, x, y, color = '#00f3ff', fontSize = 20) {
+      this.text = text;
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.fontSize = fontSize;
+      this.alpha = 1.0;
+      this.vy = -1.2;
+      this.life = 60;
+      this.maxLife = 60;
+    }
+
+    update() {
+      this.y += this.vy;
+      this.life--;
+      this.alpha = Math.max(0, this.life / this.maxLife);
+    }
+
+    draw(c) {
+      if (this.alpha <= 0) return;
+      c.save();
+      c.globalAlpha = this.alpha;
+      c.font = `900 ${this.fontSize}px 'Chakra Petch', 'Noto Sans TC', sans-serif`;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.shadowColor = this.color;
+      c.shadowBlur = 10;
+      c.lineWidth = 4;
+      c.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+      c.strokeText(this.text, this.x, this.y);
+      c.fillStyle = this.color;
+      c.fillText(this.text, this.x, this.y);
+      c.restore();
+    }
+  }
+
+  function addFloatingText(text, x, y, color, fontSize) {
+    const safeX = Math.max(50, Math.min(canvas.width - 50, x));
+    floatingTexts.push(new FloatingText(text, safeX, y, color, fontSize));
   }
 
   // --- Wave Speed Multiplier Progression ---
@@ -567,13 +650,20 @@
       // Audio feedback
       window.soundManager.playHit(state.combo);
 
-      // Score
-      const earnedScore = 100 * state.combo;
+      // Score (x2 in Fever Mode during Endless)
+      const feverMultiplier = (state.mode === 'endless' && state.isFever) ? 2.0 : 1.0;
+      const earnedScore = Math.round(100 * state.combo * feverMultiplier);
       state.score += earnedScore;
+
+      // Check for Fever Trigger at 10 combo in Endless mode!
+      if (state.mode === 'endless' && state.combo >= state.feverTriggerCombo && !state.isFever) {
+        triggerFever(10);
+      }
 
       // Combo banner alert
       if (state.combo >= 3 && state.combo % 3 === 0) {
-        showComboBanner(`🔥 ${state.combo} 連擊！x${state.combo}`);
+        const feverTag = state.isFever ? ' (🔥FEVER x2!)' : '';
+        showComboBanner(`🔥 ${state.combo} 連擊！x${state.combo}${feverTag}`);
       }
 
       // Check if completely decomposed to 1!
@@ -595,6 +685,14 @@
 
         // Show Equation Celebration Banner
         showEquationBanner(`💥 完全分解！ ${eqData.expanded}`);
+
+        // Endless Time Bonus on Complete Decomposition (+3s normal, +5s in fever)
+        if (state.mode === 'endless') {
+          const timeBonus = state.isFever ? 5 : 3;
+          state.endlessTimeLeft = Math.min(state.endlessMaxTime, state.endlessTimeLeft + timeBonus);
+          window.soundManager.playTimeBonus();
+          addFloatingText(state.isFever ? `+5s FEVER補時!` : `+3s 補時!`, monster.x, monster.y - 30, state.isFever ? '#ffe600' : '#00f3ff', 24);
+        }
 
         // Remove monster
         const idx = monsters.indexOf(monster);
@@ -637,6 +735,17 @@
       // Deflection sparks
       spawnExplosion(monster.x, monster.y, '#ff0055', 12);
 
+      // Endless Mode: Time Penalty & Break Fever
+      if (state.mode === 'endless') {
+        state.endlessTimeLeft = Math.max(0, state.endlessTimeLeft - 3);
+        window.soundManager.playTimePenalty();
+        addFloatingText(`-3s 答錯!`, monster.x, monster.y - 25, '#ff0055', 22);
+        if (state.isFever) {
+          endFever();
+          showComboBanner('💔 連擊中斷，FEVER 結束！');
+        }
+      }
+
       // Escalating Overheat Lockout: Penalize spamming with cooling delay!
       let lockMs = 1200;
       if (state.consecutiveMisses === 2) lockMs = 2000;
@@ -644,8 +753,8 @@
 
       triggerOverheat(lockMs, `❌ ${monster.currentValue} 不能被 ${prime} 整除！砲台過熱 ${(lockMs / 1000).toFixed(1)} 秒，請先心算！`);
 
-      // Shield penalty (except in practice mode)
-      if (state.mode !== 'practice') {
+      // Shield penalty (in campaign mode)
+      if (state.mode === 'campaign') {
         damageShield(6 + state.consecutiveMisses * 2);
       }
     }
@@ -694,9 +803,10 @@
   }
 
   // --- Game Over / Summary ---
-  function triggerGameOver(isWin) {
+  function triggerGameOver(isWin, customTitle = null) {
     state.isGameOver = true;
     window.soundManager.stopBgm();
+    endFever();
 
     const sumTitle = document.getElementById('summary-title');
     const sumBadge = document.getElementById('summary-badge');
@@ -706,7 +816,11 @@
     const sumAccuracy = document.getElementById('sum-accuracy');
     const reviewList = document.getElementById('review-list');
 
-    sumTitle.textContent = isWin ? '🎉 全星系防衛成功！質數神射手！' : '💥 基地防禦失守 - 任務結束';
+    if (customTitle) {
+      sumTitle.textContent = customTitle;
+    } else {
+      sumTitle.textContent = isWin ? '🎉 全星系防衛成功！質數神射手！' : '💥 基地防禦失守 - 任務結束';
+    }
     sumScore.textContent = state.score.toLocaleString();
     sumDestroyed.textContent = state.monstersDestroyed;
     sumMaxcombo.textContent = `x${state.maxCombo}`;
@@ -716,11 +830,19 @@
 
     // Grade & Accuracy Evaluation
     let grade = 'B';
-    if (acc >= 90 && state.score >= 5000) grade = 'SSS (心算天才)';
-    else if (acc >= 85 && state.score >= 3000) grade = 'S (質數神射手)';
-    else if (acc >= 75) grade = 'A (優良心算)';
-    else if (acc >= 60) grade = 'B (合格)';
-    else grade = 'C (注意：盲目亂按過多，請先心算)';
+    if (state.mode === 'endless') {
+      if (acc >= 90 && state.score >= 8000) grade = 'SSS (極速狂熱大師)';
+      else if (acc >= 85 && state.score >= 5000) grade = 'S (極速質數神射手)';
+      else if (acc >= 75 && state.score >= 3000) grade = 'A (優秀極速心算)';
+      else if (acc >= 60) grade = 'B (合格心算)';
+      else grade = 'C (請先心算，避免扣時)';
+    } else {
+      if (acc >= 90 && state.score >= 5000) grade = 'SSS (心算天才)';
+      else if (acc >= 85 && state.score >= 3000) grade = 'S (質數神射手)';
+      else if (acc >= 75) grade = 'A (優良心算)';
+      else if (acc >= 60) grade = 'B (合格)';
+      else grade = 'C (注意：盲目亂按過多，請先心算)';
+    }
     sumBadge.textContent = `評等：${grade}`;
 
     // Populate Review List
@@ -797,11 +919,32 @@
 
     if (state.mode === 'endless') {
       hudWave.textContent = `無盡 Lv.${state.endlessLevel} (${speedLabel})`;
-    } else if (state.mode === 'practice') {
-      hudWave.textContent = '自由練習';
+      if (timeBox) timeBox.classList.remove('hidden');
+      if (hudTimer) {
+        hudTimer.textContent = formatTimer(state.endlessTimeLeft);
+        if (state.endlessTimeLeft <= 15) {
+          hudTimer.classList.add('timer-warning');
+        } else {
+          hudTimer.classList.remove('timer-warning');
+        }
+      }
+      if (state.isFever) {
+        if (feverBox) feverBox.classList.remove('hidden');
+        if (hudFever) hudFever.textContent = `🔥 ${Math.ceil(state.feverTimeLeft)}s (x2)`;
+      } else {
+        if (feverBox) feverBox.classList.add('hidden');
+      }
     } else {
-      hudWave.textContent = `第 ${state.wave} 關 (${speedLabel})`;
+      if (timeBox) timeBox.classList.add('hidden');
+      if (feverBox) feverBox.classList.add('hidden');
+
+      if (state.mode === 'practice') {
+        hudWave.textContent = '自由練習';
+      } else {
+        hudWave.textContent = `第 ${state.wave} 關 (${speedLabel})`;
+      }
     }
+
     hudCombo.textContent = `x${state.combo}`;
 
     // Shield UI
@@ -959,6 +1102,9 @@
     state.isWaveTransition = false;
     state.endlessLevel = 1;
     state.endlessProgress = 0;
+    state.endlessTimeLeft = 90;
+    state.isFever = false;
+    state.feverTimeLeft = 0;
     state.learningHistory = [];
     state.waveMonstersTotal = 10;
     state.waveMonstersRemaining = 10;
@@ -979,9 +1125,11 @@
       consoleHint.innerHTML = `<span>鍵盤快捷鍵：<strong>1~6</strong> 或直接點擊下方質數砲彈發射！</span>`;
     }
 
+    if (gameContainer) gameContainer.classList.remove('fever-mode-active');
     monsters = [];
     projectiles = [];
     particles = [];
+    floatingTexts = [];
     state.activeTarget = null;
 
     modalStart.classList.add('hidden');
@@ -1698,6 +1846,7 @@ function createJsonResponse(obj) {
       const acc = state.totalShots > 0 ? Math.round((state.correctShots / state.totalShots) * 100) : 100;
       recordScoreToLeaderboard(state.mode, state.score, state.maxCombo, acc);
     }
+    endFever();
     modalSummary.classList.add('hidden');
     modalPause.classList.add('hidden');
     modalStart.classList.remove('hidden');
@@ -1756,6 +1905,26 @@ function createJsonResponse(obj) {
 
     // --- 1. Update Game Logic ---
     if (!state.isGameOver && !state.isWaveTransition && modalStart.classList.contains('hidden')) {
+      // Endless Timer & Fever Countdown
+      if (state.mode === 'endless') {
+        state.endlessTimeLeft -= 1 / 60;
+        if (state.isFever) {
+          state.feverTimeLeft -= 1 / 60;
+          if (state.feverTimeLeft <= 0) {
+            endFever();
+          }
+        }
+
+        if (state.endlessTimeLeft <= 0) {
+          state.endlessTimeLeft = 0;
+          updateHUD();
+          window.soundManager.playTimeUp();
+          triggerGameOver(false, '⏰ 時間到！無盡挑戰結束！');
+          return;
+        }
+        updateHUD();
+      }
+
       // Spawn new monsters (Pedagogical limit: max 2 monsters on screen for early waves)
       state.spawnTimer++;
       let maxOnScreen = state.wave <= 2 ? 2 : (state.wave <= 4 ? 3 : 4);
@@ -1780,7 +1949,16 @@ function createJsonResponse(obj) {
           monsters.splice(i, 1);
           if (state.activeTarget === m) state.activeTarget = null;
 
-          if (state.mode !== 'practice') {
+          if (state.mode === 'endless') {
+            state.endlessTimeLeft = Math.max(0, state.endlessTimeLeft - 5);
+            window.soundManager.playTimePenalty();
+            addFloatingText('-5s 撞擊!', m.x, canvas.height - 50, '#ff5500', 22);
+            showWarningBubble('⚠️ 基地遭到怪獸撞擊！時間 -5 秒！');
+            if (state.isFever) {
+              endFever();
+            }
+            updateHUD();
+          } else if (state.mode !== 'practice') {
             damageShield(m.isBoss ? 40 : 20);
             showWarningBubble('⚠️ 基地遭到合數怪獸撞擊！護盾受損！');
           }
@@ -1793,6 +1971,15 @@ function createJsonResponse(obj) {
         p.update();
         if (!p.isAlive) {
           projectiles.splice(i, 1);
+        }
+      }
+
+      // Update Floating Texts
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.update();
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
         }
       }
 
@@ -1809,8 +1996,11 @@ function createJsonResponse(obj) {
       }
     }
 
-    // Update Starfield (accelerates with wave for immersive speed sensation!)
-    const starSpeedMult = getWaveSpeedMultiplier();
+    // Update Starfield (accelerates with wave or fever for immersive sensation!)
+    let starSpeedMult = getWaveSpeedMultiplier();
+    if (state.mode === 'endless' && state.isFever) {
+      starSpeedMult *= 2.5;
+    }
     for (let s of stars) {
       s.y += s.speed * starSpeedMult;
       if (s.y > canvas.height) {
@@ -1835,14 +2025,14 @@ function createJsonResponse(obj) {
 
     // Draw Starfield
     for (let s of stars) {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = (state.mode === 'endless' && state.isFever) ? '#ffe600' : '#ffffff';
       ctx.globalAlpha = s.opacity;
       ctx.fillRect(s.x, s.y, s.size, s.size);
     }
     ctx.globalAlpha = 1.0;
 
     // Draw Defense Grid Line at the bottom
-    ctx.strokeStyle = 'rgba(0, 243, 255, 0.4)';
+    ctx.strokeStyle = (state.mode === 'endless' && state.isFever) ? 'rgba(255, 230, 0, 0.6)' : 'rgba(0, 243, 255, 0.4)';
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 6]);
     ctx.beginPath();
@@ -1852,7 +2042,7 @@ function createJsonResponse(obj) {
     ctx.setLineDash([]);
 
     // Defense Line Glow
-    ctx.fillStyle = 'rgba(0, 243, 255, 0.05)';
+    ctx.fillStyle = (state.mode === 'endless' && state.isFever) ? 'rgba(255, 230, 0, 0.08)' : 'rgba(0, 243, 255, 0.05)';
     ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
 
     // Draw Monsters
@@ -1863,6 +2053,11 @@ function createJsonResponse(obj) {
     // Draw Projectiles
     for (let p of projectiles) {
       p.draw(ctx);
+    }
+
+    // Draw Floating Texts
+    for (let ft of floatingTexts) {
+      ft.draw(ctx);
     }
 
     // Draw Particles

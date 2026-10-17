@@ -249,6 +249,98 @@ class SoundController {
     osc.stop(now + 0.45);
   }
 
+  // Fever Mode Activation Fanfare
+  playFeverStart() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C5, E5, G5, C6, E6
+    const now = this.ctx.currentTime;
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+      gain.gain.setValueAtTime(0.22, now + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.35);
+    });
+  }
+
+  // Time Attack Bonus Time Chime (+3s / +5s)
+  playTimeBonus() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const notes = [1046.5, 1567.98]; // C6, G6
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+
+      gain.gain.setValueAtTime(0.18, now + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.07 + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + idx * 0.07);
+      osc.stop(now + idx * 0.07 + 0.22);
+    });
+  }
+
+  // Time Attack Penalty (-3s / -5s)
+  playTimePenalty() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(280, now);
+    osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.22);
+  }
+
+  // Time's Up Whistle / Horn
+  playTimeUp() {
+    if (!this.soundEnabled || !this.ctx) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    // Two rapid whistle bursts
+    [0, 0.22].forEach(offset => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1800, now + offset);
+      osc.frequency.setValueAtTime(1650, now + offset + 0.08);
+
+      gain.gain.setValueAtTime(0.18, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.18);
+    });
+  }
+
   // Background Synth Loop
   startBgm() {
     if (!this.bgmEnabled) return;

@@ -20,9 +20,19 @@
         <span class="hud-label">關卡</span>
         <span class="hud-value" id="hud-wave">第 1 波</span>
       </div>
+      <!-- Endless Mode Time Attack Timer -->
+      <div class="hud-item hidden" id="time-box">
+        <span class="hud-label">倒數計時</span>
+        <span class="hud-value hud-timer" id="hud-timer">01:30</span>
+      </div>
       <div class="hud-item" id="combo-box">
         <span class="hud-label">連擊 (COMBO)</span>
         <span class="hud-value" id="hud-combo">x0</span>
+      </div>
+      <!-- Combo Fever Indicator -->
+      <div class="hud-item hidden" id="fever-box">
+        <span class="hud-label">狂熱狀態</span>
+        <span class="hud-value hud-fever-val" id="hud-fever">🔥 10s (x2)</span>
       </div>
       <div class="hud-item" id="shield-box">
         <span class="hud-label">基地護盾</span>
@@ -127,6 +137,10 @@
             <span class="guide-icon">🛡️</span>
             <div><strong>小心彈刀</strong>：若射出非因數會反彈扣除護盾！完全分解後可取得標準分解式加分！</div>
           </div>
+          <div class="guide-item">
+            <span class="guide-icon">⚡</span>
+            <div><strong>無盡極速狂熱</strong>：⏱️ 90 秒倒數計時！分解怪獸補時 +3 秒；10 連擊觸發🔥 FEVER 雙倍狂熱（補時 +5 秒）！答錯扣 3 秒、撞線扣 5 秒！</div>
+          </div>
         </div>
 
         <!-- Player Profile Input Form -->
@@ -151,7 +165,7 @@
 
         <div class="mode-select-box">
           <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階）</button>
-          <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（快速刷分）</button>
+          <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（⏱️ 90秒極速心算 × 🔥 10連擊狂熱雙倍）</button>
           <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力）</button>
           <button class="btn-play quaternary-btn" id="btn-view-leaderboard">🏆 查看英雄排行榜</button>
         </div>
