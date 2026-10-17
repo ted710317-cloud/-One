@@ -20,6 +20,10 @@
         <span class="hud-label">關卡</span>
         <span class="hud-value" id="hud-wave">第 1 波</span>
       </div>
+      <div class="hud-item" id="mode-badge-box">
+        <span class="hud-label">題型</span>
+        <span class="hud-value" id="hud-math-mode" style="font-size: 14px; color: #00f3ff;">🎯 填空</span>
+      </div>
       <!-- Endless Mode Time Attack Timer -->
       <div class="hud-item hidden" id="time-box">
         <span class="hud-label">倒數計時</span>
@@ -70,8 +74,16 @@
     </div>
 
     <!-- Bottom Defense Base & Number Cannon Console -->
-    <footer id="cannon-console">
-      <div class="console-hint">
+    <footer id="cannon-console" class="mode-fill-blank">
+      <!-- Ammo Buffer / Assembly Indicator (Active in Product Mode) -->
+      <div id="ammo-buffer-bar" class="ammo-buffer-bar hidden">
+        <span class="buffer-label">⚡ 砲彈裝填：</span>
+        <span id="buffer-display" class="buffer-display">[ _ _ ]</span>
+        <span id="buffer-hint" class="buffer-hint">請輸入答案（雙位數按完自動發射）</span>
+        <button type="button" id="btn-buffer-clear" class="btn-buffer-clear" title="清空重新裝填">⌫ 清除</button>
+      </div>
+
+      <div class="console-hint" id="console-hint">
         <span>鍵盤快捷鍵：<strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>
       </div>
       <div class="ammo-buttons-container">
@@ -110,6 +122,14 @@
         <button class="ammo-btn btn-num-9" data-num="9" data-key="9">
           <span class="ammo-num">9</span>
           <span class="key-badge">鍵盤 [9]</span>
+        </button>
+        <button class="ammo-btn btn-num-0" data-num="0" data-key="0">
+          <span class="ammo-num">0</span>
+          <span class="key-badge">鍵盤 [0]</span>
+        </button>
+        <button class="ammo-btn btn-action-backspace" id="btn-ammo-backspace" data-action="backspace">
+          <span class="ammo-num">⌫</span>
+          <span class="key-badge">退格/清除</span>
         </button>
       </div>
     </footer>
@@ -188,6 +208,23 @@
           <div class="practice-quick-actions">
             <button type="button" class="btn-text-sm" id="btn-select-all-multi">全部勾選</button>
             <button type="button" class="btn-text-sm" id="btn-select-789-multi">只練魔王 (7, 8, 9)</button>
+          </div>
+        </div>
+
+        <!-- Math Mode Selection (填空模式 vs 乘積模式) -->
+        <div class="math-mode-tabs-wrap">
+          <div class="math-mode-tabs-label">🎮 請選擇遊戲題型（核心教學模式）：</div>
+          <div class="math-mode-tabs">
+            <button type="button" class="math-tab active" id="tab-math-fill" data-math-mode="fill_blank">
+              <span class="math-tab-title">🎯 填空模式 (求乘數)</span>
+              <span class="math-tab-sub">題目：2 × [ ? ] = 16</span>
+              <span class="math-tab-tag">逆向思考 · 除法前置概念</span>
+            </button>
+            <button type="button" class="math-tab" id="tab-math-product" data-math-mode="product">
+              <span class="math-tab-title">💥 乘積模式 (求答案)</span>
+              <span class="math-tab-sub">題目：2 × 8 = [ ? ]</span>
+              <span class="math-tab-tag">正向直覺 · 輸入1和6自動射出</span>
+            </button>
           </div>
         </div>
 

@@ -30,6 +30,9 @@
   // --- Game State ---
   const state = {
     mode: 'campaign', // 'campaign', 'endless', 'practice'
+    mathMode: 'fill_blank', // 'fill_blank' (🎯 填空模式) or 'product' (💥 乘積模式)
+    inputBuffer: '', // Assembled digits for product mode
+    bufferTimer: null, // Timer for single digit product auto-firing
     wave: 1,
     maxWaves: 5,
     score: 0,
@@ -87,6 +90,7 @@
   const ctx = canvas.getContext('2d');
   const hudScore = document.getElementById('hud-score');
   const hudWave = document.getElementById('hud-wave');
+  const hudMathMode = document.getElementById('hud-math-mode');
   const timeBox = document.getElementById('time-box');
   const hudTimer = document.getElementById('hud-timer');
   const feverBox = document.getElementById('fever-box');
@@ -103,6 +107,11 @@
   const cannonConsole = document.getElementById('cannon-console');
   const consoleHint = document.querySelector('.console-hint');
   const ammoBtns = document.querySelectorAll('.ammo-btn, .prime-btn');
+  const ammoBufferBar = document.getElementById('ammo-buffer-bar');
+  const bufferDisplay = document.getElementById('buffer-display');
+  const btnBufferClear = document.getElementById('btn-buffer-clear');
+  const tabMathFill = document.getElementById('tab-math-fill');
+  const tabMathProduct = document.getElementById('tab-math-product');
 
   // Player Profile Inputs
   const inputClass = document.getElementById('player-class');
@@ -292,24 +301,61 @@
     return 0.85; // practice mode
   }
 
+  // --- Lane Allocation to Prevent Monster Overlapping ---
+  function getAvailableSpawnLane(monsterWidth = 156) {
+    const screenW = canvas.logicalWidth || canvas.width || 800;
+    const margin = monsterWidth / 2 + 15;
+    const usableW = Math.max(100, screenW - margin * 2);
+
+    // Dynamic lanes based on viewport width
+    const numLanes = screenW < 480 ? 2 : (screenW < 750 ? 3 : 4);
+    const lanePositions = [];
+    for (let i = 0; i < numLanes; i++) {
+      lanePositions.push(margin + (usableW * (i + 0.5)) / numLanes);
+    }
+
+    // Measure vertical clearance in each lane (distance to highest monster near top)
+    const laneScores = lanePositions.map(laneX => {
+      let minVerticalDist = 9999;
+      for (let m of monsters) {
+        const hDist = Math.abs(m.x - laneX);
+        if (hDist < monsterWidth * 0.85) {
+          minVerticalDist = Math.min(minVerticalDist, m.y);
+        }
+      }
+      return { x: laneX, clearanceY: minVerticalDist };
+    });
+
+    // Prefer lanes that have NO monster in the top 175px
+    const safeLanes = laneScores.filter(l => l.clearanceY > 175);
+    if (safeLanes.length > 0) {
+      const chosen = safeLanes[Math.floor(Math.random() * safeLanes.length)];
+      return chosen.x;
+    }
+
+    // Fallback: pick the lane whose monster is deepest down
+    laneScores.sort((a, b) => b.clearanceY - a.clearanceY);
+    return laneScores[0].x;
+  }
+
   // --- Monster Class (3rd Grade 9x9 Multiplication Falling Monster) ---
   class Monster {
     constructor(factorA, factorB, isBoss = false, bossPhases = []) {
       this.factorA = factorA;
-      this.factorB = factorB; // THIS IS THE MISSING NUMBER IN [ ]!
-      this.product = factorA * factorB;
+      this.factorB = factorB; // factorB is missing in fill_blank mode
+      this.product = factorA * factorB; // product is answer in product mode
       this.isBoss = isBoss;
       this.bossPhases = bossPhases; // Array of remaining phases for multi-stage boss
       this.currentPhaseIndex = 1;
       this.totalPhases = isBoss ? bossPhases.length + 1 : 1;
 
-      // Visual dimensions: rounded cyber capsule
-      this.width = isBoss ? 160 : 126;
-      this.height = isBoss ? 76 : 58;
-      this.radius = isBoss ? 52 : 36;
+      // Visual dimensions: comfortable width ensuring equation never touches border
+      this.width = isBoss ? 180 : 156;
+      this.height = isBoss ? 78 : 60;
+      this.radius = isBoss ? 56 : 42;
 
       const screenW = canvas.logicalWidth || 800;
-      this.x = Math.random() * (screenW - this.width - 40) + this.width / 2 + 20;
+      this.x = isBoss ? screenW / 2 : getAvailableSpawnLane(this.width);
       // Start slightly visible at top so it glides smoothly down immediately
       this.y = -10;
 
@@ -340,6 +386,24 @@
         this.staggerTimer--;
       } else {
         this.y += this.speed * mult;
+      }
+
+      // Soft anti-overlap collision avoidance with other descending monsters
+      for (let other of monsters) {
+        if (other === this) continue;
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        const minDistX = (this.width + other.width) * 0.52;
+        const minDistY = (this.height + other.height) * 0.55;
+        if (Math.abs(dx) < minDistX && Math.abs(dy) < minDistY) {
+          const pushX = (minDistX - Math.abs(dx)) * 0.04;
+          const screenW = canvas.logicalWidth || 800;
+          if (dx >= 0) {
+            this.x = Math.min(screenW - this.width / 2 - 10, this.x + pushX);
+          } else {
+            this.x = Math.max(this.width / 2 + 10, this.x - pushX);
+          }
+        }
       }
 
       this.pulsePhase += 0.06;
@@ -480,27 +544,47 @@
         }
       });
 
-      // 6. Educational Equation Badge: "2 × [ ] = 4"
+      // 6. Educational Equation Badge: Mathematically Centered, Zero Overflow
       const eqY = h * 0.20;
-      const fontSize = this.isBoss ? 23 : 19;
+      const isProductMode = state.mathMode === 'product';
+      const fontSize = this.isBoss ? 21 : 18;
       c.font = `900 ${fontSize}px 'Chakra Petch', 'Segoe UI', monospace, sans-serif`;
       c.textBaseline = 'middle';
 
-      const prefix = `${this.factorA} × `;
-      const suffix = ` = ${this.product}`;
-      const boxW = this.isBoss ? 36 : 30;
-      const boxH = this.isBoss ? 26 : 22;
+      let prefix = '';
+      let suffix = '';
+      let boxW = 32;
 
-      // Draw prefix (e.g. "2 × ")
-      c.fillStyle = '#ffffff';
-      c.textAlign = 'right';
-      c.fillText(prefix, -boxW / 2 - 3, eqY);
+      if (isProductMode) {
+        // 💥 乘積模式: "2 × 8 = [ 16 ]"
+        prefix = `${this.factorA} × ${this.factorB} = `;
+        suffix = '';
+        boxW = this.isBoss ? 46 : 40;
+      } else {
+        // 🎯 填空模式: "2 × [ 8 ] = 16"
+        prefix = `${this.factorA} × `;
+        suffix = ` = ${this.product}`;
+        boxW = this.isBoss ? 36 : 30;
+      }
 
-      // Draw middle [ ] slot box
-      const boxX = -boxW / 2;
+      const boxH = this.isBoss ? 28 : 24;
+      const prefixW = c.measureText(prefix).width;
+      const suffixW = suffix ? c.measureText(suffix).width : 0;
+      const totalEqW = prefixW + boxW + suffixW;
+
+      // Perfectly center the entire equation around x = 0
+      const startX = -totalEqW / 2;
+      const boxX = startX + prefixW;
       const boxY = eqY - boxH / 2;
+
+      // Draw Prefix
+      c.fillStyle = '#ffffff';
+      c.textAlign = 'left';
+      c.fillText(prefix, startX, eqY);
+
+      // Draw Middle Slot Box
       c.beginPath();
-      c.roundRect(boxX, boxY, boxW, boxH, 5);
+      c.roundRect(boxX, boxY, boxW, boxH, 6);
 
       if (this.solvedNumber !== null) {
         c.fillStyle = 'rgba(0, 255, 136, 0.4)';
@@ -511,7 +595,7 @@
 
         c.fillStyle = '#00ff88';
         c.textAlign = 'center';
-        c.fillText(this.solvedNumber, 0, eqY);
+        c.fillText(this.solvedNumber, boxX + boxW / 2, eqY);
       } else if (this.wrongNumber !== null && this.wrongFlash > 0) {
         c.fillStyle = 'rgba(255, 0, 85, 0.45)';
         c.strokeStyle = '#ff0055';
@@ -521,7 +605,7 @@
 
         c.fillStyle = '#ffffff';
         c.textAlign = 'center';
-        c.fillText(this.wrongNumber, 0, eqY);
+        c.fillText(this.wrongNumber, boxX + boxW / 2, eqY);
       } else {
         const boxPulse = 0.5 + Math.sin(this.pulsePhase * 2.5) * 0.4;
         c.fillStyle = 'rgba(0, 243, 255, 0.15)';
@@ -532,13 +616,15 @@
 
         c.fillStyle = '#ffe600';
         c.textAlign = 'center';
-        c.fillText('?', 0, eqY);
+        c.fillText('?', boxX + boxW / 2, eqY);
       }
 
-      // Draw suffix (e.g. " = 4")
-      c.fillStyle = '#ffffff';
-      c.textAlign = 'left';
-      c.fillText(suffix, boxW / 2 + 3, eqY);
+      // Draw Suffix (if in fill-blank mode)
+      if (suffix) {
+        c.fillStyle = '#ffffff';
+        c.textAlign = 'left';
+        c.fillText(suffix, boxX + boxW, eqY);
+      }
 
       // 7. Boss Phase Banner
       if (this.isBoss) {
@@ -557,12 +643,13 @@
   class Projectile {
     constructor(num, target) {
       this.num = num;
-      this.color = NUM_COLORS[num] || '#00f3ff';
+      this.isTwoDigits = String(num).length > 1;
+      this.color = NUM_COLORS[num] || NUM_COLORS[Math.floor(num / 10)] || '#ffe600';
       this.target = target;
       this.x = (canvas.logicalWidth || 800) / 2;
       this.y = (canvas.logicalHeight || 600) - 15;
       this.speed = 36; // Fast and snappy (flight time ~0.15s)
-      this.radius = 8;
+      this.radius = this.isTwoDigits ? 13 : 9;
       this.isAlive = true;
       this.trail = [];
     }
@@ -614,7 +701,7 @@
 
       // Number badge inside laser orb
       c.fillStyle = '#0a0e1a';
-      c.font = 'bold 11px "Chakra Petch", sans-serif';
+      c.font = this.isTwoDigits ? '900 10px "Chakra Petch", sans-serif' : '900 12px "Chakra Petch", sans-serif';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillText(this.num, this.x, this.y);
