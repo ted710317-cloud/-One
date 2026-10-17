@@ -824,6 +824,25 @@ body::after {
   border: 2px solid #eed6e5;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
+.jelly-btn.btn-return-hub {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #92400e;
+  border: 2px solid #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+  font-weight: 900;
+  margin-top: 10px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.jelly-btn.btn-return-hub:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
 
 /* 結算分析成績報告卡片 */
 .result-stats-card {
