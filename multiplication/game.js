@@ -99,6 +99,7 @@
   const shieldBarInner = document.getElementById('shield-bar-inner');
   const targetDetailPanel = document.getElementById('target-detail-panel');
   const targetEqText = document.getElementById('target-eq-text');
+  const targetHint = document.getElementById('target-hint');
   const comboBanner = document.getElementById('combo-banner');
   const equationBanner = document.getElementById('equation-banner');
   const warningBubble = document.getElementById('warning-bubble');
@@ -866,8 +867,10 @@
       targetDetailPanel.classList.remove('hidden');
       if (state.mathMode === 'product') {
         targetEqText.textContent = `${state.activeTarget.factorA} × ${state.activeTarget.factorB} = [ ? ]`;
+        if (targetHint) targetHint.textContent = '請輸入乘積答案裝填發射！';
       } else {
         targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
+        if (targetHint) targetHint.textContent = '請按數字砲彈填入 [ ]！';
       }
     } else {
       targetDetailPanel.classList.add('hidden');

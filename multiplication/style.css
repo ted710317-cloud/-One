@@ -219,44 +219,52 @@ html, body {
   display: block;
 }
 
-/* Target Details Panel (Floating on top-right of canvas) */
+/* Target Details Panel (Moved next to bottom cannon turret) */
 #target-detail-panel {
   position: absolute;
-  top: 15px;
-  right: 20px;
-  background: rgba(10, 20, 42, 0.92);
+  bottom: 12px;
+  right: calc(50% + 46px);
+  background: rgba(10, 20, 42, 0.94);
   border: 2px solid var(--cyan-glow);
-  box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+  box-shadow: 0 0 18px rgba(0, 243, 255, 0.45), inset 0 0 10px rgba(0, 243, 255, 0.12);
   border-radius: 12px;
-  padding: 10px 18px;
-  min-width: 180px;
+  padding: 8px 16px;
+  min-width: 165px;
+  max-width: calc(50% - 56px);
   text-align: center;
   pointer-events: none;
   animation: fadeIn 0.3s ease;
   z-index: 10;
+  backdrop-filter: blur(4px);
 }
 
 .target-title {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--cyan-glow);
   font-weight: bold;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .target-equation-display {
   font-size: 26px;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 12px var(--cyan-glow), 0 0 20px rgba(0, 255, 136, 0.5);
+  text-shadow: 0 0 12px var(--cyan-glow), 0 0 20px rgba(0, 255, 136, 0.6);
   font-family: 'Chakra Petch', monospace, sans-serif;
   letter-spacing: 1px;
+  line-height: 1.15;
 }
 
 .target-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--yellow-glow);
-  margin-top: 4px;
+  margin-top: 3px;
+  white-space: nowrap;
 }
 
 /* Floating Banners */
@@ -1456,4 +1464,35 @@ html, body {
     flex-direction: column;
     align-items: flex-start;
   }
+  #target-detail-panel {
+    right: calc(50% + 40px);
+    padding: 6px 12px;
+    min-width: 135px;
+    max-width: calc(50% - 48px);
+  }
+  .target-title {
+    font-size: 10px;
+  }
+  .target-equation-display {
+    font-size: 20px;
+  }
+  .target-hint {
+    font-size: 10px;
+  }
 }
+
+@media (max-width: 440px) {
+  #target-detail-panel {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 58px;
+    max-width: 90%;
+    min-width: auto;
+    padding: 5px 12px;
+  }
+  .target-hint {
+    display: none;
+  }
+}
+
