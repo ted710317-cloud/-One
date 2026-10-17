@@ -1,11 +1,11 @@
 // ============================================================================
 // 三年級九九乘法砲台保衛戰 - Google 試算表雲端排行榜後端程式碼 (GAS)
 // ============================================================================
-// 💡 本程式碼支援：
-// 1. 自動建立「關卡模式榜」與「無盡挑戰榜」兩張工作表。
-// 2. 紀錄時間、班級、座號、姓名、得分、最高連擊、命中率、玩法模式、擊潰數、學生完整標籤。
-// 3. 依「班級_座號」自動保留每位學生之個人最佳紀錄進行全班排名，杜絕重複刷榜。
-// 4. doGet 支援連線測試 (?action=test) 與獲取排行榜資料。
+// 💡 全智慧相容版本：
+// 1. 無論是直接由 script.google.com 建立的獨立腳本，或試算表內建腳本皆能自動運作！
+// 2. 若為獨立腳本，系統會自動在您的 Google 雲端硬碟建立「三年級九九乘法戰績總表」試算表。
+// 3. 自動建立「關卡模式榜」與「無盡挑戰榜」兩張工作表與標題排版。
+// 4. 依「班級_座號」自動保留每位學生個人最佳紀錄進行全班排名，杜絕重複刷榜。
 // 5. doPost 接收學生遊戲結束後成績並安全寫入試算表（具備 LockService 佇列防撞）。
 // ============================================================================
 
@@ -16,15 +16,26 @@ function doGet(e) {
 
   // 1. 連線測試
   if (action === 'test') {
-    return createJsonResponse({
-      status: 'success',
-      message: '🎉 恭喜！三年級九九乘法試算表雲端排行榜連線測試成功！'
-    });
+    try {
+      var ss = getSS();
+      var sheet = getOrCreateSheet(ss, '關卡模式榜');
+      return createJsonResponse({
+        status: 'success',
+        message: '🎉 恭喜！三年級九九乘法試算表雲端排行榜連線測試成功！',
+        sheetName: ss.getName(),
+        sheetUrl: ss.getUrl()
+      });
+    } catch (err) {
+      return createJsonResponse({
+        status: 'error',
+        message: '試算表初始化失敗：' + err.toString()
+      });
+    }
   }
 
   // 2. 獲取排行榜資料
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSS();
     var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
     var sheet = getOrCreateSheet(ss, sheetName);
     var data = sheet.getDataRange().getValues();
@@ -105,7 +116,7 @@ function doPost(e) {
     var raw = e.postData.contents;
     var data = JSON.parse(raw);
     var mode = (data.mode || 'campaign').toLowerCase();
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSS();
     var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
     var sheet = getOrCreateSheet(ss, sheetName);
 
@@ -165,6 +176,29 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// 智慧取得或自動建立試算表（相容獨立腳本與容器腳本）
+function getSS() {
+  var ss = null;
+  try {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) return ss;
+  } catch (e) {}
+
+  var props = PropertiesService.getScriptProperties();
+  var savedId = props.getProperty('SPREADSHEET_ID');
+  if (savedId) {
+    try {
+      ss = SpreadsheetApp.openById(savedId);
+      if (ss) return ss;
+    } catch (e) {}
+  }
+
+  // 自動在雲端硬碟建立專用試算表
+  ss = SpreadsheetApp.create('三年級九九乘法戰績總表');
+  props.setProperty('SPREADSHEET_ID', ss.getId());
+  return ss;
 }
 
 function getOrCreateSheet(ss, name) {

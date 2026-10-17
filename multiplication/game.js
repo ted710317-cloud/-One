@@ -1581,7 +1581,7 @@
   // ============================================================================
   // Leaderboard Storage & Google Sheets Cloud Synchronization
   // ============================================================================
-  const DEFAULT_CLOUD_API_URL = '';
+  const DEFAULT_CLOUD_API_URL = 'https://script.google.com/macros/s/AKfycbwkjAFiygCxoOMUPAy0o0-CFiD82CpZccVq6mrYPOWxTjhY4vLFl39v1_JSXz4tDZ-Jvw/exec';
 
   const GOOGLE_APPS_SCRIPT_TEMPLATE = `function doGet(e) {
   var params = e ? e.parameter : {};
