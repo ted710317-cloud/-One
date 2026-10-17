@@ -1,4 +1,4 @@
-// audio.js - Web Audio API Synthesizer for Prime Factor Defender
+// audio.js - Web Audio API Synthesizer for Multiplication Cannon Defender (九九乘法砲台保衛戰)
 // 100% self-contained synthetic sound effects & adaptive BGM without external assets
 
 class SoundController {
@@ -37,23 +37,33 @@ class SoundController {
     return this.bgmEnabled;
   }
 
-  // Laser shot sound
-  playShoot(prime) {
+  // Laser shot sound (melodic pitch mapped to numbers 1~9)
+  playShoot(num = 1) {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    // Map prime numbers to laser pitch tones
-    const baseFreqs = { 2: 440, 3: 520, 5: 660, 7: 780, 11: 880, 13: 1040 };
-    const startFreq = baseFreqs[prime] || 500;
+    // Pleasant ascending scale for numbers 1 to 9 (C4 to D5)
+    const baseFreqs = {
+      1: 261.63, // C4
+      2: 293.66, // D4
+      3: 329.63, // E4
+      4: 349.23, // F4
+      5: 392.00, // G4
+      6: 440.00, // A4
+      7: 493.88, // B4
+      8: 523.25, // C5
+      9: 587.33  // D5
+    };
+    const startFreq = baseFreqs[num] || 440;
 
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(startFreq * 1.5, now);
-    osc.frequency.exponentialRampToValueAtTime(startFreq * 0.4, now + 0.12);
+    osc.frequency.setValueAtTime(startFreq * 1.8, now);
+    osc.frequency.exponentialRampToValueAtTime(startFreq * 0.7, now + 0.12);
 
-    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.setValueAtTime(0.2, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
 
     osc.connect(gain);
@@ -63,7 +73,7 @@ class SoundController {
     osc.stop(now + 0.12);
   }
 
-  // Correct factorization hit (chime rising with combo)
+  // Correct multiplication hit chime (rises with combo)
   playHit(combo = 1) {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
@@ -78,17 +88,17 @@ class SoundController {
     osc.frequency.setValueAtTime(freq, now);
     osc.frequency.setValueAtTime(freq * 1.25, now + 0.05);
 
-    gain.gain.setValueAtTime(0.22, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.18);
+    osc.stop(now + 0.2);
   }
 
-  // Complete Factorization / Big Explosion
+  // Complete Elimination / Monster Explosion
   playExplosion() {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
@@ -98,10 +108,10 @@ class SoundController {
     const osc = this.ctx.createOscillator();
     const oscGain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(32, now + 0.35);
 
-    oscGain.gain.setValueAtTime(0.35, now);
+    oscGain.gain.setValueAtTime(0.38, now);
     oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
 
     osc.connect(oscGain);
@@ -122,11 +132,11 @@ class SoundController {
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(800, now);
-    filter.frequency.linearRampToValueAtTime(50, now + 0.3);
+    filter.frequency.setValueAtTime(900, now);
+    filter.frequency.linearRampToValueAtTime(60, now + 0.3);
 
     const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.3, now);
+    noiseGain.gain.setValueAtTime(0.32, now);
     noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
 
     whiteNoise.connect(filter);
@@ -137,7 +147,7 @@ class SoundController {
     whiteNoise.stop(now + 0.3);
   }
 
-  // Metallic deflection / rebound (wrong factor)
+  // Deflection / rebound (wrong answer)
   playDeflect() {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
@@ -146,20 +156,20 @@ class SoundController {
     const gain = this.ctx.createGain();
 
     osc.type = 'square';
-    osc.frequency.setValueAtTime(240, now);
-    osc.frequency.setValueAtTime(160, now + 0.08);
+    osc.frequency.setValueAtTime(260, now);
+    osc.frequency.setValueAtTime(170, now + 0.08);
 
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+    gain.gain.setValueAtTime(0.24, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.2);
+    osc.stop(now + 0.22);
   }
 
-  // Shield damaged alarm
+  // Base Shield damaged alarm
   playDamage() {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
@@ -169,19 +179,19 @@ class SoundController {
 
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(180, now);
-    osc.frequency.linearRampToValueAtTime(100, now + 0.25);
+    osc.frequency.linearRampToValueAtTime(90, now + 0.28);
 
     gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.25);
+    osc.stop(now + 0.28);
   }
 
-  // Error buzzer / Spam lockout sound
+  // Error buzzer / Anti-spam lockout sound
   playBuzzer() {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
@@ -190,7 +200,7 @@ class SoundController {
     const gain = this.ctx.createGain();
 
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(130, now);
+    osc.frequency.setValueAtTime(140, now);
     osc.frequency.setValueAtTime(110, now + 0.1);
 
     gain.gain.setValueAtTime(0.25, now);
@@ -207,7 +217,7 @@ class SoundController {
   playVictory() {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
-    const notes = [523.25, 659.25, 783.99, 1046.5]; // C, E, G, High C
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, High C6
     const now = this.ctx.currentTime;
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
@@ -215,14 +225,14 @@ class SoundController {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.12);
 
-      gain.gain.setValueAtTime(0.2, now + idx * 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+      gain.gain.setValueAtTime(0.22, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.35);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start(now + idx * 0.12);
-      osc.stop(now + idx * 0.12 + 0.3);
+      osc.stop(now + idx * 0.12 + 0.35);
     });
   }
 
@@ -235,8 +245,8 @@ class SoundController {
     const gain = this.ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(260, now);
-    osc.frequency.exponentialRampToValueAtTime(1100, now + 0.4);
+    osc.frequency.setValueAtTime(280, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
 
     gain.gain.setValueAtTime(0.01, now);
     gain.gain.linearRampToValueAtTime(0.25, now + 0.15);
@@ -322,7 +332,6 @@ class SoundController {
     if (!this.soundEnabled || !this.ctx) return;
     this.init();
     const now = this.ctx.currentTime;
-    // Two rapid whistle bursts
     [0, 0.22].forEach(offset => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -341,14 +350,14 @@ class SoundController {
     });
   }
 
-  // Background Synth Loop
+  // Background Synth Loop (catchy upbeat 8-bit space defense melody)
   startBgm() {
     if (!this.bgmEnabled) return;
     if (this.bgmInterval) clearInterval(this.bgmInterval);
 
-    // Minor pentatonic arpeggio sequence for sci-fi atmosphere
-    const bassNotes = [110, 110, 130.81, 146.83, 110, 98, 110, 164.81];
-    const tempoMs = 280;
+    // Energetic arpeggio loop for Grade 3 math defense action
+    const bassNotes = [130.81, 164.81, 196.00, 220.00, 196.00, 164.81, 146.83, 174.61];
+    const tempoMs = 260;
 
     this.bgmInterval = setInterval(() => {
       if (!this.bgmEnabled || !this.ctx || this.ctx.state !== 'running') return;
@@ -359,17 +368,17 @@ class SoundController {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = 'sine';
+      osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now);
 
-      gain.gain.setValueAtTime(0.045, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.22);
+      osc.stop(now + 0.2);
     }, tempoMs);
   }
 
