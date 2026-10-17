@@ -109,6 +109,7 @@
   const ammoBtns = document.querySelectorAll('.ammo-btn, .prime-btn');
   const ammoBufferBar = document.getElementById('ammo-buffer-bar');
   const bufferDisplay = document.getElementById('buffer-display');
+  const btnBufferFire = document.getElementById('btn-buffer-fire');
   const btnBufferClear = document.getElementById('btn-buffer-clear');
   const tabMathFill = document.getElementById('tab-math-fill');
   const tabMathProduct = document.getElementById('tab-math-product');
@@ -864,10 +865,13 @@
     if (state.mathMode === 'product') {
       if (state.inputBuffer.length === 0) {
         bufferDisplay.textContent = '[ _ _ ]';
+        bufferDisplay.classList.remove('has-digit');
       } else if (state.inputBuffer.length === 1) {
         bufferDisplay.textContent = `[ ${state.inputBuffer} _ ]`;
+        bufferDisplay.classList.add('has-digit');
       } else {
         bufferDisplay.textContent = `[ ${state.inputBuffer} ]`;
+        bufferDisplay.classList.add('has-digit');
       }
     }
   }
@@ -1083,6 +1087,7 @@
   function shoot(num, action = null) {
     if (state.isPaused || state.isGameOver || (modalStart && !modalStart.classList.contains('hidden'))) return;
 
+    // 退格或清空裝填槽
     if (action === 'backspace') {
       if (state.mathMode === 'product') {
         state.inputBuffer = '';
@@ -1096,6 +1101,21 @@
       return;
     }
 
+    // 手動點擊「🚀 發射」或按鍵盤 Enter
+    if (action === 'fire') {
+      if (state.mathMode === 'product' && state.inputBuffer.length > 0) {
+        if (state.bufferTimer) {
+          clearTimeout(state.bufferTimer);
+          state.bufferTimer = null;
+        }
+        const assembled = parseInt(state.inputBuffer, 10);
+        state.inputBuffer = '';
+        updateBufferUI();
+        fireProjectile(assembled);
+      }
+      return;
+    }
+
     if (num === null || isNaN(num)) return;
 
     if (state.mathMode === 'fill_blank') {
@@ -1103,37 +1123,73 @@
       if (num < 1 || num > 9) return;
       fireProjectile(num);
     } else {
-      // 💥 乘積模式: 緩衝十位與個位 (例如 1 和 6 -> 16 自動發射)
+      // 💥 乘積模式: 依序輸入十位與個位 (例如 1 和 6 -> 16 自動發射)
+      if (num < 0 || num > 9) return;
+
       if (state.inputBuffer.length === 0) {
-        // 如果目前目標為個位數答案 (例如 2x3=6) 且輸入相符，直接零延遲發射
-        if (state.activeTarget && state.activeTarget.product === num) {
+        // --- 緩衝區為空，輸入第一個數字 ---
+        if (num === 0) return; // 九九乘法表答案開頭沒有 0
+
+        // 1. 檢查畫面上是否有怪獸的答案「就是這個個位數」且沒有以該數字開頭的雙位數怪獸
+        const exactSingleMonster = monsters.find(m => m.product === num);
+        const multiMonsterStartingWithNum = monsters.find(m => m.product >= 10 && String(m.product).startsWith(String(num)));
+
+        if (exactSingleMonster && !multiMonsterStartingWithNum) {
+          // 畫面上只有個位數答案（例如 2x3=6），且沒有雙位數以此開頭，直接零延遲發射！
+          state.activeTarget = exactSingleMonster;
+          updateHUD();
           fireProjectile(num);
           return;
         }
 
+        // 2. 智慧鎖定：優先鎖定答案以此數字開頭的怪獸（例如輸入 1，立刻鎖定 16 的怪獸）
+        if (multiMonsterStartingWithNum) {
+          state.activeTarget = multiMonsterStartingWithNum;
+          updateHUD();
+        }
+
+        // 3. 存入十位數緩衝區，顯示 [ 1 _ ]
         state.inputBuffer = String(num);
         updateBufferUI();
 
-        // 550ms 智慧定時器：若為單純個位數且學生停頓，自動發射該個位數
-        if (state.bufferTimer) clearTimeout(state.bufferTimer);
-        state.bufferTimer = setTimeout(() => {
-          if (state.inputBuffer.length > 0) {
-            const assembled = parseInt(state.inputBuffer, 10);
-            state.inputBuffer = '';
-            updateBufferUI();
-            fireProjectile(assembled);
-          }
-        }, 550);
-      } else {
-        // 第二個數字到位，立刻組合為雙位數自動發射！
+        // 4. 耐心等待第二位數字：
+        // 若當前怪獸是雙位數（如 16、24），絕對不設短時自動發射，讓學生有充足時間輸入個位數！
+        // 若當前怪獸是個位數，給予 1.8 秒寬限或按發射鍵
         if (state.bufferTimer) {
           clearTimeout(state.bufferTimer);
           state.bufferTimer = null;
         }
-        const assembled = parseInt(state.inputBuffer + String(num), 10);
+
+        if (state.activeTarget && state.activeTarget.product < 10) {
+          state.bufferTimer = setTimeout(() => {
+            if (state.inputBuffer.length > 0) {
+              const assembled = parseInt(state.inputBuffer, 10);
+              state.inputBuffer = '';
+              updateBufferUI();
+              fireProjectile(assembled);
+            }
+          }, 1800);
+        }
+      } else {
+        // --- 緩衝區已有十位數（例如 "1"），第二個數字（例如 "6"）到達！ ---
+        if (state.bufferTimer) {
+          clearTimeout(state.bufferTimer);
+          state.bufferTimer = null;
+        }
+
+        const fullNum = parseInt(state.inputBuffer + String(num), 10); // 例如 16
         state.inputBuffer = '';
         updateBufferUI();
-        fireProjectile(assembled);
+
+        // 智慧比對：畫面上是否有怪獸答案完全相符？如果有，鎖定該怪獸！
+        const matchedMonster = monsters.find(m => m.product === fullNum);
+        if (matchedMonster) {
+          state.activeTarget = matchedMonster;
+          updateHUD();
+        }
+
+        // 立即發射雙位數砲彈（例如 16）！
+        fireProjectile(fullNum);
       }
     }
   }
@@ -1619,7 +1675,7 @@
     btn.addEventListener('pointerdown', handlePress);
   });
 
-  // Keyboard shortcut listener (0~9, Numpad 0~9, Backspace, Delete)
+  // Keyboard shortcut listener (0~9, Numpad 0~9, Backspace, Delete, Enter)
   window.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
@@ -1632,6 +1688,14 @@
           setTimeout(() => targetBtn.classList.remove('active-press'), 100);
         }
         shoot(null, 'backspace');
+      }
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      if (state.mathMode === 'product' && state.inputBuffer.length > 0) {
+        e.preventDefault();
+        shoot(null, 'fire');
       }
       return;
     }
@@ -1655,6 +1719,10 @@
       togglePause();
     }
   });
+
+  if (btnBufferFire) {
+    btnBufferFire.addEventListener('click', () => shoot(null, 'fire'));
+  }
 
   if (btnBufferClear) {
     btnBufferClear.addEventListener('click', () => shoot(null, 'backspace'));
