@@ -155,6 +155,25 @@ class SoundEngine {
     sparkle.stop(now + 0.22);
   }
 
+  // 3b. 糖果雨降落歡樂鈴鐺滑音 (Candy Rain Chimes)
+  playCandyRain() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    const notes = [1046, 880, 784, 659, 523, 659, 784];
+    notes.forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, now + i * 0.045);
+      gain.gain.setValueAtTime(0.25, now + i * 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.16);
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(now + i * 0.045);
+      osc.stop(now + i * 0.045 + 0.18);
+    });
+  }
+
   // 4. 連擊 Combo 升調音效 (連擊越多越熱血)
   playCombo(comboCount) {
     if (!this.ctx || this.isMuted) return;

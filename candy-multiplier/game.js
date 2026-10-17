@@ -72,6 +72,9 @@
   // 動畫與特效系統
   let particles = [];
   let floatingTexts = [];
+  let ambientCandies = []; // 背景飄落糖果雨粒子
+  let zapBeams = [];       // 消消樂連鎖光束
+  let shockwaves = [];     // 糖果爆破衝擊波
   let screenShake = 0;
   let lastFrameTime = performance.now();
 
@@ -106,6 +109,7 @@
   const modalTable = document.getElementById('modalTable');
 
   // --- 4. 初始化 ---
+  // --- 4. 初始化 ---
   function init() {
     canvas = document.getElementById('gameCanvas');
     ctx = canvas.getContext('2d');
@@ -124,22 +128,56 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // 初始化背景糖果雨飄落粒子
+    initAmbientRain();
+
+    // 預先初始化棋盤與題目 (確保畫面一開啟就有滿滿的可愛糖果與題目，絕不空白！)
+    initGrid();
+    generateNewQuestion();
+
     // 啟動主渲染迴圈
     requestAnimationFrame(gameLoop);
   }
 
-  // 調整畫布尺寸 (高 DPI 銳利繪製，動態適配平板高度)
+  // 背景飄落糖果雨動畫粒子
+  function initAmbientRain() {
+    ambientCandies = [];
+    const w = (canvas && canvas.width) ? canvas.width / dpr : 440;
+    const h = (canvas && canvas.height) ? canvas.height / dpr : 400;
+    for (let i = 0; i < 22; i++) {
+      ambientCandies.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: 3 + Math.random() * 6,
+        speedY: 0.6 + Math.random() * 1.2,
+        speedX: (Math.random() - 0.5) * 0.3,
+        color: ['#ff85a2', '#ffd166', '#06d6a0', '#118ab2', '#b5179e', '#ff9f43'][Math.floor(Math.random() * 6)],
+        alpha: 0.35 + Math.random() * 0.4
+      });
+    }
+  }
+
+  function updateAmbientRain(dt) {
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
+    for (const p of ambientCandies) {
+      p.y += p.speedY;
+      p.x += p.speedX;
+      if (p.y > h + 10) {
+        p.y = -10;
+        p.x = Math.random() * w;
+      }
+    }
+  }
+
+  // 調整畫布尺寸 (高 DPI 銳利繪製，確保糖果夠大夠清晰)
   function resizeCanvas() {
     const wrapper = document.getElementById('canvasWrapper');
     if (!wrapper) return;
-    const width = wrapper.clientWidth;
-    const isKeypadVisible = keypadPanel && !keypadPanel.classList.contains('hidden');
+    const width = wrapper.clientWidth || 440;
 
-    // 動態計算可用垂直高度，預留頂部卡片、底部超大鍵盤與道具列空間，確保平板直向/橫向免捲動
-    const windowH = window.innerHeight;
-    const overhead = isKeypadVisible ? 510 : 250;
-    const maxAvailH = Math.max(260, windowH - overhead);
-    const height = Math.min(Math.floor(width * 1.05), maxAvailH, 460);
+    // 給予糖果足夠的展示高度 (360px ~ 460px)，確保每顆糖果有 45px+ 的舒適大小
+    const height = Math.min(Math.max(Math.floor(width * 0.96), 360), 460);
 
     dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
@@ -153,6 +191,22 @@
     cellHeight = height / ROWS;
     gridOffsetX = 0;
     gridOffsetY = 0;
+
+    // 更新現有糖果在縮放後的座標
+    if (grid && grid.length === COLS) {
+      for (let c = 0; c < COLS; c++) {
+        if (!grid[c]) continue;
+        for (let r = 0; r < ROWS; r++) {
+          if (grid[c][r]) {
+            grid[c][r].currentX = c * cellWidth;
+            grid[c][r].targetY = r * cellHeight;
+            if (grid[c][r].currentY >= 0) {
+              grid[c][r].currentY = r * cellHeight;
+            }
+          }
+        }
+      }
+    }
   }
 
   // --- 5. 網格與糖果生成邏輯 ---
@@ -160,8 +214,8 @@
     grid = [];
     for (let c = 0; c < COLS; c++) {
       grid[c] = [];
-      // 初始每行隨機填入 4~5 顆糖果
-      const initialCount = 4 + Math.floor(Math.random() * 2);
+      // 初始填滿 5~6 排可愛糖果，讓棋盤繽紛熱鬧
+      const initialCount = 5 + Math.floor(Math.random() * 2);
       for (let r = 0; r < ROWS; r++) {
         if (r >= ROWS - initialCount) {
           grid[c][r] = createRandomCandy(c, r, false);
@@ -290,12 +344,13 @@
 
   // --- 6. 糖果雨降落與重力機制 ---
   function triggerCandyRain() {
+    if (!grid || !grid.length) return;
     if (freezeTimer > 0) return; // 處於冰凍狀態
 
     // 檢查是否有任一列即將溢出最頂端
     let overflowColumn = false;
     for (let c = 0; c < COLS; c++) {
-      if (grid[c][0] !== null) {
+      if (grid[c] && grid[c][0] !== null) {
         overflowColumn = true;
         break;
       }
@@ -306,7 +361,7 @@
       return;
     }
 
-    // 將所有糖果向下推一格
+    // 將所有糖果向下推一格，頂部從高空降落新糖果雨
     for (let c = 0; c < COLS; c++) {
       for (let r = ROWS - 1; r > 0; r--) {
         grid[c][r] = grid[c][r - 1];
@@ -315,20 +370,25 @@
           grid[c][r].targetY = r * cellHeight;
         }
       }
-      // 頂部生成新糖果
+      // 頂部生成新糖果 (高空飄落)
       grid[c][0] = createRandomCandy(c, 0, true);
     }
 
     if (window.soundEngine) {
-      window.soundEngine.playPop(350);
+      window.soundEngine.playCandyRain();
     }
-    screenShake = 3;
+    screenShake = 5;
+
+    // 飄起華麗糖果雨降落橫幅
+    spawnFloatingText(canvas.width / (2 * dpr), 40, '🌧️ 糖果雨降落！ RAIN DROP! 🍬', '#ff3388');
   }
 
   // 物理重力下落填補空格
   function applyGravity() {
+    if (!grid || grid.length < COLS) return false;
     let hasFalling = false;
     for (let c = 0; c < COLS; c++) {
+      if (!grid[c]) continue;
       for (let r = ROWS - 1; r >= 0; r--) {
         if (grid[c][r] === null) {
           // 往上找第一顆非空糖果往下掉
@@ -350,6 +410,7 @@
 
   // --- 7. 連鎖消除 (Connected Same-Color Blast) ---
   function popConnectedCandies(startCol, startRow) {
+    if (!grid || !grid[startCol]) return [];
     const targetCandy = grid[startCol][startRow];
     if (!targetCandy) return [];
 
@@ -373,7 +434,7 @@
 
       for (const n of neighbors) {
         if (n.c >= 0 && n.c < COLS && n.r >= 0 && n.r < ROWS) {
-          if (!visited[n.c][n.r] && grid[n.c][n.r] && !grid[n.c][n.r].isPopping) {
+          if (!visited[n.c][n.r] && grid[n.c] && grid[n.c][n.r] && !grid[n.c][n.r].isPopping) {
             if (grid[n.c][n.r].type.id === targetType) {
               visited[n.c][n.r] = true;
               queue.push(n);
@@ -421,28 +482,67 @@
     }
 
     // 畫面震動
-    screenShake = Math.min(count * 2, 8);
+    screenShake = Math.min(count * 2.5, 10);
 
-    // 糖果噴發特效
+    // 1. 建立相鄰糖果連鎖雷射光束 (消消樂連鎖線)
+    if (candiesToPop.length > 1) {
+      for (let i = 0; i < candiesToPop.length - 1; i++) {
+        const c1 = candiesToPop[i];
+        const c2 = candiesToPop[i + 1];
+        zapBeams.push({
+          x1: c1.col * cellWidth + cellWidth / 2,
+          y1: c1.currentY + cellHeight / 2,
+          x2: c2.col * cellWidth + cellWidth / 2,
+          y2: c2.currentY + cellHeight / 2,
+          color: c1.type.color,
+          alpha: 1.0,
+          life: 0.35
+        });
+      }
+    }
+
+    // 2. 糖果爆炸衝擊波與豐富糖果噴碎屑
     candiesToPop.forEach((candy, idx) => {
       candy.isPopping = true;
-      spawnCandyParticles(candy.currentX + cellWidth / 2, candy.currentY + cellHeight / 2, candy.type.color);
+      const cx = candy.col * cellWidth + cellWidth / 2;
+      const cy = candy.currentY + cellHeight / 2;
+
+      // 糖果圓環衝擊波
+      shockwaves.push({
+        x: cx,
+        y: cy,
+        radius: 8,
+        maxRadius: cellWidth * 0.95,
+        color: candy.type.color,
+        alpha: 0.95
+      });
+
+      // 噴射星星糖果碎屑
+      spawnCandyParticles(cx, cy, candy.type.color);
 
       // 延遲移除網格引用
       setTimeout(() => {
-        if (grid[candy.col][candy.row] === candy) {
+        if (grid[candy.col] && grid[candy.col][candy.row] === candy) {
           grid[candy.col][candy.row] = null;
         }
       }, 120);
     });
 
-    // 飄字分數特效
+    // 3. 飄字讚揚動畫
     const first = candiesToPop[0];
-    const textMsg = combo > 1 ? `+${baseScore} (${combo} 連擊!)` : `+${baseScore}`;
-    spawnFloatingText(first.currentX + cellWidth / 2, first.currentY, textMsg, isFeverActive ? '#ff3377' : '#ffd154');
+    let praiseText = `+${baseScore}`;
+    if (count >= 5) {
+      praiseText = `SUGAR RUSH! +${baseScore} 🌈`;
+    } else if (count >= 3) {
+      praiseText = `TASTY! +${baseScore} 🍭`;
+    } else if (combo > 1) {
+      praiseText = `+${baseScore} (${combo} 連擊!)`;
+    }
+
+    spawnFloatingText(first.col * cellWidth + cellWidth / 2, first.currentY, praiseText, isFeverActive ? '#ff1493' : '#ffd154');
 
     // 累積 Fever
-    addFever(count * 4 + 10);
+    addFever(count * 5 + 10);
 
     // 檢查闖關模式是否達到過關分數
     checkStageClear();
@@ -865,6 +965,7 @@
   }
 
   function updateParticles(dt) {
+    // 碎屑粒子
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx;
@@ -876,12 +977,32 @@
       }
     }
 
+    // 飄字
     for (let i = floatingTexts.length - 1; i >= 0; i--) {
       const t = floatingTexts[i];
       t.y += t.vy;
       t.alpha -= dt / t.life;
       if (t.alpha <= 0) {
         floatingTexts.splice(i, 1);
+      }
+    }
+
+    // 消消樂連鎖雷射光束
+    for (let i = zapBeams.length - 1; i >= 0; i--) {
+      const b = zapBeams[i];
+      b.alpha -= dt / b.life;
+      if (b.alpha <= 0) {
+        zapBeams.splice(i, 1);
+      }
+    }
+
+    // 爆炸衝擊波
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      const sw = shockwaves[i];
+      sw.radius += (sw.maxRadius - sw.radius) * 0.25 + 1.5;
+      sw.alpha -= dt * 2.8;
+      if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+        shockwaves.splice(i, 1);
       }
     }
   }
@@ -902,6 +1023,7 @@
   function updateGame(dt) {
     updateFever(dt);
     updateParticles(dt);
+    updateAmbientRain(dt);
 
     if (currentMode === 'rush') {
       rushTimeRemaining -= dt;
@@ -928,10 +1050,12 @@
 
     // 檢查是否有糖果堆到危險區
     let inDanger = false;
-    for (let c = 0; c < COLS; c++) {
-      if (grid[c][DANGER_ROW] !== null) {
-        inDanger = true;
-        break;
+    if (grid && grid.length === COLS) {
+      for (let c = 0; c < COLS; c++) {
+        if (grid[c] && grid[c][DANGER_ROW] !== null) {
+          inDanger = true;
+          break;
+        }
       }
     }
     elDangerOverlay.style.display = inDanger ? 'block' : 'none';
@@ -947,23 +1071,26 @@
     applyGravity();
 
     // 糖果平滑移動插值與彈跳縮放
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        const candy = grid[c][r];
-        if (candy) {
-          // Y 軸平滑落至目標位置
-          if (candy.currentY < candy.targetY) {
-            candy.currentY += (candy.targetY - candy.currentY) * 0.25 + 1.2;
-            if (candy.currentY >= candy.targetY) {
-              candy.currentY = candy.targetY;
-              // 著地 Q 彈動畫 (Squash and stretch)
-              candy.scaleX = 1.2;
-              candy.scaleY = 0.85;
+    if (grid && grid.length === COLS) {
+      for (let c = 0; c < COLS; c++) {
+        if (!grid[c]) continue;
+        for (let r = 0; r < ROWS; r++) {
+          const candy = grid[c][r];
+          if (candy) {
+            // Y 軸平滑落至目標位置
+            if (candy.currentY < candy.targetY) {
+              candy.currentY += (candy.targetY - candy.currentY) * 0.25 + 1.2;
+              if (candy.currentY >= candy.targetY) {
+                candy.currentY = candy.targetY;
+                // 著地 Q 彈動畫 (Squash and stretch)
+                candy.scaleX = 1.2;
+                candy.scaleY = 0.85;
+              }
             }
+            // 縮放平滑復原
+            candy.scaleX += (1 - candy.scaleX) * 0.2;
+            candy.scaleY += (1 - candy.scaleY) * 0.2;
           }
-          // 縮放平滑復原
-          candy.scaleX += (1 - candy.scaleX) * 0.2;
-          candy.scaleY += (1 - candy.scaleY) * 0.2;
         }
       }
     }
@@ -986,23 +1113,26 @@
       ctx.translate(shakeX, shakeY);
     }
 
-    // 繪製棋盤柔和底格線
+    // 繪製棋盤柔和底格線與背景飄落糖果雨
     drawGridBackground();
 
     // 繪製頂部危險警戒虛線
     drawDangerLine();
 
-    // 繪製所有糖果
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        const candy = grid[c][r];
-        if (candy && !candy.isPopping) {
-          drawCandy(candy);
+    // 繪製所有糖果 (安全檢查防止陣列未初始化)
+    if (grid && grid.length === COLS) {
+      for (let c = 0; c < COLS; c++) {
+        if (!grid[c]) continue;
+        for (let r = 0; r < ROWS; r++) {
+          const candy = grid[c][r];
+          if (candy && !candy.isPopping) {
+            drawCandy(candy);
+          }
         }
       }
     }
 
-    // 繪製粒子與飄字
+    // 繪製粒子、光束、衝擊波與飄字
     drawParticles();
 
     ctx.restore();
@@ -1012,14 +1142,30 @@
     const w = canvas.width / dpr;
     const h = canvas.height / dpr;
 
+    // 棋盤格紋
     for (let c = 0; c < COLS; c++) {
       for (let r = 0; r < ROWS; r++) {
         if ((c + r) % 2 === 0) {
-          ctx.fillStyle = 'rgba(255, 230, 240, 0.35)';
+          ctx.fillStyle = 'rgba(255, 220, 235, 0.3)';
           ctx.fillRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
         }
       }
     }
+
+    // 背景飄落的糖果雨粒子 (Ambient Candy Rain)
+    drawAmbientRain();
+  }
+
+  function drawAmbientRain() {
+    ambientCandies.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
   }
 
   function drawDangerLine() {
@@ -1040,54 +1186,181 @@
     ctx.restore();
   }
 
-  // 繪製單顆 Q 萌糖果
+  // 繪製單顆 Q 萌立體造型糖果
   function drawCandy(candy) {
     const cx = candy.col * cellWidth + cellWidth / 2;
     const cy = candy.currentY + cellHeight / 2;
-    const radius = Math.min(cellWidth, cellHeight) * 0.44;
+    const r = Math.min(cellWidth, cellHeight) * 0.44;
 
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(candy.scaleX, candy.scaleY);
 
-    // 1. 糖果柔和陰影
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-    ctx.shadowBlur = 6;
+    // 1. 柔和可愛陰影
+    ctx.shadowColor = 'rgba(70, 20, 80, 0.22)';
+    ctx.shadowBlur = 8;
     ctx.shadowOffsetY = 4;
 
-    // 2. 漸層糖果球體
-    const grad = ctx.createLinearGradient(0, -radius, 0, radius);
+    // 漸層填充色
+    const grad = ctx.createLinearGradient(0, -r, 0, r);
     grad.addColorStop(0, candy.type.bgGradient[0]);
     grad.addColorStop(1, candy.type.bgGradient[1]);
     ctx.fillStyle = grad;
 
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, Math.PI * 2);
-    ctx.fill();
+    // 2. 依照造型繪製各具特色的可愛糖果形狀
+    const shape = candy.type.shape;
+    if (shape === 'heart') {
+      // 🍓 草莓愛心軟糖
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.85);
+      ctx.bezierCurveTo(-r * 1.15, r * 0.1, -r * 1.05, -r * 0.85, 0, -r * 0.45);
+      ctx.bezierCurveTo(r * 1.05, -r * 0.85, r * 1.15, r * 0.1, 0, r * 0.85);
+      ctx.fill();
 
-    // 3. 糖果頂部反光弧光 (水潤果凍感)
+      // 頂部草莓小綠葉
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = '#48e5c2';
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.25, -r * 0.65, r * 0.22, r * 0.1, -Math.PI / 6, 0, Math.PI * 2);
+      ctx.ellipse(r * 0.25, -r * 0.65, r * 0.22, r * 0.1, Math.PI / 6, 0, Math.PI * 2);
+      ctx.fill();
+
+    } else if (shape === 'star') {
+      // 🍋 檸檬星星糖 (圓角五角星)
+      ctx.beginPath();
+      const spikes = 5;
+      const outerR = r * 1.08;
+      const innerR = r * 0.58;
+      let rot = (Math.PI / 2) * 3;
+      const step = Math.PI / spikes;
+      ctx.moveTo(0, -outerR);
+      for (let i = 0; i < spikes; i++) {
+        ctx.lineTo(Math.cos(rot) * outerR, Math.sin(rot) * outerR);
+        rot += step;
+        ctx.lineTo(Math.cos(rot) * innerR, Math.sin(rot) * innerR);
+        rot += step;
+      }
+      ctx.closePath();
+      ctx.fill();
+
+    } else if (shape === 'apple') {
+      // 🍏 青蘋果薄荷豆 (圓潤青蘋果)
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 蘋果小綠葉
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.ellipse(r * 0.3, -r * 0.8, r * 0.24, r * 0.12, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fill();
+
+    } else if (shape === 'diamond') {
+      // 💎 藍莓水晶寶石糖
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.05);
+      ctx.lineTo(r * 0.95, 0);
+      ctx.lineTo(0, r * 1.05);
+      ctx.lineTo(-r * 0.95, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // 水晶切面線
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+    } else if (shape === 'jelly') {
+      // 🍇 葡萄小熊軟糖
+      // 熊耳
+      ctx.beginPath();
+      ctx.arc(-r * 0.65, -r * 0.6, r * 0.35, 0, Math.PI * 2);
+      ctx.arc(r * 0.65, -r * 0.6, r * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      // 熊頭本體
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+
+    } else {
+      // 🍊 甜橙棒棒漩渦糖
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 白色漩渦旋轉紋路
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.6, 0, Math.PI * 1.2);
+      ctx.stroke();
+    }
+
+    // 3. 果凍頂部晶亮反光 (Glossy Highlight)
     ctx.shadowColor = 'transparent';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
     ctx.beginPath();
-    ctx.ellipse(0, -radius * 0.45, radius * 0.55, radius * 0.25, 0, 0, Math.PI * 2);
+    ctx.ellipse(-r * 0.25, -r * 0.4, r * 0.42, r * 0.18, -Math.PI / 6, 0, Math.PI * 2);
     ctx.fill();
 
-    // 4. 清晰易讀的乘法結果數字
-    ctx.fillStyle = candy.type.textColor;
-    ctx.font = `900 ${Math.floor(radius * 1.05)}px Nunito, sans-serif`;
+    // 4. 中央可愛圓形高對比數字徽章 (讓孩子一眼看清答案)
+    const badgeR = r * 0.62;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+    ctx.beginPath();
+    ctx.arc(0, 0, badgeR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = candy.type.color;
+    ctx.stroke();
+
+    // 5. 乘法數字
+    ctx.fillStyle = '#2d1436';
+    ctx.font = `900 ${Math.floor(badgeR * 1.15)}px Nunito, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
-    // 數字外層深色筆觸（提升小螢幕辨識度）
-    ctx.lineWidth = 3.5;
-    ctx.strokeStyle = 'rgba(40, 20, 50, 0.4)';
-    ctx.strokeText(candy.number, 0, 2);
-    ctx.fillText(candy.number, 0, 2);
+    ctx.fillText(candy.number, 0, 1);
 
     ctx.restore();
   }
 
   function drawParticles() {
+    // 繪製消消樂連鎖雷射光束
+    zapBeams.forEach(b => {
+      ctx.save();
+      ctx.globalAlpha = b.alpha;
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(b.x1, b.y1);
+      ctx.lineTo(b.x2, b.y2);
+      ctx.stroke();
+
+      // 白色核心光
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 繪製爆炸衝擊波
+    shockwaves.forEach(sw => {
+      ctx.save();
+      ctx.globalAlpha = sw.alpha;
+      ctx.strokeStyle = sw.color;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    });
+
     // 糖果爆破碎屑
     particles.forEach(p => {
       ctx.save();
@@ -1104,10 +1377,10 @@
       ctx.save();
       ctx.globalAlpha = t.alpha;
       ctx.fillStyle = t.color;
-      ctx.font = '900 16px Nunito, sans-serif';
+      ctx.font = '900 18px Nunito, sans-serif';
       ctx.textAlign = 'center';
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(40, 10, 50, 0.8)';
       ctx.strokeText(t.text, t.x, t.y);
       ctx.fillText(t.text, t.x, t.y);
       ctx.restore();
