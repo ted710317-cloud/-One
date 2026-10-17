@@ -55,22 +55,7 @@
       </div>
     </section>
 
-    <!-- 當前九九乘法任務看板 -->
-    <section class="question-card" id="questionCard">
-      <div class="mascot-box" id="mascotIcon">🐰</div>
-      <div class="question-content">
-        <div class="question-hint-title">
-          <span>🎯 點擊盤面糖果 或 鍵盤輸入答案：</span>
-        </div>
-        <div class="question-equation">
-          <span id="txtEquation">7 × 8 = </span>
-          <span class="target-unknown" id="txtUnknown">?</span>
-        </div>
-      </div>
-      <div id="comboBadge" class="combo-badge">3 連擊! 🔥</div>
-    </section>
-
-    <!-- 糖果雨核心遊戲機台 (上方落下欄位 + 正下方超大果凍鍵盤) -->
+    <!-- 糖果雨核心遊戲機台 (上方落下欄位 + 中間任務題目 + 正下方超大果凍鍵盤) -->
     <div class="arcade-cabinet">
       <!-- 糖果雨落下欄位 -->
       <div class="canvas-wrapper" id="canvasWrapper">
@@ -79,7 +64,22 @@
         <canvas id="gameCanvas" width="480" height="480"></canvas>
       </div>
 
-      <!-- 直接位於落下欄位最下方的超大 Q 萌果凍鍵盤 (大按鍵防誤觸) -->
+      <!-- 當前九九乘法任務看板 (位於落下欄位下方、鍵盤正上方，最舒適的作答視線) -->
+      <section class="question-card" id="questionCard">
+        <div class="mascot-box" id="mascotIcon">🐰</div>
+        <div class="question-content">
+          <div class="question-hint-title">
+            <span>🎯 點擊盤面糖果 或 鍵盤輸入答案：</span>
+          </div>
+          <div class="question-equation">
+            <span id="txtEquation">7 × 8 = </span>
+            <span class="target-unknown" id="txtUnknown">?</span>
+          </div>
+        </div>
+        <div id="comboBadge" class="combo-badge">3 連擊! 🔥</div>
+      </section>
+
+      <!-- 直接位於題目正下方的超大 Q 萌果凍鍵盤 (大按鍵防誤觸) -->
       <section class="virtual-keypad-panel" id="virtualKeypad">
         <div class="keypad-grid">
           <button class="key-btn candy-1" data-key="1">1</button>
