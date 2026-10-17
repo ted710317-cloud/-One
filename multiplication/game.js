@@ -168,8 +168,23 @@
   const tabLbCampaign = document.getElementById('tab-lb-campaign');
   const tabLbEndless = document.getElementById('tab-lb-endless');
   const lbTbody = document.getElementById('leaderboard-tbody');
+  const lbTabHint = document.getElementById('lb-tab-hint');
   const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
   const btnClearLeaderboard = document.getElementById('btn-clear-leaderboard');
+  const summaryCloudStatus = document.getElementById('summary-cloud-status');
+  const lbCloudBadge = document.getElementById('lb-cloud-badge');
+  const lbCloudHint = document.getElementById('lb-cloud-hint');
+  const btnRefreshLb = document.getElementById('btn-refresh-lb');
+  const btnOpenCloudSetup = document.getElementById('btn-open-cloud-setup');
+
+  // Cloud Setup Modal Elements
+  const modalCloudSetup = document.getElementById('modal-cloud-setup');
+  const inputCloudUrl = document.getElementById('input-cloud-url');
+  const cloudSetupMsg = document.getElementById('cloud-setup-msg');
+  const btnTestSaveCloud = document.getElementById('btn-test-save-cloud');
+  const btnCopyGasCode = document.getElementById('btn-copy-gas-code');
+  const btnClearCloudUrl = document.getElementById('btn-clear-cloud-url');
+  const btnCloseCloudSetup = document.getElementById('btn-close-cloud-setup');
 
   // Entities
   let monsters = [];
@@ -1563,7 +1578,389 @@
     return true;
   }
 
-  // --- Leaderboard (100% Local Storage - Standalone & Fast) ---
+  // ============================================================================
+  // Leaderboard Storage & Google Sheets Cloud Synchronization
+  // ============================================================================
+  const DEFAULT_CLOUD_API_URL = '';
+
+  const GOOGLE_APPS_SCRIPT_TEMPLATE = `function doGet(e) {
+  var params = e ? e.parameter : {};
+  var action = params.action;
+  var mode = (params.mode || 'campaign').toLowerCase();
+
+  if (action === 'test') {
+    return createJsonResponse({
+      status: 'success',
+      message: '🎉 恭喜！三年級九九乘法試算表雲端排行榜連線測試成功！'
+    });
+  }
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+    var sheet = getOrCreateSheet(ss, sheetName);
+    var data = sheet.getDataRange().getValues();
+
+    if (data.length <= 1) {
+      return createJsonResponse({ status: 'success', mode: mode, leaderboard: [] });
+    }
+
+    var rows = data.slice(1);
+    var bestScoresMap = {};
+
+    rows.forEach(function(row) {
+      var date = String(row[0] || '');
+      var pClass = String(row[1] || '').trim();
+      var pSeat = String(row[2] || '').trim();
+      var pName = String(row[3] || '').trim();
+      var score = Number(row[4]) || 0;
+      var combo = Number(row[5]) || 0;
+      var accuracy = Number(row[6]) || 0;
+      var mathMode = String(row[7] || '填空模式').trim();
+      var destroyed = Number(row[8]) || 0;
+      var pPlayer = String(row[9] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+
+      var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || 'player');
+
+      var entry = {
+        date: date,
+        class: pClass,
+        seat: pSeat,
+        name: pName,
+        score: score,
+        combo: combo,
+        accuracy: accuracy,
+        mathMode: mathMode,
+        destroyed: destroyed,
+        player: pPlayer
+      };
+
+      if (!bestScoresMap[uniqueKey]) {
+        bestScoresMap[uniqueKey] = entry;
+      } else {
+        var cur = bestScoresMap[uniqueKey];
+        if (score > cur.score || (score === cur.score && accuracy > cur.accuracy)) {
+          bestScoresMap[uniqueKey] = entry;
+        }
+      }
+    });
+
+    var formattedList = Object.keys(bestScoresMap).map(function(k) {
+      return bestScoresMap[k];
+    });
+
+    formattedList.sort(function(a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.accuracy - a.accuracy;
+    });
+
+    return createJsonResponse({
+      status: 'success',
+      mode: mode,
+      leaderboard: formattedList.slice(0, 50)
+    });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  }
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+  } catch (lockErr) {
+    return createJsonResponse({ status: 'error', message: '伺服器寫入排隊超時，請稍後重試' });
+  }
+
+  try {
+    var raw = e.postData.contents;
+    var data = JSON.parse(raw);
+    var mode = (data.mode || 'campaign').toLowerCase();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetName = mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+    var sheet = getOrCreateSheet(ss, sheetName);
+
+    var now = new Date();
+    var timeStr = Utilities.formatDate(now, "GMT+8", "yyyy/MM/dd HH:mm");
+    var pClass = String(data.class || '').trim();
+    var pSeat = String(data.seat || '').trim();
+    var pName = String(data.name || '').trim();
+    var score = Number(data.score) || 0;
+    var combo = Number(data.combo) || 0;
+    var accuracy = Number(data.accuracy) || 0;
+    var mathMode = String(data.mathMode || '填空模式').trim();
+    var destroyed = Number(data.destroyed) || 0;
+    var player = String(data.player || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+
+    sheet.appendRow([timeStr, pClass, pSeat, pName, score, combo, accuracy, mathMode, destroyed, player]);
+
+    var allRows = sheet.getDataRange().getValues().slice(1);
+    var bestMap = {};
+    for (var i = 0; i < allRows.length; i++) {
+      var rClass = String(allRows[i][1] || '').trim();
+      var rSeat = String(allRows[i][2] || '').trim();
+      var rPlayer = String(allRows[i][9] || '').trim();
+      var rKey = (rClass && rSeat) ? (rClass + '_' + rSeat) : rPlayer;
+
+      var rScore = Number(allRows[i][4]) || 0;
+      var rAcc = Number(allRows[i][6]) || 0;
+
+      if (!bestMap[rKey] || rScore > bestMap[rKey].score || (rScore === bestMap[rKey].score && rAcc > bestMap[rKey].acc)) {
+        bestMap[rKey] = { score: rScore, acc: rAcc };
+      }
+    }
+
+    var currentRank = 1;
+    var myKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : player;
+    var myBestScore = bestMap[myKey] ? bestMap[myKey].score : score;
+    var myBestAcc = bestMap[myKey] ? bestMap[myKey].acc : accuracy;
+
+    Object.keys(bestMap).forEach(function(k) {
+      if (k !== myKey) {
+        var other = bestMap[k];
+        if (other.score > myBestScore || (other.score === myBestScore && other.acc > myBestAcc)) {
+          currentRank++;
+        }
+      }
+    });
+
+    return createJsonResponse({
+      status: 'success',
+      rank: currentRank,
+      message: '成績已同步記錄至九九乘法榮譽榜！'
+    });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    var headers = ["紀錄時間", "班級", "座號", "姓名", "得分", "最高連擊", "命中率(%)", "題型模式", "擊潰怪獸數", "防衛官標籤"];
+    sheet.appendRow(headers);
+    var headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#101a33");
+    headerRange.setFontColor("#00f3ff");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function createJsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+  function getCloudApiUrl() {
+    const customUrl = localStorage.getItem('multi_cloud_api_url');
+    if (customUrl && customUrl.trim()) return customUrl.trim();
+    if (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl && window.GAME_CONFIG.cloudApiUrl.trim()) {
+      return window.GAME_CONFIG.cloudApiUrl.trim();
+    }
+    return DEFAULT_CLOUD_API_URL;
+  }
+
+  function setCloudApiUrl(url) {
+    if (url && url.trim()) {
+      localStorage.setItem('multi_cloud_api_url', url.trim());
+    } else {
+      localStorage.removeItem('multi_cloud_api_url');
+    }
+    updateCloudStatusUI();
+  }
+
+  function isCloudEnabled() {
+    const url = getCloudApiUrl();
+    return url.length > 0 && url.startsWith('http');
+  }
+
+  function updateCloudStatusUI(isSyncing = false, customHint = null) {
+    if (!lbCloudBadge || !lbCloudHint) return;
+
+    if (isSyncing) {
+      lbCloudBadge.className = 'cloud-badge cloud-syncing';
+      lbCloudBadge.textContent = '🔄 即時同步中...';
+      lbCloudHint.textContent = customHint || '正在連接全班試算表資料庫...';
+      return;
+    }
+
+    if (isCloudEnabled()) {
+      lbCloudBadge.className = 'cloud-badge cloud-online';
+      lbCloudBadge.textContent = '🟢 全班即時連線榜';
+      lbCloudHint.textContent = customHint || '已連接 Google 試算表雲端資料庫';
+    } else {
+      lbCloudBadge.className = 'cloud-badge cloud-local';
+      lbCloudBadge.textContent = '🟡 本機紀錄模式';
+      lbCloudHint.textContent = customHint || '尚未設定試算表網址 (點右側 ⚙️ 可設定全班同步)';
+    }
+  }
+
+  // --- Offline Pending Scores Queue (離線自動補傳佇列) ---
+  function getPendingScores() {
+    try {
+      const raw = localStorage.getItem('multi_pending_scores');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addPendingScore(payload) {
+    try {
+      const list = getPendingScores();
+      if (!list.some(item => item.timestamp === payload.timestamp)) {
+        list.push(payload);
+        localStorage.setItem('multi_pending_scores', JSON.stringify(list.slice(-25)));
+      }
+    } catch (e) {}
+  }
+
+  function removePendingScore(timestamp) {
+    try {
+      let list = getPendingScores();
+      list = list.filter(item => item.timestamp !== timestamp);
+      localStorage.setItem('multi_pending_scores', JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  let isFlushingQueue = false;
+  async function flushPendingScores() {
+    if (isFlushingQueue || !isCloudEnabled()) return;
+    const pending = getPendingScores();
+    if (!pending || pending.length === 0) return;
+
+    isFlushingQueue = true;
+    for (const item of pending) {
+      try {
+        const res = await sendScoreToCloud(item, false);
+        if (res !== null) {
+          removePendingScore(item.timestamp);
+        }
+      } catch (e) {
+        break;
+      }
+    }
+    isFlushingQueue = false;
+  }
+
+  let cloudCache = {
+    campaign: null,
+    endless: null,
+    lastFetched: 0
+  };
+
+  async function fetchCloudLeaderboard(mode, force = false) {
+    const cloudUrl = getCloudApiUrl();
+    if (!isCloudEnabled()) return null;
+
+    if (!force && cloudCache[mode] && (Date.now() - cloudCache.lastFetched < 12000)) {
+      return cloudCache[mode];
+    }
+
+    updateCloudStatusUI(true, '正在下載全班最新排名...');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      const res = await fetch(`${cloudUrl}?mode=${mode}&t=${Date.now()}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.status === 'success' && Array.isArray(data.leaderboard)) {
+        cloudCache[mode] = data.leaderboard;
+        cloudCache.lastFetched = Date.now();
+        try {
+          localStorage.setItem(`multi_cloud_cache_${mode}`, JSON.stringify(data.leaderboard));
+        } catch (e) {}
+        const nowTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        updateCloudStatusUI(false, `已同步最新全班戰報 (${nowTime})`);
+        return data.leaderboard;
+      } else {
+        throw new Error(data.message || '資料格式不符');
+      }
+    } catch (err) {
+      console.warn('Cloud leaderboard fetch error:', err);
+      try {
+        const cached = localStorage.getItem(`multi_cloud_cache_${mode}`);
+        if (cached) {
+          updateCloudStatusUI(false, '⚠️ 網路連線延遲，顯示前次暫存之雲端紀錄');
+          return JSON.parse(cached);
+        }
+      } catch (e) {}
+      updateCloudStatusUI(false, '⚠️ 雲端無法連線，已切換至本機紀錄');
+      return null;
+    }
+  }
+
+  let activeScoreUploadPromise = null;
+
+  async function sendScoreToCloud(payload, canQueue = true) {
+    const cloudUrl = getCloudApiUrl();
+    if (!isCloudEnabled()) return null;
+
+    const sheetTabName = payload.mode === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+
+    if (summaryCloudStatus) {
+      summaryCloudStatus.className = 'summary-cloud-status syncing';
+      summaryCloudStatus.innerHTML = `☁️ 正在同步成績至 Google 試算表【${sheetTabName}】...`;
+      summaryCloudStatus.classList.remove('hidden');
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const res = await fetch(cloudUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+      if (result && result.status === 'success') {
+        cloudCache.lastFetched = 0;
+        cloudCache[payload.mode] = null;
+        if (summaryCloudStatus) {
+          summaryCloudStatus.className = 'summary-cloud-status success';
+          summaryCloudStatus.innerHTML = `✅ 成績已成功寫入 Google 試算表【${sheetTabName}】！(全班即時第 ${result.rank} 名)`;
+          summaryCloudStatus.classList.remove('hidden');
+        }
+        return result.rank;
+      } else {
+        throw new Error(result.message || '寫入失敗');
+      }
+    } catch (e) {
+      console.warn('Failed to upload score to cloud:', e);
+      if (canQueue) {
+        addPendingScore(payload);
+      }
+      if (summaryCloudStatus) {
+        summaryCloudStatus.className = 'summary-cloud-status warning';
+        summaryCloudStatus.innerHTML = `⚠️ 網路連線微延遲，成績已先暫存本機，連線恢復時將自動補傳！<button class="btn-retry-sync" id="btn-manual-retry">🔄 立即重試</button>`;
+        summaryCloudStatus.classList.remove('hidden');
+        const retryBtn = document.getElementById('btn-manual-retry');
+        if (retryBtn) {
+          retryBtn.onclick = () => {
+            activeScoreUploadPromise = sendScoreToCloud(payload, false);
+          };
+        }
+      }
+    }
+    return null;
+  }
+
   function getLeaderboard(mode) {
     const key = `multi_lb_${mode}`;
     try {
@@ -1583,7 +1980,11 @@
 
   function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   function recordScoreToLeaderboard(mode, score, maxCombo, accuracy) {
@@ -1594,12 +1995,15 @@
     const pName = state.player.name ? ` (${state.player.name})` : '';
     const playerLabel = `${pClass}班 ${pSeat}號${pName}`;
     const dateStr = new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
+    const currentMathMode = state.mathMode === 'product' ? '💥 乘積模式' : '🎯 填空模式';
 
     const newEntry = {
       player: playerLabel,
       score: score,
       combo: maxCombo,
       accuracy: accuracy,
+      mathMode: currentMathMode,
+      destroyed: state.monstersDestroyed,
       date: dateStr,
       timestamp: Date.now()
     };
@@ -1609,30 +2013,77 @@
     const localRank = list.indexOf(newEntry);
     saveLeaderboard(mode, list);
 
-    if (summaryLbRank) {
-      summaryLbRank.textContent = `🎉 太厲害了！你榮登英雄排行榜第 ${localRank + 1} 名！`;
-      summaryLbRank.classList.remove('hidden');
+    if (isCloudEnabled()) {
+      const payload = {
+        mode: mode,
+        class: state.player.class || '',
+        seat: state.player.seat || '',
+        name: state.player.name || '',
+        player: playerLabel,
+        score: score,
+        combo: maxCombo,
+        accuracy: accuracy,
+        mathMode: currentMathMode,
+        destroyed: state.monstersDestroyed,
+        date: dateStr,
+        timestamp: Date.now()
+      };
+      activeScoreUploadPromise = sendScoreToCloud(payload).then(cloudRank => {
+        if (cloudRank !== null && summaryLbRank) {
+          const modeName = mode === 'endless' ? '無盡挑戰' : '關卡模式';
+          summaryLbRank.textContent = `🎉 太厲害了！你榮登【${modeName}】全班線上英雄榜第 ${cloudRank} 名！`;
+          summaryLbRank.classList.remove('hidden');
+        }
+        return cloudRank;
+      });
     }
 
     return localRank;
   }
 
   let currentLbTab = 'campaign';
+  let lbFetchCounter = 0;
 
-  function renderLeaderboard(tab = 'campaign') {
+  async function renderLeaderboard(tab = 'campaign', forceRefresh = false) {
     currentLbTab = tab;
     if (tabLbCampaign) tabLbCampaign.classList.toggle('active', tab === 'campaign');
     if (tabLbEndless) tabLbEndless.classList.toggle('active', tab === 'endless');
 
+    if (lbTabHint) {
+      const sheetName = tab === 'endless' ? '無盡挑戰榜' : '關卡模式榜';
+      const modeLabel = tab === 'endless' ? '⚡ 30 秒無盡挑戰模式' : '🚀 闖關關卡模式';
+      lbTabHint.innerHTML = `📋 目前檢視：<strong>${modeLabel}</strong> ｜ 對應 Google 試算表：<strong>【${sheetName}】</strong><br><small style="color:#8b9bb4;">（每位同學自動保留歷史最高分，杜絕洗版）</small>`;
+    }
+
     if (!lbTbody) return;
+
+    if (isCloudEnabled()) {
+      const currentCallId = ++lbFetchCounter;
+      updateCloudStatusUI(true);
+      lbTbody.innerHTML = `<tr><td colspan="6" style="color: #00f3ff; padding: 25px;"><span class="cloud-badge cloud-syncing">🔄 連線同步中</span><br><br>正在下載全班最新英雄戰報...</td></tr>`;
+
+      const cloudList = await fetchCloudLeaderboard(tab, forceRefresh);
+      if (currentCallId !== lbFetchCounter) return;
+
+      if (cloudList && Array.isArray(cloudList)) {
+        renderTableRows(cloudList, true);
+        return;
+      }
+    } else {
+      updateCloudStatusUI(false);
+    }
+
     const localList = getLeaderboard(tab);
-    renderTableRows(localList);
+    renderTableRows(localList, false);
   }
 
-  function renderTableRows(list) {
+  function renderTableRows(list, isCloud) {
     lbTbody.innerHTML = '';
     if (!list || list.length === 0) {
-      lbTbody.innerHTML = `<tr><td colspan="5" style="color: #8b9bb4; padding: 25px;">尚無英雄紀錄，快來進行第一場戰鬥奪下第 1 名！</td></tr>`;
+      const emptyMsg = isCloud
+        ? '雲端尚無英雄紀錄，快來進行第一場戰鬥奪下全班第 1 名！'
+        : '本機尚無英雄紀錄，快來進行第一場戰鬥奪下第 1 名！';
+      lbTbody.innerHTML = `<tr><td colspan="6" style="color: #8b9bb4; padding: 25px;">${emptyMsg}</td></tr>`;
       return;
     }
 
@@ -1643,15 +2094,135 @@
       else if (index === 1) rankHtml = `<span class="rank-badge rank-2">🥈 2</span>`;
       else if (index === 2) rankHtml = `<span class="rank-badge rank-3">🥉 3</span>`;
 
+      const mathModeBadge = item.mathMode
+        ? `<span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(0, 243, 255, 0.15); color: #00f3ff;">${escapeHtml(item.mathMode)}</span>`
+        : `<span style="font-size: 11px; color: #888;">--</span>`;
+
       tr.innerHTML = `
         <td>${rankHtml}</td>
         <td class="lb-player-tag">${escapeHtml(item.player)}</td>
+        <td>${mathModeBadge}</td>
         <td class="lb-score-tag">${Number(item.score).toLocaleString()}</td>
         <td style="color: #ffe600; font-weight: bold;">x${item.combo}</td>
         <td style="color: #00f3ff; font-weight: bold;">${item.accuracy}%</td>
       `;
       lbTbody.appendChild(tr);
     });
+  }
+
+  async function openLeaderboard(tab = null) {
+    if (!tab) {
+      tab = (state.mode === 'endless') ? 'endless' : 'campaign';
+    }
+    if (modalLeaderboard) modalLeaderboard.classList.remove('hidden');
+    flushPendingScores();
+    if (activeScoreUploadPromise) {
+      try {
+        await activeScoreUploadPromise;
+      } catch (e) {}
+    }
+    renderLeaderboard(tab, true);
+  }
+
+  function closeLeaderboard() {
+    if (modalLeaderboard) modalLeaderboard.classList.add('hidden');
+  }
+
+  function openCloudSetup() {
+    if (!modalCloudSetup) return;
+    if (inputCloudUrl) {
+      inputCloudUrl.value = getCloudApiUrl();
+    }
+    if (cloudSetupMsg) {
+      cloudSetupMsg.className = 'cloud-setup-msg hidden';
+      cloudSetupMsg.textContent = '';
+    }
+    modalCloudSetup.classList.remove('hidden');
+  }
+
+  function closeCloudSetup() {
+    if (modalCloudSetup) modalCloudSetup.classList.add('hidden');
+    renderLeaderboard(currentLbTab);
+  }
+
+  async function testAndSaveCloud() {
+    if (!inputCloudUrl || !cloudSetupMsg) return;
+    const url = inputCloudUrl.value.trim();
+
+    if (!url) {
+      cloudSetupMsg.className = 'cloud-setup-msg error';
+      cloudSetupMsg.textContent = '⚠️ 請輸入 Google Apps Script 網頁應用程式網址！';
+      cloudSetupMsg.classList.remove('hidden');
+      return;
+    }
+
+    if (!url.startsWith('https://script.google.com/macros/')) {
+      cloudSetupMsg.className = 'cloud-setup-msg error';
+      cloudSetupMsg.textContent = '⚠️ 網址格式不正確，應以 https://script.google.com/macros/ 開頭，結尾為 /exec！';
+      cloudSetupMsg.classList.remove('hidden');
+      return;
+    }
+
+    cloudSetupMsg.className = 'cloud-setup-msg loading';
+    cloudSetupMsg.textContent = '⏳ 正在測試 Google 試算表連線中，請稍候...';
+    cloudSetupMsg.classList.remove('hidden');
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+      const testUrl = `${url}${url.includes('?') ? '&' : '?'}action=test&t=${Date.now()}`;
+      const res = await fetch(testUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (data && data.status === 'success') {
+        setCloudApiUrl(url);
+        cloudSetupMsg.className = 'cloud-setup-msg success';
+        cloudSetupMsg.textContent = `🎉 連線成功！三年級九九乘法全班雲端排行榜已正式啟用！`;
+      } else {
+        throw new Error(data.message || '回傳格式異常');
+      }
+    } catch (err) {
+      cloudSetupMsg.className = 'cloud-setup-msg error';
+      cloudSetupMsg.innerHTML = `❌ 連線測試失敗：${escapeHtml(err.message)}<br><small>💡 請確認在發布 Apps Script 時，「誰可以存取 (Who has access)」是否已設定為<strong>「任何人 (Anyone)」</strong>！</small>`;
+    }
+  }
+
+  function copyAppsScriptCode() {
+    if (!navigator.clipboard) {
+      alert('您的瀏覽器不支援自動複製，請直接開啟 google_apps_script.js 檔案複製。');
+      return;
+    }
+    navigator.clipboard.writeText(GOOGLE_APPS_SCRIPT_TEMPLATE).then(() => {
+      if (btnCopyGasCode) {
+        const origText = btnCopyGasCode.textContent;
+        btnCopyGasCode.textContent = '✅ 已複製程式碼至剪貼簿！';
+        btnCopyGasCode.style.background = '#00ff88';
+        btnCopyGasCode.style.color = '#000';
+        setTimeout(() => {
+          btnCopyGasCode.textContent = origText;
+          btnCopyGasCode.style.background = '';
+          btnCopyGasCode.style.color = '';
+        }, 2500);
+      }
+    }).catch(() => {
+      alert('複製失敗，請手動複製 google_apps_script.js 檔案內的內容。');
+    });
+  }
+
+  function clearCloudUrl() {
+    if (confirm('確定要清除雲端網址並切換回本機模式嗎？')) {
+      setCloudApiUrl('');
+      if (inputCloudUrl) inputCloudUrl.value = '';
+      if (cloudSetupMsg) {
+        cloudSetupMsg.className = 'cloud-setup-msg success';
+        cloudSetupMsg.textContent = '已清除雲端網址，已切換回本機排行榜模式。';
+        cloudSetupMsg.classList.remove('hidden');
+      }
+    }
   }
 
   // --- Event Listeners: Console Buttons & Keyboard ---
@@ -1780,27 +2351,54 @@
     });
   }
 
-  btnViewLeaderboard.addEventListener('click', () => {
-    renderLeaderboard('campaign');
-    modalLeaderboard.classList.remove('hidden');
-  });
+  if (btnViewLeaderboard) {
+    btnViewLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
+  }
 
-  btnCloseLeaderboard.addEventListener('click', () => {
-    modalLeaderboard.classList.add('hidden');
-  });
+  if (btnCloseLeaderboard) {
+    btnCloseLeaderboard.addEventListener('click', closeLeaderboard);
+  }
 
-  tabLbCampaign.addEventListener('click', () => renderLeaderboard('campaign'));
-  tabLbEndless.addEventListener('click', () => renderLeaderboard('endless'));
+  if (tabLbCampaign) {
+    tabLbCampaign.addEventListener('click', () => renderLeaderboard('campaign'));
+  }
+  if (tabLbEndless) {
+    tabLbEndless.addEventListener('click', () => renderLeaderboard('endless'));
+  }
 
+  if (btnRefreshLb) {
+    btnRefreshLb.addEventListener('click', () => renderLeaderboard(currentLbTab, true));
+  }
 
+  if (btnOpenCloudSetup) {
+    btnOpenCloudSetup.addEventListener('click', openCloudSetup);
+  }
 
-  btnClearLeaderboard.addEventListener('click', () => {
-    if (confirm('確定要清除本機所有排行榜歷史紀錄嗎？')) {
-      localStorage.removeItem('multi_lb_campaign');
-      localStorage.removeItem('multi_lb_endless');
-      renderLeaderboard(currentLbTab);
-    }
-  });
+  if (btnCloseCloudSetup) {
+    btnCloseCloudSetup.addEventListener('click', closeCloudSetup);
+  }
+
+  if (btnTestSaveCloud) {
+    btnTestSaveCloud.addEventListener('click', testAndSaveCloud);
+  }
+
+  if (btnCopyGasCode) {
+    btnCopyGasCode.addEventListener('click', copyAppsScriptCode);
+  }
+
+  if (btnClearCloudUrl) {
+    btnClearCloudUrl.addEventListener('click', clearCloudUrl);
+  }
+
+  if (btnClearLeaderboard) {
+    btnClearLeaderboard.addEventListener('click', () => {
+      if (confirm('確定要清除本機所有排行榜歷史紀錄嗎？')) {
+        localStorage.removeItem('multi_lb_campaign');
+        localStorage.removeItem('multi_lb_endless');
+        renderLeaderboard(currentLbTab);
+      }
+    });
+  }
 
   // HUD Controls
   btnSpeed.addEventListener('click', () => {
@@ -1846,21 +2444,27 @@
     startGame(state.mode);
   });
 
-  btnLeaderboard.addEventListener('click', () => {
-    renderLeaderboard('campaign');
-    modalLeaderboard.classList.remove('hidden');
-  });
+  if (btnLeaderboard) {
+    btnLeaderboard.addEventListener('click', () => openLeaderboard('campaign'));
+  }
 
-  btnPlayAgain.addEventListener('click', () => startGame(state.mode));
-  btnSummaryLb.addEventListener('click', () => {
-    renderLeaderboard(state.mode === 'endless' ? 'endless' : 'campaign');
-    modalLeaderboard.classList.remove('hidden');
-  });
-  btnBackMenu.addEventListener('click', () => {
-    modalSummary.classList.add('hidden');
-    modalStart.classList.remove('hidden');
-    window.soundManager.stopBgm();
-  });
+  if (btnPlayAgain) {
+    btnPlayAgain.addEventListener('click', () => startGame(state.mode));
+  }
+
+  if (btnSummaryLb) {
+    btnSummaryLb.addEventListener('click', () => {
+      openLeaderboard(state.mode === 'endless' ? 'endless' : 'campaign');
+    });
+  }
+
+  if (btnBackMenu) {
+    btnBackMenu.addEventListener('click', () => {
+      modalSummary.classList.add('hidden');
+      modalStart.classList.remove('hidden');
+      window.soundManager.stopBgm();
+    });
+  }
 
   // --- Main Render & Game Loop (Optimized 60fps) ---
   function loop() {
@@ -2081,6 +2685,8 @@
   // Initialize profile & math mode on load
   loadPlayerProfile();
   setMathMode('fill_blank');
+  updateCloudStatusUI();
+  flushPendingScores();
 
   // Start animation loop
   requestAnimationFrame(loop);
