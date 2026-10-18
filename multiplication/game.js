@@ -1604,7 +1604,7 @@
   if (action === 'test') {
     return createJsonResponse({
       status: 'success',
-      message: '🎉 恭喜！三年級九九乘法試算表雲端排行榜連線測試成功！'
+      message: '🎉 恭喜！中年級九九乘法試算表雲端排行榜連線測試成功！'
     });
   }
 
@@ -2194,7 +2194,7 @@ function createJsonResponse(obj) {
       if (data && data.status === 'success') {
         setCloudApiUrl(url);
         cloudSetupMsg.className = 'cloud-setup-msg success';
-        cloudSetupMsg.textContent = `🎉 連線成功！三年級九九乘法全班雲端排行榜已正式啟用！`;
+        cloudSetupMsg.textContent = `🎉 連線成功！中年級九九乘法全班雲端排行榜已正式啟用！`;
       } else {
         throw new Error(data.message || '回傳格式異常');
       }

@@ -1,9 +1,9 @@
 // ============================================================================
-// 三年級九九乘法砲台保衛戰 - Google 試算表雲端排行榜後端程式碼 (GAS)
+// 中年級九九乘法砲台保衛戰 - Google 試算表雲端排行榜後端程式碼 (GAS)
 // ============================================================================
 // 💡 全智慧相容版本：
 // 1. 無論是直接由 script.google.com 建立的獨立腳本，或試算表內建腳本皆能自動運作！
-// 2. 若為獨立腳本，系統會自動在您的 Google 雲端硬碟建立「三年級九九乘法戰績總表」試算表。
+// 2. 若為獨立腳本，系統會自動在您的 Google 雲端硬碟建立「中年級九九乘法戰績總表」試算表。
 // 3. 自動建立「關卡模式榜」與「無盡挑戰榜」兩張工作表與標題排版。
 // 4. 依「班級_座號」自動保留每位學生個人最佳紀錄進行全班排名，杜絕重複刷榜。
 // 5. doPost 接收學生遊戲結束後成績並安全寫入試算表（具備 LockService 佇列防撞）。
@@ -21,7 +21,7 @@ function doGet(e) {
       var sheet = getOrCreateSheet(ss, '關卡模式榜');
       return createJsonResponse({
         status: 'success',
-        message: '🎉 恭喜！三年級九九乘法試算表雲端排行榜連線測試成功！',
+        message: '🎉 恭喜！中年級九九乘法試算表雲端排行榜連線測試成功！',
         sheetName: ss.getName(),
         sheetUrl: ss.getUrl()
       });
@@ -196,7 +196,7 @@ function getSS() {
   }
 
   // 自動在雲端硬碟建立專用試算表
-  ss = SpreadsheetApp.create('三年級九九乘法戰績總表');
+  ss = SpreadsheetApp.create('中年級九九乘法戰績總表');
   props.setProperty('SPREADSHEET_ID', ss.getId());
   return ss;
 }
