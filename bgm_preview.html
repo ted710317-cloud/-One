@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎮 數學保衛戰 - 遊戲背景音樂 (BGM) 試聽挑選間</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --card-bg: rgba(16, 26, 48, 0.88);
+      --cyan-glow: #00f3ff;
+      --green-glow: #00ff88;
+      --yellow-glow: #ffe600;
+      --pink-glow: #ff007f;
+      --border-color: rgba(0, 243, 255, 0.35);
+      --text-main: #f0f6fc;
+      --text-dim: #8b9bb4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 10%, rgba(0, 243, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 80% 90%, rgba(255, 0, 127, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #070b14 0%, #0d1527 100%);
+      color: var(--text-main);
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 24px;
+    }
+
+    .header-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan-glow);
+      background: rgba(0, 243, 255, 0.12);
+      border: 1px solid var(--border-color);
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 4.5vw, 34px);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 16px rgba(0, 243, 255, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .sub-desc {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Master Player / Visualizer Bar */
+    .master-bar {
+      width: 100%;
+      max-width: 860px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 243, 255, 0.2);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .now-playing-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .now-playing-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--yellow-glow);
+    }
+
+    .now-playing-status {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Audio Visualizer Canvas */
+    #visualizer-canvas {
+      width: 100%;
+      height: 60px;
+      background: rgba(5, 10, 20, 0.85);
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      border-radius: 8px;
+      display: block;
+    }
+
+    .master-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 6px;
+    }
+
+    .vol-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .vol-ctrl input[type="range"] {
+      accent-color: var(--cyan-glow);
+      cursor: pointer;
+    }
+
+    .tempo-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .tempo-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+
+    .tempo-btn.active {
+      background: var(--cyan-glow);
+      color: #070b14;
+      border-color: var(--cyan-glow);
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+
+    /* Track Cards Grid */
+    .tracks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 18px;
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 440px) {
+      .tracks-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .track-card {
+      background: var(--card-bg);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .track-card:hover {
+      border-color: var(--cyan-glow);
+      box-shadow: 0 8px 25px rgba(0, 243, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .track-card.playing {
+      border-color: var(--green-glow);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.35);
+      background: rgba(16, 32, 54, 0.95);
+    }
+
+    .track-card.playing::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--green-glow);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .track-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .track-meta {
+      flex: 1;
+    }
+
+    .track-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-1 { background: rgba(0, 243, 255, 0.2); color: var(--cyan-glow); border: 1px solid rgba(0, 243, 255, 0.4); }
+    .badge-2 { background: rgba(0, 255, 136, 0.2); color: var(--green-glow); border: 1px solid rgba(0, 255, 136, 0.4); }
+    .badge-3 { background: rgba(255, 230, 0, 0.2); color: var(--yellow-glow); border: 1px solid rgba(255, 230, 0, 0.4); }
+    .badge-4 { background: rgba(255, 0, 127, 0.2); color: var(--pink-glow); border: 1px solid rgba(255, 0, 127, 0.4); }
+
+    .track-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .track-bpm {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 13px;
+      color: var(--cyan-glow);
+      font-weight: 700;
+    }
+
+    .track-desc {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .track-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag-pill {
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tag-recommend {
+      background: rgba(255, 230, 0, 0.12);
+      color: #ffe600;
+      border-color: rgba(255, 230, 0, 0.3);
+      font-weight: 700;
+    }
+
+    .btn-play-track {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      border: 2px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-play-1 { background: rgba(0, 243, 255, 0.15); border-color: var(--cyan-glow); color: var(--cyan-glow); }
+    .btn-play-1:hover { background: var(--cyan-glow); color: #000; box-shadow: 0 0 15px var(--cyan-glow); }
+
+    .btn-play-2 { background: rgba(0, 255, 136, 0.15); border-color: var(--green-glow); color: var(--green-glow); }
+    .btn-play-2:hover { background: var(--green-glow); color: #000; box-shadow: 0 0 15px var(--green-glow); }
+
+    .btn-play-3 { background: rgba(255, 230, 0, 0.15); border-color: var(--yellow-glow); color: var(--yellow-glow); }
+    .btn-play-3:hover { background: var(--yellow-glow); color: #000; box-shadow: 0 0 15px var(--yellow-glow); }
+
+    .btn-play-4 { background: rgba(255, 0, 127, 0.15); border-color: var(--pink-glow); color: var(--pink-glow); }
+    .btn-play-4:hover { background: var(--pink-glow); color: #fff; box-shadow: 0 0 15px var(--pink-glow); }
+
+    .track-card.playing .btn-play-track {
+      background: #ff0055 !important;
+      border-color: #ff0055 !important;
+      color: #fff !important;
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+    }
+
+    /* Footer Navigation */
+    .preview-footer {
+      max-width: 860px;
+      width: 100%;
+      background: rgba(10, 18, 32, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .link-btn {
+      color: var(--cyan-glow);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(0, 243, 255, 0.08);
+      transition: all 0.15s;
+    }
+
+    .link-btn:hover {
+      background: var(--cyan-glow);
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-badge">🎵 音效控制台 · 背景音樂試聽選單</div>
+    <h1>數學保衛戰 · 緊張刺激 BGM 試聽間</h1>
+    <p class="sub-desc">專為高年級（質因數）與中年級（九九乘法）量身挑選 4 首強烈節奏戰鬥曲。<br>請點擊下方曲目試聽，選出您最喜歡的音樂！</p>
+  </header>
+
+  <!-- Master Player & Visualizer -->
+  <section class="master-bar">
+    <div class="now-playing-row">
+      <div class="now-playing-title" id="now-playing-title">⏸️ 點選下方任一曲目開始試聽</div>
+      <div class="now-playing-status" id="now-playing-status">音量：100% ｜ 速度：標準 1.0x</div>
+    </div>
+    <canvas id="visualizer-canvas"></canvas>
+    <div class="master-controls">
+      <div class="vol-ctrl">
+        <span>🔊 音量：</span>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.8">
+      </div>
+      <div class="tempo-ctrl">
+        <span>⚡ 模擬遊戲波次加速：</span>
+        <button class="tempo-btn active" data-tempo="1.0">1.0x 平常</button>
+        <button class="tempo-btn" data-tempo="1.2">1.2x 提速</button>
+        <button class="tempo-btn" data-tempo="1.45">1.45x 狂熱/魔王</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Tracks Showcase Grid -->
+  <div class="tracks-grid">
+
+    <!-- Track 1 -->
+    <div class="track-card" id="card-track-1">
+      <div class="track-header">
+        <div class="track-meta">
+          <span class="track-badge badge-1">曲目一 · 推薦高年級</span>
+          <div class="track-title">🚀 賽博疾速 (Cyber Rush)</div>
+        </div>
+        <div class="track-bpm">136 BPM</div>
+      </div>
+      <p class="track-desc">
+        強勁的 16 分音符重低音 Bassline，搭配緊湊的 Four-on-the-Floor 四四拍重擊鼓點與科技感雷射琶音。充滿奔馳與破關快感，極度激發專注力與心算速度！
+      </p>
+      <div class="track-tags">
+        <span class="tag-pill tag-recommend">⭐ 強烈推薦：高年級質數保衛戰</span>
+        <span class="tag-pill">賽博電音</span>
+        <span class="tag-pill">熱血緊湊</span>
+        <span class="tag-pill">提神專注</span>
+      </div>
+      <button class="btn-play-track btn-play-1" data-track="1">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">試聽【賽博疾速】</span>
+      </button>
+    </div>
+
+    <!-- Track 2 -->
+    <div class="track-card" id="card-track-2">
+      <div class="track-header">
+        <div class="track-meta">
+          <span class="track-badge badge-2">曲目二 · 推薦中年級</span>
+          <div class="track-title">👾 像素街機 (Arcade Hero)</div>
+        </div>
+        <div class="track-bpm">128 BPM</div>
+      </div>
+      <p class="track-desc">
+        經典紅白機與街機電玩風格！生動跳躍的方波主旋律、清脆軍鼓切分打擊，充滿勇闖外星基地的冒險感，節奏分明熱鬧，小三學生百聽不厭！
+      </p>
+      <div class="track-tags">
+        <span class="tag-pill tag-recommend">⭐ 強烈推薦：中年級九九乘法</span>
+        <span class="tag-pill">8-Bit 像素風</span>
+        <span class="tag-pill">歡樂動感</span>
+        <span class="tag-pill">勇者闖關</span>
+      </div>
+      <button class="btn-play-track btn-play-2" data-track="2">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">試聽【像素街機】</span>
+      </button>
+    </div>
+
+    <!-- Track 3 -->
+    <div class="track-card" id="card-track-3">
+      <div class="track-header">
+        <div class="track-meta">
+          <span class="track-badge badge-3">曲目三 · 決戰魔王感</span>
+          <div class="track-title">🌌 星際危機 (Space Crisis)</div>
+        </div>
+        <div class="track-bpm">120 BPM</div>
+      </div>
+      <p class="track-desc">
+        深沉的重低音滑音、壓迫感十足的警報琶音與金屬重拍。營造大敵當前、外星大軍兵臨城下的緊張戰慄感，適合高難度波次與魔王關卡！
+      </p>
+      <div class="track-tags">
+        <span class="tag-pill">魔王決戰氛圍</span>
+        <span class="tag-pill">外星壓迫感</span>
+        <span class="tag-pill">深沉重拍</span>
+        <span class="tag-pill">沉浸感強</span>
+      </div>
+      <button class="btn-play-track btn-play-3" data-track="3">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">試聽【星際危機】</span>
+      </button>
+    </div>
+
+    <!-- Track 4 -->
+    <div class="track-card" id="card-track-4">
+      <div class="track-header">
+        <div class="track-meta">
+          <span class="track-badge badge-4">曲目四 · 極限倒數</span>
+          <div class="track-title">⚡ 極限倒數 (Overdrive Beat)</div>
+        </div>
+        <div class="track-bpm">144 BPM</div>
+      </div>
+      <p class="track-desc">
+        高速 Breakbeat 碎拍與急迫感軍鼓切音，節奏最快！心跳般的衝擊節拍與警報短音，適合分秒必爭的無盡挑戰模式，心跳與手指極限同頻！
+      </p>
+      <div class="track-tags">
+        <span class="tag-pill">極速 144 BPM</span>
+        <span class="tag-pill">碎拍 Breakbeat</span>
+        <span class="tag-pill">爭分奪秒</span>
+        <span class="tag-pill">心跳加速</span>
+      </div>
+      <button class="btn-play-track btn-play-4" data-track="4">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">試聽【極限倒數】</span>
+      </button>
+    </div>
+
+  </div>
+
+  <footer class="preview-footer">
+    <p>💡 <strong>挑選方式</strong>：您可以聽完後直接在對話中告訴我，例如：「<em>高年級用第 1 首，中年級用第 2 首</em>」或「<em>兩邊都用第 1 首</em>」，我會立即幫您整合入遊戲中！</p>
+    <div class="footer-links">
+      <a href="./multiplication/" class="link-btn">🎯 前往三年級九九乘法遊戲</a>
+      <a href="./factor/" class="link-btn">💥 前往六年級質因數保衛戰</a>
+    </div>
+  </footer>
+
+  <script>
+    // ============================================================================
+    // Professional Multi-Track Web Audio Synthesizer Engine
+    // ============================================================================
+    class BGMPreviewEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.analyser = null;
+        this.noiseBuffer = null;
+        this.currentTrack = null;
+        this.isPlaying = false;
+        this.step = 0;
+        this.timer = null;
+        this.tempoMultiplier = 1.0;
+        this.volume = 0.8;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(this.volume, this.ctx.currentTime);
+
+          this.analyser = this.ctx.createAnalyser();
+          this.analyser.fftSize = 64;
+
+          this.masterGain.connect(this.analyser);
+          this.analyser.connect(this.ctx.destination);
+
+          // Generate noise buffer for drums
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.3);
+          this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = this.noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      setVolume(val) {
+        this.volume = Math.max(0, Math.min(1, val));
+        if (this.masterGain && this.ctx) {
+          this.masterGain.gain.setValueAtTime(this.volume, this.ctx.currentTime);
+        }
+      }
+
+      setTempoMultiplier(mult) {
+        this.tempoMultiplier = mult;
+        if (this.isPlaying && this.currentTrack) {
+          const cur = this.currentTrack;
+          this.stop();
+          this.play(cur);
+        }
+      }
+
+      // --- Percussion Synthesis ---
+      playKick(t, punch = 140) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(punch, t);
+        osc.frequency.exponentialRampToValueAtTime(32, t + 0.08);
+
+        gain.gain.setValueAtTime(0.38, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.16);
+      }
+
+      playSnare(t, bright = false) {
+        if (!this.ctx || !this.noiseBuffer) return;
+        // Noise crack
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = bright ? 'bandpass' : 'highpass';
+        filter.frequency.setValueAtTime(bright ? 2400 : 1200, t);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.24, t);
+        gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        noise.start(t);
+        noise.stop(t + 0.14);
+
+        // Body pop
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, t);
+        osc.frequency.exponentialRampToValueAtTime(60, t + 0.09);
+        oscGain.gain.setValueAtTime(0.2, t);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+        osc.connect(oscGain);
+        oscGain.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.09);
+      }
+
+      playHiHat(t, open = false) {
+        if (!this.ctx || !this.noiseBuffer) return;
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(8000, t);
+
+        const gain = this.ctx.createGain();
+        const dur = open ? 0.14 : 0.035;
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        noise.start(t);
+        noise.stop(t + dur);
+      }
+
+      // --- Synth Voices ---
+      playBass(freq, t, dur = 0.15, type = 'sawtooth', cutoff = 800) {
+        if (!this.ctx || !freq) return;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(cutoff, t);
+        filter.frequency.exponentialRampToValueAtTime(cutoff * 0.35, t + dur);
+        filter.Q.setValueAtTime(5, t);
+
+        gain.gain.setValueAtTime(0.24, t);
+        gain.gain.exponentialRampToValueAtTime(0.002, t + dur);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(t);
+        osc.stop(t + dur);
+      }
+
+      playLead(freq, t, dur = 0.18, type = 'square', vol = 0.14) {
+        if (!this.ctx || !freq) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+
+        gain.gain.setValueAtTime(vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(t);
+        osc.stop(t + dur);
+      }
+
+      // --- Track Playback Sequences ---
+      play(trackNum) {
+        this.init();
+        if (this.isPlaying) this.stop();
+
+        this.currentTrack = trackNum;
+        this.isPlaying = true;
+        this.step = 0;
+
+        let baseBpm = 136;
+        if (trackNum === 1) baseBpm = 136;
+        else if (trackNum === 2) baseBpm = 128;
+        else if (trackNum === 3) baseBpm = 120;
+        else if (trackNum === 4) baseBpm = 144;
+
+        const effectiveBpm = baseBpm * this.tempoMultiplier;
+        const stepMs = (60000 / effectiveBpm) / 4; // 16th note step in ms
+
+        this.timer = setInterval(() => {
+          if (!this.isPlaying || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const s16 = this.step % 16;
+          const s32 = this.step % 32;
+          const s64 = this.step % 64;
+
+          if (trackNum === 1) {
+            // ==========================================
+            // Track 1: 賽博疾速 (Cyber Rush - BPM 136)
+            // ==========================================
+            // Drums (Four-on-the-Floor)
+            if (s16 % 4 === 0) this.playKick(now);
+            if (s16 === 4 || s16 === 12) this.playSnare(now);
+            if (s16 % 2 === 0) this.playHiHat(now, s16 % 4 === 2);
+
+            // Driving 16th Bassline (D minor progression: D2 -> F2 -> G2 -> A2/C)
+            const bassProg = [
+              73.42, 73.42, 146.83, 73.42, 73.42, 73.42, 146.83, 73.42, // D
+              87.31, 87.31, 174.61, 87.31, 87.31, 87.31, 174.61, 87.31, // F
+              98.00, 98.00, 196.00, 98.00, 98.00, 98.00, 196.00, 98.00, // G
+              110.0, 110.0, 220.00, 110.0, 130.8, 110.0, 164.81, 146.8  // A -> C -> E -> D
+            ];
+            const bFreq = bassProg[s32];
+            this.playBass(bFreq, now, (stepMs / 1000) * 0.9, 'sawtooth', 950);
+
+            // Laser Lead Arpeggio (D minor pentatonic)
+            if (s64 >= 16) {
+              const leadMelody = [
+                293.66, 349.23, 440.00, 523.25, 587.33, 523.25, 440.00, 349.23,
+                293.66, 349.23, 440.00, 587.33, 698.46, 587.33, 523.25, 440.00
+              ];
+              if (s16 % 2 === 0) {
+                const lFreq = leadMelody[(s16 / 2) % leadMelody.length];
+                this.playLead(lFreq, now, 0.10, 'triangle', 0.12);
+              }
+            }
+
+          } else if (trackNum === 2) {
+            // ==========================================
+            // Track 2: 像素街機 (Arcade Hero - BPM 128)
+            // ==========================================
+            // Bouncy Arcade Beat
+            if (s16 === 0 || s16 === 6 || s16 === 8 || s16 === 10) this.playKick(now, 160);
+            if (s16 === 4 || s16 === 12) this.playSnare(now, true);
+            if (s16 % 2 === 1) this.playHiHat(now, s16 === 14);
+
+            // 8-Bit Bouncy Bass (Octave leaps)
+            const aBass = [
+              110.0, 220.0, 110.0, 220.0, 130.8, 261.6, 130.8, 261.6,
+              146.8, 293.6, 146.8, 293.6, 164.8, 329.6, 146.8, 130.8
+            ];
+            this.playBass(aBass[s16], now, (stepMs / 1000) * 0.75, 'triangle', 1400);
+
+            // Bright Square Wave Hero Lead (Catchy 8-bit theme)
+            const chiptuneTheme = [
+              440, 0, 440, 523.25, 0, 587.33, 0, 659.25,
+              587.33, 0, 523.25, 0, 440, 0, 392, 0,
+              440, 0, 523.25, 0, 587.33, 0, 659.25, 783.99,
+              880, 0, 783.99, 0, 659.25, 0, 587.33, 523.25
+            ];
+            const cFreq = chiptuneTheme[s32];
+            if (cFreq > 0) {
+              this.playLead(cFreq, now, 0.12, 'square', 0.10);
+            }
+
+          } else if (trackNum === 3) {
+            // ==========================================
+            // Track 3: 星際危機 (Space Crisis - BPM 120)
+            // ==========================================
+            // Heavy Cinematic Drums
+            if (s16 === 0 || s16 === 7 || s16 === 10) this.playKick(now, 110);
+            if (s16 === 4 || s16 === 12) this.playSnare(now, false);
+            if (s16 % 4 === 2) this.playHiHat(now, false);
+
+            // Deep Ominous Bass Drop
+            if (s16 === 0) {
+              const rootNotes = [65.41, 58.27, 51.91, 48.99]; // C1 -> Bb0 -> Ab0 -> G0
+              const rFreq = rootNotes[Math.floor(s32 / 8) % rootNotes.length];
+              this.playBass(rFreq, now, 0.65, 'sawtooth', 600);
+            }
+
+            // High Tension Minor Alarm Arpeggio
+            const alarmArp = [
+              523.25, 554.37, 523.25, 622.25, 523.25, 659.25, 523.25, 783.99
+            ];
+            if (s16 % 2 === 0) {
+              const aFreq = alarmArp[(s16 / 2) % alarmArp.length];
+              this.playLead(aFreq, now, 0.08, 'sawtooth', 0.08);
+            }
+
+          } else if (trackNum === 4) {
+            // ==========================================
+            // Track 4: 極限倒數 (Overdrive Beat - BPM 144)
+            // ==========================================
+            // High-Speed Breakbeat
+            if (s16 === 0 || s16 === 6 || s16 === 10) this.playKick(now, 150);
+            if (s16 === 4 || s16 === 12 || s16 === 15) this.playSnare(now, true);
+            this.playHiHat(now, s16 % 4 === 2);
+
+            // Fast Phrygian Pulse Bass
+            const pulseNotes = [82.41, 82.41, 87.31, 82.41, 98.00, 82.41, 87.31, 77.78];
+            this.playBass(pulseNotes[s16 % pulseNotes.length], now, (stepMs / 1000) * 0.85, 'sawtooth', 1200);
+
+            // Staccato Synth Stabs
+            if (s16 === 0 || s16 === 3 || s16 === 6 || s16 === 10 || s16 === 12) {
+              this.playLead(659.25, now, 0.06, 'square', 0.11); // E5 stab
+              this.playLead(783.99, now, 0.06, 'square', 0.09); // G5 stab
+            }
+          }
+
+          this.step++;
+        }, stepMs);
+      }
+
+      stop() {
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+        this.isPlaying = false;
+        this.currentTrack = null;
+      }
+    }
+
+    const engine = new BGMPreviewEngine();
+
+    // UI Elements
+    const cards = {
+      1: document.getElementById('card-track-1'),
+      2: document.getElementById('card-track-2'),
+      3: document.getElementById('card-track-3'),
+      4: document.getElementById('card-track-4')
+    };
+
+    const trackNames = {
+      1: '🚀 賽博疾速 (Cyber Rush - 136 BPM)',
+      2: '👾 像素街機 (Arcade Hero - 128 BPM)',
+      3: '🌌 星際危機 (Space Crisis - 120 BPM)',
+      4: '⚡ 極限倒數 (Overdrive Beat - 144 BPM)'
+    };
+
+    const nowTitle = document.getElementById('now-playing-title');
+    const nowStatus = document.getElementById('now-playing-status');
+    const volSlider = document.getElementById('vol-slider');
+    const tempoBtns = document.querySelectorAll('.tempo-btn');
+    const playBtns = document.querySelectorAll('.btn-play-track');
+
+    function updateUI() {
+      for (let i = 1; i <= 4; i++) {
+        const card = cards[i];
+        const btn = card.querySelector('.btn-play-track');
+        const isThisPlaying = engine.isPlaying && engine.currentTrack === i;
+
+        if (isThisPlaying) {
+          card.classList.add('playing');
+          btn.querySelector('.btn-icon').textContent = '⏹️';
+          btn.querySelector('.btn-text').textContent = '停止播放';
+        } else {
+          card.classList.remove('playing');
+          btn.querySelector('.btn-icon').textContent = '▶️';
+          btn.querySelector('.btn-text').textContent = `試聽【${btn.dataset.track == 1 ? '賽博疾速' : btn.dataset.track == 2 ? '像素街機' : btn.dataset.track == 3 ? '星際危機' : '極限倒數'}】`;
+        }
+      }
+
+      if (engine.isPlaying && engine.currentTrack) {
+        nowTitle.innerHTML = `🎵 正在播放：<strong>${trackNames[engine.currentTrack]}</strong>`;
+        nowStatus.textContent = `音量：${Math.round(engine.volume * 100)}% ｜ 速度：${engine.tempoMultiplier}x`;
+      } else {
+        nowTitle.textContent = '⏸️ 點選下方任一曲目開始試聽';
+        nowStatus.textContent = `音量：${Math.round(engine.volume * 100)}% ｜ 速度：${engine.tempoMultiplier}x`;
+      }
+    }
+
+    playBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const trackId = parseInt(btn.dataset.track, 10);
+        if (engine.isPlaying && engine.currentTrack === trackId) {
+          engine.stop();
+        } else {
+          engine.play(trackId);
+        }
+        updateUI();
+      });
+    });
+
+    volSlider.addEventListener('input', e => {
+      engine.setVolume(parseFloat(e.target.value));
+      updateUI();
+    });
+
+    tempoBtns.forEach(b => {
+      b.addEventListener('click', () => {
+        tempoBtns.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        engine.setTempoMultiplier(parseFloat(b.dataset.tempo));
+        updateUI();
+      });
+    });
+
+    // --- Audio Canvas Visualizer Animation ---
+    const vCanvas = document.getElementById('visualizer-canvas');
+    const vCtx = vCanvas.getContext('2d');
+
+    function resizeVCanvas() {
+      vCanvas.width = vCanvas.clientWidth * window.devicePixelRatio;
+      vCanvas.height = vCanvas.clientHeight * window.devicePixelRatio;
+    }
+    window.addEventListener('resize', resizeVCanvas);
+    resizeVCanvas();
+
+    function drawVisualizer() {
+      requestAnimationFrame(drawVisualizer);
+      const w = vCanvas.width;
+      const h = vCanvas.height;
+
+      vCtx.clearRect(0, 0, w, h);
+
+      if (!engine.analyser || !engine.isPlaying) {
+        // Draw idle wave
+        vCtx.strokeStyle = 'rgba(0, 243, 255, 0.2)';
+        vCtx.lineWidth = 2;
+        vCtx.beginPath();
+        vCtx.moveTo(0, h / 2);
+        vCtx.lineTo(w, h / 2);
+        vCtx.stroke();
+        return;
+      }
+
+      const freqData = new Uint8Array(engine.analyser.frequencyBinCount);
+      engine.analyser.getByteFrequencyData(freqData);
+
+      const barCount = 28;
+      const barW = (w / barCount) * 0.7;
+      const gap = (w / barCount) * 0.3;
+
+      for (let i = 0; i < barCount; i++) {
+        const val = freqData[i] || 0;
+        const barH = (val / 255) * h * 0.88;
+        const x = i * (barW + gap) + gap / 2;
+        const y = h - barH;
+
+        let grad = vCtx.createLinearGradient(0, y, 0, h);
+        if (engine.currentTrack === 1) {
+          grad.addColorStop(0, '#00f3ff'); grad.addColorStop(1, '#0044ff');
+        } else if (engine.currentTrack === 2) {
+          grad.addColorStop(0, '#00ff88'); grad.addColorStop(1, '#008844');
+        } else if (engine.currentTrack === 3) {
+          grad.addColorStop(0, '#ffe600'); grad.addColorStop(1, '#ff6600');
+        } else {
+          grad.addColorStop(0, '#ff007f'); grad.addColorStop(1, '#aa00ff');
+        }
+
+        vCtx.fillStyle = grad;
+        vCtx.fillRect(x, y, barW, barH);
+      }
+    }
+    drawVisualizer();
+  </script>
+</body>
+</html>
