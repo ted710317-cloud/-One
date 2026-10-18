@@ -705,12 +705,15 @@
           state.waveMonstersRemaining--;
           if (state.bossSpawned && monster.isBoss) {
             // Boss defeated!
+            state.bossSpawned = false;
+            updateHUD();
             setTimeout(completeWave, 1200);
           } else if (!state.bossSpawned && state.waveMonstersRemaining <= 0) {
             // Spawn Boss for this wave
             state.bossSpawned = true;
             monsters.push(spawnBoss(state.wave));
             showComboBanner(`⚠️ 魔王出現！注意分解！`);
+            updateHUD();
           }
         } else if (state.mode === 'endless') {
           // Endless Mode Progression: Scale difficulty and speed every 5 monsters destroyed!
@@ -964,6 +967,18 @@
       shieldBarInner.classList.add('shield-critical');
     } else {
       shieldBarInner.classList.remove('shield-critical');
+    }
+
+    // Adaptive Dynamic BGM Tempo Update
+    if (window.soundManager && typeof window.soundManager.updateBgmState === 'function') {
+      window.soundManager.updateBgmState({
+        mode: state.mode,
+        wave: state.wave,
+        endlessLevel: state.endlessLevel,
+        bossSpawned: state.bossSpawned,
+        isFever: state.isFever,
+        endlessTimeLeft: state.endlessTimeLeft
+      });
     }
   }
 

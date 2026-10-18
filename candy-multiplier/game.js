@@ -68,6 +68,19 @@
   let rushTimeRemaining = 60.0;
   let inputBuffer = '';
   let isInputProcessing = false;
+  let singleDigitTimer = null;
+  let wrongResetTimer = null;
+
+  function clearInputTimers() {
+    if (singleDigitTimer) {
+      clearTimeout(singleDigitTimer);
+      singleDigitTimer = null;
+    }
+    if (wrongResetTimer) {
+      clearTimeout(wrongResetTimer);
+      wrongResetTimer = null;
+    }
+  }
 
   // 動畫與特效系統
   let particles = [];
@@ -331,6 +344,7 @@
     };
 
     // 更新題目 UI 與重設鍵盤輸入緩衝
+    clearInputTimers();
     inputBuffer = '';
     isInputProcessing = false;
     elEquation.textContent = `${currentQuestion.a} × ${currentQuestion.b} = `;
@@ -550,6 +564,7 @@
 
   // --- 8. 答題判定核心 (支援點擊糖果與虛擬鍵盤雙模式) ---
   function handleCorrectAnswer(col, row) {
+    clearInputTimers();
     const timeSpent = (Date.now() - currentQuestion.startTime) / 1000;
     const equationStr = `${currentQuestion.a} × ${currentQuestion.b} = ${currentQuestion.answer}`;
 
@@ -572,6 +587,30 @@
     if (col !== null && row !== null) {
       const blastList = popConnectedCandies(col, row);
       executePop(blastList, true);
+    } else {
+      // 保底機制：若盤面上目前無該答案糖果（例如已在連鎖或剛掉落），找任意盤面糖果引爆慶祝，確保 100% 觸發得分與音效
+      let fallbackCandy = null;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[c] && grid[c][r] && !grid[c][r].isPopping) {
+            fallbackCandy = grid[c][r];
+            break;
+          }
+        }
+        if (fallbackCandy) break;
+      }
+      if (fallbackCandy) {
+        fallbackCandy.number = currentQuestion.answer;
+        const blastList = popConnectedCandies(fallbackCandy.col, fallbackCandy.row);
+        executePop(blastList, true);
+      } else {
+        // 盤面全空時保底給予得分與音效
+        executePop([{
+          col: Math.floor(COLS / 2),
+          currentY: cellHeight * 4,
+          type: CANDY_TYPES[0]
+        }], true);
+      }
     }
 
     setTimeout(() => {
@@ -609,11 +648,12 @@
       spawnFloatingText(candyToWiggle.currentX + cellWidth / 2, candyToWiggle.currentY, '再想想看喔~', '#ff508c');
     }
 
-    setTimeout(() => {
+    wrongResetTimer = setTimeout(() => {
       inputBuffer = '';
       elUnknown.textContent = '?';
       elUnknown.className = 'target-unknown';
       isInputProcessing = false;
+      wrongResetTimer = null;
     }, 450);
   }
 
@@ -639,16 +679,65 @@
     }
   }
 
-  // 模式 B：使用平板虛擬鍵盤或實體數字鍵輸入
+  // 模式 B：使用平板虛擬鍵盤或實體數字鍵輸入 (超智慧寬容判讀核心)
+  function commitCorrectAnswer() {
+    clearInputTimers();
+    isInputProcessing = true;
+
+    // 在盤面上尋找該數字對應的糖果引爆
+    let targetCol = null, targetRow = null;
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        if (grid[c][r] && grid[c][r].number === currentQuestion.answer && !grid[c][r].isPopping) {
+          targetCol = c;
+          targetRow = r;
+          break;
+        }
+      }
+      if (targetCol !== null) break;
+    }
+
+    handleCorrectAnswer(targetCol, targetRow);
+    setTimeout(() => {
+      isInputProcessing = false;
+      inputBuffer = '';
+    }, 300);
+  }
+
+  function commitWrongAnswer(enteredNum) {
+    clearInputTimers();
+    isInputProcessing = true;
+    handleWrongAnswer(enteredNum, null);
+  }
+
   function handleKeypadInput(digit) {
-    if (isGameOver || isPaused || !gameStarted || isInputProcessing) return;
+    if (isGameOver || isPaused || !gameStarted) return;
 
     if (window.soundEngine && !window.soundEngine.bgmPlaying) {
       window.soundEngine.startBGM();
     }
 
-    const targetStr = currentQuestion.answer.toString();
-    if (inputBuffer.length >= targetStr.length) {
+    // 若前一次剛處於答錯震動狀態，學生若立刻輸入新數字，立即取消鎖定並開始全新作答（絕不吃字/漏按）
+    if (wrongResetTimer) {
+      clearInputTimers();
+      inputBuffer = '';
+      isInputProcessing = false;
+      elUnknown.className = 'target-unknown';
+    } else if (isInputProcessing) {
+      // 正在播放答對過關爆破特效時暫緩輸入
+      return;
+    }
+
+    if (singleDigitTimer) {
+      clearTimeout(singleDigitTimer);
+      singleDigitTimer = null;
+    }
+
+    const targetAnswer = currentQuestion.answer;
+    const targetStr = targetAnswer.toString();
+
+    // 防禦緩衝區長度（九九乘法最多 2 位，容許前導 0 故最多 3 位，若超長則重新計數）
+    if (inputBuffer.length >= 3) {
       inputBuffer = '';
     }
 
@@ -660,35 +749,88 @@
       window.soundEngine.playKeyTap(parseInt(digit, 10));
     }
 
-    // 當輸入位數達到題目答案長度時自動判斷 (1位數或2位數)
-    if (inputBuffer.length === targetStr.length) {
-      isInputProcessing = true;
-      const enteredNum = parseInt(inputBuffer, 10);
+    const enteredNum = parseInt(inputBuffer, 10);
 
-      if (enteredNum === currentQuestion.answer) {
-        // 在盤面上尋找該數字對應的糖果引爆
-        let targetCol = null, targetRow = null;
-        for (let c = 0; c < COLS; c++) {
-          for (let r = 0; r < ROWS; r++) {
-            if (grid[c][r] && grid[c][r].number === currentQuestion.answer && !grid[c][r].isPopping) {
-              targetCol = c;
-              targetRow = r;
-              break;
-            }
-          }
-          if (targetCol !== null) break;
-        }
-
-        handleCorrectAnswer(targetCol, targetRow);
-        setTimeout(() => { isInputProcessing = false; }, 300);
-      } else {
-        handleWrongAnswer(enteredNum, null);
+    // 判讀邏輯 1：輸入值直接命中目標答案！
+    // 例如輸入 8、08、24、024 等情況
+    if (enteredNum === targetAnswer) {
+      // 若題目為 1 位數 (例如 8) 且輸入是 '8' 或 '08' -> 立即過關！
+      // 若題目為 2 位數 (例如 24) 且輸入是 '24' 或 '024' -> 立即過關！
+      if (inputBuffer === targetStr || inputBuffer === '0' + targetStr || inputBuffer.length >= targetStr.length) {
+        commitCorrectAnswer();
+        return;
       }
+    }
+
+    // 判讀邏輯 2：前導 0 寬容處理 (如孩子習慣輸入 04, 08 等)
+    if (inputBuffer === '0') {
+      // 剛按 0，九九乘法積沒有 0，學生必然打算按第二個數字 (例如 08)
+      // 保持顯示 '0'，不提前判定為錯，等待第二個數字輸入
+      singleDigitTimer = setTimeout(() => {
+        if (inputBuffer === '0' && !isInputProcessing) {
+          commitWrongAnswer(0);
+        }
+      }, 1500);
+      return;
+    }
+
+    // 判讀邏輯 3：若題目是 2 位數 (例如 7×8=56, 3×8=24)
+    if (targetStr.length === 2) {
+      if (inputBuffer.length === 2) {
+        if (enteredNum === targetAnswer) {
+          commitCorrectAnswer();
+        } else {
+          commitWrongAnswer(enteredNum);
+        }
+      } else if (inputBuffer.length >= 3) {
+        if (enteredNum === targetAnswer) {
+          commitCorrectAnswer();
+        } else {
+          commitWrongAnswer(enteredNum);
+        }
+      }
+      return;
+    }
+
+    // 判讀邏輯 4：若題目是 1 位數 (例如 2×4=8, 3×3=9)
+    if (targetStr.length === 1) {
+      if (inputBuffer.length === 1) {
+        // 輸入了 1 個非目標的數字 (例如答案是 8，學生按了 1 或 6)
+        // 學生可能以為是兩位數答案 (例如想輸入 16 或 18)！
+        // 給予 700ms 寬容時間：若繼續按下第二位 (例如按 6 變成 16)，以 16 判讀錯題；
+        // 若 700ms 內未再按任何鍵，則確認該單位數為其最終回答，判定錯誤
+        singleDigitTimer = setTimeout(() => {
+          if (inputBuffer.length === 1 && !isInputProcessing) {
+            commitWrongAnswer(parseInt(inputBuffer, 10));
+          }
+        }, 700);
+      } else if (inputBuffer.length >= 2) {
+        if (enteredNum === targetAnswer) {
+          commitCorrectAnswer();
+        } else {
+          commitWrongAnswer(enteredNum);
+        }
+      }
+      return;
+    }
+  }
+
+  // 實體鍵盤 Enter 或手動確認當前輸入
+  function submitCurrentInput() {
+    if (isGameOver || isPaused || !gameStarted || isInputProcessing) return;
+    if (inputBuffer.length === 0) return;
+    clearInputTimers();
+    const enteredNum = parseInt(inputBuffer, 10);
+    if (enteredNum === currentQuestion.answer) {
+      commitCorrectAnswer();
+    } else {
+      commitWrongAnswer(enteredNum);
     }
   }
 
   function handleKeypadClear() {
-    if (isInputProcessing) return;
+    clearInputTimers();
+    isInputProcessing = false;
     inputBuffer = '';
     elUnknown.textContent = '?';
     elUnknown.className = 'target-unknown';
@@ -696,7 +838,14 @@
   }
 
   function handleKeypadBack() {
+    clearInputTimers();
+    if (wrongResetTimer) {
+      clearTimeout(wrongResetTimer);
+      wrongResetTimer = null;
+      isInputProcessing = false;
+    }
     if (isInputProcessing) return;
+
     if (inputBuffer.length > 0) {
       inputBuffer = inputBuffer.slice(0, -1);
       elUnknown.textContent = inputBuffer.length > 0 ? inputBuffer : '?';
@@ -809,6 +958,9 @@
     rainTimer = 0;
     freezeTimer = 0;
     dangerAlertTimer = 0;
+    clearInputTimers();
+    inputBuffer = '';
+    isInputProcessing = false;
 
     items = { bomb: 2, freeze: 1, reroll: 3 };
     countBomb.textContent = items.bomb;
@@ -1540,32 +1692,40 @@
       modalTable.classList.remove('active');
     });
 
-    // 虛擬鍵盤按鈕監聽 (針對平板觸控最佳化)
+    // 虛擬鍵盤按鈕監聽 (針對平板觸控與滑鼠點擊徹底防重複觸發)
     if (keypadPanel) {
+      let lastTouchTimestamp = 0;
+      let lastBtn = null;
+      let lastBtnTime = 0;
+
+      const triggerKey = (btn) => {
+        const now = Date.now();
+        // 僅針對同一顆按鈕進行 60ms 內防彈跳，不同按鈕（如十位數與個位數連續輸入）絕不攔截
+        if (lastBtn === btn && (now - lastBtnTime < 60)) return;
+        lastBtn = btn;
+        lastBtnTime = now;
+
+        btn.classList.add('pressed');
+        setTimeout(() => btn.classList.remove('pressed'), 100);
+
+        const key = btn.getAttribute('data-key');
+        const action = btn.getAttribute('data-action');
+        if (key !== null) handleKeypadInput(key);
+        else if (action === 'clear') handleKeypadClear();
+        else if (action === 'back') handleKeypadBack();
+      };
+
       keypadPanel.querySelectorAll('.key-btn').forEach(btn => {
-        let keyTouchTime = 0;
         btn.addEventListener('touchstart', (e) => {
-          keyTouchTime = Date.now();
-          btn.classList.add('pressed');
-          const key = btn.getAttribute('data-key');
-          const action = btn.getAttribute('data-action');
-          if (key !== null) handleKeypadInput(key);
-          else if (action === 'clear') handleKeypadClear();
-          else if (action === 'back') handleKeypadBack();
+          lastTouchTimestamp = Date.now();
           e.preventDefault();
+          triggerKey(btn);
         }, { passive: false });
 
-        btn.addEventListener('touchend', () => {
-          setTimeout(() => btn.classList.remove('pressed'), 100);
-        });
-
         btn.addEventListener('click', () => {
-          if (Date.now() - keyTouchTime < 450) return;
-          const key = btn.getAttribute('data-key');
-          const action = btn.getAttribute('data-action');
-          if (key !== null) handleKeypadInput(key);
-          else if (action === 'clear') handleKeypadClear();
-          else if (action === 'back') handleKeypadBack();
+          // 如果 400ms 內剛發生過觸控，此 click 必為瀏覽器合成點擊，直接忽略
+          if (Date.now() - lastTouchTimestamp < 400) return;
+          triggerKey(btn);
         });
       });
     }
@@ -1579,13 +1739,15 @@
       });
     }
 
-    // 電腦實體鍵盤支援 (Chromebook / 筆電數字鍵同步支援)
+    // 電腦實體鍵盤支援 (Chromebook / 筆電數字鍵與九宮格數字鍵同步支援)
     window.addEventListener('keydown', (e) => {
       if (isGameOver || isPaused || !gameStarted) return;
       if (e.key >= '0' && e.key <= '9') {
         handleKeypadInput(e.key);
       } else if (e.key === 'Backspace') {
         handleKeypadBack();
+      } else if (e.key === 'Enter') {
+        submitCurrentInput();
       } else if (e.key === 'Escape' || e.key === 'Delete' || e.key === 'c' || e.key === 'C') {
         handleKeypadClear();
       }

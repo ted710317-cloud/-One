@@ -1038,12 +1038,15 @@
       if (state.mode === 'campaign') {
         state.waveMonstersRemaining--;
         if (state.bossSpawned && monster.isBoss) {
+          state.bossSpawned = false;
+          updateHUD();
           setTimeout(completeWave, 1000);
         } else if (!state.bossSpawned && state.waveMonstersRemaining <= 0) {
           state.bossSpawned = true;
           monsters.push(spawnBoss(state.wave));
           showComboBanner(`⚠️ 魔王出現！請快速心算消除！`);
           window.soundManager.playDamage();
+          updateHUD();
         }
       } else if (state.mode === 'endless') {
         state.endlessProgress++;
@@ -1482,6 +1485,18 @@
       shieldBarInner.classList.add('shield-low');
     } else {
       shieldBarInner.classList.remove('shield-low');
+    }
+
+    // Adaptive Dynamic BGM Tempo Update
+    if (window.soundManager && typeof window.soundManager.updateBgmState === 'function') {
+      window.soundManager.updateBgmState({
+        mode: state.mode,
+        wave: state.wave,
+        endlessLevel: state.endlessLevel,
+        bossSpawned: state.bossSpawned,
+        isFever: state.isFever,
+        endlessTimeLeft: state.endlessTimeLeft
+      });
     }
   }
 
@@ -2529,12 +2544,15 @@ function createJsonResponse(obj) {
       // Campaign Mode Watchdog: prevent deadlock if 0 monsters exist while wave is active
       if (state.mode === 'campaign' && monsters.length === 0 && !state.isWaveTransition && !state.isGameOver) {
         if (state.bossSpawned) {
+          state.bossSpawned = false;
+          updateHUD();
           setTimeout(completeWave, 500);
         } else if (state.waveMonstersRemaining <= 0) {
           state.bossSpawned = true;
           monsters.push(spawnBoss(state.wave));
           showComboBanner('⚠️ 魔王出現！請快速心算消除！');
           window.soundManager.playDamage();
+          updateHUD();
         } else if (state.spawnTimer >= 60) {
           state.spawnTimer = 0;
           monsters.push(generateQuestion(effectiveWave));
@@ -2568,6 +2586,8 @@ function createJsonResponse(obj) {
               if (wasBoss) {
                 // Boss breached defense line, but player survived with shield!
                 // Trigger wave completion so game cleanly advances to next wave!
+                state.bossSpawned = false;
+                updateHUD();
                 setTimeout(completeWave, 1000);
               } else {
                 state.waveMonstersRemaining--;
@@ -2576,6 +2596,7 @@ function createJsonResponse(obj) {
                   monsters.push(spawnBoss(state.wave));
                   showComboBanner('⚠️ 魔王出現！請快速心算消除！');
                   window.soundManager.playDamage();
+                  updateHUD();
                 }
               }
             }
