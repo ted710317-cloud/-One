@@ -736,6 +736,12 @@
     const targetAnswer = currentQuestion.answer;
     const targetStr = targetAnswer.toString();
 
+    // 若先前緩衝區只有一個 '0'：
+    // 若題目是兩位數答案 (如 24)，前導 0 必為誤觸，自動以新輸入數字取代 '0'
+    if (inputBuffer === '0' && targetStr.length >= 2) {
+      inputBuffer = '';
+    }
+
     // 防禦緩衝區長度（九九乘法最多 2 位，容許前導 0 故最多 3 位，若超長則重新計數）
     if (inputBuffer.length >= 3) {
       inputBuffer = '';
