@@ -1003,14 +1003,15 @@
         monster.factorB = nextPhase.factorB;
         monster.product = nextPhase.product;
         monster.solvedNumber = null;
-        monster.staggerTimer = 35;
-        monster.y = Math.max(monster.height, monster.y - 15);
+        // Generous stagger and dramatic knockback so 3rd graders have room and time to solve Phase 2!
+        monster.staggerTimer = 55;
+        monster.y = Math.max(monster.height + 20, monster.y - 120);
         const nextEqHint = state.mathMode === 'product'
           ? `${monster.factorA} × ${monster.factorB} = [ ? ]`
           : `${monster.factorA} × [ ] = ${monster.product}`;
         showEquationBanner(`💥 階段突破！下一題：${nextEqHint}`);
         window.soundManager.playExplosion();
-        screenShake = 10;
+        screenShake = 12;
         updateHUD();
         return;
       }
@@ -1291,8 +1292,17 @@
 
   // --- Wave Completion ---
   function completeWave() {
+    if (state.isWaveTransition || state.isGameOver) return;
     state.isWaveTransition = true;
     window.soundManager.playVictory();
+
+    // Clean up any remaining monsters & projectiles with victory fireworks
+    for (let m of monsters) {
+      spawnExplosion(m.x, m.y, '#00ff88', 16);
+    }
+    monsters = [];
+    projectiles = [];
+    state.activeTarget = null;
 
     if (state.wave === 5) {
       showEquationBanner('🏆 達成第 5 波全通關！即刻進入【極限超越戰】速度越來越快！🚀');
@@ -2516,6 +2526,21 @@ function createJsonResponse(obj) {
         monsters.push(generateQuestion(effectiveWave));
       }
 
+      // Campaign Mode Watchdog: prevent deadlock if 0 monsters exist while wave is active
+      if (state.mode === 'campaign' && monsters.length === 0 && !state.isWaveTransition && !state.isGameOver) {
+        if (state.bossSpawned) {
+          setTimeout(completeWave, 500);
+        } else if (state.waveMonstersRemaining <= 0) {
+          state.bossSpawned = true;
+          monsters.push(spawnBoss(state.wave));
+          showComboBanner('⚠️ 魔王出現！請快速心算消除！');
+          window.soundManager.playDamage();
+        } else if (state.spawnTimer >= 60) {
+          state.spawnTimer = 0;
+          monsters.push(generateQuestion(effectiveWave));
+        }
+      }
+
       // Update Monsters & Base Defense Collision
       for (let i = monsters.length - 1; i >= 0; i--) {
         const m = monsters[i];
@@ -2524,6 +2549,7 @@ function createJsonResponse(obj) {
         // Check if monster reaches defense line
         if (m.y >= screenH - 30) {
           spawnExplosion(m.x, screenH - 30, '#ff0055', 25);
+          const wasBoss = m.isBoss;
           monsters.splice(i, 1);
           if (state.activeTarget === m) state.activeTarget = null;
 
@@ -2535,8 +2561,24 @@ function createJsonResponse(obj) {
             if (state.isFever) endFever();
             updateHUD();
           } else if (state.mode !== 'practice') {
-            damageShield(m.isBoss ? 40 : 20);
-            showWarningBubble('⚠️ 基地遭到乘法怪獸撞擊！護盾受損！');
+            damageShield(wasBoss ? 40 : 20);
+            showWarningBubble(wasBoss ? '💥 魔王突破防線重創基地！' : '⚠️ 基地遭到乘法怪獸撞擊！護盾受損！');
+
+            if (state.mode === 'campaign' && !state.isGameOver) {
+              if (wasBoss) {
+                // Boss breached defense line, but player survived with shield!
+                // Trigger wave completion so game cleanly advances to next wave!
+                setTimeout(completeWave, 1000);
+              } else {
+                state.waveMonstersRemaining--;
+                if (!state.bossSpawned && state.waveMonstersRemaining <= 0) {
+                  state.bossSpawned = true;
+                  monsters.push(spawnBoss(state.wave));
+                  showComboBanner('⚠️ 魔王出現！請快速心算消除！');
+                  window.soundManager.playDamage();
+                }
+              }
+            }
           }
         }
       }
