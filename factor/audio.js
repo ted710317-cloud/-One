@@ -21,6 +21,19 @@ class SoundController {
       isFever: false,
       endlessTimeLeft: 30
     };
+
+    // Auto-unlock Web Audio on user gesture (fixes mobile suspended context)
+    if (typeof window !== 'undefined') {
+      const unlock = () => {
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      };
+      ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'].forEach(evt => {
+        window.addEventListener(evt, unlock, { passive: true });
+      });
+    }
   }
 
   init() {
@@ -30,7 +43,7 @@ class SoundController {
         this.ctx = new AudioCtx();
         try {
           this.bgmGain = this.ctx.createGain();
-          this.bgmGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+          this.bgmGain.gain.setValueAtTime(0.70, this.ctx.currentTime);
           this.bgmGain.connect(this.ctx.destination);
 
           // Pre-generate noise buffer for drums
@@ -46,7 +59,7 @@ class SoundController {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 
@@ -370,15 +383,15 @@ class SoundController {
   }
 
   // --- Track 1: 賽博疾速 (Cyber Rush) Polyphonic Web Audio Synthesizer ---
-  playBgmKick(t, punch = 140) {
+  playBgmKick(t, punch = 160) {
     if (!this.ctx || !this.bgmGain) return;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
     osc.frequency.setValueAtTime(punch, t);
-    osc.frequency.exponentialRampToValueAtTime(32, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(42, t + 0.09);
 
-    gain.gain.setValueAtTime(0.36, t);
+    gain.gain.setValueAtTime(0.42, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
 
     osc.connect(gain);
@@ -394,10 +407,10 @@ class SoundController {
     noise.buffer = this.noiseBuffer;
     const filter = this.ctx.createBiquadFilter();
     filter.type = bright ? 'bandpass' : 'highpass';
-    filter.frequency.setValueAtTime(bright ? 2400 : 1200, t);
+    filter.frequency.setValueAtTime(bright ? 2400 : 1400, t);
 
     const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.22, t);
+    gain.gain.setValueAtTime(0.26, t);
     gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
 
     noise.connect(filter);
@@ -410,9 +423,9 @@ class SoundController {
     const osc = this.ctx.createOscillator();
     const oscGain = this.ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(190, t);
-    osc.frequency.exponentialRampToValueAtTime(60, t + 0.09);
-    oscGain.gain.setValueAtTime(0.18, t);
+    osc.frequency.setValueAtTime(210, t);
+    osc.frequency.exponentialRampToValueAtTime(70, t + 0.09);
+    oscGain.gain.setValueAtTime(0.22, t);
     oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
 
     osc.connect(oscGain);
@@ -427,11 +440,11 @@ class SoundController {
     noise.buffer = this.noiseBuffer;
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'highpass';
-    filter.frequency.setValueAtTime(8000, t);
+    filter.frequency.setValueAtTime(7500, t);
 
     const gain = this.ctx.createGain();
-    const dur = open ? 0.12 : 0.035;
-    gain.gain.setValueAtTime(0.10, t);
+    const dur = open ? 0.12 : 0.04;
+    gain.gain.setValueAtTime(0.14, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
 
     noise.connect(filter);
@@ -441,21 +454,23 @@ class SoundController {
     noise.stop(t + dur);
   }
 
-  playBgmBass(freq, t, dur = 0.15, type = 'sawtooth', cutoff = 950) {
+  playBgmBass(freq, t, dur = 0.15, type = 'sawtooth', cutoff = 1200) {
     if (!this.ctx || !freq || !this.bgmGain) return;
     const osc = this.ctx.createOscillator();
     const filter = this.ctx.createBiquadFilter();
     const gain = this.ctx.createGain();
 
+    // Ensure bass fundamental is clearly audible on mobile phone speakers (boost 1 octave if sub-100Hz)
+    const audibleFreq = freq < 100 ? freq * 2 : freq;
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.setValueAtTime(audibleFreq, t);
 
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(cutoff, t);
-    filter.frequency.exponentialRampToValueAtTime(cutoff * 0.35, t + dur);
-    filter.Q.setValueAtTime(4.5, t);
+    filter.frequency.exponentialRampToValueAtTime(cutoff * 0.4, t + dur);
+    filter.Q.setValueAtTime(4.0, t);
 
-    gain.gain.setValueAtTime(0.24, t);
+    gain.gain.setValueAtTime(0.28, t);
     gain.gain.exponentialRampToValueAtTime(0.002, t + dur);
 
     osc.connect(filter);
@@ -466,18 +481,24 @@ class SoundController {
     osc.stop(t + dur);
   }
 
-  playBgmLead(freq, t, dur = 0.12, type = 'triangle', vol = 0.10) {
+  playBgmLead(freq, t, dur = 0.13, type = 'sawtooth', vol = 0.16) {
     if (!this.ctx || !freq || !this.bgmGain) return;
     const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
     const gain = this.ctx.createGain();
 
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t);
 
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2600, t);
+    filter.frequency.exponentialRampToValueAtTime(900, t + dur);
+
     gain.gain.setValueAtTime(vol, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
 
-    osc.connect(gain);
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(this.bgmGain);
 
     osc.start(t);
@@ -584,17 +605,20 @@ class SoundController {
   }
 
   startBgm() {
-    if (!this.bgmEnabled) return;
+    this.bgmEnabled = true;
     this.stopBgm();
     this.init();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
     this.scheduleStep();
   }
 
   scheduleStep() {
     if (!this.bgmEnabled || !this.ctx) return;
-    if (this.ctx.state !== 'running') {
-      this.bgmTimer = setTimeout(() => this.scheduleStep(), 100);
-      return;
+
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
     }
 
     const now = this.ctx.currentTime;

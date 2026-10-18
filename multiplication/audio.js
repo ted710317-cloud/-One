@@ -21,6 +21,19 @@ class SoundController {
       isFever: false,
       endlessTimeLeft: 30
     };
+
+    // Auto-unlock Web Audio on user gesture (fixes mobile suspended context)
+    if (typeof window !== 'undefined') {
+      const unlock = () => {
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      };
+      ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'].forEach(evt => {
+        window.addEventListener(evt, unlock, { passive: true });
+      });
+    }
   }
 
   init() {
@@ -30,7 +43,7 @@ class SoundController {
         this.ctx = new AudioCtx();
         try {
           this.bgmGain = this.ctx.createGain();
-          this.bgmGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+          this.bgmGain.gain.setValueAtTime(0.70, this.ctx.currentTime);
           this.bgmGain.connect(this.ctx.destination);
 
           // Pre-generate noise buffer once to avoid buffer allocation lag during game
@@ -38,7 +51,7 @@ class SoundController {
           this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
           const output = this.noiseBuffer.getChannelData(0);
           for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
+            data[i] = Math.random() * 2 - 1;
           }
         } catch (e) {
           console.warn('Audio noise buffer init error', e);
@@ -46,7 +59,7 @@ class SoundController {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 
@@ -570,17 +583,20 @@ class SoundController {
   }
 
   startBgm() {
-    if (!this.bgmEnabled) return;
+    this.bgmEnabled = true;
     this.stopBgm();
     this.init();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
     this.scheduleStep();
   }
 
   scheduleStep() {
     if (!this.bgmEnabled || !this.ctx) return;
-    if (this.ctx.state !== 'running') {
-      this.bgmTimer = setTimeout(() => this.scheduleStep(), 100);
-      return;
+
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
     }
 
     const now = this.ctx.currentTime;
