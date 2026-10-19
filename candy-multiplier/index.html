@@ -140,16 +140,16 @@
         </div>
         <div class="profile-input-grid">
           <div class="profile-field">
-            <label for="playerClass">班級</label>
-            <input type="text" id="playerClass" placeholder="例: 301" maxlength="6">
+            <label for="playerClass">🏫 班級</label>
+            <input type="text" id="playerClass" placeholder="例: 301" maxlength="6" autocomplete="off">
           </div>
           <div class="profile-field">
-            <label for="playerSeat">座號</label>
-            <input type="number" id="playerSeat" placeholder="例: 15" min="1" max="99">
+            <label for="playerSeat">🔢 座號</label>
+            <input type="number" id="playerSeat" placeholder="例: 15" min="1" max="99" autocomplete="off">
           </div>
-          <div class="profile-field">
-            <label for="playerName">姓名/暱稱</label>
-            <input type="text" id="playerName" placeholder="例: 小明 (可選)" maxlength="10">
+          <div class="profile-field field-full">
+            <label for="playerName">✏️ 姓名 / 暱稱 <span class="label-optional">(可選填)</span></label>
+            <input type="text" id="playerName" placeholder="例: 小明" maxlength="10" autocomplete="off">
           </div>
         </div>
         <div id="profileErrorMsg" class="profile-error-msg hidden">⚠️ 請輸入班級與座號才能登錄英雄榜喔！</div>
