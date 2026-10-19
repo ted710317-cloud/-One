@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>九九乘法砲台保衛戰 - 國小中年級九九乘法練習遊戲</title>
-  <link rel="stylesheet" href="style.css?v=20261018_1435">
+  <link rel="stylesheet" href="style.css?v=20261019_1645">
 </head>
 <body>
   <div id="game-container">
@@ -58,13 +58,6 @@
     <!-- Canvas Game Area -->
     <div id="canvas-wrapper">
       <canvas id="game-canvas"></canvas>
-      
-      <!-- Current Target Indicator & Equation Display -->
-      <div id="target-detail-panel" class="hidden">
-        <div class="target-title">🎯 鎖定怪獸目標</div>
-        <div class="target-equation-display" id="target-eq-text">2 × [ ? ] = 4</div>
-        <div class="target-hint" id="target-hint">請按下方 <strong>1~9</strong> 砲彈發射填入 [ ]！</div>
-      </div>
 
       <!-- Combo Alert Overlay -->
       <div id="combo-banner" class="hidden"></div>
@@ -74,65 +67,97 @@
       <div id="warning-bubble" class="hidden"></div>
     </div>
 
-    <!-- Bottom Defense Base & Number Cannon Console -->
-    <footer id="cannon-console" class="mode-fill-blank">
-      <!-- Ammo Buffer / Assembly Indicator (Active in Product Mode) -->
-      <div id="ammo-buffer-bar" class="ammo-buffer-bar hidden">
-        <span class="buffer-label">⚡ 砲彈裝填：</span>
-        <span id="buffer-display" class="buffer-display">[ _ _ ]</span>
-        <span id="buffer-hint" class="buffer-hint">請輸入答案（雙位數按完自動發射）</span>
-        <button type="button" id="btn-buffer-fire" class="btn-buffer-fire" title="立即發射目前裝填的砲彈">🚀 發射</button>
-        <button type="button" id="btn-buffer-clear" class="btn-buffer-clear" title="清空重新裝填">⌫ 清除</button>
-      </div>
+    <!-- Bottom Defense Base & Number Cannon Console (Tactical Split Layout) -->
+    <footer id="cannon-console" class="mode-fill-blank layout-tactical">
+      <div class="console-tactical-wrapper">
 
-      <div class="console-hint" id="console-hint">
-        <span>鍵盤快捷鍵：<strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>
-      </div>
-      <div class="ammo-buttons-container">
-        <button class="ammo-btn btn-num-1" data-num="1" data-key="1">
-          <span class="ammo-num">1</span>
-          <span class="key-badge">鍵盤 [1]</span>
-        </button>
-        <button class="ammo-btn btn-num-2" data-num="2" data-key="2">
-          <span class="ammo-num">2</span>
-          <span class="key-badge">鍵盤 [2]</span>
-        </button>
-        <button class="ammo-btn btn-num-3" data-num="3" data-key="3">
-          <span class="ammo-num">3</span>
-          <span class="key-badge">鍵盤 [3]</span>
-        </button>
-        <button class="ammo-btn btn-num-4" data-num="4" data-key="4">
-          <span class="ammo-num">4</span>
-          <span class="key-badge">鍵盤 [4]</span>
-        </button>
-        <button class="ammo-btn btn-num-5" data-num="5" data-key="5">
-          <span class="ammo-num">5</span>
-          <span class="key-badge">鍵盤 [5]</span>
-        </button>
-        <button class="ammo-btn btn-num-6" data-num="6" data-key="6">
-          <span class="ammo-num">6</span>
-          <span class="key-badge">鍵盤 [6]</span>
-        </button>
-        <button class="ammo-btn btn-num-7" data-num="7" data-key="7">
-          <span class="ammo-num">7</span>
-          <span class="key-badge">鍵盤 [7]</span>
-        </button>
-        <button class="ammo-btn btn-num-8" data-num="8" data-key="8">
-          <span class="ammo-num">8</span>
-          <span class="key-badge">鍵盤 [8]</span>
-        </button>
-        <button class="ammo-btn btn-num-9" data-num="9" data-key="9">
-          <span class="ammo-num">9</span>
-          <span class="key-badge">鍵盤 [9]</span>
-        </button>
-        <button class="ammo-btn btn-num-0" data-num="0" data-key="0">
-          <span class="ammo-num">0</span>
-          <span class="key-badge">鍵盤 [0]</span>
-        </button>
-        <button class="ammo-btn btn-action-backspace" id="btn-ammo-backspace" data-action="backspace">
-          <span class="ammo-num">⌫</span>
-          <span class="key-badge">退格/清除</span>
-        </button>
+        <!-- Left Side: Tactical Mission Cockpit & Target Display -->
+        <div class="tactical-cockpit-left">
+          <!-- Mission Target Callout Panel -->
+          <div id="target-detail-panel">
+            <div class="target-title">🎯 鎖定怪獸目標</div>
+            <div class="target-equation-display" id="target-eq-text">等待怪獸進入射程...</div>
+            <div class="target-hint" id="target-hint">請由右側小鍵盤輸入數字發射！</div>
+          </div>
+
+          <!-- Ammo Buffer (Product Mode) -->
+          <div id="ammo-buffer-bar" class="ammo-buffer-bar hidden">
+            <div class="buffer-display-wrap">
+              <span class="buffer-label">⚡ 裝填：</span>
+              <span id="buffer-display" class="buffer-display">[ _ _ ]</span>
+            </div>
+            <div class="buffer-actions-wrap">
+              <button type="button" id="btn-buffer-clear" class="btn-buffer-clear" title="清空重新裝填">⌫ 清除</button>
+              <button type="button" id="btn-buffer-fire" class="btn-buffer-fire" title="立即發射目前裝填的砲彈">🚀 發射</button>
+            </div>
+          </div>
+
+          <div class="console-hint" id="console-hint">
+            <span>小鍵盤快捷鍵：<strong>NumPad 7~9 / 4~6 / 1~3</strong></span>
+          </div>
+        </div>
+
+        <!-- Right Side: 3x3 Calculator Numpad (7-8-9 on top) -->
+        <div class="tactical-keypad-right">
+          <div class="ammo-buttons-container">
+            <!-- Row 1: 7, 8, 9 (Calculator Order) -->
+            <button class="ammo-btn btn-num-7" data-num="7" data-key="7">
+              <span class="ammo-num">7</span>
+              <span class="key-badge">[7]</span>
+            </button>
+            <button class="ammo-btn btn-num-8" data-num="8" data-key="8">
+              <span class="ammo-num">8</span>
+              <span class="key-badge">[8]</span>
+            </button>
+            <button class="ammo-btn btn-num-9" data-num="9" data-key="9">
+              <span class="ammo-num">9</span>
+              <span class="key-badge">[9]</span>
+            </button>
+
+            <!-- Row 2: 4, 5, 6 -->
+            <button class="ammo-btn btn-num-4" data-num="4" data-key="4">
+              <span class="ammo-num">4</span>
+              <span class="key-badge">[4]</span>
+            </button>
+            <button class="ammo-btn btn-num-5" data-num="5" data-key="5">
+              <span class="ammo-num">5</span>
+              <span class="key-badge">[5]</span>
+            </button>
+            <button class="ammo-btn btn-num-6" data-num="6" data-key="6">
+              <span class="ammo-num">6</span>
+              <span class="key-badge">[6]</span>
+            </button>
+
+            <!-- Row 3: 1, 2, 3 -->
+            <button class="ammo-btn btn-num-1" data-num="1" data-key="1">
+              <span class="ammo-num">1</span>
+              <span class="key-badge">[1]</span>
+            </button>
+            <button class="ammo-btn btn-num-2" data-num="2" data-key="2">
+              <span class="ammo-num">2</span>
+              <span class="key-badge">[2]</span>
+            </button>
+            <button class="ammo-btn btn-num-3" data-num="3" data-key="3">
+              <span class="ammo-num">3</span>
+              <span class="key-badge">[3]</span>
+            </button>
+
+            <!-- Row 4: Product Mode Extras (Backspace, 0, Fire) -->
+            <button class="ammo-btn btn-action-backspace" id="btn-ammo-backspace" data-action="backspace" title="退格清除">
+              <span class="ammo-num">⌫</span>
+              <span class="key-badge">退格</span>
+            </button>
+            <button class="ammo-btn btn-num-0" data-num="0" data-key="0">
+              <span class="ammo-num">0</span>
+              <span class="key-badge">[0]</span>
+            </button>
+            <button class="ammo-btn btn-action-fire" id="btn-ammo-fire" data-action="fire" title="立即發射目前裝填的砲彈">
+              <span class="ammo-num">🚀</span>
+              <span class="key-badge">發射</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </footer>
 
@@ -442,8 +467,8 @@
   </div>
 
   <!-- Audio synthesizers & Core Game Engine -->
-  <script src="audio.js?v=20261018_1545"></script>
-  <script src="config.js?v=20261018_1545"></script>
-  <script src="game.js?v=20261018_1545"></script>
+  <script src="audio.js?v=20261019_1645"></script>
+  <script src="config.js?v=20261019_1645"></script>
+  <script src="game.js?v=20261019_1645"></script>
 </body>
 </html>

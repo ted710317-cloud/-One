@@ -219,45 +219,62 @@ html, body {
   display: block;
 }
 
-/* Target Details Panel (Moved next to bottom cannon turret) */
+/* Target Details Panel (Tactical Cockpit Target HUD) */
 #target-detail-panel {
-  position: absolute;
-  bottom: 12px;
-  right: calc(50% + 46px);
-  background: rgba(10, 20, 42, 0.94);
+  position: relative;
+  background: linear-gradient(180deg, rgba(14, 26, 52, 0.95) 0%, rgba(8, 14, 30, 0.98) 100%);
   border: 2px solid var(--cyan-glow);
-  box-shadow: 0 0 18px rgba(0, 243, 255, 0.45), inset 0 0 10px rgba(0, 243, 255, 0.12);
-  border-radius: 12px;
-  padding: 8px 16px;
-  min-width: 165px;
-  max-width: calc(50% - 56px);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 0 12px rgba(0, 243, 255, 0.1);
+  border-radius: 14px;
+  padding: 8px 14px;
+  width: 100%;
   text-align: center;
   pointer-events: none;
   animation: fadeIn 0.3s ease;
   z-index: 10;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  transition: all 0.25s ease;
+}
+
+#target-detail-panel.no-target {
+  border-color: rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+  background: rgba(10, 20, 42, 0.7);
+}
+
+#target-detail-panel.no-target .target-equation-display {
+  font-size: 18px;
+  color: #8b9bb4;
+  text-shadow: none;
+  font-weight: 700;
 }
 
 .target-title {
   font-size: 11px;
   color: var(--cyan-glow);
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   margin-bottom: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .target-equation-display {
-  font-size: 26px;
+  font-size: clamp(22px, 3.2vh, 28px);
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 12px var(--cyan-glow), 0 0 20px rgba(0, 255, 136, 0.6);
+  text-shadow: 0 0 14px var(--cyan-glow), 0 0 24px rgba(0, 255, 136, 0.5);
   font-family: 'Chakra Petch', monospace, sans-serif;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   line-height: 1.15;
+  transition: all 0.2s;
 }
 
 .target-hint {
@@ -339,12 +356,12 @@ html, body {
   100% { opacity: 0; }
 }
 
-/* Bottom Console */
+/* Bottom Console (Tactical Split Layout) */
 #cannon-console {
-  background: var(--bg-panel);
+  background: linear-gradient(180deg, rgba(10, 18, 36, 0.98) 0%, rgba(5, 10, 22, 0.99) 100%);
   border-top: 2px solid var(--border-neon);
-  box-shadow: 0 -4px 20px rgba(0, 243, 255, 0.15);
-  padding: 8px 12px;
+  box-shadow: 0 -4px 25px rgba(0, 243, 255, 0.18);
+  padding: 8px 14px;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -353,24 +370,51 @@ html, body {
   flex-shrink: 0;
 }
 
-.console-hint {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
+.console-tactical-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.console-hint strong {
+/* Left Cockpit: Target Equation Panel, Buffer Bar, Shortcuts */
+.tactical-cockpit-left {
+  flex: 1 1 58%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+.tactical-cockpit-left .console-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.tactical-cockpit-left .console-hint strong {
   color: var(--cyan-glow);
 }
 
-/* 1~9 Number Ammo Buttons Container */
-.ammo-buttons-container,
-.prime-buttons-container {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: clamp(4px, 1vw, 10px);
-  max-width: 960px;
+/* Right Keypad: 3-Column Calculator Grid */
+.tactical-keypad-right {
+  flex: 0 0 clamp(230px, 30vw, 280px);
+  display: flex;
+  justify-content: center;
+}
+
+.ammo-buttons-container {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px;
   width: 100%;
+  max-width: 280px;
   margin: 0 auto;
 }
 
@@ -380,7 +424,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(6px, 1.4vh, 14px) 2px;
+  padding: 6px 2px;
+  min-height: 50px;
   border-radius: 12px;
   background: linear-gradient(180deg, #1e2a48 0%, #111a33 100%);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -390,6 +435,7 @@ html, body {
   transition: all 0.12s ease-in-out;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .ammo-btn:hover,
@@ -482,25 +528,42 @@ html, body {
 }
 .btn-action-backspace .ammo-num, .ammo-btn[data-action="backspace"] .ammo-num {
   color: #ff3366;
-  font-size: clamp(18px, 3.2vh, 26px);
+  font-size: clamp(16px, 2.6vh, 22px);
 }
 
-/* 11 columns in Product Mode */
+/* Fire Button on Keypad */
+.btn-action-fire, .ammo-btn[data-action="fire"] {
+  border-color: #00ff88;
+  box-shadow: 0 4px 10px rgba(0, 255, 136, 0.25);
+  background: linear-gradient(180deg, #153825 0%, #0d2018 100%);
+}
+.btn-action-fire .ammo-num, .ammo-btn[data-action="fire"] .ammo-num {
+  color: #00ff88;
+  font-size: clamp(16px, 2.6vh, 22px);
+}
+.btn-action-fire .key-badge, .ammo-btn[data-action="fire"] .key-badge {
+  color: #00ff88;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* 3-Column Calculator Grid for both modes */
 #cannon-console.mode-product .ammo-buttons-container,
 .mode-product #cannon-console .ammo-buttons-container {
-  grid-template-columns: repeat(11, 1fr);
+  grid-template-columns: repeat(3, 1fr) !important;
 }
 
-/* Hide 0 & Backspace in Fill Blank Mode */
+/* Fill Blank Mode: Hide 0, Backspace, Fire -> Clean 3x3 Grid */
 #cannon-console.mode-fill-blank .btn-num-0,
 #cannon-console.mode-fill-blank .btn-action-backspace,
+#cannon-console.mode-fill-blank .btn-action-fire,
 .mode-fill-blank #cannon-console .btn-num-0,
-.mode-fill-blank #cannon-console .btn-action-backspace {
+.mode-fill-blank #cannon-console .btn-action-backspace,
+.mode-fill-blank #cannon-console .btn-action-fire {
   display: none !important;
 }
 #cannon-console.mode-fill-blank .ammo-buttons-container,
 .mode-fill-blank #cannon-console .ammo-buttons-container {
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(3, 1fr) !important;
 }
 
 /* Ammo Buffer Bar (Assembler HUD) */
@@ -514,10 +577,9 @@ html, body {
   box-shadow: 0 0 16px rgba(0, 243, 255, 0.2);
   border-radius: 8px;
   padding: 5px 14px;
-  margin-bottom: 8px;
-  max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 0;
+  max-width: 100%;
+  width: 100%;
 }
 
 .buffer-label {
@@ -1441,9 +1503,29 @@ html, body {
 
 /* Responsive Media Queries */
 @media (max-width: 640px) {
-  .ammo-buttons-container,
-  .prime-buttons-container {
-    grid-template-columns: repeat(5, 1fr);
+  .console-tactical-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .tactical-cockpit-left {
+    width: 100%;
+    max-width: 320px;
+  }
+  .tactical-keypad-right {
+    width: 100%;
+    max-width: 300px;
+  }
+  .ammo-buttons-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px;
+  }
+  .ammo-btn {
+    min-height: 44px;
+    padding: 4px 2px;
+  }
+  .ammo-num {
+    font-size: 20px;
   }
   .profile-input-grid {
     grid-template-columns: 1fr;
@@ -1465,16 +1547,14 @@ html, body {
     align-items: flex-start;
   }
   #target-detail-panel {
-    right: calc(50% + 40px);
-    padding: 6px 12px;
-    min-width: 135px;
-    max-width: calc(50% - 48px);
+    min-height: 58px;
+    padding: 6px 10px;
   }
   .target-title {
     font-size: 10px;
   }
   .target-equation-display {
-    font-size: 20px;
+    font-size: 22px;
   }
   .target-hint {
     font-size: 10px;
@@ -1482,16 +1562,27 @@ html, body {
 }
 
 @media (max-width: 440px) {
+  .tactical-cockpit-left {
+    max-width: 290px;
+  }
+  .tactical-keypad-right {
+    max-width: 275px;
+  }
   #target-detail-panel {
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 58px;
-    max-width: 90%;
-    min-width: auto;
-    padding: 5px 12px;
+    min-height: 52px;
+    padding: 4px 8px;
+  }
+  .target-equation-display {
+    font-size: 20px;
   }
   .target-hint {
+    display: none;
+  }
+  .ammo-btn {
+    min-height: 40px;
+    padding: 3px 2px;
+  }
+  .key-badge {
     display: none;
   }
 }

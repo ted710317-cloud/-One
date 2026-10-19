@@ -864,16 +864,24 @@
 
     // Update target HUD details
     if (state.activeTarget) {
-      targetDetailPanel.classList.remove('hidden');
+      if (targetDetailPanel) {
+        targetDetailPanel.classList.remove('hidden');
+        targetDetailPanel.classList.remove('no-target');
+      }
       if (state.mathMode === 'product') {
-        targetEqText.textContent = `${state.activeTarget.factorA} × ${state.activeTarget.factorB} = [ ? ]`;
+        if (targetEqText) targetEqText.textContent = `${state.activeTarget.factorA} × ${state.activeTarget.factorB} = [ ? ]`;
         if (targetHint) targetHint.textContent = '請輸入乘積答案裝填發射！';
       } else {
-        targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
-        if (targetHint) targetHint.textContent = '請按數字砲彈填入 [ ]！';
+        if (targetEqText) targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
+        if (targetHint) targetHint.textContent = '請由右側小鍵盤輸入數字發射！';
       }
     } else {
-      targetDetailPanel.classList.add('hidden');
+      if (targetDetailPanel) {
+        targetDetailPanel.classList.remove('hidden');
+        targetDetailPanel.classList.add('no-target');
+      }
+      if (targetEqText) targetEqText.textContent = '等待怪獸進入射程...';
+      if (targetHint) targetHint.textContent = '砲台就緒 · 準備迎擊！';
     }
   }
 
@@ -938,9 +946,9 @@
 
     if (consoleHint) {
       if (newMode === 'product') {
-        consoleHint.innerHTML = '<span>乘積模式：請輸入答案砲彈 (例如 <strong>1</strong> 和 <strong>6</strong> 組合 <strong>16</strong> 自動發射)！退位請按 <strong>⌫</strong></span>';
+        consoleHint.innerHTML = '<span>小鍵盤：<strong>NumPad 7~9 / 4~6 / 1~3 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
       } else {
-        consoleHint.innerHTML = '<span>填空模式：鍵盤快捷鍵 <strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
+        consoleHint.innerHTML = '<span>小鍵盤快捷鍵：<strong>NumPad 7~9 / 4~6 / 1~3</strong>，或點擊右側九宮格發射！</span>';
       }
     }
 
@@ -1273,9 +1281,9 @@
       if (consoleHint) {
         consoleHint.classList.remove('overheat-banner');
         if (state.mathMode === 'product') {
-          consoleHint.innerHTML = '<span>乘積模式：請輸入答案砲彈 (例如 <strong>1</strong> 和 <strong>6</strong> 組合 <strong>16</strong> 自動發射)！退位請按 <strong>⌫</strong></span>';
+          consoleHint.innerHTML = '<span>小鍵盤：<strong>NumPad 7~9 / 4~6 / 1~3 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
         } else {
-          consoleHint.innerHTML = '<span>填空模式：鍵盤快捷鍵 <strong>1~9</strong> 或直接點擊下方數字砲彈發射填入 [ ]！</span>';
+          consoleHint.innerHTML = '<span>小鍵盤快捷鍵：<strong>NumPad 7~9 / 4~6 / 1~3</strong>，或點擊右側九宮格發射！</span>';
         }
       }
     }, 1000);
@@ -2264,6 +2272,12 @@ function createJsonResponse(obj) {
         shoot(null, 'backspace');
         return;
       }
+      if (action === 'fire') {
+        btn.classList.add('active-press');
+        setTimeout(() => btn.classList.remove('active-press'), 100);
+        shoot(null, 'fire');
+        return;
+      }
 
       const numVal = btn.dataset.num !== undefined ? btn.dataset.num : btn.dataset.prime;
       const num = parseInt(numVal, 10);
@@ -2291,9 +2305,14 @@ function createJsonResponse(obj) {
       return;
     }
 
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.code === 'NumpadEnter') {
       if (state.mathMode === 'product' && state.inputBuffer.length > 0) {
         e.preventDefault();
+        const fireBtn = document.getElementById('btn-ammo-fire');
+        if (fireBtn) {
+          fireBtn.classList.add('active-press');
+          setTimeout(() => fireBtn.classList.remove('active-press'), 100);
+        }
         shoot(null, 'fire');
       }
       return;
