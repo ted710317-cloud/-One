@@ -873,7 +873,7 @@
         if (targetHint) targetHint.textContent = '請輸入乘積答案裝填發射！';
       } else {
         if (targetEqText) targetEqText.textContent = `${state.activeTarget.factorA} × [ ? ] = ${state.activeTarget.product}`;
-        if (targetHint) targetHint.textContent = '請由右側小鍵盤輸入數字發射！';
+        if (targetHint) targetHint.textContent = '請由右側電話九宮格輸入數字發射！';
       }
     } else {
       if (targetDetailPanel) {
@@ -946,9 +946,9 @@
 
     if (consoleHint) {
       if (newMode === 'product') {
-        consoleHint.innerHTML = '<span>小鍵盤：<strong>NumPad 7~9 / 4~6 / 1~3 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
+        consoleHint.innerHTML = '<span>電話九宮格：<strong>1~9 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
       } else {
-        consoleHint.innerHTML = '<span>小鍵盤快捷鍵：<strong>NumPad 7~9 / 4~6 / 1~3</strong>，或點擊右側九宮格發射！</span>';
+        consoleHint.innerHTML = '<span>電話九宮格：點擊右側 <strong>1~9</strong> 或按鍵盤數字發射！</span>';
       }
     }
 
@@ -1281,9 +1281,9 @@
       if (consoleHint) {
         consoleHint.classList.remove('overheat-banner');
         if (state.mathMode === 'product') {
-          consoleHint.innerHTML = '<span>小鍵盤：<strong>NumPad 7~9 / 4~6 / 1~3 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
+          consoleHint.innerHTML = '<span>電話九宮格：<strong>1~9 / 0</strong>，按 <strong>Enter</strong> 或 <strong>🚀</strong> 發射，<strong>⌫</strong> 退格</span>';
         } else {
-          consoleHint.innerHTML = '<span>小鍵盤快捷鍵：<strong>NumPad 7~9 / 4~6 / 1~3</strong>，或點擊右側九宮格發射！</span>';
+          consoleHint.innerHTML = '<span>電話九宮格：點擊右側 <strong>1~9</strong> 或按鍵盤數字發射！</span>';
         }
       }
     }, 1000);
