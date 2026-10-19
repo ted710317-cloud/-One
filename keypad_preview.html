@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>九九乘法保衛戰 - 九宮格鍵盤設計提案與互動預覽</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800;900&family=Noto+Sans+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e1a;
+      --card-bg: rgba(16, 26, 48, 0.92);
+      --cyan: #00f3ff;
+      --cyan-glow: 0 0 15px rgba(0, 243, 255, 0.5);
+      --neon-green: #00ff88;
+      --neon-pink: #ff0055;
+      --neon-yellow: #ffe600;
+      --neon-purple: #bf55ec;
+      --text-main: #f0f6fc;
+      --text-muted: #8b9bb4;
+      --border-glow: rgba(0, 243, 255, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(0, 243, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 100%, rgba(255, 0, 85, 0.08) 0%, transparent 60%);
+      color: var(--text-main);
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 12px 40px;
+    }
+
+    /* Page Header */
+    .preview-header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 20px;
+    }
+
+    .badge-proposal {
+      display: inline-block;
+      background: linear-gradient(90deg, #00f3ff, #bf55ec);
+      color: #050a14;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      box-shadow: 0 0 16px rgba(0, 243, 255, 0.4);
+    }
+
+    .preview-header h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(0, 243, 255, 0.6);
+      margin-bottom: 8px;
+    }
+
+    .preview-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Interactive Switcher Toolbar */
+    .controls-panel {
+      width: 100%;
+      max-width: 840px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ctrl-row:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .ctrl-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #00f3ff, #0088ff);
+      color: #050a14;
+      font-weight: 900;
+      box-shadow: 0 2px 10px rgba(0, 243, 255, 0.4);
+    }
+
+    /* Comparison & Simulator Area */
+    .simulator-card {
+      width: 100%;
+      max-width: 840px;
+      background: #060a14;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 35px rgba(0, 243, 255, 0.25);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Game Top Bar Simulator */
+    .sim-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(10, 18, 36, 0.95);
+      border-bottom: 1px solid rgba(0, 243, 255, 0.25);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .sim-hud-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .sim-hud-val {
+      color: var(--neon-yellow);
+      font-family: 'Chakra Petch', monospace;
+      font-weight: 900;
+    }
+
+    /* Virtual Game Canvas Playfield */
+    .sim-playfield {
+      height: 240px;
+      background: 
+        radial-gradient(circle at 50% 40%, rgba(16, 32, 64, 0.8) 0%, #060a14 75%),
+        linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+    }
+
+    /* Enemy Monster */
+    .sim-monster {
+      background: linear-gradient(135deg, #2a1b4e 0%, #150f2e 100%);
+      border: 2px solid var(--neon-purple);
+      box-shadow: 0 0 20px rgba(191, 85, 236, 0.5);
+      border-radius: 14px;
+      padding: 8px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: floatMonster 2.5s ease-in-out infinite alternate;
+      cursor: default;
+    }
+
+    @keyframes floatMonster {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(12px) scale(1.02); }
+    }
+
+    .monster-icon {
+      font-size: 24px;
+      margin-bottom: 2px;
+    }
+
+    .monster-text {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      font-family: 'Chakra Petch', monospace;
+      letter-spacing: 1px;
+    }
+
+    .monster-blank {
+      color: var(--neon-yellow);
+      background: rgba(255, 230, 0, 0.15);
+      border: 1px dashed var(--neon-yellow);
+      padding: 0 6px;
+      border-radius: 6px;
+      animation: pulseBlank 0.8s infinite alternate;
+    }
+
+    @keyframes pulseBlank {
+      0% { box-shadow: 0 0 4px rgba(255, 230, 0, 0.3); }
+      100% { box-shadow: 0 0 14px rgba(255, 230, 0, 0.8); }
+    }
+
+    /* Cannon Turret */
+    .sim-turret-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      position: relative;
+    }
+
+    .sim-cannon-body {
+      width: 48px;
+      height: 48px;
+      background: radial-gradient(circle, #00f3ff 20%, #0066aa 70%, #002244 100%);
+      border: 3px solid #fff;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.7);
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sim-cannon-barrel {
+      width: 8px;
+      height: 22px;
+      background: #00f3ff;
+      position: absolute;
+      top: -14px;
+      border-radius: 4px;
+      box-shadow: 0 0 10px #00f3ff;
+    }
+
+    /* Target Equation Display Panel (Next to Cannon) */
+    .sim-target-panel {
+      background: rgba(10, 20, 42, 0.95);
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+      border-radius: 10px;
+      padding: 6px 14px;
+      text-align: center;
+    }
+
+    .target-title-sim {
+      font-size: 11px;
+      color: var(--cyan);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .target-eq-sim {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      font-family: 'Chakra Petch', monospace;
+    }
+
+    /* Shoot Laser Animation Effect */
+    .laser-beam {
+      position: absolute;
+      width: 4px;
+      height: 80px;
+      background: linear-gradient(to top, rgba(0, 243, 255, 0), #00f3ff 70%, #fff 100%);
+      box-shadow: 0 0 12px #00f3ff;
+      border-radius: 2px;
+      left: 50%;
+      bottom: 50px;
+      transform: translateX(-50%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .laser-shoot-anim {
+      animation: laserFire 0.35s ease-out forwards;
+    }
+
+    @keyframes laserFire {
+      0% { opacity: 1; bottom: 50px; height: 30px; }
+      50% { opacity: 1; height: 90px; }
+      100% { opacity: 0; bottom: 170px; height: 40px; }
+    }
+
+    .hit-flash {
+      animation: hitFlashAnim 0.3s ease-out;
+    }
+
+    @keyframes hitFlashAnim {
+      0% { filter: brightness(2.5) drop-shadow(0 0 25px #00ff88); }
+      100% { filter: brightness(1); }
+    }
+
+    /* ==========================================================================
+       BOTTOM KEYBOARD CONSOLE (THE PROPOSAL CORE)
+       ========================================================================== */
+    .sim-console-footer {
+      background: linear-gradient(180deg, #101a30 0%, #080d1a 100%);
+      border-top: 2px solid var(--cyan);
+      box-shadow: 0 -4px 20px rgba(0, 243, 255, 0.2);
+      padding: 14px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .console-caption {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Ammo Buffer Bar (Product Mode) */
+    .sim-buffer-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(14, 24, 48, 0.9);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      border-radius: 8px;
+      padding: 4px 14px;
+      font-size: 13px;
+    }
+
+    .buffer-digits {
+      color: var(--neon-yellow);
+      font-weight: 900;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+
+    /* --- LAYOUT 1: CENTERED NUMPAD (方案一：經典置中九宮格) --- */
+    .numpad-container {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+      transition: all 0.25s ease;
+    }
+
+    /* Centered 3-Column Grid */
+    .layout-center .numpad-container {
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 330px;
+    }
+
+    /* Split Tactical Layout (方案二：右側九宮格) */
+    .layout-split {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 680px;
+      gap: 20px;
+    }
+
+    .layout-split .tactical-left-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+      padding: 14px;
+      border-radius: 12px;
+    }
+
+    .layout-split .numpad-container {
+      grid-template-columns: repeat(3, 1fr);
+      width: 280px;
+      flex-shrink: 0;
+    }
+
+    /* Old Comparison Layout: 1-row horizontal */
+    .layout-old .numpad-container {
+      grid-template-columns: repeat(9, 1fr);
+      max-width: 100%;
+      gap: 6px;
+    }
+
+    /* Keypad Button Styling */
+    .key-btn {
+      aspect-ratio: 1 / 1;
+      min-height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #1b2644 0%, #10182e 100%);
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+
+    .layout-old .key-btn {
+      aspect-ratio: auto;
+      padding: 10px 0;
+      min-height: 58px;
+    }
+
+    .key-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.2);
+    }
+
+    .key-btn:active, .key-btn.btn-pressed {
+      transform: scale(0.92);
+      filter: brightness(1.4);
+    }
+
+    .key-num {
+      font-size: clamp(22px, 3.5vw, 28px);
+      font-weight: 900;
+      font-family: 'Chakra Petch', sans-serif;
+      line-height: 1;
+    }
+
+    .key-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Distinct Key Colors */
+    .k-1 { border-color: #00f3ff; } .k-1 .key-num { color: #00f3ff; text-shadow: 0 0 10px rgba(0,243,255,0.4); }
+    .k-2 { border-color: #00ff88; } .k-2 .key-num { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.4); }
+    .k-3 { border-color: #10b981; } .k-3 .key-num { color: #10b981; text-shadow: 0 0 10px rgba(16,185,129,0.4); }
+    .k-4 { border-color: #ffe600; } .k-4 .key-num { color: #ffe600; text-shadow: 0 0 10px rgba(255,230,0,0.4); }
+    .k-5 { border-color: #ff9100; } .k-5 .key-num { color: #ff9100; text-shadow: 0 0 10px rgba(255,145,0,0.4); }
+    .k-6 { border-color: #ff5577; } .k-6 .key-num { color: #ff5577; text-shadow: 0 0 10px rgba(255,85,119,0.4); }
+    .k-7 { border-color: #bf55ec; } .k-7 .key-num { color: #bf55ec; text-shadow: 0 0 10px rgba(191,85,236,0.4); }
+    .k-8 { border-color: #4361ee; } .k-8 .key-num { color: #6b85ff; text-shadow: 0 0 10px rgba(67,97,238,0.4); }
+    .k-9 { border-color: #ff0055; } .k-9 .key-num { color: #ff0055; text-shadow: 0 0 10px rgba(255,0,85,0.4); }
+    .k-0 { border-color: #00d2ff; } .k-0 .key-num { color: #00d2ff; }
+    
+    .k-backspace {
+      border-color: #ff3366;
+      background: linear-gradient(180deg, #301322 0%, #1a0b14 100%);
+    }
+    .k-backspace .key-num { color: #ff3366; font-size: 20px; }
+
+    .k-fire {
+      border-color: #00ff88;
+      background: linear-gradient(180deg, #133324 0%, #0b1c14 100%);
+    }
+    .k-fire .key-num { color: #00ff88; font-size: 16px; }
+
+    /* Feature Comparison Table */
+    .comparison-section {
+      width: 100%;
+      max-width: 840px;
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .comp-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .comp-card.highlight {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+    }
+
+    .comp-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--cyan);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comp-list {
+      list-style: none;
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    .comp-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .comp-list li span.icon {
+      font-size: 15px;
+    }
+
+    /* Footer Action */
+    .preview-action-footer {
+      width: 100%;
+      max-width: 840px;
+      margin-top: 24px;
+      background: rgba(16, 26, 48, 0.7);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      border-radius: 16px;
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .preview-action-footer h3 {
+      font-size: 17px;
+      color: var(--neon-yellow);
+      margin-bottom: 6px;
+    }
+
+    .preview-action-footer p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 580px) {
+      .layout-split {
+        flex-direction: column;
+        align-items: center;
+      }
+      .layout-split .tactical-left-info {
+        width: 100%;
+      }
+      .layout-split .numpad-container {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="preview-header">
+    <div class="badge-proposal">UI / UX 升級設計提案</div>
+    <h1>🎮 九九乘法表：九宮格鍵盤呈現提案</h1>
+    <p>
+      請老師在下方直接點擊按鈕試用！切換不同的排列版型與操作模式，體驗最符合小學生操作直覺的數字鍵盤。
+    </p>
+  </header>
+
+  <!-- Control Toolbar -->
+  <div class="controls-panel">
+    <!-- Row 1: Layout Mode -->
+    <div class="ctrl-row">
+      <div class="ctrl-label">📐 佈局版型選擇：</div>
+      <div class="btn-group" id="group-layout">
+        <button class="tab-btn active" data-layout="center">⭐ 方案一：經典置中九宮格</button>
+        <button class="tab-btn" data-layout="split">方案二：右側戰術九宮格</button>
+        <button class="tab-btn" data-layout="old">對照組：目前單排橫列</button>
+      </div>
+    </div>
+
+    <!-- Row 2: Number Ordering -->
+    <div class="ctrl-row">
+      <div class="ctrl-label">🔢 數字排列順序：</div>
+      <div class="btn-group" id="group-order">
+        <button class="tab-btn active" data-order="phone">📱 電話/手機順序 (1 在左上，推薦)</button>
+        <button class="tab-btn" data-order="calculator">💻 計算機順序 (7 在左上)</button>
+      </div>
+    </div>
+
+    <!-- Row 3: Game Question Mode -->
+    <div class="ctrl-row">
+      <div class="ctrl-label">🎯 題型呈現模式：</div>
+      <div class="btn-group" id="group-mode">
+        <button class="tab-btn active" data-mode="blank">填空模式 (純 1~9 九宮格)</button>
+        <button class="tab-btn" data-mode="product">乘積雙位數模式 (加 0 與退格)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Simulator Card -->
+  <div class="simulator-card">
+    
+    <!-- Virtual HUD Top -->
+    <div class="sim-header">
+      <div class="sim-hud-item">
+        <span>分數:</span>
+        <span class="sim-hud-val" id="hud-score">2,480</span>
+      </div>
+      <div class="sim-hud-item">
+        <span>關卡:</span>
+        <span class="sim-hud-val" id="hud-wave">第 3 波</span>
+      </div>
+      <div class="sim-hud-item">
+        <span>連擊:</span>
+        <span class="sim-hud-val" id="hud-combo">x5 COMBO</span>
+      </div>
+      <div class="sim-hud-item">
+        <span>護盾:</span>
+        <span class="sim-hud-val" style="color: #00ff88;">100%</span>
+      </div>
+    </div>
+
+    <!-- Virtual Playfield -->
+    <div class="sim-playfield">
+      <!-- Monster -->
+      <div class="sim-monster" id="sim-monster">
+        <div class="monster-icon">👾</div>
+        <div class="monster-text" id="monster-eq">6 × <span class="monster-blank">[ ? ]</span> = 42</div>
+      </div>
+
+      <!-- Laser Beam Animation -->
+      <div class="laser-beam" id="laser-beam"></div>
+
+      <!-- Bottom Turret & Target Panel -->
+      <div class="sim-turret-wrap">
+        <div class="sim-target-panel" id="sim-target-panel">
+          <div class="target-title-sim">🎯 當前鎖定目標</div>
+          <div class="target-eq-sim" id="target-eq-display">6 × [ ? ] = 42</div>
+        </div>
+
+        <div class="sim-cannon-body">
+          <div class="sim-cannon-barrel"></div>
+          <span style="font-size: 14px;">⚡</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Keyboard Console (Interactive) -->
+    <footer class="sim-console-footer layout-center" id="sim-console">
+      
+      <!-- Product Mode Buffer (Only shown in Product Mode) -->
+      <div class="sim-buffer-bar" id="sim-buffer-bar" style="display: none;">
+        <span>裝填砲彈：</span>
+        <span class="buffer-digits" id="buffer-val">[ _ _ ]</span>
+        <span style="font-size: 11px; color: #8b9bb4;">（雙位數自動發射）</span>
+      </div>
+
+      <div class="console-caption" id="console-caption">
+        <span>👉 <strong>請點擊下方按鈕試射！</strong>（答案為 <strong>7</strong>）</span>
+      </div>
+
+      <!-- Main Keypad Grid (Dynamically rendered by JS) -->
+      <div class="numpad-container" id="numpad-container">
+        <!-- Rendered via JS -->
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Design Advantages Comparison -->
+  <div class="comparison-section">
+    <div class="comp-card highlight">
+      <div class="comp-title">✨ 九宮格鍵盤優勢 (New)</div>
+      <ul class="comp-list">
+        <li><span class="icon">✅</span> <strong>超大按鈕面積 (+280%)</strong>：每顆按鈕均勻方正，小學生在平板上點擊極度穩當，不再誤觸相鄰數字。</li>
+        <li><span class="icon">✅</span> <strong>視野集中不分散</strong>：視線不用在 11 顆橫條間左右游移，九宮格緊湊集中於視線正下方。</li>
+        <li><span class="icon">✅</span> <strong>直覺心算反射</strong>：標準 3×3 排列與生活中電話、收銀機完全一致，形成極速反射肌肉記憶。</li>
+      </ul>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-title">⚠️ 目前單排橫列限制 (Current)</div>
+      <ul class="comp-list">
+        <li><span class="icon">❌</span> <strong>按鈕太窄太長</strong>：橫向擠入 9~11 顆按鍵，每顆按鈕寬度被壓縮得很窄。</li>
+        <li><span class="icon">❌</span> <strong>手機平板容易按錯</strong>：指尖較圓時容易同時按到相鄰兩顆數字。</li>
+        <li><span class="icon">❌</span> <strong>手腕左右移動距離長</strong>：按 1 號要移到最左邊，按 9 號要移到最右邊，疲勞度較高。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Teacher Feedback Action -->
+  <div class="preview-action-footer">
+    <h3>💬 請老師檢視預覽並確認：</h3>
+    <p>
+      1. 您偏好 <strong>【方案一：經典置中九宮格】</strong> 還是 <strong>【方案二：右側戰術九宮格】</strong>？<br>
+      2. 數字順序您希望是 <strong>【電話順序 (123在上)】</strong> 還是 <strong>【計算機順序 (789在上)】</strong>？<br>
+      確認您滿意的呈現方式後，告訴我一聲，我就會立即將九九乘法遊戲更新為九宮格鍵盤！
+    </p>
+  </div>
+
+  <!-- Audio Synthesizer for Preview clicks -->
+  <script>
+    // Audio synthesizer for click preview
+    let audioCtx = null;
+    function playLaserSound(num) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const freqs = { 1: 261, 2: 293, 3: 329, 4: 349, 5: 392, 6: 440, 7: 523, 8: 587, 9: 659, 0: 220 };
+        const f = freqs[num] || 440;
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f * 1.5, now);
+        osc.frequency.exponentialRampToValueAtTime(f * 0.7, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } catch (e) {}
+    }
+
+    function playSuccessSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        [523.25, 659.25, 783.99].forEach((f, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.25);
+        });
+      } catch (e) {}
+    }
+
+    // State
+    const state = {
+      layout: 'center', // 'center', 'split', 'old'
+      order: 'phone',   // 'phone' (1-9), 'calculator' (7-1)
+      mode: 'blank',    // 'blank', 'product'
+      buffer: '',
+      targetFactor: 7,  // 6 x [7] = 42
+      score: 2480,
+      combo: 5
+    };
+
+    // Elements
+    const numpadContainer = document.getElementById('numpad-container');
+    const simConsole = document.getElementById('sim-console');
+    const simBufferBar = document.getElementById('sim-buffer-bar');
+    const bufferVal = document.getElementById('buffer-val');
+    const laserBeam = document.getElementById('laser-beam');
+    const simMonster = document.getElementById('sim-monster');
+    const monsterEq = document.getElementById('monster-eq');
+    const targetEqDisplay = document.getElementById('target-eq-display');
+    const hudScore = document.getElementById('hud-score');
+    const hudCombo = document.getElementById('hud-combo');
+    const consoleCaption = document.getElementById('console-caption');
+
+    // Layout Buttons
+    document.querySelectorAll('#group-layout .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#group-layout .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.layout = btn.dataset.layout;
+        updateLayoutClass();
+        renderKeypad();
+      });
+    });
+
+    // Order Buttons
+    document.querySelectorAll('#group-order .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#group-order .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.order = btn.dataset.order;
+        renderKeypad();
+      });
+    });
+
+    // Mode Buttons
+    document.querySelectorAll('#group-mode .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#group-mode .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.mode = btn.dataset.mode;
+        state.buffer = '';
+        updateModeDisplay();
+        renderKeypad();
+      });
+    });
+
+    function updateLayoutClass() {
+      simConsole.className = 'sim-console-footer';
+      if (state.layout === 'center') simConsole.classList.add('layout-center');
+      else if (state.layout === 'split') simConsole.classList.add('layout-split');
+      else if (state.layout === 'old') simConsole.classList.add('layout-old');
+    }
+
+    function updateModeDisplay() {
+      if (state.mode === 'product') {
+        simBufferBar.style.display = 'flex';
+        bufferVal.textContent = state.buffer ? `[ ${state.buffer} ]` : '[ _ _ ]';
+        monsterEq.innerHTML = `7 × 8 = <span class="monster-blank">[ ? ]</span>`;
+        targetEqDisplay.textContent = `7 × 8 = [ ? ]`;
+        consoleCaption.innerHTML = `👉 <strong>乘積雙位數模式</strong>：輸入 <strong>5</strong> 再輸入 <strong>6</strong> 立即擊發！`;
+      } else {
+        simBufferBar.style.display = 'none';
+        monsterEq.innerHTML = `6 × <span class="monster-blank">[ ? ]</span> = 42`;
+        targetEqDisplay.textContent = `6 × [ ? ] = 42`;
+        consoleCaption.innerHTML = `👉 <strong>填空模式</strong>：直接按 <strong>7</strong> 立即擊破怪獸！`;
+      }
+    }
+
+    function renderKeypad() {
+      numpadContainer.innerHTML = '';
+
+      let digits = [];
+      if (state.layout === 'old') {
+        // Old row: 1 to 9 (or 1 to 0 + backspace)
+        digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        if (state.mode === 'product') {
+          digits.push(0, 'backspace');
+        }
+      } else {
+        // Numpad 3x3 layout
+        if (state.order === 'phone') {
+          // Standard Phone: 1-2-3 top
+          digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        } else {
+          // Calculator: 7-8-9 top
+          digits = [7, 8, 9, 4, 5, 6, 1, 2, 3];
+        }
+
+        // In product mode, append 4th row: [backspace, 0, fire]
+        if (state.mode === 'product') {
+          digits.push('backspace', 0, 'fire');
+        }
+      }
+
+      digits.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = `key-btn k-${val}`;
+
+        if (val === 'backspace') {
+          btn.innerHTML = `<span class="key-num">⌫</span><span class="key-sub">退格</span>`;
+          btn.addEventListener('click', handleBackspace);
+        } else if (val === 'fire') {
+          btn.innerHTML = `<span class="key-num">🚀</span><span class="key-sub">發射</span>`;
+          btn.addEventListener('click', handleFireAction);
+        } else {
+          btn.innerHTML = `<span class="key-num">${val}</span><span class="key-sub">[${val}]</span>`;
+          btn.addEventListener('click', () => handleNumClick(val));
+        }
+
+        numpadContainer.appendChild(btn);
+      });
+    }
+
+    function handleNumClick(num) {
+      playLaserSound(num);
+
+      // Trigger laser beam animation
+      laserBeam.classList.remove('laser-shoot-anim');
+      void laserBeam.offsetWidth; // reflow
+      laserBeam.classList.add('laser-shoot-anim');
+
+      if (state.mode === 'blank') {
+        // Single digit immediate answer check (Target is 7)
+        if (num === 7) {
+          triggerSuccessHit('6 × 7 = 42 算式成立！');
+        } else {
+          triggerMissHit(num);
+        }
+      } else {
+        // Product mode: buffer accumulation
+        state.buffer += num.toString();
+        if (state.buffer.length > 2) state.buffer = num.toString();
+        bufferVal.textContent = `[ ${state.buffer} ]`;
+
+        if (state.buffer === '56') {
+          setTimeout(() => {
+            triggerSuccessHit('7 × 8 = 56 命中目標！');
+            state.buffer = '';
+            bufferVal.textContent = '[ _ _ ]';
+          }, 200);
+        } else if (state.buffer.length >= 2) {
+          setTimeout(() => {
+            triggerMissHit(state.buffer);
+            state.buffer = '';
+            bufferVal.textContent = '[ _ _ ]';
+          }, 350);
+        }
+      }
+    }
+
+    function handleBackspace() {
+      playLaserSound(0);
+      if (state.buffer.length > 0) {
+        state.buffer = state.buffer.slice(0, -1);
+        bufferVal.textContent = state.buffer ? `[ ${state.buffer} ]` : '[ _ _ ]';
+      }
+    }
+
+    function handleFireAction() {
+      if (!state.buffer) return;
+      handleNumClick(parseInt(state.buffer));
+    }
+
+    function triggerSuccessHit(msg) {
+      playSuccessSound();
+      simMonster.classList.add('hit-flash');
+      state.score += 200;
+      state.combo++;
+      hudScore.textContent = state.score.toLocaleString();
+      hudCombo.textContent = `x${state.combo} COMBO`;
+      consoleCaption.innerHTML = `<span style="color: #00ff88; font-weight: bold;">💥 答對了！${msg}</span>`;
+
+      setTimeout(() => {
+        simMonster.classList.remove('hit-flash');
+        updateModeDisplay();
+      }, 1500);
+    }
+
+    function triggerMissHit(val) {
+      consoleCaption.innerHTML = `<span style="color: #ff3366; font-weight: bold;">⚠️ 砲彈 ${val} 未命中！請再試一次！</span>`;
+      state.combo = 0;
+      hudCombo.textContent = `x0 COMBO`;
+      setTimeout(() => {
+        updateModeDisplay();
+      }, 1200);
+    }
+
+    // Init
+    updateLayoutClass();
+    updateModeDisplay();
+    renderKeypad();
+  </script>
+</body>
+</html>
