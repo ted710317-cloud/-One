@@ -23,6 +23,7 @@
         <button id="btnToggleKeypad" class="circle-btn active" title="開啟/關閉虛擬鍵盤">⌨️</button>
         <button id="btnHintMatrix" class="circle-btn" title="查看點子視覺提示">💡</button>
         <button id="btnTable" class="circle-btn" title="查看九九乘法表">📖</button>
+        <button id="btnLeaderboard" class="circle-btn" title="查看糖果英雄榜">🏆</button>
         <button id="btnAudio" class="circle-btn" title="開關音效">🔊</button>
         <button id="btnPause" class="circle-btn" title="暫停遊戲">⏸️</button>
         <a href="../" class="circle-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" title="返回「朕的數學遊戲吧」大廳">👑</a>
@@ -132,6 +133,28 @@
       <h2 class="modal-title">糖果雨消消樂</h2>
       <p class="modal-subtitle">國小低年級九九乘法大冒險！消除糖果引爆連鎖大爆炸！</p>
 
+      <!-- 學生身分登錄卡片 (登錄全班英雄榜與記錄歷程) -->
+      <div class="player-profile-card">
+        <div class="profile-card-header">
+          <span>🎒 糖果小英雄資料 (登錄全班英雄榜)</span>
+        </div>
+        <div class="profile-input-grid">
+          <div class="profile-field">
+            <label for="playerClass">班級</label>
+            <input type="text" id="playerClass" placeholder="例: 301" maxlength="6">
+          </div>
+          <div class="profile-field">
+            <label for="playerSeat">座號</label>
+            <input type="number" id="playerSeat" placeholder="例: 15" min="1" max="99">
+          </div>
+          <div class="profile-field">
+            <label for="playerName">姓名/暱稱</label>
+            <input type="text" id="playerName" placeholder="例: 小明 (可選)" maxlength="10">
+          </div>
+        </div>
+        <div id="profileErrorMsg" class="profile-error-msg hidden">⚠️ 請輸入班級與座號才能登錄英雄榜喔！</div>
+      </div>
+
       <div class="mode-selection-grid">
         <div class="mode-card selected" data-mode="stage">
           <div class="mode-card-icon">🌟</div>
@@ -175,6 +198,10 @@
 
       <button id="btnStartGame" class="jelly-btn">
         <span>🎮 開始遊玩</span>
+      </button>
+
+      <button id="btnStartLeaderboard" class="jelly-btn btn-secondary">
+        <span>🏆 查看全班英雄榜</span>
       </button>
 
       <a href="../" class="jelly-btn btn-return-hub">
@@ -232,10 +259,19 @@
             <!-- 動態生成診斷文字 -->
           </div>
         </div>
+        <!-- 雲端英雄榜同步與排名回饋徽章 -->
+        <div id="resCloudRankBadge" class="cloud-rank-badge hidden">
+          <div class="cr-icon">🏆</div>
+          <div class="cr-info">
+            <div class="cr-title">全班雲端英雄榜</div>
+            <div class="cr-rank" id="resCloudRankText">正在同步成績至試算表...</div>
+          </div>
+        </div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <button id="btnPlayAgain" class="jelly-btn">🔁 再玩一次</button>
+        <button id="btnResultLeaderboard" class="jelly-btn btn-secondary">🏆 查看英雄榜</button>
         <button id="btnBackToHome" class="jelly-btn btn-outline">🏠 回到主選單</button>
         <a href="../" class="jelly-btn btn-return-hub" style="margin-top: 0;">👑 返回「朕的數學遊戲吧」大廳</a>
       </div>
@@ -275,7 +311,103 @@
     </div>
   </div>
 
-  <!-- 音效與遊戲核心腳本 -->
+  <!-- ==================== 彈出視窗 6：全班英雄榜 ==================== -->
+  <div class="modal-overlay" id="modalLeaderboard">
+    <div class="modal-card modal-leaderboard-card">
+      <div class="modal-mascot">🏆</div>
+      <h2 class="modal-title">糖果消消樂英雄榜</h2>
+      <p class="modal-subtitle">看看誰是乘法消消樂得分大王與連擊神手！</p>
+
+      <!-- 雲端同步狀態條 -->
+      <div class="lb-cloud-bar">
+        <div class="lb-cloud-status" id="lbCloudStatus">
+          <span class="cloud-indicator online">●</span>
+          <span id="lbCloudStatusText">雲端試算表已連線</span>
+        </div>
+        <div class="lb-cloud-actions">
+          <button id="btnRefreshLeaderboard" class="lb-mini-btn" title="重新整理雲端排名">🔄 重新整理</button>
+          <a id="btnOpenSpreadsheet" href="#" target="_blank" class="lb-mini-btn btn-sheet hidden" title="在 Google 試算表開啟查看所有歷程">📊 檢視試算表</a>
+          <button id="btnOpenCloudSetup" class="lb-mini-btn" title="設定 Google 試算表連結">⚙️ 設定</button>
+        </div>
+      </div>
+
+      <!-- 分頁標籤：闖關模式 / 極速衝刺 -->
+      <div class="leaderboard-tabs">
+        <button class="lb-tab-btn active" data-tab="stage">🌟 冒險闖關榜</button>
+        <button class="lb-tab-btn" data-tab="rush">⚡ 極速衝刺榜</button>
+      </div>
+
+      <!-- 排行榜表格容器 -->
+      <div class="leaderboard-table-container">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">名次</th>
+              <th style="width: 100px;">班級座號</th>
+              <th>姓名</th>
+              <th style="width: 80px;">最高分</th>
+              <th style="width: 80px;">最高連擊</th>
+              <th style="width: 80px;">答對率</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <tr>
+              <td colspan="6" class="lb-loading">載入英雄榜中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 14px;">
+        <button id="btnCloseLeaderboard" class="jelly-btn">關閉英雄榜</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 彈出視窗 7：教師雲端試算表設定 ==================== -->
+  <div class="modal-overlay" id="modalCloudSetup">
+    <div class="modal-card modal-setup-card">
+      <div class="modal-mascot">⚙️</div>
+      <h2 class="modal-title">教師雲端試算表設定</h2>
+      <p class="modal-subtitle">貼上 Google Apps Script 網路應用程式網址，將全班成績與答題歷程即時存入試算表！</p>
+
+      <div class="cloud-setup-content">
+        <div class="setup-field">
+          <label for="inputGasUrl">Google Apps Script Web App URL：</label>
+          <input type="text" id="inputGasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+          <small class="field-tip">💡 請按照說明將 <code>google_apps_script.js</code> 部署為網路應用程式後貼在此處。</small>
+        </div>
+
+        <div class="setup-field">
+          <label for="inputSheetUrl">Google 試算表檢視網址 (可選)：</label>
+          <input type="text" id="inputSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../edit">
+          <small class="field-tip">💡 貼上您的試算表網址，方便在英雄榜點擊按鈕直接開啟。</small>
+        </div>
+
+        <div class="setup-test-box">
+          <button id="btnTestCloudConnection" class="jelly-btn btn-secondary">🔍 測試連線狀態</button>
+          <div id="setupTestResult" class="setup-test-result">尚未測試</div>
+        </div>
+
+        <div class="setup-help-guide">
+          <h4>📌 快速設定 3 步驟：</h4>
+          <ol>
+            <li>在 Google 雲端硬碟建立一個新的 Google 試算表。</li>
+            <li>點選「擴充功能」>「Apps Script」，貼上專案中的 <code>google_apps_script.js</code> 程式碼。</li>
+            <li>點選右上角「部署」>「新增部署作業」，類型選擇「網頁應用程式」，誰可以存取選擇「任何人」，將產生的網址複製到上方。</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="display: flex; gap: 10px; margin-top: 14px;">
+        <button id="btnSaveCloudSetup" class="jelly-btn">💾 儲存設定</button>
+        <button id="btnCloseCloudSetup" class="jelly-btn btn-outline">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 配置檔、音效與遊戲核心腳本 -->
+  <script src="config.js"></script>
   <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>

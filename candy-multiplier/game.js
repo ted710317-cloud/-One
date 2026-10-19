@@ -148,6 +148,11 @@
     initGrid();
     generateNewQuestion();
 
+    // 初始化學生身份與雲端試算表連線狀態
+    initPlayerProfile();
+    updateCloudStatusUI();
+    flushPendingScores();
+
     // 啟動主渲染迴圈
     requestAnimationFrame(gameLoop);
   }
@@ -1055,6 +1060,40 @@
     // 診斷弱點與熟練乘法
     analyzeLearningRecords();
 
+    // 雲端試算表自動登錄成績與每題作答歷程
+    const profile = getPlayerProfile();
+    const accuracy = questionAttempts.length > 0 ? ((totalCorrect / questionAttempts.length) * 100).toFixed(1) : 0;
+    const stageDesc = currentMode === 'rush' ? '60秒衝刺' : (STAGE_CONFIGS[currentStageIndex]?.name || '冒險闖關');
+
+    const payload = {
+      action: 'submitScore',
+      game: 'candy-multiplier',
+      class: profile.class,
+      seat: profile.seat,
+      name: profile.name,
+      player: profile.display,
+      mode: currentMode,
+      score: score,
+      maxCombo: maxCombo,
+      accuracy: parseFloat(accuracy),
+      correctCount: totalCorrect,
+      totalCount: questionAttempts.length,
+      avgTime: parseFloat(avgTime),
+      stage: stageDesc,
+      attempts: questionAttempts.map(att => ({
+        equation: att.equation,
+        a: att.a,
+        b: att.b,
+        answer: att.answer,
+        wrongInput: att.wrongClicked || att.wrongInput || '',
+        correct: att.correct,
+        time: att.time
+      })),
+      timestamp: Date.now()
+    };
+
+    sendScoreToCloud(payload);
+
     modalResult.classList.add('active');
   }
 
@@ -1698,6 +1737,45 @@
       modalTable.classList.remove('active');
     });
 
+    // 🏆 英雄榜與雲端試算表按鈕監聽
+    const btnHeaderLb = document.getElementById('btnLeaderboard');
+    if (btnHeaderLb) btnHeaderLb.addEventListener('click', () => openLeaderboardModal(currentMode === 'rush' ? 'rush' : 'stage'));
+
+    const btnStartLb = document.getElementById('btnStartLeaderboard');
+    if (btnStartLb) btnStartLb.addEventListener('click', () => openLeaderboardModal('stage'));
+
+    const btnResultLb = document.getElementById('btnResultLeaderboard');
+    if (btnResultLb) btnResultLb.addEventListener('click', () => openLeaderboardModal(currentMode === 'rush' ? 'rush' : 'stage'));
+
+    const btnCloseLb = document.getElementById('btnCloseLeaderboard');
+    if (btnCloseLb) btnCloseLb.addEventListener('click', closeLeaderboardModal);
+
+    const btnRefreshLb = document.getElementById('btnRefreshLeaderboard');
+    if (btnRefreshLb) btnRefreshLb.addEventListener('click', () => renderLeaderboard(currentLeaderboardTab, true));
+
+    // 英雄榜模式標籤頁籤切換
+    document.querySelectorAll('.lb-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        renderLeaderboard(tab);
+      });
+    });
+
+    // 雲端試算表設定視窗
+    const btnOpenSetup = document.getElementById('btnOpenCloudSetup');
+    if (btnOpenSetup) btnOpenSetup.addEventListener('click', openCloudSetupModal);
+
+    const btnCloseSetup = document.getElementById('btnCloseCloudSetup');
+    if (btnCloseSetup) btnCloseSetup.addEventListener('click', () => {
+      if (modalCloudSetup) modalCloudSetup.classList.remove('active');
+    });
+
+    const btnTestConn = document.getElementById('btnTestCloudConnection');
+    if (btnTestConn) btnTestConn.addEventListener('click', testCloudConnection);
+
+    const btnSaveSetup = document.getElementById('btnSaveCloudSetup');
+    if (btnSaveSetup) btnSaveSetup.addEventListener('click', saveCloudSetup);
+
     // 虛擬鍵盤按鈕監聽 (針對平板觸控與滑鼠點擊徹底防重複觸發)
     if (keypadPanel) {
       let lastTouchTimestamp = 0;
@@ -1758,6 +1836,496 @@
         handleKeypadClear();
       }
     });
+  }
+
+  // --- 17. 雲端 Google 試算表英雄榜與作答歷程整合系統 ---
+  const modalLeaderboard = document.getElementById('modalLeaderboard');
+  const modalCloudSetup = document.getElementById('modalCloudSetup');
+  const inputPlayerClass = document.getElementById('playerClass');
+  const inputPlayerSeat = document.getElementById('playerSeat');
+  const inputPlayerName = document.getElementById('playerName');
+  const profileErrorMsg = document.getElementById('profileErrorMsg');
+
+  let currentLeaderboardTab = 'stage';
+  let lbFetchCounter = 0;
+  let cloudCache = {
+    stage: null,
+    rush: null,
+    lastFetched: 0
+  };
+
+  // 讀取/儲存學生身份資料
+  function initPlayerProfile() {
+    try {
+      const savedClass = localStorage.getItem('candy_player_class') || '';
+      const savedSeat = localStorage.getItem('candy_player_seat') || '';
+      const savedName = localStorage.getItem('candy_player_name') || '';
+
+      if (inputPlayerClass && savedClass) inputPlayerClass.value = savedClass;
+      if (inputPlayerSeat && savedSeat) inputPlayerSeat.value = savedSeat;
+      if (inputPlayerName && savedName) inputPlayerName.value = savedName;
+
+      const saveProfile = () => {
+        if (inputPlayerClass) localStorage.setItem('candy_player_class', inputPlayerClass.value.trim());
+        if (inputPlayerSeat) localStorage.setItem('candy_player_seat', inputPlayerSeat.value.trim());
+        if (inputPlayerName) localStorage.setItem('candy_player_name', inputPlayerName.value.trim());
+        if (profileErrorMsg) profileErrorMsg.classList.add('hidden');
+      };
+
+      if (inputPlayerClass) inputPlayerClass.addEventListener('input', saveProfile);
+      if (inputPlayerSeat) inputPlayerSeat.addEventListener('input', saveProfile);
+      if (inputPlayerName) inputPlayerName.addEventListener('input', saveProfile);
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
+  }
+
+  function getPlayerProfile() {
+    const pClass = (inputPlayerClass ? inputPlayerClass.value : localStorage.getItem('candy_player_class') || '').trim();
+    const pSeat = (inputPlayerSeat ? inputPlayerSeat.value : localStorage.getItem('candy_player_seat') || '').trim();
+    const pName = (inputPlayerName ? inputPlayerName.value : localStorage.getItem('candy_player_name') || '').trim();
+
+    let display = '';
+    if (pClass && pSeat) {
+      display = `${pClass}班 ${pSeat}號${pName ? ' (' + pName + ')' : ''}`;
+    } else if (pName) {
+      display = pName;
+    } else {
+      display = '糖果小勇士';
+    }
+
+    return {
+      class: pClass,
+      seat: pSeat,
+      name: pName,
+      display: display
+    };
+  }
+
+  // 雲端 API 網址管理 (優先取 localStorage，次取 window.GAME_CONFIG)
+  function getCloudApiUrl() {
+    try {
+      const customUrl = localStorage.getItem('candy_cloud_api_url');
+      if (customUrl && customUrl.trim()) return customUrl.trim();
+    } catch (e) {}
+    if (window.GAME_CONFIG && window.GAME_CONFIG.cloudApiUrl) {
+      return window.GAME_CONFIG.cloudApiUrl.trim();
+    }
+    return '';
+  }
+
+  function getSpreadsheetUrl() {
+    try {
+      const customUrl = localStorage.getItem('candy_spreadsheet_url');
+      if (customUrl && customUrl.trim()) return customUrl.trim();
+    } catch (e) {}
+    if (window.GAME_CONFIG && window.GAME_CONFIG.spreadsheetUrl) {
+      return window.GAME_CONFIG.spreadsheetUrl.trim();
+    }
+    return '';
+  }
+
+  function isCloudEnabled() {
+    const url = getCloudApiUrl();
+    return !!(url && (url.startsWith('https://script.google.com') || url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1')));
+  }
+
+  // 離線佇列管理 (斷網時暫存成績，連線後自動補傳)
+  function getPendingScores() {
+    try {
+      const raw = localStorage.getItem('candy_pending_scores');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addPendingScore(payload) {
+    try {
+      const list = getPendingScores();
+      list.push(payload);
+      localStorage.setItem('candy_pending_scores', JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  function removePendingScore(timestamp) {
+    try {
+      let list = getPendingScores();
+      list = list.filter(item => item.timestamp !== timestamp);
+      localStorage.setItem('candy_pending_scores', JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  let isFlushingQueue = false;
+  async function flushPendingScores() {
+    if (isFlushingQueue || !isCloudEnabled()) return;
+    const pending = getPendingScores();
+    if (!pending || pending.length === 0) return;
+
+    isFlushingQueue = true;
+    for (const item of pending) {
+      try {
+        const res = await sendScoreToCloud(item, false);
+        if (res !== null) {
+          removePendingScore(item.timestamp);
+        }
+      } catch (e) {
+        break;
+      }
+    }
+    isFlushingQueue = false;
+  }
+
+  // 本機離線排行榜 (當未設定試算表時自動維持排行榜運作)
+  function getLocalLeaderboard(mode) {
+    try {
+      const raw = localStorage.getItem(`candy_local_lb_${mode}`);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLocalScore(payload) {
+    try {
+      const mode = payload.mode;
+      const list = getLocalLeaderboard(mode);
+      const existingIdx = list.findIndex(item => 
+        (item.class && item.seat && item.class === payload.class && item.seat === payload.seat) ||
+        (item.name && item.name === payload.name)
+      );
+
+      const entry = {
+        class: payload.class,
+        seat: payload.seat,
+        name: payload.name,
+        player: payload.player,
+        score: payload.score,
+        combo: payload.maxCombo,
+        accuracy: payload.accuracy,
+        correctCount: payload.correctCount,
+        totalCount: payload.totalCount,
+        date: new Date().toLocaleDateString('zh-TW')
+      };
+
+      if (existingIdx >= 0) {
+        if (entry.score > list[existingIdx].score || (entry.score === list[existingIdx].score && entry.accuracy > list[existingIdx].accuracy)) {
+          list[existingIdx] = entry;
+        }
+      } else {
+        list.push(entry);
+      }
+
+      list.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return b.accuracy - a.accuracy;
+      });
+
+      localStorage.setItem(`candy_local_lb_${mode}`, JSON.stringify(list.slice(0, 30)));
+    } catch (e) {}
+  }
+
+  // 取得雲端排行榜資料
+  async function fetchCloudLeaderboard(mode, force = false) {
+    const cloudUrl = getCloudApiUrl();
+    if (!isCloudEnabled()) return null;
+
+    if (!force && cloudCache[mode] && (Date.now() - cloudCache.lastFetched < 15000)) {
+      return cloudCache[mode];
+    }
+
+    updateCloudStatusUI(true, '正在下載全班最新排名...');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+      const res = await fetch(`${cloudUrl}?action=getLeaderboard&mode=${mode}&t=${Date.now()}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.status === 'success' && Array.isArray(data.leaderboard)) {
+        cloudCache[mode] = data.leaderboard;
+        cloudCache.lastFetched = Date.now();
+        try {
+          localStorage.setItem(`candy_cloud_cache_${mode}`, JSON.stringify(data.leaderboard));
+        } catch (e) {}
+        const nowTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        updateCloudStatusUI(false, `雲端試算表已連線 (${nowTime})`);
+        return data.leaderboard;
+      } else {
+        throw new Error(data.message || '資料格式不符');
+      }
+    } catch (err) {
+      console.warn('Cloud leaderboard fetch error:', err);
+      try {
+        const cached = localStorage.getItem(`candy_cloud_cache_${mode}`);
+        if (cached) {
+          updateCloudStatusUI(false, '⚠️ 網路延遲，顯示前次暫存之雲端紀錄');
+          return JSON.parse(cached);
+        }
+      } catch (e) {}
+      updateCloudStatusUI(false, '⚠️ 雲端無法連線，已切換至本機紀錄');
+      return null;
+    }
+  }
+
+  // 發送成績與作答歷程到 Google 試算表
+  async function sendScoreToCloud(payload, canQueue = true) {
+    saveLocalScore(payload); // 本機同時儲存備份
+
+    const cloudUrl = getCloudApiUrl();
+    const rankBadge = document.getElementById('resCloudRankBadge');
+    const rankText = document.getElementById('resCloudRankText');
+
+    if (!isCloudEnabled()) {
+      if (rankBadge && rankText) {
+        rankBadge.classList.remove('hidden');
+        rankText.innerHTML = `本機紀錄已儲存 <span style="font-size:0.78rem; color:#884466;">(點擊右上角🏆設定雲端試算表)</span>`;
+      }
+      return null;
+    }
+
+    if (rankBadge && rankText) {
+      rankBadge.classList.remove('hidden');
+      rankText.innerHTML = `☁️ 正在同步成績至試算表...`;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      const res = await fetch(cloudUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+      if (result && result.status === 'success') {
+        cloudCache.lastFetched = 0;
+        cloudCache[payload.mode] = null;
+        if (rankBadge && rankText) {
+          rankBadge.classList.remove('hidden');
+          const rankInfo = result.rank ? `第 ${result.rank} 名！` : '登錄成功！';
+          rankText.innerHTML = `🎉 恭喜！全班即時排名 <span style="color:#d81159; font-weight:900;">${rankInfo}</span>`;
+        }
+        return result.rank;
+      } else {
+        throw new Error(result.message || '寫入失敗');
+      }
+    } catch (err) {
+      console.warn('Send score error:', err);
+      if (canQueue) {
+        addPendingScore(payload);
+      }
+      if (rankBadge && rankText) {
+        rankBadge.classList.remove('hidden');
+        rankText.innerHTML = `⚠️ 網路連線延遲，已暫存本機，恢復後自動補傳`;
+      }
+      return null;
+    }
+  }
+
+  // 更新英雄榜雲端狀態 UI
+  function updateCloudStatusUI(isSyncing, text) {
+    const statusText = document.getElementById('lbCloudStatusText');
+    const indicator = document.querySelector('#lbCloudStatus .cloud-indicator');
+    const btnOpenSheet = document.getElementById('btnOpenSpreadsheet');
+    const sheetUrl = getSpreadsheetUrl();
+
+    if (btnOpenSheet) {
+      if (sheetUrl) {
+        btnOpenSheet.href = sheetUrl;
+        btnOpenSheet.classList.remove('hidden');
+      } else {
+        btnOpenSheet.classList.add('hidden');
+      }
+    }
+
+    if (indicator) {
+      indicator.className = 'cloud-indicator';
+      if (isSyncing) {
+        indicator.classList.add('syncing');
+      } else if (isCloudEnabled()) {
+        indicator.classList.add('online');
+      } else {
+        indicator.classList.add('offline');
+      }
+    }
+
+    if (statusText) {
+      if (text) {
+        statusText.textContent = text;
+      } else if (isCloudEnabled()) {
+        statusText.textContent = '雲端試算表已連線';
+      } else {
+        statusText.textContent = '本機離線模式 (未設定試算表)';
+      }
+    }
+  }
+
+  // 渲染排行榜表格內容
+  async function renderLeaderboard(tab = currentLeaderboardTab, forceRefresh = false) {
+    currentLeaderboardTab = tab;
+    const tbody = document.getElementById('leaderboardBody');
+    if (!tbody) return;
+
+    // 更新頁籤 active 樣式
+    document.querySelectorAll('.lb-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+    });
+
+    tbody.innerHTML = `<tr><td colspan="6" class="lb-loading">🔄 正在下載最新英雄榜...</td></tr>`;
+
+    lbFetchCounter++;
+    const thisCall = lbFetchCounter;
+
+    let list = null;
+    if (isCloudEnabled()) {
+      list = await fetchCloudLeaderboard(tab, forceRefresh);
+    }
+
+    if (thisCall !== lbFetchCounter) return;
+
+    // 如果雲端無法獲取或未設定，自動回退本機資料
+    if (!list || list.length === 0) {
+      list = getLocalLeaderboard(tab);
+    }
+
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; color:#884466;">目前尚未有 ${tab === 'rush' ? '極速衝刺' : '冒險闖關'} 的挑戰紀錄！<br>快成為第一位登上英雄榜的小達人吧！🍭</td></tr>`;
+      return;
+    }
+
+    const myProfile = getPlayerProfile();
+    let rowsHtml = '';
+
+    list.forEach((entry, idx) => {
+      const rank = idx + 1;
+      let medal = `<span class="rank-badge">${rank}</span>`;
+      if (rank === 1) medal = `<span class="rank-badge rank-1">🥇 1</span>`;
+      else if (rank === 2) medal = `<span class="rank-badge rank-2">🥈 2</span>`;
+      else if (rank === 3) medal = `<span class="rank-badge rank-3">🥉 3</span>`;
+
+      const pClass = entry.class || '';
+      const pSeat = entry.seat || '';
+      const pName = entry.name || entry.player || '糖果小勇士';
+      const classSeat = (pClass && pSeat) ? `${pClass}班 ${pSeat}號` : '-';
+
+      const isMyRow = (myProfile.class && myProfile.seat && myProfile.class === pClass && myProfile.seat === pSeat) ||
+                      (myProfile.name && myProfile.name === pName);
+
+      const scoreNum = Number(entry.score || 0).toLocaleString();
+      const comboNum = entry.combo !== undefined ? entry.combo : (entry.maxCombo || 0);
+      const accNum = entry.accuracy !== undefined ? `${Number(entry.accuracy).toFixed(0)}%` : '-';
+
+      rowsHtml += `
+        <tr class="${isMyRow ? 'my-rank' : ''}">
+          <td>${medal}</td>
+          <td><b>${classSeat}</b></td>
+          <td>${pName}${isMyRow ? ' ⭐' : ''}</td>
+          <td style="color:#ff3377; font-weight:900;">${scoreNum}</td>
+          <td>🔥 ${comboNum}</td>
+          <td>${accNum}</td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = rowsHtml;
+  }
+
+  function openLeaderboardModal(tab = 'stage') {
+    if (modalLeaderboard) {
+      modalLeaderboard.classList.add('active');
+      renderLeaderboard(tab);
+      flushPendingScores();
+    }
+  }
+
+  function closeLeaderboardModal() {
+    if (modalLeaderboard) {
+      modalLeaderboard.classList.remove('active');
+    }
+  }
+
+  function openCloudSetupModal() {
+    const inputUrl = document.getElementById('inputGasUrl');
+    const inputSheet = document.getElementById('inputSheetUrl');
+    const resultBox = document.getElementById('setupTestResult');
+
+    if (inputUrl) inputUrl.value = getCloudApiUrl();
+    if (inputSheet) inputSheet.value = getSpreadsheetUrl();
+    if (resultBox) {
+      resultBox.className = 'setup-test-result';
+      resultBox.textContent = '尚未測試';
+    }
+
+    if (modalCloudSetup) modalCloudSetup.classList.add('active');
+  }
+
+  // 測試雲端試算表 GAS 部署網址連線
+  async function testCloudConnection() {
+    const inputUrl = document.getElementById('inputGasUrl');
+    const resultBox = document.getElementById('setupTestResult');
+    if (!inputUrl || !resultBox) return;
+
+    const url = inputUrl.value.trim();
+    if (!url) {
+      resultBox.className = 'setup-test-result error';
+      resultBox.textContent = '❌ 請先貼上 Google Apps Script 網址！';
+      return;
+    }
+
+    resultBox.className = 'setup-test-result';
+    resultBox.textContent = '⏳ 正在連線測試中，請稍候...';
+
+    try {
+      const res = await fetch(`${url}?action=test&t=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.status === 'success') {
+        resultBox.className = 'setup-test-result success';
+        resultBox.textContent = `✅ 連線成功！已連結至：${data.sheetName || 'Google 試算表'}`;
+        const inputSheet = document.getElementById('inputSheetUrl');
+        if (inputSheet && !inputSheet.value && data.sheetUrl) {
+          inputSheet.value = data.sheetUrl;
+        }
+      } else {
+        throw new Error(data.message || '測試回傳錯誤');
+      }
+    } catch (err) {
+      resultBox.className = 'setup-test-result error';
+      resultBox.textContent = `❌ 連線失敗：${err.message || '無法連線至該網址，請確認部署權限是否設為「任何人」'}`;
+    }
+  }
+
+  // 儲存雲端設定
+  function saveCloudSetup() {
+    const inputUrl = document.getElementById('inputGasUrl');
+    const inputSheet = document.getElementById('inputSheetUrl');
+
+    if (inputUrl) {
+      const url = inputUrl.value.trim();
+      localStorage.setItem('candy_cloud_api_url', url);
+    }
+    if (inputSheet) {
+      const sUrl = inputSheet.value.trim();
+      localStorage.setItem('candy_spreadsheet_url', sUrl);
+    }
+
+    cloudCache = { stage: null, rush: null, lastFetched: 0 };
+    updateCloudStatusUI();
+
+    if (modalCloudSetup) modalCloudSetup.classList.remove('active');
+    renderLeaderboard(currentLeaderboardTab, true);
   }
 
   // 視窗載入完成後啟動
