@@ -18,13 +18,13 @@
     9: '#ff0055', // Crimson Rose
   };
 
-  // Preset multiplier stages for Grade 3 curriculum
+  // Preset multiplier stages for Grade 3 curriculum (Lowered speeds for approachable 3rd grade learning)
   const STAGE_CONFIG = {
-    1: { factors: [2, 3], total: 10, speedMult: 0.92, name: '【第 1 波】2 和 3 的乘法 (基礎起步)' },
-    2: { factors: [4, 5], total: 10, speedMult: 1.12, name: '【第 2 波】4 和 5 的乘法 (規律翻倍)' },
-    3: { factors: [6, 7], total: 12, speedMult: 1.32, name: '【第 3 波】6 和 7 的乘法 (精熟大挑戰)' },
-    4: { factors: [8, 9], total: 12, speedMult: 1.52, name: '【第 4 波】8 和 9 的乘法 (高階心算)' },
-    5: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 15, speedMult: 1.75, name: '【第 5 波】2 到 9 乘法大混合 (全面決戰)' }
+    1: { factors: [2, 3], total: 10, speedMult: 0.72, name: '【第 1 波】2 和 3 的乘法 (基礎起步)' },
+    2: { factors: [4, 5], total: 10, speedMult: 0.82, name: '【第 2 波】4 和 5 的乘法 (規律翻倍)' },
+    3: { factors: [6, 7], total: 12, speedMult: 0.92, name: '【第 3 波】6 和 7 的乘法 (精熟大挑戰)' },
+    4: { factors: [8, 9], total: 12, speedMult: 1.05, name: '【第 4 波】8 和 9 的乘法 (高階心算)' },
+    5: { factors: [2, 3, 4, 5, 6, 7, 8, 9], total: 15, speedMult: 1.20, name: '【第 5 波】2 到 9 乘法大混合 (全面決戰)' }
   };
 
   // --- Game State ---
@@ -49,7 +49,7 @@
     isWaveTransition: false,
     learningHistory: [], // stores { equation, factorA, factorB, product, timeSec, wasWrong }
     spawnTimer: 0,
-    spawnInterval: 220, // frames between spawns
+    spawnInterval: 260, // frames between spawns (gentle pacing for 3rd graders)
     waveMonstersRemaining: 10,
     waveMonstersTotal: 10,
     bossSpawned: false,
@@ -62,9 +62,9 @@
     feverTriggerCombo: 10,
     speedIndex: 0,
     speedLevels: [
-      { label: '🚶 標準心算', mult: 1.0 },
-      { label: '🐢 悠閒慢速', mult: 0.70 },
-      { label: '⚡ 挑戰快速', mult: 1.45 }
+      { label: '🚶 溫和心算', mult: 1.0 },
+      { label: '🐢 輕鬆慢速', mult: 0.75 },
+      { label: '⚡ 挑戰快速', mult: 1.30 }
     ],
     // Practice mode customizable factors (2~9)
     practiceFactors: [2, 3, 4, 5, 6, 7, 8, 9],
@@ -305,17 +305,17 @@
   // --- Wave Speed Multiplier Progression ---
   function getWaveSpeedMultiplier() {
     if (state.mode === 'endless') {
-      return 1.0 + (state.endlessLevel - 1) * 0.16;
+      return 0.75 + (state.endlessLevel - 1) * 0.08;
     } else if (state.mode === 'campaign') {
       if (state.wave <= 5) {
         const cfg = STAGE_CONFIG[state.wave];
-        return cfg ? cfg.speedMult : 1.0;
+        return cfg ? cfg.speedMult : 0.85;
       } else {
-        // 第 5 波之後，波次越高速度越來越快！每多一波 +0.15 倍速，上限 2.6 倍速（保護小三學生手速反應）
-        return Math.min(2.6, 1.75 + (state.wave - 5) * 0.15);
+        // 第 5 波之後，波次越高速度越來越快！每多一波 +0.10 倍速，上限 1.8 倍速（保護中年級手速與心算反應）
+        return Math.min(1.8, 1.20 + (state.wave - 5) * 0.10);
       }
     }
-    return 0.85; // practice mode
+    return 0.75; // practice mode
   }
 
   // --- Lane Allocation to Prevent Monster Overlapping ---
@@ -376,11 +376,11 @@
       // Start slightly visible at top so it glides smoothly down immediately
       this.y = -10;
 
-      // Realistic, fun arcade falling speed for 3rd graders
+      // Realistic, gentle falling speed designed for 3rd graders
       const waveMult = getWaveSpeedMultiplier();
-      let baseSpeed = isBoss ? 0.95 : 1.35;
+      let baseSpeed = isBoss ? 0.60 : 0.82;
       if (state.mode === 'practice') baseSpeed *= 0.8;
-      this.speed = baseSpeed * waveMult + Math.random() * 0.1;
+      this.speed = baseSpeed * waveMult + Math.random() * 0.08;
 
       this.staggerTimer = 0;
       this.hitFlash = 0;
@@ -1084,7 +1084,8 @@
       monster.hadWrongAttempt = true;
       monster.wrongNumber = shotNum;
       monster.wrongFlash = 14;
-      monster.staggerTimer = 20;
+      monster.staggerTimer = 35; // Generous pause giving students room to think
+      monster.y = Math.max(monster.height + 10, monster.y - 20); // Gentle knockback
 
       window.soundManager.playDeflect();
       screenShake = 5;
@@ -1385,12 +1386,12 @@
         if (item.wasWrong) {
           badgeClass = 'speed-slow';
           badgeText = `💡 建議加強 (曾有失誤)`;
-        } else if (Number(item.timeSec) < 2.0) {
+        } else if (Number(item.timeSec) < 2.8) {
           badgeClass = 'speed-fast';
           badgeText = `⚡ 神速反射 (${item.timeSec}s)`;
-        } else if (Number(item.timeSec) > 3.5) {
+        } else if (Number(item.timeSec) > 5.0) {
           badgeClass = 'speed-slow';
-          badgeText = `💡 建議加強 (${item.timeSec}s)`;
+          badgeText = `💡 漸入佳境 (${item.timeSec}s)`;
         }
 
         row.innerHTML = `
@@ -1534,7 +1535,7 @@
     state.waveMonstersRemaining = 10;
     state.bossSpawned = false;
     state.spawnTimer = 0;
-    state.spawnInterval = 220;
+    state.spawnInterval = 260;
 
     if (state.mode === 'practice') {
       const selected = [];
@@ -2545,15 +2546,15 @@ function createJsonResponse(obj) {
       // Spawning Monsters (Max 2~3 on screen to keep mental math focused)
       state.spawnTimer++;
       const effectiveWave = state.mode === 'endless' ? state.endlessLevel : state.wave;
-      let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 3);
+      let maxOnScreen = effectiveWave <= 3 ? 2 : 3;
       if (state.bossSpawned) maxOnScreen = 1;
 
       const shouldSpawn = (monsters.length < maxOnScreen) &&
         (state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
       const currentSpawnInterval = state.mode === 'endless'
-        ? Math.max(140, 220 - (state.endlessLevel - 1) * 15)
-        : (state.wave >= 5 ? Math.max(130, 200 - (state.wave - 5) * 12) : state.spawnInterval);
+        ? Math.max(160, 260 - (state.endlessLevel - 1) * 15)
+        : (state.wave >= 5 ? Math.max(160, 240 - (state.wave - 5) * 15) : state.spawnInterval);
 
       if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
         state.spawnTimer = 0;
@@ -2572,7 +2573,7 @@ function createJsonResponse(obj) {
           showComboBanner('⚠️ 魔王出現！請快速心算消除！');
           window.soundManager.playDamage();
           updateHUD();
-        } else if (state.spawnTimer >= 60) {
+        } else if (state.spawnTimer >= 75) {
           state.spawnTimer = 0;
           monsters.push(generateQuestion(effectiveWave));
         }
