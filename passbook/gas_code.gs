@@ -1,22 +1,21 @@
 // ============================================================================
-// 羚藝氣泡水電子存摺 - 雲端試算表整合 API (Google Apps Script)
+// 羚藝氣泡水電子存摺 - 雲端試算表整合 API (Google Apps Script) - 智慧多分頁版
 // ============================================================================
 // 💡 使用說明：
 // 1. 打開您的 Google 試算表，點選上方選單【擴充功能】➔【Apps Script】。
 // 2. 將編輯器內的原有內容全部清空，貼上此完整代碼。
-// 3. 點擊右上角【部署】➔【管理部署作業】或【新增部署作業】。
-// 4. 類型選【網頁應用程式】。
-// 5. 「執行身分」選【我】(Me)。
-// 6. 「誰可以存取」選【任何人】(Anyone)（重要！學生與外部網站才能正常讀寫）。
-// 7. 點擊【部署】，複製產生的網頁應用程式網址（以 /exec 結尾）。
+// 3. 點擊右上角【部署】➔【管理部署作業】➔ 點擊鉛筆圖示【編輯】➔ 版本選【新版本】➔ 點擊【部署】。
+//    （或者點擊【新增部署作業】➔ 選擇【網頁應用程式】）
+// 4. 「執行身分」選【我】(Me)；「誰可以存取」選【任何人】(Anyone)（重要！）。
+// 5. 複製產生的網頁應用程式網址（以 /exec 結尾）即可！
 // ============================================================================
 
 const CONFIG = {
   // 教師管理密碼 (可自訂，預設: 03170317)
   TEACHER_PASSWORD: "03170317",
   
-  // 工作表名稱設定 (若工作表不存在，系統會自動建立)
-  SHEET_STUDENTS: "學生名單",
+  // 預設工作表名稱 (系統會智慧搜尋現有資料表，若無才會新建)
+  DEFAULT_SHEET_STUDENTS: "學生名單",
   SHEET_HISTORY: "異動紀錄"
 };
 
@@ -45,10 +44,11 @@ function handleRequest(e, method) {
     }
 
     const action = params.action || (e && e.parameter ? e.parameter.action : 'getData');
+    const requestedSheet = params.sheet || (e && e.parameter ? e.parameter.sheet : '');
     let result = {};
 
     if (action === 'getData' || action === 'getCloudData') {
-      result = getCloudData();
+      result = getCloudData(requestedSheet);
     } 
     else if (action === 'verifyPassword') {
       const pwd = params.password || '';
@@ -62,24 +62,23 @@ function handleRequest(e, method) {
         return createJsonResponse({ error: '密碼驗證失敗，無法執行加扣點！' });
       }
       const updates = params.updates || [];
-      result = updateStudentPointsCore(updates);
+      result = updateStudentPointsCore(updates, requestedSheet);
     } 
     else if (action === 'updateRole' || action === 'updateStudentRoleCloud') {
       if (params.password !== CONFIG.TEACHER_PASSWORD) {
         return createJsonResponse({ error: '密碼驗證失敗，無法設定幹部！' });
       }
       const roleData = params.roleData || params;
-      result = updateStudentRoleCore(roleData);
+      result = updateStudentRoleCore(roleData, requestedSheet);
     } 
     else if (action === 'paySalaries' || action === 'payAllSalariesCloud') {
       if (params.password !== CONFIG.TEACHER_PASSWORD) {
         return createJsonResponse({ error: '密碼驗證失敗，無法發放薪水！' });
       }
-      result = payAllSalariesCore();
+      result = payAllSalariesCore(requestedSheet);
     } 
     else {
-      // 預設回傳完整資料
-      result = getCloudData();
+      result = getCloudData(requestedSheet);
     }
 
     return createJsonResponse(result);
@@ -94,73 +93,137 @@ function createJsonResponse(data) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// --- 取得試算表實例與自動初始化 ---
-function getOrCreateSheet(sheetName, defaultHeaders) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(sheetName);
-  
-  if (!sheet) {
-    // 嘗試尋找相近名稱
-    const allSheets = ss.getSheets();
+// --- 智慧尋找學生資料工作表 ---
+function findStudentSheet(ss, requestedSheetName) {
+  // 1. 若有指定工作表名稱，優先使用指定分頁
+  if (requestedSheetName) {
+    const s = ss.getSheetByName(requestedSheetName);
+    if (s) return s;
+  }
+
+  const allSheets = ss.getSheets();
+
+  // 2. 優先搜尋包含現有實體學生資料的工作表（以工作表1、Sheet1、學生名單等常見名稱搜尋）
+  const priorityKeywords = ["工作表1", "Sheet1", "學生名單", "學生", "名單", "名冊", "點數", "存摺", "班級"];
+  for (let kw of priorityKeywords) {
     for (let s of allSheets) {
-      if (s.getName().indexOf(sheetName.substring(0, 2)) !== -1) {
+      if (s.getName().toLowerCase().indexOf(kw.toLowerCase()) !== -1 && s.getLastRow() > 1) {
         return s;
       }
     }
-    // 不存在則新建
-    sheet = ss.insertSheet(sheetName);
-    if (defaultHeaders && defaultHeaders.length > 0) {
-      sheet.appendRow(defaultHeaders);
-      sheet.getRange(1, 1, 1, defaultHeaders.length).setFontWeight("bold").setBackground("#e2e8f0");
+  }
+
+  // 3. 檢查第一個分頁是否已有資料（且不是歷史紀錄）
+  if (allSheets.length > 0 && allSheets[0].getLastRow() > 1 && allSheets[0].getName() !== CONFIG.SHEET_HISTORY) {
+    return allSheets[0];
+  }
+
+  // 4. 尋找任何有資料的分頁
+  for (let s of allSheets) {
+    if (s.getLastRow() > 1 && s.getName() !== CONFIG.SHEET_HISTORY) {
+      return s;
     }
   }
-  return sheet;
+
+  // 5. 若全試算表皆為空，尋找或建立預設工作表
+  let defaultSheet = ss.getSheetByName(CONFIG.DEFAULT_SHEET_STUDENTS);
+  if (!defaultSheet) {
+    defaultSheet = ss.insertSheet(CONFIG.DEFAULT_SHEET_STUDENTS);
+    defaultSheet.appendRow(["座號", "姓名", "目前點數", "幹部職稱", "薪水點數", "發放週期"]);
+    defaultSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#e2e8f0");
+    for (let i = 1; i <= 25; i++) {
+      defaultSheet.appendRow([i, `學生 ${i} 號`, 10, i === 1 ? "班長" : (i === 2 ? "副班長" : ""), i <= 2 ? 5 : 0, i <= 2 ? "weekly" : "none"]);
+    }
+  }
+  return defaultSheet;
 }
 
-// --- 取得全班資料 (學生列表 + 歷史紀錄) ---
-function getCloudData() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // 1. 學生工作表
-  let stuSheet = getOrCreateSheet(CONFIG.SHEET_STUDENTS, ["座號", "姓名", "目前點數", "幹部職稱", "薪水點數", "發放週期"]);
-  
-  // 若工作表只有標題，自動建立 1~25 號示範名單
-  if (stuSheet.getLastRow() <= 1) {
-    for (let i = 1; i <= 25; i++) {
-      stuSheet.appendRow([i, `學生 ${i} 號`, 10, i === 1 ? "班長" : (i === 2 ? "副班長" : ""), i <= 2 ? 5 : 0, i <= 2 ? "weekly" : "none"]);
+// --- 取得或建立歷史紀錄工作表 ---
+function getOrCreateHistorySheet(ss) {
+  let histSheet = ss.getSheetByName(CONFIG.SHEET_HISTORY);
+  if (!histSheet) {
+    histSheet = ss.insertSheet(CONFIG.SHEET_HISTORY);
+    histSheet.appendRow(["時間", "座號", "異動點數", "原因說明"]);
+    histSheet.getRange(1, 1, 1, 4).setFontWeight("bold").setBackground("#e2e8f0");
+  }
+  return histSheet;
+}
+
+// --- 自動偵測標題欄位索引 (0-indexed) ---
+function detectColumns(headers) {
+  let colId = 0, colName = 1, colPoints = 2, colRole = 3, colSalary = 4, colCycle = 5;
+  let idFound = false, nameFound = false, pointsFound = false;
+
+  for (let idx = 0; idx < headers.length; idx++) {
+    const s = String(headers[idx] || "").trim().toLowerCase();
+    if (!idFound && (s.includes("座號") || s.includes("號碼") || s.includes("編號") || s === "no" || s === "id" || s === "號")) {
+      colId = idx; idFound = true;
+    } else if (!nameFound && (s.includes("姓名") || s.includes("名字") || s.includes("學生") || s === "name")) {
+      colName = idx; nameFound = true;
+    } else if (!pointsFound && (s.includes("點數") || s.includes("氣泡水") || s.includes("餘額") || s.includes("總分") || s.includes("points") || s.includes("score"))) {
+      colPoints = idx; pointsFound = true;
+    } else if (s.includes("幹部") || s.includes("職稱") || s.includes("職務") || s.includes("role")) {
+      colRole = idx;
+    } else if (s.includes("薪水") || s.includes("津貼") || s.includes("薪資") || s.includes("salary")) {
+      colSalary = idx;
+    } else if (s.includes("週期") || s.includes("頻率") || s.includes("cycle")) {
+      colCycle = idx;
     }
   }
 
+  return { colId, colName, colPoints, colRole, colSalary, colCycle };
+}
+
+// --- 取得全班資料 (學生列表 + 歷史紀錄 + 試算表診斷資訊) ---
+function getCloudData(requestedSheetName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const stuSheet = findStudentSheet(ss, requestedSheetName);
+  const allSheets = ss.getSheets().map(s => s.getName());
+
   const stuData = stuSheet.getDataRange().getValues();
+  const headers = stuData.length > 0 ? stuData[0] : [];
+  const cols = detectColumns(headers);
   const students = [];
-  
-  // 第一列為標題，從第二列開始讀取
+
+  // 從第 2 列開始讀取學生資料
   for (let r = 1; r < stuData.length; r++) {
     const row = stuData[r];
-    const id = parseInt(row[0], 10);
-    if (isNaN(id)) continue;
-    
+    let id = parseInt(row[cols.colId], 10);
+    // 若沒有座號欄位或無法解析，以行號做為座號 (第 2 列為 1 號)
+    if (isNaN(id)) id = r;
+
+    const rawName = row[cols.colName];
+    const name = (rawName !== undefined && rawName !== null && String(rawName).trim() !== "")
+      ? String(rawName).trim()
+      : `學生 ${id} 號`;
+
+    const rawPoints = row[cols.colPoints];
+    const points = parseInt(rawPoints, 10) || 0;
+
+    const role = cols.colRole < row.length ? String(row[cols.colRole] || "").trim() : "";
+    const salary = cols.colSalary < row.length ? (parseInt(row[cols.colSalary], 10) || 0) : 0;
+    const cycle = cols.colCycle < row.length ? String(row[cols.colCycle] || "none").trim().toLowerCase() : "none";
+
     students.push({
       id: id,
-      name: String(row[1] || `學生 ${id} 號`),
-      points: parseInt(row[2], 10) || 0,
-      role: String(row[3] || "").trim(),
-      salary: parseInt(row[4], 10) || 0,
-      cycle: String(row[5] || "none").trim().toLowerCase()
+      name: name,
+      points: points,
+      role: role,
+      salary: salary,
+      cycle: cycle
     });
   }
 
-  // 2. 歷史紀錄工作表
-  let histSheet = getOrCreateSheet(CONFIG.SHEET_HISTORY, ["時間", "座號", "異動點數", "原因說明"]);
+  // 讀取歷史紀錄
+  const histSheet = getOrCreateHistorySheet(ss);
   const histData = histSheet.getDataRange().getValues();
   const history = [];
 
-  // 反向讀取最近 200 筆紀錄
   for (let r = histData.length - 1; r >= 1; r--) {
     const row = histData[r];
     const sid = parseInt(row[1], 10);
     if (isNaN(sid)) continue;
-    
+
     let timeStr = "";
     if (row[0] instanceof Date) {
       timeStr = Utilities.formatDate(row[0], "Asia/Taipei", "yyyy/MM/dd HH:mm");
@@ -179,29 +242,33 @@ function getCloudData() {
   }
 
   return {
+    spreadsheetName: ss.getName(),
+    activeSheet: stuSheet.getName(),
+    availableSheets: allSheets,
     students: students,
     history: history
   };
 }
 
 // --- 批次加扣點核心 ---
-function updateStudentPointsCore(updates) {
-  if (!updates || updates.length === 0) return getCloudData();
+function updateStudentPointsCore(updates, requestedSheetName) {
+  if (!updates || updates.length === 0) return getCloudData(requestedSheetName);
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const stuSheet = getOrCreateSheet(CONFIG.SHEET_STUDENTS);
-  const histSheet = getOrCreateSheet(CONFIG.SHEET_HISTORY);
-  
+  const stuSheet = findStudentSheet(ss, requestedSheetName);
+  const histSheet = getOrCreateHistorySheet(ss);
+
   const stuData = stuSheet.getDataRange().getValues();
+  const headers = stuData.length > 0 ? stuData[0] : [];
+  const cols = detectColumns(headers);
   const nowStr = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy/MM/dd HH:mm");
 
   // 建立座號到行號的對照表
   const rowMap = {};
   for (let r = 1; r < stuData.length; r++) {
-    const id = parseInt(stuData[r][0], 10);
-    if (!isNaN(id)) {
-      rowMap[id] = r + 1; // 試算表行號從 1 開始
-    }
+    let id = parseInt(stuData[r][cols.colId], 10);
+    if (isNaN(id)) id = r;
+    rowMap[id] = r + 1; // 試算表行號從 1 開始
   }
 
   const histRows = [];
@@ -213,27 +280,37 @@ function updateStudentPointsCore(updates) {
 
     if (rowMap[id]) {
       const rowIndex = rowMap[id];
-      const curPoints = parseInt(stuSheet.getRange(rowIndex, 3).getValue(), 10) || 0;
-      const newPoints = Math.max(0, curPoints + change); // 最低不低於 0
-      stuSheet.getRange(rowIndex, 3).setValue(newPoints);
+      const curPoints = parseInt(stuSheet.getRange(rowIndex, cols.colPoints + 1).getValue(), 10) || 0;
+      const newPoints = Math.max(0, curPoints + change);
+      stuSheet.getRange(rowIndex, cols.colPoints + 1).setValue(newPoints);
 
       histRows.push([nowStr, id, change, reason]);
     }
   }
 
-  // 批量追加寫入歷史紀錄
   if (histRows.length > 0) {
     histSheet.getRange(histSheet.getLastRow() + 1, 1, histRows.length, 4).setValues(histRows);
   }
 
-  return getCloudData();
+  return getCloudData(requestedSheetName);
 }
 
 // --- 設定幹部核心 ---
-function updateStudentRoleCore(roleData) {
+function updateStudentRoleCore(roleData, requestedSheetName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const stuSheet = getOrCreateSheet(CONFIG.SHEET_STUDENTS);
+  const stuSheet = findStudentSheet(ss, requestedSheetName);
   const stuData = stuSheet.getDataRange().getValues();
+  const headers = stuData.length > 0 ? stuData[0] : [];
+  let cols = detectColumns(headers);
+
+  // 若缺乏幹部/薪資欄位，自動擴充標題欄
+  if (cols.colRole >= headers.length || cols.colSalary >= headers.length || cols.colCycle >= headers.length) {
+    const lastCol = stuSheet.getLastColumn();
+    stuSheet.getRange(1, lastCol + 1, 1, 3).setValues([["幹部職稱", "薪水點數", "發放週期"]]);
+    cols.colRole = lastCol;
+    cols.colSalary = lastCol + 1;
+    cols.colCycle = lastCol + 2;
+  }
 
   const id = parseInt(roleData.id, 10);
   const role = String(roleData.role || "").trim();
@@ -241,40 +318,47 @@ function updateStudentRoleCore(roleData) {
   const cycle = String(roleData.cycle || "none").trim();
 
   for (let r = 1; r < stuData.length; r++) {
-    if (parseInt(stuData[r][0], 10) === id) {
+    let rowId = parseInt(stuData[r][cols.colId], 10);
+    if (isNaN(rowId)) rowId = r;
+
+    if (rowId === id) {
       const rowIndex = r + 1;
-      stuSheet.getRange(rowIndex, 4).setValue(role);
-      stuSheet.getRange(rowIndex, 5).setValue(role ? salary : 0);
-      stuSheet.getRange(rowIndex, 6).setValue(role ? cycle : "none");
+      stuSheet.getRange(rowIndex, cols.colRole + 1).setValue(role);
+      stuSheet.getRange(rowIndex, cols.colSalary + 1).setValue(role ? salary : 0);
+      stuSheet.getRange(rowIndex, cols.colCycle + 1).setValue(role ? cycle : "none");
       break;
     }
   }
 
-  return getCloudData();
+  return getCloudData(requestedSheetName);
 }
 
 // --- 發放幹部薪水核心 ---
-function payAllSalariesCore() {
+function payAllSalariesCore(requestedSheetName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const stuSheet = getOrCreateSheet(CONFIG.SHEET_STUDENTS);
-  const histSheet = getOrCreateSheet(CONFIG.SHEET_HISTORY);
-  
+  const stuSheet = findStudentSheet(ss, requestedSheetName);
+  const histSheet = getOrCreateHistorySheet(ss);
+
   const stuData = stuSheet.getDataRange().getValues();
+  const headers = stuData.length > 0 ? stuData[0] : [];
+  const cols = detectColumns(headers);
   const nowStr = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy/MM/dd HH:mm");
 
   const histRows = [];
   let paidCount = 0;
 
   for (let r = 1; r < stuData.length; r++) {
-    const id = parseInt(stuData[r][0], 10);
-    const role = String(stuData[r][3] || "").trim();
-    const salary = parseInt(stuData[r][4], 10) || 0;
-    const cycle = String(stuData[r][5] || "").trim();
+    let id = parseInt(stuData[r][cols.colId], 10);
+    if (isNaN(id)) id = r;
+
+    const role = cols.colRole < stuData[r].length ? String(stuData[r][cols.colRole] || "").trim() : "";
+    const salary = cols.colSalary < stuData[r].length ? (parseInt(stuData[r][cols.colSalary], 10) || 0) : 0;
+    const cycle = cols.colCycle < stuData[r].length ? String(stuData[r][cols.colCycle] || "").trim() : "";
 
     if (role && salary > 0) {
       const rowIndex = r + 1;
-      const curPoints = parseInt(stuSheet.getRange(rowIndex, 3).getValue(), 10) || 0;
-      stuSheet.getRange(rowIndex, 3).setValue(curPoints + salary);
+      const curPoints = parseInt(stuSheet.getRange(rowIndex, cols.colPoints + 1).getValue(), 10) || 0;
+      stuSheet.getRange(rowIndex, cols.colPoints + 1).setValue(curPoints + salary);
 
       const cycleLabel = cycle === "monthly" ? "每月薪資" : "每週薪資";
       histRows.push([nowStr, id, salary, `幹部【${role}】發放${cycleLabel}`]);
@@ -288,11 +372,11 @@ function payAllSalariesCore() {
 
   return {
     paidCount: paidCount,
-    data: getCloudData()
+    data: getCloudData(requestedSheetName)
   };
 }
 
-// --- 相容原有 google.script.run 呼叫介面 ---
+// --- 相容原有介面 ---
 function updateStudentPointsCloud(data) {
   return updateStudentPointsCore(data.updates || []);
 }

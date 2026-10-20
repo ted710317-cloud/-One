@@ -159,7 +159,11 @@
       selectedIds: new Set(),
       currentStudentId: null,
       gasUrl: localStorage.getItem('passbook_gas_url') || DEFAULT_GAS_URL,
-      isDemoMode: localStorage.getItem('passbook_is_demo') === 'true'
+      isDemoMode: localStorage.getItem('passbook_is_demo') === 'true',
+      spreadsheetName: localStorage.getItem('passbook_spreadsheet_name') || '',
+      activeSheet: localStorage.getItem('passbook_active_sheet') || '',
+      availableSheets: [],
+      selectedSheet: localStorage.getItem('passbook_selected_sheet') || ''
     },
 
     // 初始化進入點
@@ -254,12 +258,16 @@
     async syncWithCloud(showToastFeedback = true) {
       if (this.state.isDemoMode) {
         if (showToastFeedback) this.showToast('🌱 目前處於示範模式，點數已儲存於本機', 'info');
+        this.updateCloudStatusBadge();
         return;
       }
 
       this.showLoading(true, '與雲端試算表同步中...');
       try {
-        const fetchUrl = `${this.state.gasUrl}?action=getData&_t=${Date.now()}`;
+        let fetchUrl = `${this.state.gasUrl}?action=getData&_t=${Date.now()}`;
+        if (this.state.selectedSheet) {
+          fetchUrl += `&sheet=${encodeURIComponent(this.state.selectedSheet)}`;
+        }
         const res = await fetch(fetchUrl, {
           method: 'GET',
           mode: 'cors'
@@ -272,11 +280,20 @@
           this.state.students = data.students;
           this.state.history = data.history || [];
           
+          if (data.spreadsheetName) {
+            this.state.spreadsheetName = data.spreadsheetName;
+            this.state.activeSheet = data.activeSheet || '';
+            this.state.availableSheets = data.availableSheets || [];
+            localStorage.setItem('passbook_spreadsheet_name', this.state.spreadsheetName);
+            localStorage.setItem('passbook_active_sheet', this.state.activeSheet);
+          }
+
           // 寫入快取
           localStorage.setItem('passbook_cached_students', JSON.stringify(this.state.students));
           localStorage.setItem('passbook_cached_history', JSON.stringify(this.state.history));
 
-          if (showToastFeedback) this.showToast('✅ 成功從雲端同步最新學生點數！', 'success');
+          this.updateCloudStatusBadge();
+          if (showToastFeedback) this.showToast(`✅ 成功從雲端同步！(共 ${this.state.students.length} 位學生)`, 'success');
         } else if (data.error) {
           throw new Error(data.error);
         }
@@ -291,7 +308,53 @@
         }
       } finally {
         this.showLoading(false);
+        this.updateCloudStatusBadge();
         this.refreshCurrentView();
+      }
+    },
+
+    // 更新雲端連線狀態徽章與設定視窗資訊
+    updateCloudStatusBadge() {
+      const badge = document.getElementById('teacher-cloud-status-badge');
+      if (badge) {
+        if (this.state.isDemoMode) {
+          badge.textContent = '🌱 本機離線示範模式';
+          badge.style.background = '#fef3c7';
+          badge.style.color = '#b45309';
+        } else {
+          const sName = this.state.spreadsheetName ? `【${this.state.spreadsheetName}】` : '';
+          const sheetName = this.state.activeSheet ? `分頁：${this.state.activeSheet}` : '學生名單';
+          badge.textContent = `🟢 ${sName} ${sheetName} (${this.state.students.length}人)`;
+          badge.style.background = '#e0f2fe';
+          badge.style.color = '#0369a1';
+        }
+      }
+
+      // 雲端設定視窗內的狀態顯示
+      const infoBox = document.getElementById('cloud-info-display');
+      const selectSheet = document.getElementById('select-sheet-name');
+      if (infoBox) {
+        if (this.state.spreadsheetName || this.state.activeSheet) {
+          infoBox.style.display = 'block';
+          infoBox.innerHTML = `🟢 試算表：<strong>${this.state.spreadsheetName || '已連線'}</strong><br>📄 目前讀取分頁：<strong>${this.state.activeSheet || '學生名單'}</strong>（共 ${this.state.students.length} 位學生）`;
+        } else {
+          infoBox.style.display = 'none';
+        }
+      }
+
+      if (selectSheet && this.state.availableSheets && this.state.availableSheets.length > 0) {
+        selectSheet.innerHTML = `<option value="">✨ 智慧自動偵測 (目前: ${this.state.activeSheet || '預設'})</option>`;
+        this.state.availableSheets.forEach(s => {
+          if (s !== '異動紀錄') {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = `分頁: ${s}`;
+            if (s === this.state.selectedSheet || (!this.state.selectedSheet && s === this.state.activeSheet)) {
+              opt.selected = true;
+            }
+            selectSheet.appendChild(opt);
+          }
+        });
       }
     },
 
@@ -342,6 +405,16 @@
         } else {
           localStorage.removeItem('passbook_remember_seat');
         }
+      });
+
+      // 學生端：同步雲端資料按鈕
+      document.getElementById('btn-student-refresh')?.addEventListener('click', () => this.syncWithCloud(true));
+
+      // 雲端設定：手動指定工作表分頁
+      document.getElementById('select-sheet-name')?.addEventListener('change', e => {
+        this.state.selectedSheet = e.target.value;
+        localStorage.setItem('passbook_selected_sheet', e.target.value);
+        this.syncWithCloud(true);
       });
 
       // 學生端：明細 / 願望 Sub-Tabs
@@ -783,6 +856,7 @@
             body: JSON.stringify({
               action: 'updatePoints',
               password: this.state.teacherPasswordPlain || '03170317',
+              sheet: this.state.selectedSheet || '',
               updates: updates
             })
           });
@@ -827,6 +901,7 @@
             body: JSON.stringify({
               action: 'updatePoints',
               password: this.state.teacherPasswordPlain || '03170317',
+              sheet: this.state.selectedSheet || '',
               updates: updates
             })
           });
@@ -899,7 +974,8 @@
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
               action: 'paySalaries',
-              password: this.state.teacherPasswordPlain || '03170317'
+              password: this.state.teacherPasswordPlain || '03170317',
+              sheet: this.state.selectedSheet || ''
             })
           });
           const data = await res.json();
@@ -958,6 +1034,7 @@
             body: JSON.stringify({
               action: 'updateRole',
               password: this.state.teacherPasswordPlain || '03170317',
+              sheet: this.state.selectedSheet || '',
               roleData: { id, role, salary, cycle }
             })
           });
@@ -1038,6 +1115,7 @@
     openSettingsModal() {
       const input = document.getElementById('input-gas-url');
       if (input) input.value = this.state.gasUrl || DEFAULT_GAS_URL;
+      this.updateCloudStatusBadge();
       document.getElementById('modal-settings')?.classList.remove('hidden');
     },
 
@@ -1052,7 +1130,11 @@
 
       this.showLoading(true, '測試雲端連線中...');
       try {
-        const testRes = await fetch(`${url}?action=getData&_t=${Date.now()}`, { method: 'GET', mode: 'cors' });
+        let testUrl = `${url}?action=getData&_t=${Date.now()}`;
+        if (this.state.selectedSheet) {
+          testUrl += `&sheet=${encodeURIComponent(this.state.selectedSheet)}`;
+        }
+        const testRes = await fetch(testUrl, { method: 'GET', mode: 'cors' });
         if (!testRes.ok) throw new Error(`HTTP ${testRes.status}`);
         const data = await testRes.json();
 
@@ -1060,6 +1142,14 @@
         this.state.isDemoMode = false;
         localStorage.setItem('passbook_gas_url', url);
         localStorage.setItem('passbook_is_demo', 'false');
+
+        if (data.spreadsheetName) {
+          this.state.spreadsheetName = data.spreadsheetName;
+          this.state.activeSheet = data.activeSheet || '';
+          this.state.availableSheets = data.availableSheets || [];
+          localStorage.setItem('passbook_spreadsheet_name', this.state.spreadsheetName);
+          localStorage.setItem('passbook_active_sheet', this.state.activeSheet);
+        }
 
         if (data.students && Array.isArray(data.students)) {
           this.state.students = data.students;
@@ -1069,8 +1159,9 @@
         }
 
         this.sound.playCoin();
+        this.updateCloudStatusBadge();
         this.closeModal('modal-settings');
-        this.showToast('🎉 雲端試算表連線測試成功！已完成設定！', 'success');
+        this.showToast(`🎉 雲端連線成功！共同步 ${this.state.students.length} 位學生資料！`, 'success');
         this.refreshCurrentView();
       } catch (err) {
         this.sound.playBuzzer();

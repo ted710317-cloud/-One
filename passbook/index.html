@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=20261020_1645">
+  <link rel="stylesheet" href="style.css?v=20261020_1700">
 </head>
 <body>
 
@@ -75,6 +75,7 @@
         <label class="remember-seat-label">
           <input type="checkbox" id="check-remember-seat"> 記住我的座號
         </label>
+        <button type="button" class="btn-secondary-sm" id="btn-student-refresh" style="margin-left: auto;" title="從雲端試算表同步最新點數">🔄 同步雲端資料</button>
       </div>
 
       <!-- Digital Passbook Hero Card -->
@@ -213,12 +214,13 @@
         </div>
 
         <!-- Student Cards Grid -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
           <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
             <span>📋 全班學生點數看板</span>
             <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">(點擊卡片可多選，點擊 ⚙️ 可設定幹部)</span>
           </h3>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span id="teacher-cloud-status-badge" style="font-size: 12px; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 4px 10px; border-radius: 6px;">☁️ 連線中...</span>
             <button type="button" class="btn-secondary-sm" id="btn-refresh-data" title="手動同步最新資料">🔄 重新整理</button>
           </div>
         </div>
@@ -317,6 +319,14 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label class="form-label">選擇讀取的工作表分頁 (Sheet)：</label>
+        <select id="select-sheet-name" class="form-input">
+          <option value="">✨ 智慧自動偵測（優先讀取 工作表1 / 學生名單）</option>
+        </select>
+        <div id="cloud-info-display" style="font-size: 12px; color: #0369a1; background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; display: none; line-height: 1.5;"></div>
+      </div>
+
       <div style="display: flex; gap: 8px; margin-bottom: 14px;">
         <button type="button" id="btn-test-cloud" class="btn-primary-sm" style="flex: 1; justify-content: center;">
           ⚡ 測試連線並儲存
@@ -346,6 +356,6 @@
   </div>
 
   <!-- Audio Manager & Application Engine -->
-  <script src="app.js?v=20261020_1645"></script>
+  <script src="app.js?v=20261020_1700"></script>
 </body>
 </html>
