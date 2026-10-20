@@ -6,7 +6,7 @@
   'use strict';
 
   // --- 預設常數與密碼雜湊 ---
-  const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyE4xFxBiNIUjGqltcTxyO42seKtjYg4n9EodUuZCaH8EW2LR1izfSgsBTAmIROJ2dqcw/exec';
+  const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbySpPTnQFg2o2Z9SLQqBhzF9OjYoxuV0aiWMDz1w_tQsi2snBhBNW-KLrRvgoq3mAvxfw/exec';
   // 預設教師密碼 '03170317' 之 SHA-256 雜湊值 (前端不留明文密碼，防止學生 F12 偷看)
   const DEFAULT_TEACHER_HASH = 'ee7febaaeb103fc0371775e1288694b288773206c60141abb4fcc173d159244e';
 
@@ -164,6 +164,15 @@
 
     // 初始化進入點
     async init() {
+      // 自動升級更新至最新雲端網址
+      const savedUrl = localStorage.getItem('passbook_gas_url');
+      if (!savedUrl || savedUrl.includes('AKfycbyE4xFxBiNIUjGqltcTxyO42seKtjYg4n9EodUuZCaH8EW2LR1izfSgsBTAmIROJ2dqcw')) {
+        this.state.gasUrl = DEFAULT_GAS_URL;
+        this.state.isDemoMode = false;
+        localStorage.setItem('passbook_gas_url', DEFAULT_GAS_URL);
+        localStorage.setItem('passbook_is_demo', 'false');
+      }
+
       this.createFloatingBubbles();
       this.bindEvents();
       this.initSoundButton();
