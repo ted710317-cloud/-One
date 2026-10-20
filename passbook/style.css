@@ -562,55 +562,10 @@ body {
   gap: 6px;
 }
 
-.quick-pills-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
 .quick-pill-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
-}
-
-.pill-btn {
-  border: none;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  transition: all 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pill-add {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-}
-
-.pill-add:hover {
-  background: #059669;
-  color: #fff;
-  transform: scale(1.04);
-}
-
-.pill-deduct {
-  background: #fff1f2;
-  color: #e11d48;
-  border: 1px solid #fecdd3;
-}
-
-.pill-deduct:hover {
-  background: #e11d48;
-  color: #fff;
-  transform: scale(1.04);
 }
 
 .custom-action-row {

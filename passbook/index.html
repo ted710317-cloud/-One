@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=20261020_1520">
+  <link rel="stylesheet" href="style.css?v=20261020_1550">
 </head>
 <body>
 
@@ -163,7 +163,7 @@
         </p>
         <div class="form-group">
           <label class="form-label">管理密碼：</label>
-          <input type="password" id="input-teacher-pwd" class="form-input" placeholder="請輸入密碼 (預設: 03170317)" autocomplete="current-password">
+          <input type="password" id="input-teacher-pwd" class="form-input" placeholder="請輸入管理密碼" autocomplete="current-password">
         </div>
         <div class="form-group" style="display: flex; align-items: center; gap: 6px;">
           <input type="checkbox" id="check-remember-teacher" checked>
@@ -199,22 +199,9 @@
             </div>
           </div>
 
-          <!-- Quick Action Pills (One-click instant points) -->
-          <div class="quick-pills-row">
-            <span class="quick-pill-label">⚡ 秒級快捷登記（點擊直接套用）：</span>
-            <button type="button" class="pill-btn pill-add" data-change="2" data-reason="作業甲上">作業甲上 (+2)</button>
-            <button type="button" class="pill-btn pill-add" data-change="3" data-reason="主動認真打掃">認真打掃 (+3)</button>
-            <button type="button" class="pill-btn pill-add" data-change="1" data-reason="課堂主動發言">課堂發言 (+1)</button>
-            <button type="button" class="pill-btn pill-add" data-change="5" data-reason="熱心助人/楷模">熱心助人 (+5)</button>
-            <button type="button" class="pill-btn pill-add" data-change="2" data-reason="團體競賽表現優良">分組優勝 (+2)</button>
-            <button type="button" class="pill-btn pill-deduct" data-change="-1" data-reason="未帶學用品">未帶學用品 (-1)</button>
-            <button type="button" class="pill-btn pill-deduct" data-change="-2" data-reason="作業未訂正/遲交">作業未訂正 (-2)</button>
-            <button type="button" class="pill-btn pill-deduct" data-change="-1" data-reason="課堂常規提醒">課堂常規 (-1)</button>
-          </div>
-
-          <!-- Custom Points Batch Action Input -->
+          <!-- Points Batch Action Input -->
           <div class="custom-action-row">
-            <span class="quick-pill-label">✏️ 自訂點數：</span>
+            <span class="quick-pill-label">✏️ 點數異動：</span>
             <select id="select-bulk-action" class="input-sm" style="font-weight: 700;">
               <option value="add">➕ 增加點數</option>
               <option value="deduct">➖ 扣除點數</option>
@@ -359,6 +346,6 @@
   </div>
 
   <!-- Audio Manager & Application Engine -->
-  <script src="app.js?v=20261020_1520"></script>
+  <script src="app.js?v=20261020_1550"></script>
 </body>
 </html>

@@ -356,16 +356,7 @@
       document.getElementById('btn-clear-selection')?.addEventListener('click', () => this.clearSelection());
       document.getElementById('btn-invert-selection')?.addEventListener('click', () => this.invertSelection());
 
-      // 教師端：秒級快捷膠囊
-      document.querySelectorAll('.pill-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const change = parseInt(btn.dataset.change, 10);
-          const reason = btn.dataset.reason;
-          this.executeBatchPoints(change, reason);
-        });
-      });
-
-      // 教師端：自訂加扣點
+      // 教師端：點數異動批次套用
       document.getElementById('btn-submit-bulk')?.addEventListener('click', () => {
         const action = document.getElementById('select-bulk-action').value;
         const pts = parseInt(document.getElementById('input-bulk-points').value, 10);
