@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>羚藝氣泡水電子存摺 - 班級點數與獎勵管理系統</title>
+  
+  <!-- Google Fonts: Chakra Petch for digital numbers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css?v=20261020_1520">
+</head>
+<body>
+
+  <!-- Floating Background Bubbles -->
+  <div class="bubbles-container" id="bubbles-container"></div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="hidden">
+    <div class="spinner"></div>
+    <div id="loading-text" style="font-weight: 700; font-size: 15px;">與雲端試算表同步中...</div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-wrap" id="btn-brand-home">
+        <div class="brand-icon">🫧</div>
+        <div>
+          <div class="brand-title">羚藝氣泡水電子存摺</div>
+          <div class="brand-tag">班級榮譽點數 · 數位存摺</div>
+        </div>
+      </div>
+
+      <!-- Mode Switching Tabs -->
+      <nav class="nav-tabs">
+        <button type="button" class="nav-tab-btn active" id="tab-student-mode">
+          <span>🎓 學生查詢</span>
+        </button>
+        <button type="button" class="nav-tab-btn" id="tab-teacher-mode">
+          <span>👩‍🏫 教師管理</span>
+        </button>
+      </nav>
+
+      <!-- Header Action Buttons -->
+      <div class="header-actions">
+        <button type="button" class="btn-icon-round" id="btn-toggle-sound" title="切換音效">🔊</button>
+        <button type="button" class="btn-icon-round" id="btn-open-settings" title="雲端試算表設定">⚙️</button>
+        <button type="button" class="btn-icon-round hidden" id="btn-teacher-logout" title="登出管理員">🚪</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Area -->
+  <main class="app-main">
+
+    <!-- ===================================================================
+         VIEW 1: 學生查詢端 (Student Passbook View)
+         =================================================================== -->
+    <section id="section-student" class="student-view-wrap">
+      
+      <!-- Seat Picker Bar -->
+      <div class="seat-picker-bar">
+        <span style="font-size: 14px; font-weight: 700; color: var(--text-muted);">請選擇學生座號：</span>
+        <select id="select-student-seat" class="seat-select-dropdown">
+          <option value="">載入中...</option>
+        </select>
+        <label class="remember-seat-label">
+          <input type="checkbox" id="check-remember-seat"> 記住我的座號
+        </label>
+      </div>
+
+      <!-- Digital Passbook Hero Card -->
+      <div class="student-passbook-hero">
+        <div class="passbook-card">
+          <div class="passbook-card-header">
+            <div class="passbook-bank-name">
+              <span>🫧</span> 羚藝氣泡水榮譽存摺
+            </div>
+            <div class="passbook-chip"></div>
+          </div>
+
+          <div class="passbook-card-body">
+            <div class="passbook-account-label">CURRENT SPARKLING BALANCE</div>
+            <div class="passbook-balance-wrap">
+              <span class="passbook-balance-number" id="stu-balance-display">--</span>
+              <span class="passbook-balance-unit">氣泡水點數</span>
+            </div>
+          </div>
+
+          <div class="passbook-card-footer">
+            <div class="passbook-owner-info">
+              <span class="passbook-seat-badge" id="stu-seat-badge">座號 -- 號</span>
+              <span class="passbook-owner-name" id="stu-name-display">請選擇座號</span>
+            </div>
+            <div id="stu-role-badge-wrap" class="passbook-role-badge hidden">
+              <span>🎖️</span> <span id="stu-role-text">班級幹部</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger & Wishlist Navigation Tabs -->
+      <div class="passbook-tabs-nav">
+        <button type="button" class="ledger-tab-btn active" id="tab-ledger-history">📜 存摺流水帳明細</button>
+        <button type="button" class="ledger-tab-btn" id="tab-ledger-shop">🎁 氣泡水心願小舖</button>
+      </div>
+
+      <!-- Sub-Tab A: Transaction Ledger Table -->
+      <div id="panel-ledger-history" class="ledger-card">
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="stu-ledger-count">共 0 筆收支紀錄</div>
+          <input type="text" id="stu-ledger-search" class="input-sm" placeholder="🔍 搜尋事由關鍵字..." style="max-width: 200px;">
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">交易時間</th>
+                <th style="width: 100px;">異動點數</th>
+                <th>事由與項目說明</th>
+              </tr>
+            </thead>
+            <tbody id="stu-ledger-tbody">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                  請先在上方選取座號以檢視電子存摺明細
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sub-Tab B: Reward Wishlist / Shop -->
+      <div id="panel-ledger-shop" class="hidden">
+        <div class="wish-grid" id="wish-grid-container">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================================
+         VIEW 2: 教師管理端 (Teacher Dashboard View)
+         =================================================================== -->
+    <section id="section-teacher" class="hidden">
+
+      <!-- Teacher Login Screen (Shown when not authenticated) -->
+      <div id="teacher-login-card" class="modal-card" style="margin: 40px auto; max-width: 380px;">
+        <div class="modal-header">
+          <h2 class="modal-title">🔐 教師管理權限驗證</h2>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          請輸入教師專屬管理密碼以進入班級點數管理中心。
+        </p>
+        <div class="form-group">
+          <label class="form-label">管理密碼：</label>
+          <input type="password" id="input-teacher-pwd" class="form-input" placeholder="請輸入密碼 (預設: 03170317)" autocomplete="current-password">
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" id="check-remember-teacher" checked>
+          <label for="check-remember-teacher" style="font-size: 13px; color: var(--text-muted); cursor: pointer;">在此裝置保持登入 7 天</label>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btn-submit-teacher-login" class="btn-primary-sm" style="width: 100%; justify-content: center; padding: 10px;">
+            🔓 登入管理後台
+          </button>
+        </div>
+      </div>
+
+      <!-- Teacher Management Cockpit (Shown when authenticated) -->
+      <div id="teacher-cockpit" class="hidden">
+
+        <!-- Toolbar: Batch selection & Quick pills -->
+        <div class="teacher-toolbar">
+          
+          <div class="toolbar-top-row">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <button type="button" class="btn-secondary-sm" id="btn-select-all">全選全班</button>
+              <button type="button" class="btn-secondary-sm" id="btn-clear-selection">清除選取</button>
+              <button type="button" class="btn-secondary-sm" id="btn-invert-selection">反向選取</button>
+              <div class="selection-summary" id="selection-summary-text">
+                <span>👥 已選取 <strong>0</strong> 位學生</span>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="btn-amber-sm" id="btn-pay-salaries" title="自動發放全班幹部每週/每月薪水">
+                💰 一鍵發放幹部薪水
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Action Pills (One-click instant points) -->
+          <div class="quick-pills-row">
+            <span class="quick-pill-label">⚡ 秒級快捷登記（點擊直接套用）：</span>
+            <button type="button" class="pill-btn pill-add" data-change="2" data-reason="作業甲上">作業甲上 (+2)</button>
+            <button type="button" class="pill-btn pill-add" data-change="3" data-reason="主動認真打掃">認真打掃 (+3)</button>
+            <button type="button" class="pill-btn pill-add" data-change="1" data-reason="課堂主動發言">課堂發言 (+1)</button>
+            <button type="button" class="pill-btn pill-add" data-change="5" data-reason="熱心助人/楷模">熱心助人 (+5)</button>
+            <button type="button" class="pill-btn pill-add" data-change="2" data-reason="團體競賽表現優良">分組優勝 (+2)</button>
+            <button type="button" class="pill-btn pill-deduct" data-change="-1" data-reason="未帶學用品">未帶學用品 (-1)</button>
+            <button type="button" class="pill-btn pill-deduct" data-change="-2" data-reason="作業未訂正/遲交">作業未訂正 (-2)</button>
+            <button type="button" class="pill-btn pill-deduct" data-change="-1" data-reason="課堂常規提醒">課堂常規 (-1)</button>
+          </div>
+
+          <!-- Custom Points Batch Action Input -->
+          <div class="custom-action-row">
+            <span class="quick-pill-label">✏️ 自訂點數：</span>
+            <select id="select-bulk-action" class="input-sm" style="font-weight: 700;">
+              <option value="add">➕ 增加點數</option>
+              <option value="deduct">➖ 扣除點數</option>
+            </select>
+            <input type="number" id="input-bulk-points" class="input-sm" style="width: 75px;" placeholder="點數" min="1">
+            <input type="text" id="input-bulk-reason" class="input-sm" style="flex: 1; min-width: 130px;" placeholder="請輸入加扣點原因說明 (例: 運動會進步獎)">
+            <button type="button" id="btn-submit-bulk" class="btn-primary-sm">🚀 執行套用</button>
+          </div>
+        </div>
+
+        <!-- Student Cards Grid -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+            <span>📋 全班學生點數看板</span>
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">(點擊卡片可多選，點擊 ⚙️ 可設定幹部)</span>
+          </h3>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-secondary-sm" id="btn-refresh-data" title="手動同步最新資料">🔄 重新整理</button>
+          </div>
+        </div>
+
+        <div class="student-grid" id="teacher-student-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Class History Audit Log Accordion -->
+        <div style="margin-top: 30px;" class="ledger-card">
+          <div style="padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main);">📜 全班最新異動紀錄流水帳</h4>
+            <input type="text" id="input-all-history-search" class="input-sm" placeholder="🔍 搜尋座號或原因..." style="width: 200px;">
+          </div>
+          <div style="max-height: 380px; overflow-y: auto;">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">時間</th>
+                  <th style="width: 80px;">座號</th>
+                  <th style="width: 100px;">異動</th>
+                  <th>原因說明</th>
+                </tr>
+              </thead>
+              <tbody id="all-history-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       MODAL 1: 幹部與薪水設定 (Officer & Salary Modal)
+       ===================================================================== -->
+  <div id="modal-role" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🎖️ 設定學生幹部與薪水</h3>
+        <button type="button" class="modal-close" id="btn-close-role-modal">&times;</button>
+      </div>
+
+      <input type="hidden" id="role-modal-stu-id">
+      
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+        正在編輯 <strong id="role-modal-stu-name" style="color: var(--primary);">--</strong> 的幹部職務。
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">幹部職稱（若不指派請留白）：</label>
+        <input type="text" id="role-modal-title" class="form-input" placeholder="例: 班長、風紀股長、衛生股長">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="form-group">
+          <label class="form-label">薪資點數：</label>
+          <input type="number" id="role-modal-salary" class="form-input" min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">發放週期：</label>
+          <select id="role-modal-cycle" class="form-input">
+            <option value="weekly">每週發放</option>
+            <option value="monthly">每月發放</option>
+            <option value="none">無固定薪資</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="btn-cancel-role" class="btn-secondary-sm">取消</button>
+        <button type="button" id="btn-save-role" class="btn-amber-sm">💾 儲存幹部設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: 雲端試算表設定 (Cloud Settings Modal)
+       ===================================================================== -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ 雲端試算表連線設定</h3>
+        <button type="button" class="modal-close" id="btn-close-settings-modal">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Google Apps Script 網頁應用程式網址：</label>
+        <input type="url" id="input-gas-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+          貼入您的 Apps Script 部署網址（結尾為 <code>/exec</code>）。
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <button type="button" id="btn-test-cloud" class="btn-primary-sm" style="flex: 1; justify-content: center;">
+          ⚡ 測試連線並儲存
+        </button>
+        <button type="button" id="btn-reset-demo" class="btn-secondary-sm" style="flex: 1;">
+          🌱 切換離線示範模式
+        </button>
+      </div>
+
+      <!-- Collapsible Guide & Code -->
+      <details style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; color: var(--text-main);">
+        <summary style="font-weight: 700; color: var(--primary); cursor: pointer; margin-bottom: 8px;">
+          📋 如何在 Google 試算表中設定後端？（點此查看步驟與複製代碼）
+        </summary>
+        <ol style="padding-left: 20px; line-height: 1.6; color: var(--text-muted);">
+          <li>打開您的 Google 試算表，點選【擴充功能】➔【Apps Script】。</li>
+          <li>將編輯器原有程式碼全部清空，點擊下方「複製完整 Apps Script 程式碼」貼上。</li>
+          <li>點擊右上角【部署】➔【新增部署作業】➔ 選擇【網頁應用程式】。</li>
+          <li>「執行身分」選【我】，「誰可以存取」選【任何人】(重要！)。</li>
+          <li>點擊【部署】，複製網址並貼到上方輸入框即可完成！</li>
+        </ol>
+        <button type="button" id="btn-copy-gas-code" class="btn-secondary-sm" style="width: 100%; margin-top: 8px; font-size: 12px;">
+          📋 複製 Google Apps Script 完整程式碼
+        </button>
+      </details>
+    </div>
+  </div>
+
+  <!-- Audio Manager & Application Engine -->
+  <script src="app.js?v=20261020_1520"></script>
+</body>
+</html>
