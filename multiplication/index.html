@@ -6,51 +6,56 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>九九乘法砲台保衛戰 - 國小中年級九九乘法練習遊戲</title>
-  <link rel="stylesheet" href="style.css?v=20261019_1710">
+  <link rel="stylesheet" href="style.css?v=20261021_0820">
 </head>
 <body>
   <div id="game-container">
     <!-- Top HUD Bar -->
     <header id="hud">
-      <div class="hud-item" id="score-box">
-        <span class="hud-label">得分</span>
-        <span class="hud-value" id="hud-score">0</span>
-      </div>
-      <div class="hud-item" id="wave-box">
-        <span class="hud-label">關卡</span>
-        <span class="hud-value" id="hud-wave">第 1 波</span>
-      </div>
-      <div class="hud-item" id="mode-badge-box">
-        <span class="hud-label">題型</span>
-        <span class="hud-value" id="hud-math-mode" style="font-size: 14px; color: #00f3ff;">🎯 填空</span>
-      </div>
-      <!-- Endless Mode Time Attack Timer -->
-      <div class="hud-item hidden" id="time-box">
-        <span class="hud-label">倒數計時</span>
-        <span class="hud-value hud-timer" id="hud-timer">00:30</span>
-      </div>
-      <div class="hud-item" id="combo-box">
-        <span class="hud-label">連擊 (COMBO)</span>
-        <span class="hud-value" id="hud-combo">x0</span>
-      </div>
-      <!-- Combo Fever Indicator -->
-      <div class="hud-item hidden" id="fever-box">
-        <span class="hud-label">狂熱狀態</span>
-        <span class="hud-value hud-fever-val" id="hud-fever">🔥 10s (x2)</span>
-      </div>
-      <div class="hud-item" id="shield-box">
-        <span class="hud-label">基地護盾</span>
-        <div class="shield-bar-outer">
-          <div id="shield-bar-inner"></div>
+      <!-- Upper Tier: Tactical Status Metrics -->
+      <div class="hud-status-group">
+        <div class="hud-item" id="score-box">
+          <span class="hud-label">得分</span>
+          <span class="hud-value" id="hud-score">0</span>
+        </div>
+        <div class="hud-item" id="wave-box">
+          <span class="hud-label">關卡</span>
+          <span class="hud-value" id="hud-wave">第 1 波</span>
+        </div>
+        <div class="hud-item" id="mode-badge-box">
+          <span class="hud-label">題型</span>
+          <span class="hud-value" id="hud-math-mode">🎯 填空</span>
+        </div>
+        <!-- Endless Mode Time Attack Timer -->
+        <div class="hud-item hidden" id="time-box">
+          <span class="hud-label">倒數</span>
+          <span class="hud-value hud-timer" id="hud-timer">00:30</span>
+        </div>
+        <div class="hud-item" id="combo-box">
+          <span class="hud-label">連擊</span>
+          <span class="hud-value" id="hud-combo">x0</span>
+        </div>
+        <!-- Combo Fever Indicator -->
+        <div class="hud-item hidden" id="fever-box">
+          <span class="hud-label">狂熱</span>
+          <span class="hud-value hud-fever-val" id="hud-fever">🔥 10s (x2)</span>
+        </div>
+        <div class="hud-item" id="shield-box">
+          <span class="hud-label">基地護盾</span>
+          <div class="shield-bar-outer">
+            <div id="shield-bar-inner"></div>
+          </div>
         </div>
       </div>
+
+      <!-- Lower Tier: All Function & Utility Control Buttons -->
       <div class="hud-controls">
         <button id="btn-leaderboard" class="hud-btn" title="查看英雄排行榜">🏆 排行</button>
-        <button id="btn-speed" class="hud-btn" title="切換遊戲速度（悠閒慢速/標準/挑戰快速）">🚶 標準</button>
+        <button id="btn-speed" class="hud-btn" title="切換遊戲速度（溫和心算/輕鬆慢速/挑戰快速）">🚶 溫和心算</button>
         <button id="btn-sound" class="hud-btn" title="開關音效" aria-label="音效開關">🔊</button>
         <button id="btn-bgm" class="hud-btn" title="開關音樂" aria-label="音樂開關">🎵</button>
         <button id="btn-rule" class="hud-btn" title="九九乘法速算口訣與秘笈">📖 秘笈</button>
-        <button id="btn-pause" class="hud-btn" title="暫停遊戲">⏸️</button>
+        <button id="btn-pause" class="hud-btn hud-btn-pause" title="暫停遊戲">⏸️ 暫停</button>
         <a href="../" class="hud-btn" style="text-decoration: none;" title="返回「朕的數學遊戲吧」大廳">👑 大廳</a>
       </div>
     </header>
@@ -467,8 +472,8 @@
   </div>
 
   <!-- Audio synthesizers & Core Game Engine -->
-  <script src="audio.js?v=20261019_1710"></script>
-  <script src="config.js?v=20261019_1710"></script>
-  <script src="game.js?v=20261019_1710"></script>
+  <script src="audio.js?v=20261021_0820"></script>
+  <script src="config.js?v=20261021_0820"></script>
+  <script src="game.js?v=20261021_0820"></script>
 </body>
 </html>
