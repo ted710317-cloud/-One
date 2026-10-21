@@ -561,8 +561,13 @@ class SoundController {
       }
     } else if (mode === 'campaign') {
       // Campaign mode:
-      // Wave 1: 1.0x, Wave 2: 1.06x, Wave 3: 1.13x, Wave 4: 1.21x, Wave 5: 1.28x
-      mult = 1.0 + Math.min(4, Math.max(0, wave - 1)) * 0.07;
+      // Wave 1: 1.0x, Wave 2: 1.07x, Wave 3: 1.14x, Wave 4: 1.21x, Wave 5: 1.28x
+      // Wave 6+ (EX 超速模式): 音樂節奏一關比一關更快！
+      if (wave > 5) {
+        mult = 1.28 + Math.min(0.32, (wave - 5) * 0.05); // Up to 1.60x!
+      } else {
+        mult = 1.0 + Math.max(0, wave - 1) * 0.07;
+      }
     }
 
     // Boss Battle: Dramatic tempo acceleration!

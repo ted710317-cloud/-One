@@ -311,8 +311,9 @@
         const cfg = STAGE_CONFIG[state.wave];
         return cfg ? cfg.speedMult : 0.85;
       } else {
-        // 第 5 波之後，波次越高速度越來越快！每多一波 +0.10 倍速，上限 1.8 倍速（保護中年級手速與心算反應）
-        return Math.min(1.8, 1.20 + (state.wave - 5) * 0.10);
+        // 第 5 波之後進入【EX 極限超速模式】！每過一關速度再 +0.12 倍速，真正實現一關比一關更快！上限放寬至 2.0 倍速！
+        const exLevel = state.wave - 5;
+        return Math.min(2.0, 1.20 + exLevel * 0.12);
       }
     }
     return 0.75; // practice mode
@@ -991,7 +992,8 @@
       window.soundManager.playHit(state.combo);
 
       const feverMultiplier = (state.mode === 'endless' && state.isFever) ? 2.0 : 1.0;
-      const earnedScore = Math.round(100 * state.combo * feverMultiplier);
+      const exBonusMultiplier = (state.mode === 'campaign' && state.wave > 5) ? (1.0 + (state.wave - 5) * 0.15) : 1.0;
+      const earnedScore = Math.round(100 * state.combo * feverMultiplier * exBonusMultiplier);
       state.score += earnedScore;
 
       if (state.mode === 'endless' && state.combo >= state.feverTriggerCombo && !state.isFever) {
@@ -1317,10 +1319,12 @@
     state.activeTarget = null;
 
     if (state.wave === 5) {
-      showEquationBanner('🏆 達成第 5 波全通關！即刻進入【極限超越戰】速度越來越快！🚀');
-      addFloatingText('🏆 5波通關！極限超越開始！', (canvas.logicalWidth || canvas.width || 800) / 2, (canvas.logicalHeight || canvas.height || 600) * 0.4, '#ffe600', 24);
+      showEquationBanner('🏆 達成第 5 波全通關！即刻進入【EX 極限超速模式】一關比一關更快！🚀');
+      addFloatingText('🏆 5波通關！極限超速模式啟動！', (canvas.logicalWidth || canvas.width || 800) / 2, (canvas.logicalHeight || canvas.height || 600) * 0.4, '#ffe600', 26);
     } else if (state.wave > 5) {
-      showEquationBanner(`🔥 突破第 ${state.wave} 波！速度再次提升！🚀`);
+      const nextEx = state.wave - 4;
+      showEquationBanner(`🔥 突破第 ${state.wave} 波！【EX 超速 Lv.${nextEx}】速度再次暴增！🚀`);
+      addFloatingText(`⚡ EX 超速 Lv.${nextEx}！`, (canvas.logicalWidth || canvas.width || 800) / 2, (canvas.logicalHeight || canvas.height || 600) * 0.4, '#00f3ff', 24);
     } else {
       showEquationBanner(`🎉 恭喜通過第 ${state.wave} 波守衛戰！`);
     }
@@ -1330,10 +1334,11 @@
       state.isWaveTransition = false;
       state.wave++;
 
+      const exLevel = state.wave - 5;
       const cfg = STAGE_CONFIG[state.wave] || {
         factors: [2, 3, 4, 5, 6, 7, 8, 9],
         total: 12,
-        name: `【第 ${state.wave} 波】極限超越戰 (2~9 全乘法混合 · 速度 ${Math.round(getWaveSpeedMultiplier() * 100)}% 🚀)`
+        name: `【第 ${state.wave} 波】EX 極限超速 Lv.${exLevel} (速度 ${Math.round(getWaveSpeedMultiplier() * 100)}% 🚀 · 得分加成 +${Math.round(exLevel * 15)}%)`
       };
 
       state.waveMonstersTotal = cfg.total;
@@ -1481,7 +1486,8 @@
       if (state.mode === 'practice') {
         hudWave.textContent = '自由練習';
       } else if (state.wave > 5) {
-        hudWave.textContent = `第 ${state.wave} 波 (EX極限 ${speedLabel})`;
+        const exLevel = state.wave - 5;
+        hudWave.textContent = `第 ${state.wave} 波 (EX超速Lv.${exLevel} ${speedLabel})`;
       } else {
         hudWave.textContent = `第 ${state.wave} 波 (${speedLabel})`;
       }
@@ -2554,7 +2560,7 @@ function createJsonResponse(obj) {
 
       const currentSpawnInterval = state.mode === 'endless'
         ? Math.max(160, 260 - (state.endlessLevel - 1) * 15)
-        : (state.wave >= 5 ? Math.max(160, 240 - (state.wave - 5) * 15) : state.spawnInterval);
+        : (state.wave >= 5 ? Math.max(140, 240 - (state.wave - 5) * 18) : state.spawnInterval);
 
       if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
         state.spawnTimer = 0;
