@@ -65,7 +65,7 @@
     }
 
     .container {
-      max-width: 1160px;
+      max-width: 1240px;
       width: 100%;
       z-index: 1;
       text-align: center;
@@ -118,17 +118,17 @@
       line-height: 1.6;
     }
 
-    /* 3-Column Games Grid */
+    /* 4-Column Games Grid */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
       margin-bottom: 36px;
     }
 
-    @media (max-width: 960px) {
+    @media (min-width: 1100px) {
       .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
       }
     }
 
@@ -188,6 +188,16 @@
       box-shadow: 0 16px 40px rgba(192, 132, 252, 0.28);
     }
 
+    /* Card 4: Factor Dragon */
+    .card-dragon::before {
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+    }
+    .card-dragon:hover {
+      transform: translateY(-8px);
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 16px 40px rgba(16, 185, 129, 0.28);
+    }
+
     .card-badge {
       display: inline-flex;
       align-items: center;
@@ -216,6 +226,12 @@
       background: rgba(192, 132, 252, 0.15);
       color: #e9d5ff;
       border: 1px solid rgba(192, 132, 252, 0.35);
+    }
+
+    .badge-dragon {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
     }
 
     .game-name {
@@ -313,6 +329,16 @@
       filter: brightness(1.1);
     }
 
+    .btn-dragon {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);
+    }
+    .btn-dragon:hover {
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.7);
+      filter: brightness(1.1);
+    }
+
     .footer-note {
       font-size: 13px;
       color: var(--text-muted);
@@ -337,7 +363,7 @@
       <div class="hall-sub">Imperial Math Game Arcade</div>
       <h1 class="hall-title">朕的數學遊戲吧</h1>
       <p class="hall-desc">
-        歡迎御駕光臨「朕的數學遊戲吧」！精選國小低年級、中年級與高年級數學互動數位教具，在刺激的砲台保衛戰與甜蜜消消樂中，將質因數分解與九九乘法玩出超強心算力！
+        歡迎御駕光臨「朕的數學遊戲吧」！精選國小低年級、中年級、中高年級與高年級數學互動數位教具，在刺激的砲台保衛戰、神龍因數搜集與甜蜜消消樂中，將因數全搜集、質因數分解與九九乘法玩出超強心算力！
       </p>
     </header>
 
@@ -365,7 +391,29 @@
         </a>
       </div>
 
-      <!-- Game 2: 九九乘法表保衛戰 (中年級適用) -->
+      <!-- Game 2: 貪吃因數龍 (中高年級適用) -->
+      <div class="game-card card-dragon">
+        <div>
+          <div class="card-badge badge-dragon">🐲 國小中高年級適用</div>
+          <div class="game-name">
+            <span>🐉 貪吃因數龍</span>
+          </div>
+          <div class="game-en">Factor Dragon Adventure</div>
+          <p class="game-summary">
+            操控貪吃神龍吞食地圖上的正確因數！結合展示櫃不漏找因數、質數雙倍暴擊與整除即時反饋，集齊因數解鎖神龍進化！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">💎</span> 因數圖鑑全搜集展示櫃（一個都不漏找）</li>
+            <li class="feature-item"><span class="feature-icon">🌟</span> 4 大世界 16 關卡 ＋ 四階神龍進化</li>
+            <li class="feature-item"><span class="feature-icon">📱</span> 支援平板觸控滑動手勢與螢幕虛擬十字鍵</li>
+          </ul>
+        </div>
+        <a href="./factor-dragon/" class="btn-enter btn-dragon">
+          <span>🐉 進入《貪吃因數龍》</span>
+        </a>
+      </div>
+
+      <!-- Game 3: 九九乘法表保衛戰 (中年級適用) -->
       <div class="game-card card-multi">
         <div>
           <div class="card-badge badge-multi">🎒 國小中年級適用</div>
@@ -387,7 +435,7 @@
         </a>
       </div>
 
-      <!-- Game 3: 糖果雨消消樂 (低年級適用) -->
+      <!-- Game 4: 糖果雨消消樂 (低年級適用) -->
       <div class="game-card card-candy">
         <div>
           <div class="card-badge badge-candy">🍬 國小低年級適用</div>
@@ -412,8 +460,8 @@
     </div>
 
     <div class="footer-note">
-      👑 <strong>教師課堂指引提示</strong>：大廳三大遊戲皆具備各自獨立運作能力。<br>
-      老師可以直接將個別遊戲專屬網址（<strong>.../factor/</strong>、<strong>.../multiplication/</strong>、<strong>.../candy-multiplier/</strong>）分發給班級孩子，也可以分享「朕的數學遊戲吧」大廳網址讓孩子自由選擇挑戰！
+      👑 <strong>教師課堂指引提示</strong>：大廳四大遊戲皆具備各自獨立運作能力。<br>
+      老師可以直接將個別遊戲專屬網址（<strong>.../factor/</strong>、<strong>.../factor-dragon/</strong>、<strong>.../multiplication/</strong>、<strong>.../candy-multiplier/</strong>）分發給班級孩子，也可以分享「朕的數學遊戲吧」大廳網址讓孩子自由選擇挑戰！
     </div>
   </div>
 </body>

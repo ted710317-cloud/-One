@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
+  <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
+  <link rel="stylesheet" href="./style.css?v=20261024_1820">
+</head>
+<body>
+
+  <!-- Top Hub Return Bar -->
+  <div class="hub-topbar">
+    <a href="../" class="btn-hub-return">
+      <span>👑 返回「朕的數學遊戲吧」大廳</span>
+    </a>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnSound" title="開關音效">🔊</button>
+      <button class="icon-btn" id="btnBgm" title="開關背景音樂">🎵</button>
+      <button class="icon-btn active-guide" id="btnGuide" title="因數速查秘笈">📖</button>
+      <button class="icon-btn" id="btnPause" title="遊戲暫停">⏸️</button>
+    </div>
+  </div>
+
+  <!-- Game Main Container -->
+  <div class="game-container">
+
+    <!-- Header Banner -->
+    <header class="game-header">
+      <div class="header-row-main">
+        <div class="dragon-logo">
+          <div class="dragon-avatar">🐲</div>
+          <div class="dragon-title-group">
+            <h1>貪吃因數龍</h1>
+            <div class="dragon-sub">國小中高年級適用 ‧ 因數全搜集大冒險</div>
+          </div>
+        </div>
+
+        <div class="target-box">
+          <div class="target-label">🎯 目前目標數</div>
+          <div class="target-val" id="targetVal">24</div>
+        </div>
+      </div>
+
+      <!-- Stats HUD Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span>生命：</span>
+          <span class="stat-hearts" id="statHearts">❤️❤️❤️</span>
+        </div>
+        <div class="stat-item">
+          <span>得分：</span>
+          <span class="stat-score" id="statScore">0</span>
+        </div>
+        <div class="stat-item">
+          <span>最高：</span>
+          <span class="stat-score" id="statHigh">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-mode-badge" id="statModeBadge">🌲 基礎之森 (1/4)</span>
+          <span class="powerup-pill" id="powerupPill">🛡️ 護盾</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Factor Collection Shelf Card -->
+    <div class="factor-shelf-card">
+      <div class="shelf-header">
+        <div class="shelf-title">
+          <span>💎</span>
+          <span>因數圖鑑展示櫃（吃齊所有因數即可進化過關！）</span>
+        </div>
+        <div class="shelf-progress-text" id="shelfProgressText">進度：0 / 8 (0%)</div>
+      </div>
+      <div class="factor-slots-container" id="factorSlotsContainer">
+        <!-- Dynamically rendered slots -->
+      </div>
+    </div>
+
+    <!-- Canvas Playfield Area -->
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="480" height="480"></canvas>
+      <div class="feedback-overlay" id="feedbackOverlay">
+        <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
+      </div>
+    </div>
+
+    <!-- Touch Tablet Virtual D-Pad -->
+    <div class="dpad-container">
+      <button class="dpad-btn dpad-up" data-dir="up">▲</button>
+      <button class="dpad-btn dpad-left" data-dir="left">◀</button>
+      <div class="dpad-center"></div>
+      <button class="dpad-btn dpad-right" data-dir="right">▶</button>
+      <button class="dpad-btn dpad-down" data-dir="down">▼</button>
+    </div>
+
+    <!-- Bottom Controls & Hints -->
+    <div class="bottom-controls-bar">
+      <div class="speed-selector">
+        <span>速度：</span>
+        <button class="speed-btn" data-speed="0.8">慢速</button>
+        <button class="speed-btn active" data-speed="1.0">正常</button>
+        <button class="speed-btn" data-speed="1.3">快速</button>
+      </div>
+      <div>⌨️ 電腦：方向鍵或 WASD ｜ 📱 平板：滑動或點擊十字盤</div>
+    </div>
+
+  </div>
+
+  <!-- Modal: Start Menu (Mode Selection) -->
+  <div class="modal-backdrop" id="modalStart">
+    <div class="modal-content">
+      <div style="font-size: 42px; margin-bottom: 8px;">🐲</div>
+      <h2 class="modal-title">貪吃因數龍</h2>
+      <p class="modal-subtitle">
+        操控貪吃神龍吞食地圖上的<strong>正確因數</strong>！<br>
+        不漏找、不誤食，集齊所有因數解鎖神龍進化！
+      </p>
+
+      <div class="mode-cards-grid">
+        <button class="mode-card-btn" id="btnModeCampaign">
+          <div class="mode-icon">🗺️</div>
+          <div class="mode-details">
+            <h3>冒險闖關模式（推薦首選）</h3>
+            <p>四大世界共 16 關，從 12 到 100 循序漸進進化神龍！</p>
+          </div>
+        </button>
+
+        <button class="mode-card-btn" id="btnModeBlitz">
+          <div class="mode-icon">⚡</div>
+          <div class="mode-details">
+            <h3>60秒極速衝刺模式</h3>
+            <p>限時倒數心算競速，吃對加時、連擊狂歡，打破班級紀錄！</p>
+          </div>
+        </button>
+
+        <button class="mode-card-btn" id="btnModeFree">
+          <div class="mode-icon">🌱</div>
+          <div class="mode-details">
+            <h3>自訂練習模式</h3>
+            <p>自選指定數字（如 36、48、72）專項特訓不遺漏！</p>
+          </div>
+        </button>
+      </div>
+
+      <div class="custom-input-box">
+        <label for="customTargetInput" style="font-size: 13px; color: var(--text-muted);">自訂特訓目標數：</label>
+        <input type="number" id="customTargetInput" min="4" max="120" value="36">
+      </div>
+
+      <button class="btn-secondary" onclick="window.factorDragonGame.showGuideModal()">📖 先看因數成對秘笈</button>
+    </div>
+  </div>
+
+  <!-- Modal: Pause -->
+  <div class="modal-backdrop" id="modalPause">
+    <div class="modal-content">
+      <div style="font-size: 36px; margin-bottom: 8px;">⏸️</div>
+      <h2 class="modal-title">遊戲暫停中</h2>
+      <p class="modal-subtitle">深呼吸一口氣，仔細想想目標數字的因數有哪些！</p>
+
+      <button class="btn-primary" id="btnResumeGame">▶️ 繼續冒險</button>
+      <button class="btn-secondary" id="btnRestartFromPause">🔄 重新本關</button>
+      <button class="btn-secondary" id="btnQuitToStart">🏠 回到主選單</button>
+    </div>
+  </div>
+
+  <!-- Modal: Level Clear / Dragon Evolution -->
+  <div class="modal-backdrop" id="modalLevelClear">
+    <div class="modal-content">
+      <div style="font-size: 48px; margin-bottom: 6px;" id="evolveAvatar">🐲</div>
+      <h2 class="modal-title" style="color: #34d399;">🎉 神龍進化過關！</h2>
+      <div style="font-size: 18px; font-weight: 900; color: #fbbf24; margin-bottom: 4px;" id="evolveName">🌱 青木幼龍</div>
+      <p class="modal-subtitle" id="evolveDesc">掌控因數天賦，進化為更高階神龍！</p>
+
+      <div style="background: rgba(0, 0, 0, 0.3); padding: 14px; border-radius: 12px; margin-bottom: 18px; text-align: left;">
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">
+          🎯 【 <span id="levelTargetNumber" style="color: #38bdf8; font-weight: bold;">24</span> 】 的因數成對乘積表：
+        </div>
+        <div id="levelPairsList" style="font-size: 13.5px; font-weight: bold; color: #f1f5f9; line-height: 1.6;">
+          1 × 24 = 24 ｜ 2 × 12 = 24 ｜ 3 × 8 = 24 ｜ 4 × 6 = 24
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnNextLevel">🚀 前往下一關</button>
+    </div>
+  </div>
+
+  <!-- Modal: Game Over -->
+  <div class="modal-backdrop" id="modalGameOver">
+    <div class="modal-content">
+      <div style="font-size: 44px; margin-bottom: 6px;">💫</div>
+      <h2 class="modal-title" style="color: #f87171;">冒險挑戰結束</h2>
+      <p class="modal-subtitle" id="gameOverReason">生命耗盡，請再接再厲！</p>
+
+      <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+        本局最終得分：<span id="finalScoreVal" style="font-size: 24px; font-weight: 900; color: #fbbf24;">0</span>
+      </div>
+
+      <button class="btn-primary" id="btnRetry">🔄 再玩一次</button>
+      <button class="btn-secondary" id="btnShowReview">📊 查看本局因數學習診斷</button>
+      <button class="btn-secondary" onclick="window.factorDragonGame.showModal('modalStart')">🏠 回主選單</button>
+    </div>
+  </div>
+
+  <!-- Modal: Factor Learning Guide / Cheat Sheet -->
+  <div class="modal-backdrop" id="modalGuide">
+    <div class="modal-content">
+      <h2 class="modal-title">📖 因數速查與成對秘笈</h2>
+      <p class="modal-subtitle">國小中高年級必學因數心算精熟訣竅</p>
+
+      <div class="guide-section">
+        <h4>🌈 1. 彩虹成對配對法（保證不遺漏！）</h4>
+        <p>找因數時要「一頭一尾成雙成對」找，例如找 <strong>24</strong> 的因數：</p>
+        <ul>
+          <li>從 1 開始：1 × 24 = 24（找到 1 和 24）</li>
+          <li>接著試 2：2 × 12 = 24（找到 2 和 12）</li>
+          <li>接著試 3：3 × 8 = 24（找到 3 和 8）</li>
+          <li>接著試 4：4 × 6 = 24（找到 4 和 6）</li>
+          <li>再試 5：不能整除！接下來就是 6（已找到過，停止！），共 8 個因數。</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h4>⚡ 2. 快速整除速判法則</h4>
+        <ul>
+          <li><strong>2 的倍數</strong>：個位數是 0、2、4、6、8 的偶數。</li>
+          <li><strong>5 的倍數</strong>：個位數是 0 或 5。</li>
+          <li><strong>3 的倍數</strong>：所有位數數字相加起來是 3 的倍數（如 42 ➔ 4+2=6，是 3 的倍數！）。</li>
+          <li><strong>10 的倍數</strong>：個位數是 0。</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h4>💎 3. 質數與合數</h4>
+        <p>只有 1 和自己本身兩個因數的數叫<strong>質數</strong>（如 2, 3, 5, 7, 11...）。在遊戲中吃到質因數有<strong>雙倍積分</strong>喔！</p>
+      </div>
+
+      <button class="btn-primary" id="btnCloseGuide">我學會了，開始挑戰！</button>
+    </div>
+  </div>
+
+  <!-- Modal: Learning Review Diagnostic -->
+  <div class="modal-backdrop" id="modalReview">
+    <div class="modal-content">
+      <h2 class="modal-title">📊 因數學習診斷歷程</h2>
+      <p class="modal-subtitle">記錄本局練習中誤判的非因數，加強複習！</p>
+
+      <div class="review-table-container">
+        <table class="review-table">
+          <thead>
+            <tr>
+              <th>目標數</th>
+              <th>誤判果實</th>
+              <th>除法算式診斷（帶餘數）</th>
+            </tr>
+          </thead>
+          <tbody id="reviewTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <button class="btn-primary" id="btnCloseReview">確定返回</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./audio.js?v=20261024_1820"></script>
+  <script src="./game.js?v=20261024_1820"></script>
+</body>
+</html>
