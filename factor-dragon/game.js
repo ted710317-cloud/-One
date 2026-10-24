@@ -68,13 +68,21 @@
     }
   ];
 
-  // 神龍進化型態
-  const DRAGON_EVOLUTIONS = [
-    { name: '🌱 青木幼龍', color: '#10b981', glow: '#34d399', title: '初涉因數世界的可愛小精靈' },
-    { name: '🌊 碧海角龍', color: '#06b6d4', glow: '#67e8f9', title: '長出威風龍角的海洋守護者' },
-    { name: '🔥 烈焰飛龍', color: '#f59e0b', glow: '#fcd34d', title: '吞吐赤熱火焰的乘法獵手' },
-    { name: '👑 幻彩金甲神龍', color: '#ec4899', glow: '#f472b6', title: '掌控天地所有因數的至尊天龍' }
-  ];
+  // 神龍進化型態 (支援 Q萌可愛 與 炫酷帥氣 雙風格)
+  const DRAGON_EVOLUTIONS = {
+    cute: [
+      { name: '🌱 萌萌青木幼龍', color: '#10b981', glow: '#34d399', accent: '#f472b6', title: '初涉因數世界的圓滾滾實習小萌龍' },
+      { name: '🌊 泡泡水晶角龍', color: '#06b6d4', glow: '#67e8f9', accent: '#a7f3d0', title: '長出晶瑩粉嫩雙角的水晶萌龍' },
+      { name: '🔥 甜蜜彩虹飛龍', color: '#f59e0b', glow: '#fcd34d', accent: '#fb7185', title: '吞吐彩色糖果光環的乘法小飛仙' },
+      { name: '👑 幻彩至尊萌龍皇', color: '#ec4899', glow: '#f472b6', accent: '#ffd700', title: '掌控全宇宙所有因數的最萌天龍' }
+    ],
+    cool: [
+      { name: '⚡ 雷霆迅猛幼龍', color: '#0ea5e9', glow: '#38bdf8', accent: '#ffe600', title: '目光凌厲、身披青電的疾風龍' },
+      { name: '🌊 碧海霸角天龍', color: '#0284c7', glow: '#06b6d4', accent: '#00ffff', title: '頭戴玄晶雙角、傲視深海的霸氣神龍' },
+      { name: '🔥 烈焰破空神龍', color: '#ea580c', glow: '#f97316', accent: '#ff4500', title: '背披熔岩骨刺、烈焰翻騰的獵手' },
+      { name: '👑 滅世金甲霸龍王', color: '#8b5cf6', glow: '#a855f7', accent: '#ffcc00', title: '掌控雷霆極限、萬物莫敵的終極金甲天龍' }
+    ]
+  };
 
   // --- 3. 遊戲核心類別 ---
   class FactorDragonGame {
@@ -124,6 +132,9 @@
       this.foods = []; // array of {x, y, num, isFactor, isPrime, powerup}
       this.maxFoodsOnBoard = 5;
 
+      // Dragon appearance skin: 'cute' | 'cool'
+      this.skin = localStorage.getItem('factor_dragon_skin') || 'cute';
+
       // Learning records
       this.learningLogs = [];
 
@@ -153,11 +164,24 @@
       };
 
       this.initEvents();
+      this.initSkinEvents();
       this.resizeCanvas();
       window.addEventListener('resize', () => this.resizeCanvas());
 
-      // Show Start Modal
-      this.showModal('modalStart');
+      // URL 參數支援 (便於教學直接指定外觀與自動開始)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSkin = urlParams.get('skin');
+      if (urlSkin && (urlSkin === 'cute' || urlSkin === 'cool')) {
+        this.setSkin(urlSkin);
+      }
+
+      if (urlParams.get('start') === '1' || urlParams.get('autoplay')) {
+        const target = parseInt(urlParams.get('target') || '24', 10);
+        this.startNewGame(urlParams.get('mode') || 'campaign', target);
+      } else {
+        // Show Start Modal
+        this.showModal('modalStart');
+      }
     }
 
     // --- 畫布尺寸自動適應 ---
@@ -338,6 +362,49 @@
       document.getElementById('btnCloseReview')?.addEventListener('click', () => {
         this.hideModal('modalReview');
       });
+    }
+
+    // --- 神龍角色外觀風格切換 (可愛 / 帥氣) ---
+    initSkinEvents() {
+      document.getElementById('skinCardCute')?.addEventListener('click', () => {
+        this.setSkin('cute');
+      });
+      document.getElementById('skinCardCool')?.addEventListener('click', () => {
+        this.setSkin('cool');
+      });
+      document.getElementById('btnSkinToggle')?.addEventListener('click', () => {
+        const nextSkin = this.skin === 'cute' ? 'cool' : 'cute';
+        this.setSkin(nextSkin);
+        const name = nextSkin === 'cute' ? '🌸 Q萌可愛龍' : '⚡ 炫酷帥氣龍';
+        this.showFeedback(`已切換神龍外觀：【${name}】！`, 'success');
+      });
+      this.updateSkinUI();
+    }
+
+    setSkin(skin) {
+      this.skin = skin;
+      localStorage.setItem('factor_dragon_skin', skin);
+      this.updateSkinUI();
+      if (this.isRunning) {
+        this.draw();
+      }
+    }
+
+    updateSkinUI() {
+      const isCute = this.skin === 'cute';
+      document.getElementById('skinCardCute')?.classList.toggle('active', isCute);
+      document.getElementById('skinCardCool')?.classList.toggle('active', !isCute);
+
+      const btn = document.getElementById('btnSkinToggle');
+      if (btn) {
+        btn.innerText = isCute ? '🌸' : '⚡';
+        btn.title = `目前外觀：${isCute ? 'Q萌可愛龍' : '炫酷帥氣龍'}（點擊切換）`;
+      }
+
+      const headerAvatar = document.querySelector('.dragon-avatar');
+      if (headerAvatar) {
+        headerAvatar.innerText = isCute ? '🐲' : '🐉';
+      }
     }
 
     // --- 方向變更 (防 180 度自撞) ---
@@ -915,7 +982,9 @@
       });
 
       // 3. 繪製貪吃神龍身體
-      const evo = DRAGON_EVOLUTIONS[Math.min(this.worldIdx, DRAGON_EVOLUTIONS.length - 1)];
+      const evos = DRAGON_EVOLUTIONS[this.skin] || DRAGON_EVOLUTIONS.cute;
+      const evo = evos[Math.min(this.worldIdx, evos.length - 1)];
+      const isCute = this.skin === 'cute';
 
       for (let i = this.snake.length - 1; i >= 1; i--) {
         const seg = this.snake[i];
@@ -924,21 +993,50 @@
         const segRadius = cellSize * (0.42 - (i / this.snake.length) * 0.08);
 
         ctx.save();
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = isCute ? 8 : 12;
         ctx.shadowColor = evo.glow;
 
         const bodyGrad = ctx.createRadialGradient(cx - segRadius * 0.3, cy - segRadius * 0.3, 2, cx, cy, segRadius);
-        bodyGrad.addColorStop(0, '#6ee7b7');
-        bodyGrad.addColorStop(1, evo.color);
+        if (isCute) {
+          bodyGrad.addColorStop(0, '#a7f3d0');
+          bodyGrad.addColorStop(1, evo.color);
+        } else {
+          // 帥氣龍：金屬科技漸層
+          bodyGrad.addColorStop(0, '#e0f2fe');
+          bodyGrad.addColorStop(0.4, evo.color);
+          bodyGrad.addColorStop(1, '#0f172a');
+        }
 
         ctx.fillStyle = bodyGrad;
         ctx.beginPath();
         ctx.arc(cx, cy, segRadius, 0, Math.PI * 2);
         ctx.fill();
 
+        // 帥氣龍專屬：背脊尖刺 (Dorsal Spikes)
+        if (!isCute && i > 1) {
+          const prevSeg = this.snake[i - 1];
+          const spikeAngle = Math.atan2(prevSeg.y - seg.y, prevSeg.x - seg.x) + Math.PI / 2;
+          const spikeLen = cellSize * 0.22;
+          ctx.fillStyle = evo.accent || '#ffe600';
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(spikeAngle - 0.3) * segRadius * 0.8, cy + Math.sin(spikeAngle - 0.3) * segRadius * 0.8);
+          ctx.lineTo(cx + Math.cos(spikeAngle) * (segRadius + spikeLen), cy + Math.sin(spikeAngle) * (segRadius + spikeLen));
+          ctx.lineTo(cx + Math.cos(spikeAngle + 0.3) * segRadius * 0.8, cy + Math.sin(spikeAngle + 0.3) * segRadius * 0.8);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // 可愛龍專屬：柔和光斑
+        if (isCute) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+          ctx.beginPath();
+          ctx.arc(cx - segRadius * 0.35, cy - segRadius * 0.35, segRadius * 0.25, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
         // 節段上的數字因數印記
         if (seg.num && seg.num !== 'head') {
-          ctx.fillStyle = '#064e3b';
+          ctx.fillStyle = isCute ? '#064e3b' : '#ffffff';
           ctx.font = `bold ${Math.floor(cellSize * 0.42)}px sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -956,53 +1054,142 @@
         const headR = cellSize * 0.52;
 
         ctx.save();
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = isCute ? 14 : 20;
         ctx.shadowColor = this.shieldActive ? '#38bdf8' : evo.glow;
 
         // 龍頭基底
         const headGrad = ctx.createRadialGradient(hx - headR * 0.3, hy - headR * 0.3, 3, hx, hy, headR);
-        headGrad.addColorStop(0, '#a7f3d0');
-        headGrad.addColorStop(1, evo.color);
+        if (isCute) {
+          headGrad.addColorStop(0, '#fbcfe8');
+          headGrad.addColorStop(0.3, '#a7f3d0');
+          headGrad.addColorStop(1, evo.color);
+        } else {
+          headGrad.addColorStop(0, '#e0f2fe');
+          headGrad.addColorStop(0.4, evo.color);
+          headGrad.addColorStop(1, '#090d16');
+        }
 
         ctx.fillStyle = headGrad;
         ctx.beginPath();
         ctx.arc(hx, hy, headR, 0, Math.PI * 2);
         ctx.fill();
 
-        // 龍角 (Little cute horns)
-        ctx.fillStyle = '#fbbf24';
-        const hornAngle = Math.atan2(this.direction.y, this.direction.x) + Math.PI;
-        const h1x = hx + Math.cos(hornAngle - 0.6) * headR * 0.9;
-        const h1y = hy + Math.sin(hornAngle - 0.6) * headR * 0.9;
-        const h2x = hx + Math.cos(hornAngle + 0.6) * headR * 0.9;
-        const h2y = hy + Math.sin(hornAngle + 0.6) * headR * 0.9;
+        const moveAngle = Math.atan2(this.direction.y, this.direction.x);
 
-        ctx.beginPath();
-        ctx.arc(h1x, h1y, cellSize * 0.16, 0, Math.PI * 2);
-        ctx.arc(h2x, h2y, cellSize * 0.16, 0, Math.PI * 2);
-        ctx.fill();
+        if (isCute) {
+          // --- 【Q萌可愛龍】專屬繪製 ---
+          // 1. 萌萌粉嫩腮紅
+          const blushAngle1 = moveAngle + Math.PI / 2;
+          const blushAngle2 = moveAngle - Math.PI / 2;
+          ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+          ctx.beginPath();
+          ctx.arc(hx + Math.cos(blushAngle1) * headR * 0.55, hy + Math.sin(blushAngle1) * headR * 0.55, cellSize * 0.16, 0, Math.PI * 2);
+          ctx.arc(hx + Math.cos(blushAngle2) * headR * 0.55, hy + Math.sin(blushAngle2) * headR * 0.55, cellSize * 0.16, 0, Math.PI * 2);
+          ctx.fill();
 
-        // 龍眼 (Eyes facing movement direction)
-        const eyeOffset = headR * 0.45;
-        const lookAngle = Math.atan2(this.direction.y, this.direction.x);
-        const e1x = hx + Math.cos(lookAngle - 0.5) * eyeOffset;
-        const e1y = hy + Math.sin(lookAngle - 0.5) * eyeOffset;
-        const e2x = hx + Math.cos(lookAngle + 0.5) * eyeOffset;
-        const e2y = hy + Math.sin(lookAngle + 0.5) * eyeOffset;
+          // 2. 圓滾小鹿角
+          ctx.fillStyle = '#fcd34d';
+          const hornAngle = moveAngle + Math.PI;
+          const h1x = hx + Math.cos(hornAngle - 0.55) * headR * 0.95;
+          const h1y = hy + Math.sin(hornAngle - 0.55) * headR * 0.95;
+          const h2x = hx + Math.cos(hornAngle + 0.55) * headR * 0.95;
+          const h2y = hy + Math.sin(hornAngle + 0.55) * headR * 0.95;
+          ctx.beginPath();
+          ctx.arc(h1x, h1y, cellSize * 0.18, 0, Math.PI * 2);
+          ctx.arc(h2x, h2y, cellSize * 0.18, 0, Math.PI * 2);
+          ctx.fill();
 
-        // 眼白
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(e1x, e1y, cellSize * 0.16, 0, Math.PI * 2);
-        ctx.arc(e2x, e2y, cellSize * 0.16, 0, Math.PI * 2);
-        ctx.fill();
+          // 3. 水汪汪漫畫大眼 (Sparkling Anime Eyes)
+          const eyeOffset = headR * 0.42;
+          const e1x = hx + Math.cos(moveAngle - 0.5) * eyeOffset;
+          const e1y = hy + Math.sin(moveAngle - 0.5) * eyeOffset;
+          const e2x = hx + Math.cos(moveAngle + 0.5) * eyeOffset;
+          const e2y = hy + Math.sin(moveAngle + 0.5) * eyeOffset;
+          const eyeR = cellSize * 0.18;
 
-        // 眼珠
-        ctx.fillStyle = '#0f172a';
-        ctx.beginPath();
-        ctx.arc(e1x + this.direction.x * 2, e1y + this.direction.y * 2, cellSize * 0.09, 0, Math.PI * 2);
-        ctx.arc(e2x + this.direction.x * 2, e2y + this.direction.y * 2, cellSize * 0.09, 0, Math.PI * 2);
-        ctx.fill();
+          // 眼白
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(e1x, e1y, eyeR, 0, Math.PI * 2);
+          ctx.arc(e2x, e2y, eyeR, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 黑瞳
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(e1x, e1y, eyeR * 0.8, 0, Math.PI * 2);
+          ctx.arc(e2x, e2y, eyeR * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 萌萌高光白點 (Double Sparkle Highlights)
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(e1x - 2, e1y - 2, eyeR * 0.35, 0, Math.PI * 2);
+          ctx.arc(e2x - 2, e2y - 2, eyeR * 0.35, 0, Math.PI * 2);
+          ctx.arc(e1x + 2, e1y + 2, eyeR * 0.18, 0, Math.PI * 2);
+          ctx.arc(e2x + 2, e2y + 2, eyeR * 0.18, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 4. 微笑嘴巴
+          ctx.strokeStyle = '#064e3b';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          const mouthX = hx + Math.cos(moveAngle) * headR * 0.6;
+          const mouthY = hy + Math.sin(moveAngle) * headR * 0.6;
+          ctx.arc(mouthX, mouthY, cellSize * 0.12, moveAngle - 0.7, moveAngle + 0.7);
+          ctx.stroke();
+
+        } else {
+          // --- 【炫酷帥氣龍】專屬繪製 ---
+          // 1. 銳利金屬霸角 (Dual Razor Horns)
+          ctx.fillStyle = evo.accent || '#ffe600';
+          const hornAngle = moveAngle + Math.PI;
+          const hLen = cellSize * 0.85;
+
+          [-0.5, 0.5].forEach(offset => {
+            const baseAngle = hornAngle + offset;
+            ctx.beginPath();
+            ctx.moveTo(hx + Math.cos(baseAngle - 0.2) * headR * 0.8, hy + Math.sin(baseAngle - 0.2) * headR * 0.8);
+            ctx.lineTo(hx + Math.cos(baseAngle) * (headR + hLen), hy + Math.sin(baseAngle) * (headR + hLen));
+            ctx.lineTo(hx + Math.cos(baseAngle + 0.2) * headR * 0.8, hy + Math.sin(baseAngle + 0.2) * headR * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          });
+
+          // 2. 凌厲龍瞳 (Fierce Dragon Slit Eyes)
+          const eyeOffset = headR * 0.46;
+          const e1x = hx + Math.cos(moveAngle - 0.5) * eyeOffset;
+          const e1y = hy + Math.sin(moveAngle - 0.5) * eyeOffset;
+          const e2x = hx + Math.cos(moveAngle + 0.5) * eyeOffset;
+          const e2y = hy + Math.sin(moveAngle + 0.5) * eyeOffset;
+
+          ctx.fillStyle = evo.accent || '#00f3ff';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = evo.accent || '#00f3ff';
+          [ [e1x, e1y], [e2x, e2y] ].forEach(([ex, ey]) => {
+            ctx.beginPath();
+            ctx.ellipse(ex, ey, cellSize * 0.18, cellSize * 0.11, moveAngle, 0, Math.PI * 2);
+            ctx.fill();
+            // 細長豎直瞳孔 (Slit Pupil)
+            ctx.fillStyle = '#050811';
+            ctx.beginPath();
+            ctx.ellipse(ex, ey, cellSize * 0.05, cellSize * 0.12, moveAngle + Math.PI / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = evo.accent || '#00f3ff';
+          });
+
+          // 3. 霸氣眉稜與鼻尖
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(hx + Math.cos(moveAngle - 0.8) * headR * 0.7, hy + Math.sin(moveAngle - 0.8) * headR * 0.7);
+          ctx.lineTo(hx + Math.cos(moveAngle) * headR * 0.95, hy + Math.sin(moveAngle) * headR * 0.95);
+          ctx.lineTo(hx + Math.cos(moveAngle + 0.8) * headR * 0.7, hy + Math.sin(moveAngle + 0.8) * headR * 0.7);
+          ctx.stroke();
+        }
 
         // 護盾光環動畫
         if (this.shieldActive) {
@@ -1030,8 +1217,11 @@
 
     // --- 過關彈窗顯示 ---
     showLevelClearModal() {
-      const evo = DRAGON_EVOLUTIONS[Math.min(this.worldIdx, DRAGON_EVOLUTIONS.length - 1)];
-      document.getElementById('evolveAvatar').innerText = evo.name.split(' ')[0];
+      const evos = DRAGON_EVOLUTIONS[this.skin] || DRAGON_EVOLUTIONS.cute;
+      const evo = evos[Math.min(this.worldIdx, evos.length - 1)];
+      const isCute = this.skin === 'cute';
+
+      document.getElementById('evolveAvatar').innerText = isCute ? '🌸🐲' : '⚡🐉';
       document.getElementById('evolveName').innerText = evo.name;
       document.getElementById('evolveDesc').innerText = evo.title;
       document.getElementById('levelTargetNumber').innerText = this.currentTarget;

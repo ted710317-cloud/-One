@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1820">
+  <link rel="stylesheet" href="./style.css?v=20261024_1835">
 </head>
 <body>
 
@@ -15,6 +15,7 @@
       <span>👑 返回「朕的數學遊戲吧」大廳</span>
     </a>
     <div class="top-actions">
+      <button class="icon-btn" id="btnSkinToggle" title="切換角色外觀（Q萌/炫酷）">🌸</button>
       <button class="icon-btn" id="btnSound" title="開關音效">🔊</button>
       <button class="icon-btn" id="btnBgm" title="開關背景音樂">🎵</button>
       <button class="icon-btn active-guide" id="btnGuide" title="因數速查秘笈">📖</button>
@@ -116,6 +117,32 @@
         操控貪吃神龍吞食地圖上的<strong>正確因數</strong>！<br>
         不漏找、不誤食，集齊所有因數解鎖神龍進化！
       </p>
+
+      <!-- Dragon Skin Selector -->
+      <div class="skin-selector-container">
+        <div class="skin-title">
+          <span>✨</span>
+          <span>選擇你的神龍外觀風格</span>
+        </div>
+        <div class="skin-cards">
+          <div class="skin-card active" id="skinCardCute" data-skin="cute">
+            <div class="skin-avatar">🌸🐲</div>
+            <div class="skin-info">
+              <h4>Q 萌可愛龍</h4>
+              <p>水汪汪大眼、粉嫩龍角、萌萌腮紅</p>
+            </div>
+            <div class="skin-badge-check">✓</div>
+          </div>
+          <div class="skin-card skin-cool" id="skinCardCool" data-skin="cool">
+            <div class="skin-avatar">⚡🐉</div>
+            <div class="skin-info">
+              <h4>炫酷帥氣龍</h4>
+              <p>凌厲龍瞳、雷霆霸角、背鰭骨刺</p>
+            </div>
+            <div class="skin-badge-check">✓</div>
+          </div>
+        </div>
+      </div>
 
       <div class="mode-cards-grid">
         <button class="mode-card-btn" id="btnModeCampaign">
@@ -266,7 +293,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1820"></script>
-  <script src="./game.js?v=20261024_1820"></script>
+  <script src="./audio.js?v=20261024_1835"></script>
+  <script src="./game.js?v=20261024_1835"></script>
 </body>
 </html>
