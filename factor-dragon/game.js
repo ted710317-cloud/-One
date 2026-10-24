@@ -201,10 +201,15 @@
     resizeCanvas() {
       const wrapper = this.canvas.parentElement;
       if (!wrapper) return;
-      const size = Math.floor(Math.min(wrapper.clientWidth, wrapper.clientHeight));
+      const availW = wrapper.clientWidth;
+      const availH = wrapper.clientHeight;
+      if (availW <= 0 || availH <= 0) return;
+      const size = Math.floor(Math.min(availW, availH, 640));
       if (size > 0 && (this.canvas.width !== size || this.canvas.height !== size)) {
         this.canvas.width = size;
         this.canvas.height = size;
+        this.canvas.style.width = size + 'px';
+        this.canvas.style.height = size + 'px';
         this.cellSize = size / this.gridCols;
         if (this.isRunning) {
           this.draw();
@@ -590,6 +595,13 @@
         layout.classList.toggle('hand-pos-left', isLeft);
         layout.classList.toggle('hand-pos-right', !isLeft);
       }
+      const container = document.getElementById('gameContainer');
+      if (container) {
+        container.classList.toggle('hand-pos-left', isLeft);
+        container.classList.toggle('hand-pos-right', !isLeft);
+      }
+      document.body.classList.toggle('hand-pos-left', isLeft);
+      document.body.classList.toggle('hand-pos-right', !isLeft);
 
       document.getElementById('btnHandLeft')?.classList.toggle('active', isLeft);
       document.getElementById('btnHandRight')?.classList.toggle('active', !isLeft);
@@ -599,7 +611,7 @@
       const btn = document.getElementById('btnHandPosToggle');
       if (btn) {
         btn.innerText = isLeft ? '👈' : '👉';
-        btn.title = `方向鍵位置：${isLeft ? '靠左下（點擊切換為靠右下）' : '靠右下（點擊切換為靠左下）'}`;
+        btn.title = `方向鍵位置：${isLeft ? '靠左（點擊切換為靠右）' : '靠右（點擊切換為靠左）'}`;
       }
     }
 

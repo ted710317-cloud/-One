@@ -5,15 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1915">
+  <link rel="stylesheet" href="./style.css?v=20261024_1930">
 </head>
 <body>
 
-  <!-- Top Hub Return Bar -->
+  <!-- Top Hub Return Bar (固定頂部，高度精緻緊湊，永遠不被捲動遮擋) -->
   <div class="hub-topbar">
-    <a href="../" class="btn-hub-return">
-      <span>👑 返回「朕的數學遊戲吧」大廳</span>
-    </a>
+    <div class="hub-brand-group">
+      <a href="../" class="btn-hub-return" title="返回「朕的數學遊戲吧」大廳">
+        <span>👑 返回大廳</span>
+      </a>
+      <div class="dragon-title-pill">
+        <span class="dragon-avatar">🐲</span>
+        <span class="dragon-pill-title">貪吃因數龍</span>
+      </div>
+    </div>
     <div class="top-actions">
       <button class="icon-btn" id="btnHandPosToggle" title="切換方向鍵位置（左下/右下）">👈</button>
       <button class="icon-btn" id="btnSkinToggle" title="切換角色外觀（Q萌/炫酷）">🌸</button>
@@ -24,122 +30,100 @@
     </div>
   </div>
 
-  <!-- Game Main Container -->
-  <div class="game-container">
+  <!-- Game Main Container (滿版自適應，零滾動條) -->
+  <div class="game-container" id="battleStageLayout">
 
-    <!-- Header Banner -->
-    <header class="game-header">
-      <div class="header-row-main">
-        <div class="dragon-logo">
-          <div class="dragon-avatar">🐲</div>
-          <div class="dragon-title-group">
-            <h1>貪吃因數龍</h1>
-            <div class="dragon-sub">國小中高年級適用 ‧ 因數全搜集大冒險</div>
-          </div>
-        </div>
-
-        <div class="target-box">
-          <div class="target-label">🎯 目前目標數</div>
-          <div class="target-val" id="targetVal">24</div>
-        </div>
-      </div>
-
-      <!-- Stats HUD Bar -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span>生命：</span>
-          <span class="stat-hearts" id="statHearts">❤️❤️❤️</span>
-        </div>
-        <div class="stat-item">
-          <span>得分：</span>
-          <span class="stat-score" id="statScore">0</span>
-        </div>
-        <div class="stat-item">
-          <span>最高：</span>
-          <span class="stat-score" id="statHigh">0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-mode-badge" id="statModeBadge">🌲 基礎之森 (1/4)</span>
-          <span class="powerup-pill" id="powerupPill">🛡️ 護盾</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Factor Collection Shelf Card -->
-    <div class="factor-shelf-card">
-      <div class="shelf-header">
-        <div class="shelf-title">
-          <span>💎</span>
-          <span>因數圖鑑展示櫃（吃齊所有因數即可進化過關！）</span>
-        </div>
-        <div class="shelf-progress-text" id="shelfProgressText">進度：0 / 8 (0%)</div>
-      </div>
-      <div class="factor-slots-container" id="factorSlotsContainer">
-        <!-- Dynamically rendered slots -->
+    <!-- Center Playfield Area (主遊戲畫面大幅放大，置頂居中呈現) -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <canvas id="gameCanvas" width="600" height="600"></canvas>
+      <div class="feedback-overlay" id="feedbackOverlay">
+        <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
       </div>
     </div>
 
-    <!-- Stage Layout: Controller Panel (左下/右下自由選擇) + Enlarged Center Playfield -->
-    <div class="battle-stage-layout hand-pos-left" id="battleStageLayout">
-      <!-- Controller Wing Panel (可置於左下或右下) -->
-      <div class="controller-wing" id="controllerWing">
-        <!-- Control Toolbar: Hand Switcher + Type Switcher -->
-        <div class="controller-toolbar">
-          <div class="hand-pos-switch" title="設定方向鍵位置（左下或右下）">
-            <button class="hand-btn active" id="btnHandLeft" data-pos="left">👈 左側</button>
-            <button class="hand-btn" id="btnHandRight" data-pos="right">👉 右側</button>
-          </div>
-          <div class="control-type-switch" title="設定控制器型態">
-            <button class="ctrl-tab-btn active" id="tabJoystick" title="類比搖桿">🕹️ 搖桿</button>
-            <button class="ctrl-tab-btn" id="tabDpad" title="十字按鍵">🎛️ 十字鍵</button>
-          </div>
+    <!-- 1. Controller Wing Panel (方向鍵/搖桿操作區) -->
+    <div class="controller-wing" id="controllerWing">
+      <!-- Control Toolbar: Hand Switcher + Type Switcher -->
+      <div class="controller-toolbar">
+        <div class="hand-pos-switch" title="設定方向鍵位置（左側或右側）">
+          <button class="hand-btn active" id="btnHandLeft" data-pos="left">👈 靠左</button>
+          <button class="hand-btn" id="btnHandRight" data-pos="right">👉 靠右</button>
         </div>
-
-        <!-- 1. Virtual Analog Joystick (類比式搖桿) -->
-        <div class="joystick-container" id="joystickContainer">
-          <div class="joystick-base" id="joystickBase">
-            <div class="joy-dir-indicator joy-up">▲</div>
-            <div class="joy-dir-indicator joy-left">◀</div>
-            <div class="joy-dir-indicator joy-right">▶</div>
-            <div class="joy-dir-indicator joy-down">▼</div>
-            <div class="joystick-stick" id="joystickStick">
-              <div class="stick-center-orb"></div>
-            </div>
-          </div>
-          <div class="joystick-hint">🕹️ 拖曳搖桿零延遲轉向</div>
-        </div>
-
-        <!-- 2. Classic Left D-Pad (十字鍵) -->
-        <div class="dpad-container" id="dpadContainer" style="display: none;">
-          <button class="dpad-btn dpad-up" data-dir="up" aria-label="上">▲</button>
-          <button class="dpad-btn dpad-left" data-dir="left" aria-label="左">◀</button>
-          <div class="dpad-center" title="方向控制">🎮</div>
-          <button class="dpad-btn dpad-right" data-dir="right" aria-label="右">▶</button>
-          <button class="dpad-btn dpad-down" data-dir="down" aria-label="下">▼</button>
+        <div class="control-type-switch" title="設定控制器型態">
+          <button class="ctrl-tab-btn active" id="tabJoystick" title="類比搖桿">🕹️ 搖桿</button>
+          <button class="ctrl-tab-btn" id="tabDpad" title="十字按鍵">🎛️ 十字</button>
         </div>
       </div>
 
-      <!-- Center Playfield Area (主遊戲畫面大幅放大) -->
-      <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="600" height="600"></canvas>
-        <div class="feedback-overlay" id="feedbackOverlay">
-          <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
+      <!-- 1. Virtual Analog Joystick (類比式搖桿) -->
+      <div class="joystick-container" id="joystickContainer">
+        <div class="joystick-base" id="joystickBase">
+          <div class="joy-dir-indicator joy-up">▲</div>
+          <div class="joy-dir-indicator joy-left">◀</div>
+          <div class="joy-dir-indicator joy-right">▶</div>
+          <div class="joy-dir-indicator joy-down">▼</div>
+          <div class="joystick-stick" id="joystickStick">
+            <div class="stick-center-orb"></div>
+          </div>
         </div>
+        <div class="joystick-hint">🕹️ 拖曳搖桿零延遲轉向</div>
       </div>
 
-      <!-- Stage Spacer for Tablet / Landscape Edge-Docking Balance -->
-      <div class="stage-spacer" aria-hidden="true"></div>
+      <!-- 2. Classic Left D-Pad (十字鍵) -->
+      <div class="dpad-container" id="dpadContainer" style="display: none;">
+        <button class="dpad-btn dpad-up" data-dir="up" aria-label="上">▲</button>
+        <button class="dpad-btn dpad-left" data-dir="left" aria-label="左">◀</button>
+        <div class="dpad-center" title="方向控制">🎮</div>
+        <button class="dpad-btn dpad-right" data-dir="right" aria-label="右">▶</button>
+        <button class="dpad-btn dpad-down" data-dir="down" aria-label="下">▼</button>
+      </div>
     </div>
 
-    <!-- Bottom Controls & Hints -->
-    <div class="bottom-controls-bar">
-      <div class="speed-selector">
-        <span>速度：</span>
-        <button class="speed-btn" data-speed="0.8">慢速</button>
-        <button class="speed-btn active" data-speed="1.0">正常</button>
-        <button class="speed-btn" data-speed="1.3">快速</button>
+    <!-- 2. Auxiliary Info Wing (所有輔助資訊放置於搖桿旁邊的空白區域) -->
+    <div class="aux-info-wing" id="auxInfoWing">
+      <!-- 頂部即時目標與數值卡 -->
+      <div class="aux-card aux-stats-card">
+        <div class="aux-target-badge">
+          <span class="aux-label">🎯 目標數</span>
+          <span class="target-val" id="targetVal">24</span>
+        </div>
+        <div class="aux-stats-details">
+          <div class="aux-stat-row">
+            <span class="stat-hearts" id="statHearts" title="剩餘生命">❤️❤️❤️</span>
+            <span class="stat-mode-badge" id="statModeBadge">🌲 基礎之森</span>
+            <span class="powerup-pill" id="powerupPill" style="display:none;">🛡️ 護盾</span>
+          </div>
+          <div class="aux-stat-row aux-sub-scores">
+            <span>⭐ 得分：<strong class="stat-score" id="statScore">0</strong></span>
+            <span class="aux-high-score">🏆 最高：<strong class="stat-score" id="statHigh">0</strong></span>
+          </div>
+        </div>
       </div>
-      <div>⌨️ 電腦：方向鍵或 WASD ｜ 📱 平板：滑動或點擊十字盤</div>
+
+      <!-- 因數圖鑑架 (展示櫃) -->
+      <div class="aux-card aux-shelf-card">
+        <div class="shelf-header">
+          <div class="shelf-title">
+            <span>💎</span>
+            <span>因數圖鑑櫃</span>
+          </div>
+          <div class="shelf-progress-text" id="shelfProgressText">進度：0 / 8 (0%)</div>
+        </div>
+        <div class="factor-slots-container" id="factorSlotsContainer">
+          <!-- Dynamically rendered slots -->
+        </div>
+      </div>
+
+      <!-- 速度與操作提示列 -->
+      <div class="aux-bottom-toolbar">
+        <div class="speed-selector">
+          <span class="speed-label">速度：</span>
+          <button class="speed-btn" data-speed="0.8">慢速</button>
+          <button class="speed-btn active" data-speed="1.0">正常</button>
+          <button class="speed-btn" data-speed="1.3">快速</button>
+        </div>
+        <div class="aux-hint-text">⌨️ 方向鍵/WASD</div>
+      </div>
     </div>
 
   </div>
@@ -349,7 +333,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1915"></script>
-  <script src="./game.js?v=20261024_1915"></script>
+  <script src="./audio.js?v=20261024_1930"></script>
+  <script src="./game.js?v=20261024_1930"></script>
 </body>
 </html>
