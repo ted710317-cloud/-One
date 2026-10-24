@@ -334,18 +334,28 @@ body {
   100% { transform: scale(1.06); filter: brightness(1); }
 }
 
-/* Playfield Canvas */
+/* Battle Stage: Dual D-Pads and Center Playfield Canvas */
+.battle-stage-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 16px;
+  position: relative;
+  margin: 4px 0 8px;
+}
+
 .canvas-wrapper {
   position: relative;
   width: 100%;
+  max-width: 440px;
   aspect-ratio: 1 / 1;
-  max-height: 520px;
-  margin: 0 auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 2px solid rgba(16, 185, 129, 0.35);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(16, 185, 129, 0.05);
   background: #09101d;
+  flex: 0 0 auto;
 }
 
 canvas#gameCanvas {
@@ -391,33 +401,46 @@ canvas#gameCanvas {
   color: #f87171;
 }
 
-/* Touch Tablet D-Pad Controller */
+/* Touch Tablet Dual D-Pad Wings & Buttons */
+.dpad-wing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dpad-container {
   display: grid;
-  grid-template-columns: repeat(3, 62px);
-  grid-template-rows: repeat(3, 56px);
-  gap: 6px;
-  justify-content: center;
-  margin: 8px auto 0;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(3, 46px);
+  gap: 5px;
+  background: rgba(16, 24, 48, 0.7);
+  border: 1px solid var(--border-glass);
+  padding: 7px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  user-select: none;
 }
 
 .dpad-btn {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-glass);
   color: var(--text-main);
   border-radius: var(--radius-md);
-  font-size: 20px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .dpad-btn:active {
-  background: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.45);
   border-color: var(--primary-emerald);
   transform: scale(0.92);
+  box-shadow: 0 0 12px var(--emerald-glow);
 }
 
 .dpad-up { grid-column: 2; grid-row: 1; }
@@ -425,13 +448,97 @@ canvas#gameCanvas {
 .dpad-center {
   grid-column: 2;
   grid-row: 2;
-  background: transparent;
-  border: none;
-  font-size: 12px;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold);
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .dpad-right { grid-column: 3; grid-row: 2; }
 .dpad-down { grid-column: 2; grid-row: 3; }
+
+/* ==========================================================================
+   響應式排版：橫式 (Landscape) vs 直式 (Portrait)
+   ========================================================================== */
+
+/* 1. 橫式螢幕 (Landscape)：主畫面在中間，左右兩邊各一個十字鍵 */
+@media (orientation: landscape) and (min-width: 680px), (min-aspect-ratio: 1.15/1) and (min-width: 680px) {
+  .game-container {
+    max-width: 980px;
+  }
+  .battle-stage-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .canvas-wrapper {
+    order: 2;
+    flex: 0 0 auto;
+    width: min(52vh, 440px);
+    height: min(52vh, 440px);
+  }
+  .dpad-left-wing {
+    order: 1;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .dpad-right-wing {
+    order: 3;
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
+/* 2. 直式螢幕 (Portrait)：主畫面在中央上方，方向鍵同時出現在左下角與右下角 */
+@media (orientation: portrait), (max-aspect-ratio: 1.15/1), (max-width: 679px) {
+  .game-container {
+    max-width: 520px;
+  }
+  .battle-stage-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px 14px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .canvas-wrapper {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: min(86vw, 420px);
+    margin: 0 auto;
+  }
+  .dpad-left-wing {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 4px;
+  }
+  .dpad-right-wing {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 4px;
+  }
+  .dpad-container {
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(3, 44px);
+    padding: 6px;
+    gap: 4px;
+  }
+}
 
 /* Speed Controls & Keyboard Hint */
 .bottom-controls-bar {
@@ -786,7 +893,12 @@ canvas#gameCanvas {
     font-size: 14px;
   }
   .dpad-container {
-    grid-template-columns: repeat(3, 56px);
-    grid-template-rows: repeat(3, 48px);
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 40px);
+    gap: 4px;
+    padding: 5px;
+  }
+  .dpad-btn {
+    font-size: 16px;
   }
 }

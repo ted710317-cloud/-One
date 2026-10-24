@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1835">
+  <link rel="stylesheet" href="./style.css?v=20261024_1845">
 </head>
 <body>
 
@@ -78,21 +78,37 @@
       </div>
     </div>
 
-    <!-- Canvas Playfield Area -->
-    <div class="canvas-wrapper">
-      <canvas id="gameCanvas" width="480" height="480"></canvas>
-      <div class="feedback-overlay" id="feedbackOverlay">
-        <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
+    <!-- Dual D-Pad Battle Stage Layout (橫式左右兩翼 ｜ 直式左下右下) -->
+    <div class="battle-stage-layout">
+      <!-- Left D-Pad (左手十字鍵) -->
+      <div class="dpad-wing dpad-left-wing">
+        <div class="dpad-container">
+          <button class="dpad-btn dpad-up" data-dir="up" aria-label="左手往上">▲</button>
+          <button class="dpad-btn dpad-left" data-dir="left" aria-label="左手往左">◀</button>
+          <div class="dpad-center" title="左手控制">左手</div>
+          <button class="dpad-btn dpad-right" data-dir="right" aria-label="左手往右">▶</button>
+          <button class="dpad-btn dpad-down" data-dir="down" aria-label="左手往下">▼</button>
+        </div>
       </div>
-    </div>
 
-    <!-- Touch Tablet Virtual D-Pad -->
-    <div class="dpad-container">
-      <button class="dpad-btn dpad-up" data-dir="up">▲</button>
-      <button class="dpad-btn dpad-left" data-dir="left">◀</button>
-      <div class="dpad-center"></div>
-      <button class="dpad-btn dpad-right" data-dir="right">▶</button>
-      <button class="dpad-btn dpad-down" data-dir="down">▼</button>
+      <!-- Center Playfield Area (主遊戲畫面在中間) -->
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
+        <div class="feedback-overlay" id="feedbackOverlay">
+          <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
+        </div>
+      </div>
+
+      <!-- Right D-Pad (右手十字鍵) -->
+      <div class="dpad-wing dpad-right-wing">
+        <div class="dpad-container">
+          <button class="dpad-btn dpad-up" data-dir="up" aria-label="右手往上">▲</button>
+          <button class="dpad-btn dpad-left" data-dir="left" aria-label="右手往左">◀</button>
+          <div class="dpad-center" title="右手控制">右手</div>
+          <button class="dpad-btn dpad-right" data-dir="right" aria-label="右手往右">▶</button>
+          <button class="dpad-btn dpad-down" data-dir="down" aria-label="右手往下">▼</button>
+        </div>
+      </div>
     </div>
 
     <!-- Bottom Controls & Hints -->
@@ -293,7 +309,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1835"></script>
-  <script src="./game.js?v=20261024_1835"></script>
+  <script src="./audio.js?v=20261024_1845"></script>
+  <script src="./game.js?v=20261024_1845"></script>
 </body>
 </html>

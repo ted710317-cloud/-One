@@ -167,6 +167,9 @@
       this.initSkinEvents();
       this.resizeCanvas();
       window.addEventListener('resize', () => this.resizeCanvas());
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => this.resizeCanvas(), 120);
+      });
 
       // URL 參數支援 (便於教學直接指定外觀與自動開始)
       const urlParams = new URLSearchParams(window.location.search);
@@ -187,10 +190,16 @@
     // --- 畫布尺寸自動適應 ---
     resizeCanvas() {
       const wrapper = this.canvas.parentElement;
-      const size = Math.min(wrapper.clientWidth, wrapper.clientHeight);
-      this.canvas.width = size;
-      this.canvas.height = size;
-      this.cellSize = size / this.gridCols;
+      if (!wrapper) return;
+      const size = Math.floor(Math.min(wrapper.clientWidth, wrapper.clientHeight));
+      if (size > 0 && (this.canvas.width !== size || this.canvas.height !== size)) {
+        this.canvas.width = size;
+        this.canvas.height = size;
+        this.cellSize = size / this.gridCols;
+        if (this.isRunning) {
+          this.draw();
+        }
+      }
     }
 
     // --- 事件綁定 ---
