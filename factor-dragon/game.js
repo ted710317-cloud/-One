@@ -434,8 +434,7 @@
 
       let isDragging = false;
       let center = { x: 0, y: 0 };
-      const maxRadius = 40; // 最大拖曳半徑 (px)
-      const deadzone = 8;   // 盲區 (px)
+      const deadzone = 10;  // 盲區 (px)
       let currentActiveDir = null;
 
       const updateCenter = () => {
@@ -470,6 +469,11 @@
         const dx = clientX - center.x;
         const dy = clientY - center.y;
         const dist = Math.hypot(dx, dy);
+
+        // 動態計算最大拖曳半徑 (依據當前 base 與 stick 實際尺寸，自適應大按鍵與平板螢幕)
+        const baseW = base.clientWidth || 168;
+        const stickW = stick.clientWidth || 72;
+        const maxRadius = Math.max(48, (baseW - stickW) / 2 + 6);
 
         // 限制搖桿在圓形底座內
         const clampedDist = Math.min(dist, maxRadius);

@@ -426,7 +426,7 @@ canvas#gameCanvas {
 /* Hand Position Switcher (Left vs Right) */
 .hand-pos-switch {
   display: flex;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-glass);
   border-radius: 20px;
   padding: 3px;
@@ -437,9 +437,9 @@ canvas#gameCanvas {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s;
@@ -447,16 +447,16 @@ canvas#gameCanvas {
 }
 
 .hand-btn.active {
-  background: rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.28);
   color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
 }
 
 /* Control Mode Switcher Tabs */
 .control-type-switch {
   display: flex;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-glass);
   border-radius: 20px;
   padding: 3px;
@@ -467,9 +467,9 @@ canvas#gameCanvas {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s;
@@ -477,27 +477,27 @@ canvas#gameCanvas {
 }
 
 .ctrl-tab-btn.active {
-  background: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.28);
   color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 10px var(--emerald-glow);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 12px var(--emerald-glow);
 }
 
-/* Virtual Analog Joystick */
+/* Virtual Analog Joystick (加大直徑與好觸控設計) */
 .joystick-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .joystick-base {
-  width: 136px;
-  height: 136px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 24, 48, 0.95) 0%, rgba(6, 11, 24, 0.98) 100%);
-  border: 2px solid rgba(16, 185, 129, 0.5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(16, 185, 129, 0.15);
+  background: radial-gradient(circle, rgba(16, 24, 52, 0.96) 0%, rgba(6, 11, 26, 0.98) 100%);
+  border: 2.5px solid rgba(16, 185, 129, 0.55);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), inset 0 0 32px rgba(16, 185, 129, 0.18);
   position: relative;
   display: flex;
   align-items: center;
@@ -513,33 +513,33 @@ canvas#gameCanvas {
 /* Direction Arrow Indicators on Joystick Base */
 .joy-dir-indicator {
   position: absolute;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3);
   pointer-events: none;
   transition: all 0.15s;
   font-weight: 900;
 }
 
-.joy-up { top: 7px; left: 50%; transform: translateX(-50%); }
-.joy-down { bottom: 7px; left: 50%; transform: translateX(-50%); }
-.joy-left { left: 7px; top: 50%; transform: translateY(-50%); }
-.joy-right { right: 7px; top: 50%; transform: translateY(-50%); }
+.joy-up { top: 9px; left: 50%; transform: translateX(-50%); }
+.joy-down { bottom: 9px; left: 50%; transform: translateX(-50%); }
+.joy-left { left: 9px; top: 50%; transform: translateY(-50%); }
+.joy-right { right: 9px; top: 50%; transform: translateY(-50%); }
 
 .joy-dir-indicator.active {
   color: #34d399;
-  text-shadow: 0 0 8px #10b981;
+  text-shadow: 0 0 10px #10b981, 0 0 18px #34d399;
   transform-origin: center;
-  scale: 1.35;
+  scale: 1.4;
 }
 
-/* Draggable Joystick Stick */
+/* Draggable Joystick Stick (加大觸控球體面積) */
 .joystick-stick {
-  width: 56px;
-  height: 56px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #6ee7b7 0%, #10b981 60%, #064e3b 100%);
-  border: 2px solid #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 16px var(--emerald-glow);
+  background: radial-gradient(circle at 35% 35%, #a7f3d0 0%, #10b981 55%, #064e3b 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 20px var(--emerald-glow);
   position: relative;
   display: flex;
   align-items: center;
@@ -549,53 +549,53 @@ canvas#gameCanvas {
 }
 
 .stick-center-orb {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fcd34d;
-  box-shadow: 0 0 8px #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
 }
 
 .joystick-hint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
-/* Digital D-Pad (Left side) */
+/* Digital D-Pad (加大按鍵與間距，好按防誤觸) */
 .dpad-container {
   display: grid;
-  grid-template-columns: repeat(3, 50px);
-  grid-template-rows: repeat(3, 46px);
-  gap: 5px;
-  background: rgba(16, 24, 48, 0.7);
+  grid-template-columns: repeat(3, 62px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 6px;
+  background: rgba(16, 24, 48, 0.75);
   border: 1px solid var(--border-glass);
-  padding: 7px;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
 }
 
 .dpad-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1.5px solid var(--border-glass);
   color: var(--text-main);
-  border-radius: var(--radius-md);
-  font-size: 18px;
+  border-radius: 14px;
+  font-size: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .dpad-btn:active {
-  background: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.5);
   border-color: var(--primary-emerald);
-  transform: scale(0.92);
-  box-shadow: 0 0 12px var(--emerald-glow);
+  transform: scale(0.93);
+  box-shadow: 0 0 16px var(--emerald-glow);
 }
 
 .dpad-up { grid-column: 2; grid-row: 1; }
@@ -606,83 +606,119 @@ canvas#gameCanvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 18px;
   color: var(--gold);
   pointer-events: none;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .dpad-right { grid-column: 3; grid-row: 2; }
 .dpad-down { grid-column: 2; grid-row: 3; }
 
-/* Responsive adjustments for Landscape & Portrait (支援左側 / 右側自由切換) */
+/* Responsive adjustments for Landscape & Portrait (平板與桌面極限靠邊佈局) */
 @media (orientation: landscape) and (min-width: 680px), (min-aspect-ratio: 1.15/1) and (min-width: 680px) {
   .game-container {
-    max-width: 1060px;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 12px;
   }
   .battle-stage-layout {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 30px;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+    padding: 0 4px;
   }
-  /* Left Hand Position: Controller Left, Canvas Center/Right */
+  
+  /* Left Hand Position: Controller at left edge (order 1), Canvas centered (order 2), Spacer at right (order 3) */
   .battle-stage-layout.hand-pos-left .controller-wing {
     order: 1;
-    width: 180px;
+    width: 220px;
+    margin-left: 0;
+    margin-right: auto;
   }
   .battle-stage-layout.hand-pos-left .canvas-wrapper {
     order: 2;
+    margin: 0 auto;
     max-width: min(74vh, 580px);
     width: min(74vh, 580px);
     height: min(74vh, 580px);
   }
-  /* Right Hand Position: Canvas Center/Left, Controller Right */
-  .battle-stage-layout.hand-pos-right .canvas-wrapper {
+  .battle-stage-layout.hand-pos-left .stage-spacer {
+    order: 3;
+    width: 220px;
+    flex: 0 0 220px;
+    margin-left: auto;
+    margin-right: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* Right Hand Position: Spacer at left (order 1), Canvas centered (order 2), Controller at right edge (order 3) */
+  .battle-stage-layout.hand-pos-right .stage-spacer {
     order: 1;
+    width: 220px;
+    flex: 0 0 220px;
+    margin-left: 0;
+    margin-right: auto;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .battle-stage-layout.hand-pos-right .canvas-wrapper {
+    order: 2;
+    margin: 0 auto;
     max-width: min(74vh, 580px);
     width: min(74vh, 580px);
     height: min(74vh, 580px);
   }
   .battle-stage-layout.hand-pos-right .controller-wing {
-    order: 2;
-    width: 180px;
+    order: 3;
+    width: 220px;
+    margin-left: auto;
+    margin-right: 0;
   }
 }
 
 @media (orientation: portrait), (max-aspect-ratio: 1.15/1), (max-width: 679px) {
   .game-container {
-    max-width: 560px;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 6px;
   }
   .battle-stage-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     width: 100%;
   }
   .canvas-wrapper {
     order: 1;
     width: 100%;
     max-width: min(94vw, 500px);
+    margin: 0 auto;
   }
   .controller-wing {
     order: 2;
     transition: all 0.25s ease;
   }
-  /* Left Hand Mode: Bottom-Left (左下方) */
+  /* Left Hand Mode: Bottom-Left (極限靠左下方邊緣，大拇指極佳舒適落點) */
   .battle-stage-layout.hand-pos-left .controller-wing {
     align-self: flex-start;
-    margin-left: 12px;
+    margin-left: 2px;
     margin-right: auto;
   }
-  /* Right Hand Mode: Bottom-Right (右下方) */
+  /* Right Hand Mode: Bottom-Right (極限靠右下方邊緣，大拇指極佳舒適落點) */
   .battle-stage-layout.hand-pos-right .controller-wing {
     align-self: flex-end;
-    margin-right: 12px;
+    margin-right: 2px;
     margin-left: auto;
+  }
+  .stage-spacer {
+    display: none !important;
   }
 }
 
@@ -998,6 +1034,68 @@ canvas#gameCanvas {
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* Return to Lobby in Modals (回到遊戲大廳按鈕) */
+.start-modal-nav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-return-lobby-portal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(255, 230, 0, 0.16) 0%, rgba(245, 158, 11, 0.28) 100%);
+  border: 1.5px solid rgba(255, 230, 0, 0.55);
+  color: #ffe600;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 13px 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(255, 230, 0, 0.2);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  letter-spacing: 0.5px;
+  width: 100%;
+}
+
+.btn-return-lobby-portal:hover {
+  background: linear-gradient(135deg, rgba(255, 230, 0, 0.32) 0%, rgba(245, 158, 11, 0.48) 100%);
+  border-color: #ffe600;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 230, 0, 0.4);
+}
+
+.portal-crown {
+  font-size: 20px;
+  filter: drop-shadow(0 0 8px rgba(255, 230, 0, 0.6));
+}
+
+.portal-text {
+  letter-spacing: 0.5px;
+}
+
+.btn-return-lobby-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #ffe600 !important;
+  border-color: rgba(255, 230, 0, 0.45) !important;
+  background: rgba(255, 230, 0, 0.08) !important;
+}
+
+.btn-return-lobby-link:hover {
+  background: rgba(255, 230, 0, 0.22) !important;
+  border-color: #ffe600 !important;
+  color: #ffffff !important;
+}
+
 /* Custom Free Practice Input */
 .custom-input-box {
   display: flex;
@@ -1089,12 +1187,12 @@ canvas#gameCanvas {
     font-size: 14px;
   }
   .dpad-container {
-    grid-template-columns: repeat(3, 44px);
-    grid-template-rows: repeat(3, 40px);
-    gap: 4px;
-    padding: 5px;
+    grid-template-columns: repeat(3, 52px);
+    grid-template-rows: repeat(3, 48px);
+    gap: 5px;
+    padding: 6px;
   }
   .dpad-btn {
-    font-size: 16px;
+    font-size: 20px;
   }
 }

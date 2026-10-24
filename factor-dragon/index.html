@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1900">
+  <link rel="stylesheet" href="./style.css?v=20261024_1915">
 </head>
 <body>
 
@@ -126,6 +126,9 @@
           <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
         </div>
       </div>
+
+      <!-- Stage Spacer for Tablet / Landscape Edge-Docking Balance -->
+      <div class="stage-spacer" aria-hidden="true"></div>
     </div>
 
     <!-- Bottom Controls & Hints -->
@@ -220,7 +223,13 @@
         <input type="number" id="customTargetInput" min="4" max="120" value="36">
       </div>
 
-      <button class="btn-secondary" onclick="window.factorDragonGame.showGuideModal()">📖 先看因數成對秘笈</button>
+      <div class="start-modal-nav-actions">
+        <button class="btn-secondary" onclick="window.factorDragonGame.showGuideModal()">📖 先看因數成對秘笈</button>
+        <a href="../" class="btn-return-lobby-portal" id="btnReturnHubStart">
+          <span class="portal-crown">👑</span>
+          <span class="portal-text">返回遊戲大廳（朕的數學遊戲吧）</span>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -234,6 +243,7 @@
       <button class="btn-primary" id="btnResumeGame">▶️ 繼續冒險</button>
       <button class="btn-secondary" id="btnRestartFromPause">🔄 重新本關</button>
       <button class="btn-secondary" id="btnQuitToStart">🏠 回到主選單</button>
+      <a href="../" class="btn-secondary btn-return-lobby-link">👑 返回遊戲大廳</a>
     </div>
   </div>
 
@@ -272,6 +282,7 @@
       <button class="btn-primary" id="btnRetry">🔄 再玩一次</button>
       <button class="btn-secondary" id="btnShowReview">📊 查看本局因數學習診斷</button>
       <button class="btn-secondary" onclick="window.factorDragonGame.showModal('modalStart')">🏠 回主選單</button>
+      <a href="../" class="btn-secondary btn-return-lobby-link">👑 返回遊戲大廳</a>
     </div>
   </div>
 
@@ -338,7 +349,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1900"></script>
-  <script src="./game.js?v=20261024_1900"></script>
+  <script src="./audio.js?v=20261024_1915"></script>
+  <script src="./game.js?v=20261024_1915"></script>
 </body>
 </html>
