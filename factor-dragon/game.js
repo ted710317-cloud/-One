@@ -164,6 +164,8 @@
       };
 
       this.initEvents();
+      this.initJoystick();
+      this.initControlSwitcher();
       this.initSkinEvents();
       this.resizeCanvas();
       window.addEventListener('resize', () => this.resizeCanvas());
@@ -416,13 +418,155 @@
       }
     }
 
-    // --- 方向變更 (防 180 度自撞) ---
+    // --- 類比搖桿 (Virtual Analog Joystick) 控制 ---
+    initJoystick() {
+      const base = document.getElementById('joystickBase');
+      const stick = document.getElementById('joystickStick');
+      if (!base || !stick) return;
+
+      let isDragging = false;
+      let center = { x: 0, y: 0 };
+      const maxRadius = 40; // 最大拖曳半徑 (px)
+      const deadzone = 8;   // 盲區 (px)
+      let currentActiveDir = null;
+
+      const updateCenter = () => {
+        const rect = base.getBoundingClientRect();
+        center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+      };
+
+      const setIndicator = (dir) => {
+        ['up', 'down', 'left', 'right'].forEach(d => {
+          const el = base.querySelector(`.joy-${d}`);
+          if (el) el.classList.toggle('active', d === dir);
+        });
+      };
+
+      const handlePointerDown = (e) => {
+        e.preventDefault();
+        isDragging = true;
+        stick.style.transition = 'none';
+        updateCenter();
+        handlePointerMove(e);
+      };
+
+      const handlePointerMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+        const dx = clientX - center.x;
+        const dy = clientY - center.y;
+        const dist = Math.hypot(dx, dy);
+
+        // 限制搖桿在圓形底座內
+        const clampedDist = Math.min(dist, maxRadius);
+        const angle = Math.atan2(dy, dx);
+        const stickX = Math.cos(angle) * clampedDist;
+        const stickY = Math.sin(angle) * clampedDist;
+
+        stick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+
+        // 依據角度判斷上下左右
+        if (dist >= deadzone) {
+          const deg = angle * (180 / Math.PI);
+          let newDir = null;
+          if (deg >= -135 && deg < -45) {
+            newDir = 'up';
+            this.setDirection(0, -1);
+          } else if (deg >= -45 && deg < 45) {
+            newDir = 'right';
+            this.setDirection(1, 0);
+          } else if (deg >= 45 && deg < 135) {
+            newDir = 'down';
+            this.setDirection(0, 1);
+          } else {
+            newDir = 'left';
+            this.setDirection(-1, 0);
+          }
+
+          if (newDir !== currentActiveDir) {
+            currentActiveDir = newDir;
+            setIndicator(newDir);
+          }
+        } else {
+          currentActiveDir = null;
+          setIndicator(null);
+        }
+      };
+
+      const handlePointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        stick.style.transition = 'transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        stick.style.transform = 'translate(0px, 0px)';
+        currentActiveDir = null;
+        setIndicator(null);
+      };
+
+      base.addEventListener('pointerdown', handlePointerDown);
+      window.addEventListener('pointermove', handlePointerMove, { passive: false });
+      window.addEventListener('pointerup', handlePointerUp);
+      window.addEventListener('pointercancel', handlePointerUp);
+    }
+
+    // --- 控制器模式切換 (類比搖桿 vs 十字鍵) ---
+    initControlSwitcher() {
+      const tabJoy = document.getElementById('tabJoystick');
+      const tabDpad = document.getElementById('tabDpad');
+      const joyBox = document.getElementById('joystickContainer');
+      const dpadBox = document.getElementById('dpadContainer');
+
+      const savedMode = localStorage.getItem('factor_dragon_ctrl_type') || 'joystick';
+
+      const setMode = (mode) => {
+        const isJoy = mode === 'joystick';
+        tabJoy?.classList.toggle('active', isJoy);
+        tabDpad?.classList.toggle('active', !isJoy);
+        if (joyBox) joyBox.style.display = isJoy ? 'flex' : 'none';
+        if (dpadBox) dpadBox.style.display = isJoy ? 'none' : 'grid';
+        localStorage.setItem('factor_dragon_ctrl_type', mode);
+      };
+
+      tabJoy?.addEventListener('click', () => setMode('joystick'));
+      tabDpad?.addEventListener('click', () => setMode('dpad'));
+
+      setMode(savedMode);
+    }
+
+    // --- 方向變更 (零延遲即時響應機制) ---
     setDirection(dx, dy) {
+      if (!this.isRunning || this.isPaused) return;
+
+      // 不可直接調頭 (180 度自撞)
       if (this.direction.x + dx === 0 && this.direction.y + dy === 0 && this.snake.length > 1) {
-        return; // 不可直接調頭
+        return;
       }
+
+      // 方向未變，略過
+      if (this.direction.x === dx && this.direction.y === dy) {
+        return;
+      }
+
+      const now = performance.now();
+      const timeSinceLastStep = now - (this.lastStepTime || 0);
+
       this.nextDirection = { x: dx, y: dy };
       window.dragonAudio.playTurn();
+
+      // 零延遲瞬間響應 (Zero-lag Immediate Step)：
+      // 只要距離上次步進已超過 25% 週期（約 30ms），立刻執行轉向步進並重啟計時器！
+      // 如此一來，操作延遲直接縮短至 0ms 瞬間響應！
+      const minStepInterval = Math.max(30, Math.floor(this.speedMs * 0.25));
+      if (timeSinceLastStep >= minStepInterval) {
+        this.step();
+        this.lastStepTime = performance.now();
+        this.startGameLoop();
+      }
     }
 
     // --- 開始全新遊戲 ---
@@ -609,6 +753,7 @@
 
     // --- 單一步驟運算 ---
     step() {
+      this.lastStepTime = performance.now();
       this.direction = this.nextDirection;
 
       // 計算蛇頭新位置 (穿越邊界機制 Wrap-around，友善不挫折！)

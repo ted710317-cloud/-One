@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1845">
+  <link rel="stylesheet" href="./style.css?v=20261024_1852">
 </head>
 <body>
 
@@ -78,35 +78,45 @@
       </div>
     </div>
 
-    <!-- Dual D-Pad Battle Stage Layout (橫式左右兩翼 ｜ 直式左下右下) -->
+    <!-- Stage Layout: Left Controller Panel + Center Enlarged Playfield (放大主畫面) -->
     <div class="battle-stage-layout">
-      <!-- Left D-Pad (左手十字鍵) -->
-      <div class="dpad-wing dpad-left-wing">
-        <div class="dpad-container">
-          <button class="dpad-btn dpad-up" data-dir="up" aria-label="左手往上">▲</button>
-          <button class="dpad-btn dpad-left" data-dir="left" aria-label="左手往左">◀</button>
-          <div class="dpad-center" title="左手控制">左手</div>
-          <button class="dpad-btn dpad-right" data-dir="right" aria-label="左手往右">▶</button>
-          <button class="dpad-btn dpad-down" data-dir="down" aria-label="左手往下">▼</button>
+      <!-- Left Controller Panel (僅在左邊，支援 類比搖桿 / 十字鍵 自由切換) -->
+      <div class="controller-wing-left">
+        <!-- Control Mode Switcher -->
+        <div class="control-type-switch">
+          <button class="ctrl-tab-btn active" id="tabJoystick" title="切換為類比搖桿">🕹️ 類比搖桿</button>
+          <button class="ctrl-tab-btn" id="tabDpad" title="切換為十字按鍵">🎛️ 十字鍵</button>
+        </div>
+
+        <!-- 1. Virtual Analog Joystick (類比式搖桿) -->
+        <div class="joystick-container" id="joystickContainer">
+          <div class="joystick-base" id="joystickBase">
+            <div class="joy-dir-indicator joy-up">▲</div>
+            <div class="joy-dir-indicator joy-left">◀</div>
+            <div class="joy-dir-indicator joy-right">▶</div>
+            <div class="joy-dir-indicator joy-down">▼</div>
+            <div class="joystick-stick" id="joystickStick">
+              <div class="stick-center-orb"></div>
+            </div>
+          </div>
+          <div class="joystick-hint">🕹️ 拖曳搖桿零延遲轉向</div>
+        </div>
+
+        <!-- 2. Classic Left D-Pad (十字鍵) -->
+        <div class="dpad-container" id="dpadContainer" style="display: none;">
+          <button class="dpad-btn dpad-up" data-dir="up" aria-label="上">▲</button>
+          <button class="dpad-btn dpad-left" data-dir="left" aria-label="左">◀</button>
+          <div class="dpad-center" title="方向控制">🎮</div>
+          <button class="dpad-btn dpad-right" data-dir="right" aria-label="右">▶</button>
+          <button class="dpad-btn dpad-down" data-dir="down" aria-label="下">▼</button>
         </div>
       </div>
 
-      <!-- Center Playfield Area (主遊戲畫面在中間) -->
+      <!-- Center Playfield Area (主遊戲畫面大幅放大) -->
       <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="480" height="480"></canvas>
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
         <div class="feedback-overlay" id="feedbackOverlay">
           <span id="feedbackText">✨ 24 ÷ 6 = 4 (整除！+150分)</span>
-        </div>
-      </div>
-
-      <!-- Right D-Pad (右手十字鍵) -->
-      <div class="dpad-wing dpad-right-wing">
-        <div class="dpad-container">
-          <button class="dpad-btn dpad-up" data-dir="up" aria-label="右手往上">▲</button>
-          <button class="dpad-btn dpad-left" data-dir="left" aria-label="右手往左">◀</button>
-          <div class="dpad-center" title="右手控制">右手</div>
-          <button class="dpad-btn dpad-right" data-dir="right" aria-label="右手往右">▶</button>
-          <button class="dpad-btn dpad-down" data-dir="down" aria-label="右手往下">▼</button>
         </div>
       </div>
     </div>
@@ -309,7 +319,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1845"></script>
-  <script src="./game.js?v=20261024_1845"></script>
+  <script src="./audio.js?v=20261024_1852"></script>
+  <script src="./game.js?v=20261024_1852"></script>
 </body>
 </html>
