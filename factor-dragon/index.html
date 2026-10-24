@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>貪吃因數龍：因數全搜集大冒險 - 國小中高年級適用</title>
   <meta name="description" content="專為國小中高年級設計的因數練習遊戲！走位吞食目標數字的所有因數，成對解鎖因數圖鑑，神龍進化升級！">
-  <link rel="stylesheet" href="./style.css?v=20261024_1852">
+  <link rel="stylesheet" href="./style.css?v=20261024_1900">
 </head>
 <body>
 
@@ -15,6 +15,7 @@
       <span>👑 返回「朕的數學遊戲吧」大廳</span>
     </a>
     <div class="top-actions">
+      <button class="icon-btn" id="btnHandPosToggle" title="切換方向鍵位置（左下/右下）">👈</button>
       <button class="icon-btn" id="btnSkinToggle" title="切換角色外觀（Q萌/炫酷）">🌸</button>
       <button class="icon-btn" id="btnSound" title="開關音效">🔊</button>
       <button class="icon-btn" id="btnBgm" title="開關背景音樂">🎵</button>
@@ -78,14 +79,20 @@
       </div>
     </div>
 
-    <!-- Stage Layout: Left Controller Panel + Center Enlarged Playfield (放大主畫面) -->
-    <div class="battle-stage-layout">
-      <!-- Left Controller Panel (僅在左邊，支援 類比搖桿 / 十字鍵 自由切換) -->
-      <div class="controller-wing-left">
-        <!-- Control Mode Switcher -->
-        <div class="control-type-switch">
-          <button class="ctrl-tab-btn active" id="tabJoystick" title="切換為類比搖桿">🕹️ 類比搖桿</button>
-          <button class="ctrl-tab-btn" id="tabDpad" title="切換為十字按鍵">🎛️ 十字鍵</button>
+    <!-- Stage Layout: Controller Panel (左下/右下自由選擇) + Enlarged Center Playfield -->
+    <div class="battle-stage-layout hand-pos-left" id="battleStageLayout">
+      <!-- Controller Wing Panel (可置於左下或右下) -->
+      <div class="controller-wing" id="controllerWing">
+        <!-- Control Toolbar: Hand Switcher + Type Switcher -->
+        <div class="controller-toolbar">
+          <div class="hand-pos-switch" title="設定方向鍵位置（左下或右下）">
+            <button class="hand-btn active" id="btnHandLeft" data-pos="left">👈 左側</button>
+            <button class="hand-btn" id="btnHandRight" data-pos="right">👉 右側</button>
+          </div>
+          <div class="control-type-switch" title="設定控制器型態">
+            <button class="ctrl-tab-btn active" id="tabJoystick" title="類比搖桿">🕹️ 搖桿</button>
+            <button class="ctrl-tab-btn" id="tabDpad" title="十字按鍵">🎛️ 十字鍵</button>
+          </div>
         </div>
 
         <!-- 1. Virtual Analog Joystick (類比式搖桿) -->
@@ -167,6 +174,18 @@
             </div>
             <div class="skin-badge-check">✓</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Hand Position Selector in Start Menu -->
+      <div class="hand-selector-box">
+        <div class="hand-title">
+          <span>🖐️</span>
+          <span>習慣操作手（方向鍵位置）：</span>
+        </div>
+        <div class="hand-cards">
+          <button class="hand-card-btn active" id="menuHandLeft" data-pos="left">👈 左下方 / 靠左（左手習慣）</button>
+          <button class="hand-card-btn" id="menuHandRight" data-pos="right">👉 右下方 / 靠右（右手習慣）</button>
         </div>
       </div>
 
@@ -319,7 +338,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="./audio.js?v=20261024_1852"></script>
-  <script src="./game.js?v=20261024_1852"></script>
+  <script src="./audio.js?v=20261024_1900"></script>
+  <script src="./game.js?v=20261024_1900"></script>
 </body>
 </html>

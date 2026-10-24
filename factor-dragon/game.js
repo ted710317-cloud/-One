@@ -135,6 +135,9 @@
       // Dragon appearance skin: 'cute' | 'cool'
       this.skin = localStorage.getItem('factor_dragon_skin') || 'cute';
 
+      // Hand control position: 'left' | 'right' (左下 / 右下)
+      this.handPos = localStorage.getItem('factor_dragon_hand_pos') || 'left';
+
       // Learning records
       this.learningLogs = [];
 
@@ -166,6 +169,7 @@
       this.initEvents();
       this.initJoystick();
       this.initControlSwitcher();
+      this.initHandPosEvents();
       this.initSkinEvents();
       this.resizeCanvas();
       window.addEventListener('resize', () => this.resizeCanvas());
@@ -178,6 +182,10 @@
       const urlSkin = urlParams.get('skin');
       if (urlSkin && (urlSkin === 'cute' || urlSkin === 'cool')) {
         this.setSkin(urlSkin);
+      }
+      const urlHand = urlParams.get('hand');
+      if (urlHand && (urlHand === 'left' || urlHand === 'right')) {
+        this.setHandPos(urlHand);
       }
 
       if (urlParams.get('start') === '1' || urlParams.get('autoplay')) {
@@ -536,6 +544,59 @@
       tabDpad?.addEventListener('click', () => setMode('dpad'));
 
       setMode(savedMode);
+    }
+
+    // --- 方向鍵位置設定 (左側/左下方 vs 右側/右下方) ---
+    initHandPosEvents() {
+      document.getElementById('btnHandLeft')?.addEventListener('click', () => {
+        this.setHandPos('left');
+      });
+      document.getElementById('btnHandRight')?.addEventListener('click', () => {
+        this.setHandPos('right');
+      });
+
+      document.getElementById('menuHandLeft')?.addEventListener('click', () => {
+        this.setHandPos('left');
+      });
+      document.getElementById('menuHandRight')?.addEventListener('click', () => {
+        this.setHandPos('right');
+      });
+
+      document.getElementById('btnHandPosToggle')?.addEventListener('click', () => {
+        const nextPos = this.handPos === 'left' ? 'right' : 'left';
+        this.setHandPos(nextPos);
+        const name = nextPos === 'left' ? '👈 左下方 / 靠左' : '👉 右下方 / 靠右';
+        this.showFeedback(`方向鍵已切換至：【${name}】！`, 'success');
+      });
+
+      this.updateHandPosUI();
+    }
+
+    setHandPos(pos) {
+      this.handPos = pos === 'right' ? 'right' : 'left';
+      localStorage.setItem('factor_dragon_hand_pos', this.handPos);
+      this.updateHandPosUI();
+      setTimeout(() => this.resizeCanvas(), 50);
+    }
+
+    updateHandPosUI() {
+      const isLeft = this.handPos === 'left';
+      const layout = document.getElementById('battleStageLayout');
+      if (layout) {
+        layout.classList.toggle('hand-pos-left', isLeft);
+        layout.classList.toggle('hand-pos-right', !isLeft);
+      }
+
+      document.getElementById('btnHandLeft')?.classList.toggle('active', isLeft);
+      document.getElementById('btnHandRight')?.classList.toggle('active', !isLeft);
+      document.getElementById('menuHandLeft')?.classList.toggle('active', isLeft);
+      document.getElementById('menuHandRight')?.classList.toggle('active', !isLeft);
+
+      const btn = document.getElementById('btnHandPosToggle');
+      if (btn) {
+        btn.innerText = isLeft ? '👈' : '👉';
+        btn.title = `方向鍵位置：${isLeft ? '靠左下（點擊切換為靠右下）' : '靠右下（點擊切換為靠左下）'}`;
+      }
     }
 
     // --- 方向變更 (零延遲即時響應機制) ---
