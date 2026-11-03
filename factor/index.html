@@ -64,12 +64,50 @@
         </div>
       </div>
 
+      <!-- 1v1 Opponent Mini Radar Widget (對手即時戰況小雷達) -->
+      <div id="opponent-radar-panel" class="hidden">
+        <div class="radar-header">
+          <span class="radar-tag">🛰️ 對手即時戰況</span>
+          <span class="radar-name" id="opp-name">對手同學</span>
+        </div>
+        <div class="radar-body">
+          <div class="radar-shield-row">
+            <span class="radar-label">護盾</span>
+            <div class="radar-shield-bar">
+              <div id="opp-shield-bar" style="width: 100%;"></div>
+            </div>
+            <span class="radar-shield-val" id="opp-shield-val">100%</span>
+          </div>
+          <div class="radar-stats-grid">
+            <div class="radar-stat-item">
+              <span class="stat-k">得分</span>
+              <span class="stat-v" id="opp-score">0</span>
+            </div>
+            <div class="radar-stat-item">
+              <span class="stat-k">怪獸</span>
+              <span class="stat-v" id="opp-monsters">0 隻</span>
+            </div>
+            <div class="radar-stat-item">
+              <span class="stat-k">連擊</span>
+              <span class="stat-v" id="opp-combo">x0</span>
+            </div>
+            <div class="radar-stat-item">
+              <span class="stat-k">已擊潰</span>
+              <span class="stat-v" id="opp-destroyed">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="radar-attack-badge hidden" id="opp-attack-badge">💥 準備發動送怪!</div>
+      </div>
+
       <!-- Combo Alert Overlay -->
       <div id="combo-banner" class="hidden"></div>
       <!-- Factorization Success Callout -->
       <div id="equation-banner" class="hidden"></div>
       <!-- Rebound / Miss Warning -->
       <div id="warning-bubble" class="hidden"></div>
+      <!-- Versus Incoming Attack Alert -->
+      <div id="vs-attack-banner" class="hidden"></div>
     </div>
 
     <!-- Bottom Defense Base & Prime Cannon Console -->
@@ -165,6 +203,7 @@
         </div>
 
         <div class="mode-select-box">
+          <button class="btn-play vs-btn" id="btn-mode-versus">⚔️ 雙人即時對戰 (1v1 攻防激戰 · 平板免裝軟體)</button>
           <button class="btn-play primary-btn" id="btn-mode-campaign">🚀 開始關卡模式（循序進階）</button>
           <button class="btn-play secondary-btn" id="btn-mode-endless">⚡ 無盡挑戰模式（⏱️ 30秒極速心算 × 難度漸進 × 🔥 10連擊狂熱雙倍）</button>
           <button class="btn-play tertiary-btn" id="btn-mode-practice">🌱 自由練習模式（無限護盾無壓力）</button>
@@ -208,6 +247,71 @@
           </div>
         </div>
         <button class="btn-close-modal" id="btn-close-rules">我知道了，回戰場！</button>
+      </div>
+    </div>
+
+    <!-- 1v1 VERSUS LOBBY MODAL -->
+    <div id="modal-versus" class="modal-overlay hidden">
+      <div class="modal-card versus-modal-card">
+        <div class="vs-modal-header">
+          <div class="vs-modal-badge">1v1 MULTIPLAYER BATTLE</div>
+          <h2 class="vs-modal-title">⚔️ 質因數雙人即時對決</h2>
+          <p class="vs-modal-desc">
+            全班平板免裝軟體！輸入 4 位數代碼，即刻與同學連線攻防！<br>
+            完全分解怪獸時，將該怪獸化為攻擊巨獸送給對手！
+          </p>
+        </div>
+
+        <!-- Mode Choice Tabs -->
+        <div class="vs-tab-container">
+          <button class="vs-tab-btn active" id="tab-vs-create">👑 建立房間 (房主)</button>
+          <button class="vs-tab-btn" id="tab-vs-join">🚀 輸入代碼加入 (挑戰者)</button>
+          <button class="vs-tab-btn" id="tab-vs-ai">🤖 單機人機對戰</button>
+        </div>
+
+        <!-- Panel A: Create Room -->
+        <div class="vs-panel" id="panel-vs-create">
+          <div class="vs-room-card">
+            <div class="room-label">你的 4 位數專屬房間代碼：</div>
+            <div class="room-code-display" id="my-room-code">----</div>
+            <div class="room-status-hint" id="create-status-text">⏳ 正在連線雲端房間伺服器...</div>
+            <button class="copy-room-btn" id="btn-copy-room-code">📋 複製代碼</button>
+          </div>
+          <p class="vs-instruction">💡 請同學在挑戰者分頁輸入此號碼，連線後自動開始倒數！</p>
+        </div>
+
+        <!-- Panel B: Join Room -->
+        <div class="vs-panel hidden" id="panel-vs-join">
+          <div class="join-input-group">
+            <label for="input-join-code">請輸入對手的 4 位數房間代碼：</label>
+            <div class="code-input-wrapper">
+              <input type="text" id="input-join-code" placeholder="4 位數號碼" maxlength="6" autocomplete="off" inputmode="numeric">
+              <button class="primary-btn vs-join-submit" id="btn-join-room-submit">⚔️ 進入對決</button>
+            </div>
+            <div class="join-status-hint hidden" id="join-status-text"></div>
+          </div>
+        </div>
+
+        <!-- Panel C: AI Practice -->
+        <div class="vs-panel hidden" id="panel-vs-ai">
+          <div class="ai-practice-card">
+            <div class="ai-avatar">🤖</div>
+            <div class="ai-title">班級 AI 智慧對手 (Alpha-Factor)</div>
+            <p class="ai-desc">沒有同學在身旁嗎？挑戰國小六年級算速的智慧機器人，測試手感與送怪攻防！</p>
+            <button class="primary-btn vs-start-ai" id="btn-start-ai-battle">🚀 開始人機對決</button>
+          </div>
+        </div>
+
+        <!-- Waiting / Countdown Overlay -->
+        <div class="vs-connecting-box hidden" id="vs-connecting-box">
+          <div class="vs-spinner"></div>
+          <div class="vs-spinner-text" id="vs-spinner-text">對手已連線！即將開始...</div>
+          <div class="vs-countdown-big hidden" id="vs-countdown-big">3</div>
+        </div>
+
+        <div class="vs-modal-actions">
+          <button class="tertiary-btn" id="btn-cancel-versus">返回主選單</button>
+        </div>
       </div>
     </div>
 
@@ -365,9 +469,11 @@
 
   </div>
 
-  <!-- Audio synthesizers & Core Game Engine -->
-  <script src="audio.js?v=20261018_1545"></script>
-  <script src="config.js?v=20261018_1545"></script>
-  <script src="game.js?v=20261018_1545"></script>
+  <!-- Audio synthesizers, Multiplayer Engine & Core Game -->
+  <script src="peerjs.min.js"></script>
+  <script src="audio.js?v=20261103_1100"></script>
+  <script src="config.js?v=20261103_1100"></script>
+  <script src="multiplayer.js?v=20261103_1100"></script>
+  <script src="game.js?v=20261103_1100"></script>
 </body>
 </html>

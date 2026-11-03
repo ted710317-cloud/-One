@@ -1348,3 +1348,471 @@ html, body {
     align-items: flex-start;
   }
 }
+
+
+/* ========================================================
+   ⚔️ 1v1 VERSUS MULTIPLAYER MODE STYLES
+   ======================================================== */
+
+/* Start Screen Versus Button */
+.vs-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #f472b6 !important;
+  box-shadow: 0 0 20px rgba(219, 39, 119, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.2) !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  animation: vsBtnPulse 2.4s infinite ease-in-out;
+}
+
+.vs-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: rotate(30deg);
+  animation: vsShine 3s infinite linear;
+}
+
+@keyframes vsBtnPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(219, 39, 119, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(244, 114, 182, 0.8), 0 0 15px #7c3aed;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes vsShine {
+  0% { transform: translateX(-100%) rotate(30deg); }
+  25%, 100% { transform: translateX(100%) rotate(30deg); }
+}
+
+/* Versus Lobby Modal */
+.versus-modal-card {
+  max-width: 540px;
+  background: radial-gradient(circle at 50% 10%, #1e153b 0%, #0a0b18 100%);
+  border: 2px solid #8b5cf6;
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.4), 0 20px 40px rgba(0, 0, 0, 0.85);
+}
+
+.vs-modal-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(139, 92, 246, 0.25);
+  border: 1px solid #a78bfa;
+  border-radius: 20px;
+  color: #c4b5fd;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.vs-modal-title {
+  color: #f472b6;
+  text-shadow: 0 0 15px rgba(244, 114, 182, 0.6);
+  font-size: 26px;
+  margin: 0 0 8px 0;
+}
+
+.vs-modal-desc {
+  font-size: 13.5px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Tab Switcher */
+.vs-tab-container {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 18px;
+}
+
+.vs-tab-btn {
+  flex: 1 1 auto;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.vs-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.vs-tab-btn.active {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.5);
+}
+
+/* Panels */
+.vs-panel {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Room Code Card */
+.vs-room-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px dashed #a78bfa;
+  border-radius: 16px;
+  padding: 18px 12px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.room-label {
+  font-size: 13px;
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+.room-code-display {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: #fbbf24;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  margin: 10px 0;
+  padding-left: 12px; /* balance letter-spacing */
+}
+
+.room-status-hint {
+  font-size: 13px;
+  color: #38bdf8;
+  margin-bottom: 8px;
+  min-height: 20px;
+}
+
+.copy-room-btn {
+  background: rgba(139, 92, 246, 0.25);
+  border: 1px solid #a78bfa;
+  color: #e0e7ff;
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-room-btn:hover {
+  background: #8b5cf6;
+  color: #fff;
+}
+
+.vs-instruction {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin-top: 10px;
+}
+
+/* Join Input */
+.join-input-group {
+  width: 100%;
+  text-align: center;
+}
+
+.join-input-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+.code-input-wrapper {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.code-input-wrapper input {
+  flex: 1 1 auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  text-align: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #8b5cf6;
+  border-radius: 10px;
+  color: #fbbf24;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.code-input-wrapper input:focus {
+  border-color: #f472b6;
+  box-shadow: 0 0 15px rgba(244, 114, 182, 0.5);
+}
+
+.vs-join-submit {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  font-size: 15px;
+}
+
+.join-status-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #f87171;
+}
+
+/* AI Practice Card */
+.ai-practice-card {
+  text-align: center;
+  padding: 10px;
+}
+
+.ai-avatar {
+  font-size: 42px;
+  margin-bottom: 6px;
+  animation: aiFloat 2s infinite alternate ease-in-out;
+}
+
+@keyframes aiFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-8px); }
+}
+
+.ai-title {
+  font-size: 17px;
+  font-weight: bold;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.ai-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 380px;
+  margin: 0 auto 16px auto;
+  line-height: 1.5;
+}
+
+.vs-start-ai {
+  padding: 10px 24px;
+  font-size: 15px;
+}
+
+/* Countdown Overlay */
+.vs-connecting-box {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  border: 1px solid #a78bfa;
+  text-align: center;
+}
+
+.vs-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(139, 92, 246, 0.3);
+  border-top-color: #ec4899;
+  border-radius: 50%;
+  margin: 0 auto 8px auto;
+  animation: spin 0.8s infinite linear;
+}
+
+.vs-spinner-text {
+  font-size: 14px;
+  color: #e0e7ff;
+  font-weight: bold;
+}
+
+.vs-countdown-big {
+  font-size: 64px;
+  font-weight: 900;
+  color: #ffe600;
+  text-shadow: 0 0 30px rgba(255, 230, 0, 0.8), 0 0 60px #ff007f;
+  animation: countdownPop 0.9s infinite ease-out;
+  margin-top: 6px;
+}
+
+@keyframes countdownPop {
+  0% { transform: scale(0.6); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.vs-modal-actions {
+  margin-top: 18px;
+  width: 100%;
+}
+
+.vs-modal-actions button {
+  width: 100%;
+}
+
+/* ========================================================
+   🛰️ 1v1 OPPONENT MINI RADAR WIDGET (對手即時戰況雷達)
+   ======================================================== */
+#opponent-radar-panel {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(12, 18, 38, 0.9);
+  border: 2px solid #8b5cf6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-width: 170px;
+  pointer-events: none;
+  animation: fadeIn 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.radar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
+  margin-bottom: 6px;
+}
+
+.radar-tag {
+  color: #a78bfa;
+}
+
+.radar-name {
+  color: #fbbf24;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radar-shield-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.radar-label {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.radar-shield-bar {
+  flex: 1 1 auto;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#opp-shield-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.radar-shield-val {
+  font-size: 11px;
+  font-weight: bold;
+  color: #34d399;
+  min-width: 32px;
+  text-align: right;
+}
+
+.radar-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.radar-stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.radar-stat-item .stat-k {
+  color: #94a3b8;
+}
+
+.radar-stat-item .stat-v {
+  color: #f1f5f9;
+  font-weight: bold;
+}
+
+.radar-attack-badge {
+  margin-top: 6px;
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  font-size: 10.5px;
+  font-weight: bold;
+  text-align: center;
+  padding: 2px 4px;
+  border-radius: 4px;
+  animation: pulse 1s infinite alternate;
+}
+
+/* In Versus mode, shift target-detail-panel to left: 20px so they don't overlap! */
+.versus-mode-active #target-detail-panel {
+  right: auto !important;
+  left: 20px !important;
+}
+
+/* Incoming Attack Banner (紅光警告飛入) */
+#vs-attack-banner {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95));
+  border: 2px solid #f87171;
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+  z-index: 15;
+  white-space: nowrap;
+  animation: attackBannerDrop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes attackBannerDrop {
+  0% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}

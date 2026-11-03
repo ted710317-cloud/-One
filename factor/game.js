@@ -159,10 +159,32 @@
   let activeScoreUploadPromise = null;
   let lastPlayedMode = 'campaign';
 
-  // Mode Buttons
+  // Mode Buttons & Versus Elements
+  const btnModeVersus = document.getElementById('btn-mode-versus');
   const btnModeCampaign = document.getElementById('btn-mode-campaign');
   const btnModeEndless = document.getElementById('btn-mode-endless');
   const btnModePractice = document.getElementById('btn-mode-practice');
+
+  const modalVersus = document.getElementById('modal-versus');
+  const tabVsCreate = document.getElementById('tab-vs-create');
+  const tabVsJoin = document.getElementById('tab-vs-join');
+  const tabVsAi = document.getElementById('tab-vs-ai');
+  const panelVsCreate = document.getElementById('panel-vs-create');
+  const panelVsJoin = document.getElementById('panel-vs-join');
+  const panelVsAi = document.getElementById('panel-vs-ai');
+  const myRoomCode = document.getElementById('my-room-code');
+  const createStatusText = document.getElementById('create-status-text');
+  const btnCopyRoomCode = document.getElementById('btn-copy-room-code');
+  const inputJoinCode = document.getElementById('input-join-code');
+  const btnJoinRoomSubmit = document.getElementById('btn-join-room-submit');
+  const joinStatusText = document.getElementById('join-status-text');
+  const btnStartAiBattle = document.getElementById('btn-start-ai-battle');
+  const btnCancelVersus = document.getElementById('btn-cancel-versus');
+  const vsConnectingBox = document.getElementById('vs-connecting-box');
+  const vsSpinnerText = document.getElementById('vs-spinner-text');
+  const vsCountdownBig = document.getElementById('vs-countdown-big');
+  const opponentRadarPanel = document.getElementById('opponent-radar-panel');
+  const vsAttackBanner = document.getElementById('vs-attack-banner');
 
   // Arrays of Entities
   let monsters = [];
@@ -418,14 +440,32 @@
           else c.lineTo(px, py);
         }
         c.closePath();
-        c.fillStyle = this.hitFlash > 0 ? '#ffffff' : 'rgba(20, 32, 64, 0.9)';
-        c.strokeStyle = this.currentValue <= 10 ? '#00ff88' : '#00f3ff';
-        c.lineWidth = 3;
-        c.shadowColor = '#00f3ff';
-        c.shadowBlur = 12;
+        if (this.isAttackMonster) {
+          c.fillStyle = this.hitFlash > 0 ? '#ffffff' : 'rgba(76, 29, 149, 0.9)';
+          c.strokeStyle = '#f43f5e';
+          c.lineWidth = 4;
+          c.shadowColor = '#f43f5e';
+          c.shadowBlur = 20;
+        } else {
+          c.fillStyle = this.hitFlash > 0 ? '#ffffff' : 'rgba(20, 32, 64, 0.9)';
+          c.strokeStyle = this.currentValue <= 10 ? '#00ff88' : '#00f3ff';
+          c.lineWidth = 3;
+          c.shadowColor = '#00f3ff';
+          c.shadowBlur = 12;
+        }
       }
       c.fill();
       c.stroke();
+
+      // Attack Monster Alert Badge
+      if (this.isAttackMonster) {
+        c.save();
+        c.font = 'bold 11px sans-serif';
+        c.fillStyle = '#fca5a5';
+        c.textAlign = 'center';
+        c.fillText('🔥 來自對手', 0, -drawRadius - 8);
+        c.restore();
+      }
 
       // Number text in center
       c.shadowBlur = 0;
@@ -693,6 +733,20 @@
           state.endlessTimeLeft = Math.min(state.endlessMaxTime, state.endlessTimeLeft + timeBonus);
           window.soundManager.playTimeBonus();
           addFloatingText(state.isFever ? `+5s FEVER補時!` : `+3s 補時!`, monster.x, monster.y - 30, state.isFever ? '#ffe600' : '#00f3ff', 24);
+        } else if (state.mode === 'versus') {
+          // 雙人即時對戰：完全分解成功，發射送怪攻擊給對手！
+          if (window.multiplayerManager) {
+            window.multiplayerManager.sendAttack(monster.originalValue, state.combo);
+            window.multiplayerManager.sendState({
+              shield: state.shield,
+              score: state.score,
+              monstersCount: Math.max(0, monsters.length - 1),
+              destroyed: state.monstersDestroyed,
+              combo: state.combo
+            });
+          }
+          const bonusTag = state.combo >= 3 ? `🚀 🔥 強力送怪連擊 (x${state.combo})!` : `🚀 攻擊已送出!`;
+          addFloatingText(bonusTag, monster.x, monster.y - 30, '#f472b6', 22);
         }
 
         // Remove monster
@@ -781,8 +835,23 @@
     window.soundManager.playDamage();
     updateHUD();
 
+    if (state.mode === 'versus' && window.multiplayerManager) {
+      window.multiplayerManager.sendState({
+        shield: state.shield,
+        score: state.score,
+        monstersCount: monsters.length,
+        destroyed: state.monstersDestroyed,
+        combo: state.combo
+      });
+    }
+
     if (state.shield <= 0) {
-      triggerGameOver(false);
+      if (state.mode === 'versus' && window.multiplayerManager) {
+        window.multiplayerManager.sendDefeat();
+        triggerGameOver(false, '💥 基地失守！對手獲勝！');
+      } else {
+        triggerGameOver(false);
+      }
     }
   }
 
@@ -953,6 +1022,8 @@
 
       if (state.mode === 'practice') {
         hudWave.textContent = '自由練習';
+      } else if (state.mode === 'versus') {
+        hudWave.textContent = '⚔️ 1v1 對決';
       } else {
         hudWave.textContent = `第 ${state.wave} 關 (${speedLabel})`;
       }
@@ -1152,6 +1223,17 @@
     }
 
     if (gameContainer) gameContainer.classList.remove('fever-mode-active');
+    if (mode === 'versus') {
+      state.waveMonstersTotal = 999;
+      state.waveMonstersRemaining = 999;
+      state.spawnInterval = 200;
+      state.spawnTimer = 195; // Immediate first monster spawn
+      if (gameContainer) gameContainer.classList.add('versus-mode-active');
+      if (opponentRadarPanel) opponentRadarPanel.classList.remove('hidden');
+    } else {
+      if (gameContainer) gameContainer.classList.remove('versus-mode-active');
+      if (opponentRadarPanel) opponentRadarPanel.classList.add('hidden');
+    }
     monsters = [];
     projectiles = [];
     particles = [];
@@ -1900,6 +1982,10 @@ function createJsonResponse(obj) {
   // Pause Controls
   function togglePause() {
     if (state.isGameOver) return;
+    if (state.mode === 'versus') {
+      showWarningBubble('⚠️ 雙人連線對戰進行中無法暫停！');
+      return;
+    }
     state.isPaused = !state.isPaused;
     if (state.isPaused) {
       modalPause.classList.remove('hidden');
@@ -1984,14 +2070,31 @@ function createJsonResponse(obj) {
         updateHUD();
       }
 
+      // Versus mode: Periodic heartbeat state sync (every 30 frames ~ 0.5s)
+      if (state.mode === 'versus' && window.multiplayerManager && (state.frameCount % 30 === 0)) {
+        window.multiplayerManager.sendState({
+          shield: state.shield,
+          score: state.score,
+          monstersCount: monsters.length,
+          destroyed: state.monstersDestroyed,
+          combo: state.combo
+        });
+      }
+
       // Spawn new monsters (Pedagogical limit: max 2 monsters on screen for early waves)
       state.spawnTimer++;
-      const effectiveWave = state.mode === 'endless' ? state.endlessLevel : state.wave;
+      let effectiveWave = state.wave;
+      if (state.mode === 'endless') {
+        effectiveWave = state.endlessLevel;
+      } else if (state.mode === 'versus') {
+        effectiveWave = Math.min(5, 1 + Math.floor(state.monstersDestroyed / 4));
+      }
       let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 4);
       if (state.bossSpawned) maxOnScreen = 1;
 
-      const shouldSpawn = (monsters.length < maxOnScreen) && 
-        (state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
+      const maxCap = state.mode === 'versus' ? 2 : maxOnScreen;
+      const shouldSpawn = (monsters.length < maxCap) && 
+        (state.mode === 'versus' || state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
       const currentSpawnInterval = state.mode === 'endless' ? Math.max(160, 260 - (state.endlessLevel - 1) * 20) : state.spawnInterval;
 
@@ -2164,6 +2267,230 @@ function createJsonResponse(obj) {
 
     c.restore();
   }
+
+
+// ========================================================
+  // ⚔️ 1v1 VERSUS MULTIPLAYER SYSTEM FUNCTIONS
+  // ========================================================
+
+  function spawnAttackMonster(val, combo, senderName) {
+    const isSpecial = combo >= 3;
+    const m = new Monster(val, isSpecial, isSpecial ? `🔥 ${senderName} 送來的菁英怪！` : `⚡ ${senderName} 送來的攻擊怪！`);
+    m.isAttackMonster = true;
+    m.speed *= 1.18; // slightly faster
+    m.x = Math.random() * (canvas.width - m.radius * 2.5) + m.radius * 1.25;
+    m.y = -m.radius;
+    monsters.push(m);
+
+    // Show warning bubble & banner
+    showWarningBubble(`⚠️ 警告！對手送來了攻擊怪：【${val}】！`);
+    if (vsAttackBanner) {
+      vsAttackBanner.textContent = `⚠️ 警告！${senderName} 送來了【${val}】！`;
+      vsAttackBanner.classList.remove('hidden');
+      if (vsAttackBanner._timer) clearTimeout(vsAttackBanner._timer);
+      vsAttackBanner._timer = setTimeout(() => vsAttackBanner.classList.add('hidden'), 2800);
+    }
+    window.soundManager.playDamage();
+  }
+
+  function updateOpponentRadar(stats) {
+    const shieldBar = document.getElementById('opp-shield-bar');
+    const shieldVal = document.getElementById('opp-shield-val');
+    const scoreVal = document.getElementById('opp-score');
+    const monstersVal = document.getElementById('opp-monsters');
+    const comboVal = document.getElementById('opp-combo');
+    const destroyedVal = document.getElementById('opp-destroyed');
+    const attackBadge = document.getElementById('opp-attack-badge');
+
+    const pct = Math.max(0, Math.min(100, stats.shield !== undefined ? stats.shield : 100));
+    if (shieldBar) {
+      shieldBar.style.width = pct + '%';
+      if (pct > 50) {
+        shieldBar.style.background = 'linear-gradient(90deg, #10b981, #06b6d4)';
+      } else if (pct > 25) {
+        shieldBar.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+      } else {
+        shieldBar.style.background = '#ef4444';
+      }
+    }
+    if (shieldVal) shieldVal.textContent = Math.round(pct) + '%';
+    if (scoreVal) scoreVal.textContent = (stats.score || 0).toLocaleString();
+    if (monstersVal) monstersVal.textContent = (stats.monstersCount || 0) + ' 隻';
+    if (comboVal) comboVal.textContent = 'x' + (stats.combo || 0);
+    if (destroyedVal) destroyedVal.textContent = (stats.destroyed || 0);
+
+    if (attackBadge) {
+      if ((stats.combo || 0) >= 3) {
+        attackBadge.classList.remove('hidden');
+        attackBadge.textContent = `💥 連擊 x${stats.combo} 準備送怪!`;
+      } else {
+        attackBadge.classList.add('hidden');
+      }
+    }
+  }
+
+  function switchVsTab(tabName) {
+    tabVsCreate.classList.toggle('active', tabName === 'create');
+    tabVsJoin.classList.toggle('active', tabName === 'join');
+    tabVsAi.classList.toggle('active', tabName === 'ai');
+
+    panelVsCreate.classList.toggle('hidden', tabName !== 'create');
+    panelVsJoin.classList.toggle('hidden', tabName !== 'join');
+    panelVsAi.classList.toggle('hidden', tabName !== 'ai');
+
+    if (vsConnectingBox) vsConnectingBox.classList.add('hidden');
+
+    if (tabName === 'create') {
+      const prof = {
+        name: (state.player.name || `${state.player.class}班${state.player.seat}號`),
+        classNum: state.player.class,
+        seat: state.player.seat
+      };
+      window.multiplayerManager.createRoom(prof, (code) => {
+        if (myRoomCode) myRoomCode.textContent = code;
+      });
+    } else if (tabName === 'join') {
+      window.multiplayerManager.cleanup();
+      if (inputJoinCode) {
+        inputJoinCode.value = '';
+        setTimeout(() => inputJoinCode.focus(), 100);
+      }
+      if (joinStatusText) joinStatusText.classList.add('hidden');
+    } else if (tabName === 'ai') {
+      window.multiplayerManager.cleanup();
+    }
+  }
+
+  function openVersusModal() {
+    if (modalStart) modalStart.classList.add('hidden');
+    if (modalVersus) modalVersus.classList.remove('hidden');
+    switchVsTab('create');
+  }
+
+  function initVersusEvents() {
+    if (!btnModeVersus) return;
+
+    btnModeVersus.addEventListener('click', () => {
+      if (savePlayerProfile()) {
+        openVersusModal();
+      }
+    });
+
+    if (tabVsCreate) tabVsCreate.addEventListener('click', () => switchVsTab('create'));
+    if (tabVsJoin) tabVsJoin.addEventListener('click', () => switchVsTab('join'));
+    if (tabVsAi) tabVsAi.addEventListener('click', () => switchVsTab('ai'));
+
+    if (btnCopyRoomCode) {
+      btnCopyRoomCode.addEventListener('click', () => {
+        const code = myRoomCode ? myRoomCode.textContent : '';
+        if (code && code !== '----') {
+          navigator.clipboard.writeText(code).then(() => {
+            btnCopyRoomCode.textContent = '✅ 已複製！';
+            setTimeout(() => { btnCopyRoomCode.textContent = '📋 複製代碼'; }, 1500);
+          }).catch(() => {
+            alert(`房間代碼為：${code}`);
+          });
+        }
+      });
+    }
+
+    if (btnJoinRoomSubmit) {
+      btnJoinRoomSubmit.addEventListener('click', () => {
+        const code = inputJoinCode ? inputJoinCode.value.trim() : '';
+        if (!code) {
+          if (joinStatusText) {
+            joinStatusText.textContent = '⚠️ 請輸入 4 位數房間代碼！';
+            joinStatusText.classList.remove('hidden');
+          }
+          return;
+        }
+        const prof = {
+          name: (state.player.name || `${state.player.class}班${state.player.seat}號`),
+          classNum: state.player.class,
+          seat: state.player.seat
+        };
+        window.multiplayerManager.joinRoom(code, prof);
+      });
+    }
+
+    if (inputJoinCode) {
+      inputJoinCode.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') btnJoinRoomSubmit.click();
+      });
+    }
+
+    if (btnStartAiBattle) {
+      btnStartAiBattle.addEventListener('click', () => {
+        const prof = {
+          name: (state.player.name || `${state.player.class}班${state.player.seat}號`),
+          classNum: state.player.class,
+          seat: state.player.seat
+        };
+        if (vsConnectingBox) vsConnectingBox.classList.remove('hidden');
+        window.multiplayerManager.startAiBattle(prof, (count) => {
+          if (vsSpinnerText) vsSpinnerText.textContent = `對手已就緒！倒數 ${count} 秒...`;
+        });
+      });
+    }
+
+    if (btnCancelVersus) {
+      btnCancelVersus.addEventListener('click', () => {
+        window.multiplayerManager.cleanup();
+        if (modalVersus) modalVersus.classList.add('hidden');
+        if (modalStart) modalStart.classList.remove('hidden');
+      });
+    }
+
+    // Bind multiplayerManager callbacks
+    if (window.multiplayerManager) {
+      window.multiplayerManager.callbacks.onStatusUpdate = (msg, isError) => {
+        if (createStatusText) {
+          createStatusText.textContent = msg;
+          createStatusText.style.color = isError ? '#f87171' : '#38bdf8';
+        }
+        if (joinStatusText) {
+          joinStatusText.textContent = msg;
+          joinStatusText.classList.remove('hidden');
+          joinStatusText.style.color = isError ? '#f87171' : '#38bdf8';
+        }
+      };
+
+      window.multiplayerManager.callbacks.onMatchStart = ({ role, seed, opponentName }) => {
+        modalVersus.classList.add('hidden');
+        modalStart.classList.add('hidden');
+        if (vsConnectingBox) vsConnectingBox.classList.add('hidden');
+
+        state.vsOpponentName = opponentName || '對手同學';
+        const oppNameEl = document.getElementById('opp-name');
+        if (oppNameEl) oppNameEl.textContent = state.vsOpponentName;
+
+        startGame('versus');
+        showComboBanner(`⚔️ 對決開始！VS 【${state.vsOpponentName}】！`);
+        window.soundManager.playSpeedUp();
+      };
+
+      window.multiplayerManager.callbacks.onOpponentAttack = ({ monsterVal, combo, senderName }) => {
+        spawnAttackMonster(monsterVal, combo, senderName);
+      };
+
+      window.multiplayerManager.callbacks.onOpponentState = (stats) => {
+        updateOpponentRadar(stats);
+      };
+
+      window.multiplayerManager.callbacks.onOpponentDefeat = () => {
+        triggerGameOver(true, '👑 雙人對決大獲全勝！擊潰對手防線！');
+      };
+
+      window.multiplayerManager.callbacks.onOpponentDisconnect = () => {
+        showWarningBubble('⚠️ 對手連線已中斷！');
+        if (!state.isGameOver && state.mode === 'versus') {
+          triggerGameOver(true, '🏆 對手已中斷連線，你獲得了本局勝利！');
+        }
+      };
+    }
+  }
+
+  initVersusEvents();
 
   // Start animation loop
   requestAnimationFrame(loop);
