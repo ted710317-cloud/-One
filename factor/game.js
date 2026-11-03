@@ -335,7 +335,10 @@
 
   // --- Wave Speed Multiplier Progression ---
   function getWaveSpeedMultiplier() {
-    if (state.mode === 'endless') {
+    if (state.mode === 'versus') {
+      // 【A方案】對戰模式隨擊潰數量持續增壓提速（最高 +120% 狂暴速度）
+      return 1.0 + Math.min(1.2, state.monstersDestroyed * 0.08);
+    } else if (state.mode === 'endless') {
       return 1.0 + (state.endlessLevel - 1) * 0.16;
     } else if (state.mode === 'campaign') {
       // Wave 1: 1.0x, Wave 2: 1.25x (+25%), Wave 3: 1.55x (+55%), Wave 4: 1.90x (+90%), Wave 5: 2.30x (+130%)
@@ -361,6 +364,7 @@
       const waveMult = getWaveSpeedMultiplier();
       let baseSpeed = isBoss ? 0.17 : 0.23;
       if (state.mode === 'practice') baseSpeed *= 0.75;
+      if (state.mode === 'versus') baseSpeed *= 2.5; // 【A方案】對戰模式基礎下墜速度大幅提升 2.5 倍！
       this.speed = (baseSpeed * waveMult + Math.random() * 0.04);
       this.staggerTimer = 0; // Pause when hit to give mental math time!
 
@@ -684,9 +688,14 @@
       particles.push(new Particle(monster.x, monster.y - 20, '#00ff88', `÷ ${prime} = ${nextVal}`));
       spawnExplosion(monster.x, monster.y, PRIME_COLORS[prime], 10);
 
-      // Educational Stagger & Recoil: pause for ~0.8s and float back slightly for mental math!
-      monster.staggerTimer = 48;
-      monster.y = Math.max(monster.radius, monster.y - 14);
+      // 【A方案】大幅縮減受擊硬直：對戰模式僅停滯 8 幀 (0.13s) 且微退 2px，實現極速機關槍連除！
+      if (state.mode === 'versus') {
+        monster.staggerTimer = 8;
+        monster.y = Math.max(monster.radius, monster.y - 2);
+      } else {
+        monster.staggerTimer = 48;
+        monster.y = Math.max(monster.radius, monster.y - 14);
+      }
 
       // Audio feedback
       window.soundManager.playHit(state.combo);
@@ -1091,17 +1100,20 @@
     }
 
     const now = Date.now();
-    // Anti-Spam: detect rapid random mashing (3 clicks within 750ms)
-    state.recentClicks.push(now);
-    state.recentClicks = state.recentClicks.filter(t => now - t <= 750);
-    if (state.recentClicks.length >= 3) {
+    // Anti-Spam: detect rapid random mashing (對戰模式不限制快速心算，僅在非對戰檢測)
+    if (state.mode !== 'versus') {
+      state.recentClicks.push(now);
+      state.recentClicks = state.recentClicks.filter(t => now - t <= 750);
+    }
+    if (state.mode !== 'versus' && state.recentClicks.length >= 3) {
       state.recentClicks = [];
       triggerOverheat(2500, '🛑 偵測到連續亂按！砲台強制冷卻 2.5 秒，請先心算再出擊！');
       return;
     }
 
     // Minimum shot cooldown (280ms)
-    if (now - state.lastShootTime < 280) {
+    const minShootCd = state.mode === 'versus' ? 120 : 280; // 【A方案】對戰射擊冷卻縮短至 120ms
+    if (now - state.lastShootTime < minShootCd) {
       return;
     }
     state.lastShootTime = now;
@@ -1226,8 +1238,8 @@
     if (mode === 'versus') {
       state.waveMonstersTotal = 999;
       state.waveMonstersRemaining = 999;
-      state.spawnInterval = 200;
-      state.spawnTimer = 195; // Immediate first monster spawn
+      state.spawnInterval = 85; // 【A方案】出怪間隔從 200 幀縮短至 85 幀 (~1.4 秒)
+      state.spawnTimer = 80;   // 立即召喚第一隻怪獸
       if (gameContainer) gameContainer.classList.add('versus-mode-active');
       if (opponentRadarPanel) opponentRadarPanel.classList.remove('hidden');
     } else {
@@ -2092,11 +2104,11 @@ function createJsonResponse(obj) {
       let maxOnScreen = effectiveWave <= 2 ? 2 : (effectiveWave <= 4 ? 3 : 4);
       if (state.bossSpawned) maxOnScreen = 1;
 
-      const maxCap = state.mode === 'versus' ? 2 : maxOnScreen;
+      const maxCap = state.mode === 'versus' ? 4 : maxOnScreen; // 【A方案】場上怪獸上限提升至 4 隻
       const shouldSpawn = (monsters.length < maxCap) && 
         (state.mode === 'versus' || state.mode === 'endless' || (state.mode === 'practice') || (!state.bossSpawned && state.waveMonstersRemaining > monsters.length));
 
-      const currentSpawnInterval = state.mode === 'endless' ? Math.max(160, 260 - (state.endlessLevel - 1) * 20) : state.spawnInterval;
+      const currentSpawnInterval = state.mode === 'versus' ? 85 : (state.mode === 'endless' ? Math.max(160, 260 - (state.endlessLevel - 1) * 20) : state.spawnInterval);
 
       if (shouldSpawn && state.spawnTimer >= currentSpawnInterval) {
         state.spawnTimer = 0;
@@ -2124,8 +2136,9 @@ function createJsonResponse(obj) {
             }
             updateHUD();
           } else if (state.mode !== 'practice') {
-            damageShield(m.isBoss ? 40 : 20);
-            showWarningBubble('⚠️ 基地遭到合數怪獸撞擊！護盾受損！');
+            const breachDamage = state.mode === 'versus' ? (m.isBoss ? 50 : 34) : (m.isBoss ? 40 : 20); // 【A方案】漏怪扣 34% (漏 3 隻即淘汰)
+            damageShield(breachDamage);
+            showWarningBubble(state.mode === 'versus' ? '⚠️ 基地失守受創！護盾 -34%！(漏 3 隻即淘汰)' : '⚠️ 基地遭到合數怪獸撞擊！護盾受損！');
           }
         }
       }
@@ -2277,7 +2290,7 @@ function createJsonResponse(obj) {
     const isSpecial = combo >= 3;
     const m = new Monster(val, isSpecial, isSpecial ? `🔥 ${senderName} 送來的菁英怪！` : `⚡ ${senderName} 送來的攻擊怪！`);
     m.isAttackMonster = true;
-    m.speed *= 1.18; // slightly faster
+    m.speed *= 1.35; // 【A方案】送給對手的怪獸俯衝速度再增強 35%
     m.x = Math.random() * (canvas.width - m.radius * 2.5) + m.radius * 1.25;
     m.y = -m.radius;
     monsters.push(m);

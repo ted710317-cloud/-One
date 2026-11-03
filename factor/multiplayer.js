@@ -247,8 +247,8 @@ class MultiplayerManager {
         this.opponentStats.combo++;
         this.opponentStats.score += 200 + this.opponentStats.combo * 50;
 
-        // 60% 機率將怪獸攻擊傳送給我方！
-        if (Math.random() < 0.65) {
+        // 【A方案】75% 機率將怪獸攻擊傳送給我方！
+        if (Math.random() < 0.75) {
           if (this.callbacks.onOpponentAttack) {
             this.callbacks.onOpponentAttack({
               monsterVal: comp,
@@ -277,7 +277,7 @@ class MultiplayerManager {
         }
         clearInterval(this.aiLoopTimer);
       }
-    }, 3800);
+    }, 1800); // 【A方案】AI 機器人除算週期縮減至 1.8 秒，攻防節奏全面飆升！
   }
 
   /**
@@ -408,8 +408,8 @@ class MultiplayerManager {
         senderName: this.myProfile.name
       });
     } else if (this.mode === 'ai') {
-      // AI 承受攻擊：扣減 AI 護盾並擊退 AI
-      const damage = Math.round(15 + combo * 3);
+      // 【A方案】AI 承受高傷害：3~4 次強攻即可壓制擊潰！
+      const damage = Math.round(25 + combo * 5);
       this.opponentStats.shield = Math.max(0, this.opponentStats.shield - damage);
       if (this.callbacks.onOpponentState) {
         this.callbacks.onOpponentState(this.opponentStats);
