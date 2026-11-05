@@ -2427,6 +2427,12 @@ function createJsonResponse(obj) {
     }
 
     if (inputJoinCode) {
+      inputJoinCode.addEventListener('input', () => {
+        inputJoinCode.value = inputJoinCode.value
+          .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0))
+          .replace(/[^0-9]/g, '')
+          .slice(0, 4);
+      });
       inputJoinCode.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') btnJoinRoomSubmit.click();
       });
