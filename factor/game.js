@@ -356,6 +356,9 @@
       this.factorsHistory = [];
       this.isBoss = isBoss;
       this.bossName = bossName;
+      this.isAttackMonster = false;
+      this.senderName = '';
+      this.entryWarmupTimer = 0; // 1.5 秒進場降速緩衝計時器 (幀數)
       this.radius = isBoss ? 52 : Math.min(38, 24 + Math.log2(val) * 2.5);
       this.x = Math.random() * (canvas.width - this.radius * 2.5) + this.radius * 1.25;
       this.y = -this.radius;
@@ -364,7 +367,7 @@
       const waveMult = getWaveSpeedMultiplier();
       let baseSpeed = isBoss ? 0.17 : 0.23;
       if (state.mode === 'practice') baseSpeed *= 0.75;
-      if (state.mode === 'versus') baseSpeed *= 2.5; // 【A方案】對戰模式基礎下墜速度大幅提升 2.5 倍！
+      if (state.mode === 'versus') baseSpeed *= 2.5; // 對戰模式基礎下墜速度提升
       this.speed = (baseSpeed * waveMult + Math.random() * 0.04);
       this.staggerTimer = 0; // Pause when hit to give mental math time!
 
@@ -376,7 +379,11 @@
 
     update() {
       const mult = state.speedLevels[state.speedIndex].mult;
-      if (this.staggerTimer > 0) {
+      if (this.entryWarmupTimer > 0) {
+        this.entryWarmupTimer--;
+        // 【1.5 秒進場緩衝期】極慢速降落 (0.35x)，給學生看清數字與心算質因數的時間
+        this.y += this.speed * mult * 0.35;
+      } else if (this.staggerTimer > 0) {
         this.staggerTimer--;
       } else {
         this.y += this.speed * mult;
@@ -394,18 +401,34 @@
       const pulseScale = 1 + Math.sin(this.pulsePhase) * 0.08;
       const drawRadius = this.radius * pulseScale;
 
-      // Reticle if targeted
+      // 1.5 秒進場緩衝期：外圈顯示旋轉虛線警示光環
+      if (this.entryWarmupTimer > 0) {
+        c.save();
+        c.strokeStyle = '#f59e0b';
+        c.lineWidth = 2.5;
+        c.shadowColor = '#f59e0b';
+        c.shadowBlur = 14;
+        c.setLineDash([6, 6]);
+        c.lineDashOffset = -this.pulsePhase * 8;
+        c.beginPath();
+        c.arc(0, 0, drawRadius + 18, 0, Math.PI * 2);
+        c.stroke();
+        c.restore();
+      }
+
+      // Reticle if targeted (鎖定準心)
       if (state.activeTarget === this) {
-        c.strokeStyle = '#00f3ff';
-        c.lineWidth = 3;
-        c.shadowColor = '#00f3ff';
-        c.shadowBlur = 15;
+        const isThreat = this.isAttackMonster;
+        c.strokeStyle = isThreat ? '#f43f5e' : '#00f3ff';
+        c.lineWidth = isThreat ? 4 : 3;
+        c.shadowColor = isThreat ? '#f43f5e' : '#00f3ff';
+        c.shadowBlur = isThreat ? 22 : 15;
         c.beginPath();
         c.arc(0, 0, drawRadius + 12, 0, Math.PI * 2);
         c.stroke();
 
         // Target crosshair notches
-        const notchLen = 10;
+        const notchLen = isThreat ? 14 : 10;
         const dist = drawRadius + 12;
         c.beginPath();
         c.moveTo(0, -dist - notchLen); c.lineTo(0, -dist + notchLen);
@@ -465,9 +488,14 @@
       if (this.isAttackMonster) {
         c.save();
         c.font = 'bold 11px sans-serif';
-        c.fillStyle = '#fca5a5';
         c.textAlign = 'center';
-        c.fillText('🔥 來自對手', 0, -drawRadius - 8);
+        if (this.entryWarmupTimer > 0) {
+          c.fillStyle = '#fde047';
+          c.fillText('⏳ 緩衝鎖定中 👑可反彈!', 0, -drawRadius - 9);
+        } else {
+          c.fillStyle = '#fca5a5';
+          c.fillText('⚠️ 突襲威脅 👑可反彈!', 0, -drawRadius - 9);
+        }
         c.restore();
       }
 
@@ -639,8 +667,23 @@
 
   // --- Auto Targeting ---
   function updateTarget() {
-    // If current target is gone or destroyed, choose closest monster to bottom
-    if (!state.activeTarget || !monsters.includes(state.activeTarget)) {
+    const hasValidTarget = state.activeTarget && monsters.includes(state.activeTarget);
+
+    // 【核心平衡機制】威脅優先自動鎖定 (Threat Priority Auto-Lock)
+    const attackMonsters = monsters.filter(m => m.isAttackMonster);
+    const isManualLock = (Date.now() - (state.manualTargetTimestamp || 0)) < 2500;
+
+    if (attackMonsters.length > 0 && !isManualLock) {
+      // 若場上有突襲怪獸，且玩家未在 2.5 秒內手動強制換靶，自動優先鎖定「最靠近底線的突襲怪獸」
+      if (!hasValidTarget || !state.activeTarget.isAttackMonster) {
+        let lowestThreat = attackMonsters[0];
+        for (let am of attackMonsters) {
+          if (am.y > lowestThreat.y) lowestThreat = am;
+        }
+        state.activeTarget = lowestThreat;
+      }
+    } else if (!hasValidTarget) {
+      // 若無突襲怪獸且當前無有效目標，選擇最靠近底線的怪獸
       if (monsters.length > 0) {
         let lowest = monsters[0];
         for (let m of monsters) {
@@ -656,11 +699,25 @@
     if (state.activeTarget) {
       targetDetailPanel.classList.remove('hidden');
       targetNumDisplay.textContent = state.activeTarget.currentValue;
+
+      const titleEl = targetDetailPanel.querySelector('.target-title');
+      if (titleEl) {
+        if (state.activeTarget.isAttackMonster) {
+          targetDetailPanel.classList.add('threat-target-panel');
+          titleEl.innerHTML = '⚡ 突襲威脅 (優先鎖定) <span class="badge-threat">👑 反彈回擊</span>';
+        } else {
+          targetDetailPanel.classList.remove('threat-target-panel');
+          titleEl.innerHTML = '鎖定目標 <span class="badge-switch-hint">(點此切換🎯)</span>';
+        }
+      }
+
       if (state.activeTarget.factorsHistory.length > 0) {
         const hist = state.activeTarget.factorsHistory.join(' × ');
         targetHistoryDisplay.textContent = `已除算：${hist}`;
       } else {
-        targetHistoryDisplay.textContent = '等待首發質因數砲彈';
+        targetHistoryDisplay.textContent = state.activeTarget.isAttackMonster
+          ? '🔥 對手突襲！請速心算分解反擊！'
+          : '等待首發質因數砲彈';
       }
     } else {
       targetDetailPanel.classList.add('hidden');
@@ -743,19 +800,45 @@
           window.soundManager.playTimeBonus();
           addFloatingText(state.isFever ? `+5s FEVER補時!` : `+3s 補時!`, monster.x, monster.y - 30, state.isFever ? '#ffe600' : '#00f3ff', 24);
         } else if (state.mode === 'versus') {
-          // 雙人即時對戰：完全分解成功，發射送怪攻擊給對手！
-          if (window.multiplayerManager) {
-            window.multiplayerManager.sendAttack(monster.originalValue, state.combo);
-            window.multiplayerManager.sendState({
-              shield: state.shield,
-              score: state.score,
-              monstersCount: Math.max(0, monsters.length - 1),
-              destroyed: state.monstersDestroyed,
-              combo: state.combo
-            });
+          if (monster.isAttackMonster) {
+            // ==========================================
+            // 👑 完美反彈回擊機制 (Rebound / Counter-Attack)
+            // ==========================================
+            // 1. 基地護盾修復 +10%
+            state.shield = Math.min(100, state.shield + 10);
+            updateHUD();
+
+            // 2. 特殊視覺與音效震撼
+            showComboBanner(`👑 完美反彈！回擊對手【${monster.originalValue}】！護盾 +10%！`);
+            addFloatingText(`👑 完美反彈! 護盾+10%`, monster.x, monster.y - 35, '#38bdf8', 24);
+            window.soundManager.playSpeedUp();
+
+            // 3. 將怪獸反彈回敬給對手 (帶有反彈加成)
+            if (window.multiplayerManager) {
+              window.multiplayerManager.sendAttack(monster.originalValue, state.combo + 1);
+              window.multiplayerManager.sendState({
+                shield: state.shield,
+                score: state.score,
+                monstersCount: Math.max(0, monsters.length - 1),
+                destroyed: state.monstersDestroyed,
+                combo: state.combo
+              });
+            }
+          } else {
+            // 常規怪獸分解：標準發射送怪攻擊給對手
+            if (window.multiplayerManager) {
+              window.multiplayerManager.sendAttack(monster.originalValue, state.combo);
+              window.multiplayerManager.sendState({
+                shield: state.shield,
+                score: state.score,
+                monstersCount: Math.max(0, monsters.length - 1),
+                destroyed: state.monstersDestroyed,
+                combo: state.combo
+              });
+            }
+            const bonusTag = state.combo >= 3 ? `🚀 🔥 強力送怪連擊 (x${state.combo})!` : `🚀 攻擊已送出!`;
+            addFloatingText(bonusTag, monster.x, monster.y - 30, '#f472b6', 22);
           }
-          const bonusTag = state.combo >= 3 ? `🚀 🔥 強力送怪連擊 (x${state.combo})!` : `🚀 攻擊已送出!`;
-          addFloatingText(bonusTag, monster.x, monster.y - 30, '#f472b6', 22);
         }
 
         // Remove monster
@@ -1167,6 +1250,17 @@
     let idx = monsters.indexOf(state.activeTarget);
     idx = (idx + 1) % monsters.length;
     state.activeTarget = monsters[idx];
+    state.manualTargetTimestamp = Date.now(); // 記錄手動換靶時間，2.5秒內不被自動奪焦
+    updateTarget();
+    window.soundManager.playSelect();
+  }
+
+  // 點擊左上方鎖定目標資訊面板，方便平板/觸控螢幕一鍵切換目標
+  if (targetDetailPanel) {
+    targetDetailPanel.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      cycleTarget();
+    });
   }
 
   // Click on Canvas to target monster directly
@@ -2290,18 +2384,25 @@ function createJsonResponse(obj) {
     const isSpecial = combo >= 3;
     const m = new Monster(val, isSpecial, isSpecial ? `🔥 ${senderName} 送來的菁英怪！` : `⚡ ${senderName} 送來的攻擊怪！`);
     m.isAttackMonster = true;
-    m.speed *= 1.35; // 【A方案】送給對手的怪獸俯衝速度再增強 35%
+    m.senderName = senderName || '對手';
+    m.entryWarmupTimer = 90; // 【1.5 秒進場降速緩衝期】(90 幀 ~ 1.5s)
+    m.speed = Math.max(0.36, m.speed * 0.72); // 調整至合理威脅速度，杜絕瞬間秒殺
     m.x = Math.random() * (canvas.width - m.radius * 2.5) + m.radius * 1.25;
     m.y = -m.radius;
     monsters.push(m);
 
+    // 【核心平衡機制】緊急威脅優先自動鎖定：砲口立刻自動對準此攻擊怪！
+    state.activeTarget = m;
+    state.manualTargetTimestamp = 0; // 重置手動鎖定，確保突襲怪能第一時間捕獲焦點
+    updateTarget();
+
     // Show warning bubble & banner
-    showWarningBubble(`⚠️ 警告！對手送來了攻擊怪：【${val}】！`);
+    showWarningBubble(`⚠️ 警告！對手送來了攻擊怪：【${val}】！(已優先鎖定)`);
     if (vsAttackBanner) {
-      vsAttackBanner.textContent = `⚠️ 警告！${senderName} 送來了【${val}】！`;
+      vsAttackBanner.innerHTML = `⚠️ 警告！${senderName} 送來了【${val}】！<br><span style="font-size: 13px; color: #fde047;">⚡ 砲台已自動優先瞄準！完全分解可觸發【👑 完美反彈】！</span>`;
       vsAttackBanner.classList.remove('hidden');
       if (vsAttackBanner._timer) clearTimeout(vsAttackBanner._timer);
-      vsAttackBanner._timer = setTimeout(() => vsAttackBanner.classList.add('hidden'), 2800);
+      vsAttackBanner._timer = setTimeout(() => vsAttackBanner.classList.add('hidden'), 3500);
     }
     window.soundManager.playDamage();
   }

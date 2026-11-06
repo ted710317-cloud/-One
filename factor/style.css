@@ -1816,3 +1816,59 @@ html, body {
   0% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
   100% { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
+
+/* Threat Priority Target Panel (突襲威脅優先鎖定特徵) */
+#target-detail-panel {
+  pointer-events: auto !important;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#target-detail-panel:active {
+  transform: scale(0.96);
+}
+
+.versus-mode-active #target-detail-panel:active {
+  transform: scale(0.96) !important;
+}
+
+#target-detail-panel.threat-target-panel {
+  border-color: #f43f5e !important;
+  background: rgba(30, 8, 30, 0.94) !important;
+  box-shadow: 0 0 22px rgba(244, 63, 94, 0.75) !important;
+  animation: threatPanelPulse 0.9s infinite alternate ease-in-out;
+}
+
+@keyframes threatPanelPulse {
+  0% { box-shadow: 0 0 14px rgba(244, 63, 94, 0.5); }
+  100% { box-shadow: 0 0 28px rgba(244, 63, 94, 0.95); }
+}
+
+.badge-threat {
+  display: inline-block;
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 4px;
+  vertical-align: middle;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  animation: bounceBadge 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes bounceBadge {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1.08); }
+}
+
+.badge-switch-hint {
+  font-size: 10px;
+  color: var(--cyan-glow);
+  opacity: 0.85;
+  margin-left: 4px;
+  font-weight: normal;
+}
