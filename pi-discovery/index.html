@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>🌟 圓周率密碼實驗室 - 探索 π 的奧秘</title>
+  <meta name="description" content="國小國中數學互動教具：雙擋板量直徑、滾動攤平圓周長、直徑尺排排看、六組實物大會師計算圓周率 3.14！">
+  <style>
+    :root {
+      --bg-dark: #070b18;
+      --card-bg: rgba(15, 23, 42, 0.9);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --gold: #facc15;
+      --gold-dark: #ca8a04;
+      --cyan: #06b6d4;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-dark) 75%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px 12px 60px;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--cyan);
+    }
+
+    .sound-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 30%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: clamp(13px, 2.8vw, 16px);
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Group Selector Tabs */
+    .group-selector-title {
+      font-size: 14px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-tabs {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 768px) {
+      .group-tabs {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .group-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .group-tab-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .group-tab-btn:hover {
+      border-color: rgba(250, 204, 21, 0.5);
+      background: rgba(51, 65, 85, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .group-tab-btn.active {
+      border-color: var(--gold);
+      background: linear-gradient(145deg, rgba(250, 204, 21, 0.15), rgba(30, 41, 59, 0.95));
+      color: #fff;
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.25);
+    }
+
+    .tab-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-icon {
+      font-size: 26px;
+    }
+
+    .tab-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tab-status {
+      font-size: 11px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    /* Main Experiment Card */
+    .lab-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 24px;
+    }
+
+    /* Step Navigation Bar */
+    .steps-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    @media (max-width: 640px) {
+      .steps-nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .step-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 8px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .step-nav-btn.active {
+      background: rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+
+    .step-nav-btn.completed {
+      color: #4ade80;
+    }
+
+    /* Stage Header & Instructions */
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stage-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-hint {
+      font-size: 13px;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    /* Interactive Canvas / Workspace */
+    .interactive-stage {
+      background: #090e1d;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 380px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 340px;
+      touch-action: none;
+    }
+
+    /* Stage Controls Bar */
+    .stage-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #3b82f6;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      color: #000;
+      border-color: #facc15;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(234, 179, 8, 0.35);
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #facc15, #eab308);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #34d399;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Step 4 Calculator Box */
+    .calc-container {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px dashed rgba(250, 204, 21, 0.4);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      margin: 10px auto;
+    }
+
+    .calc-equation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 800;
+      margin: 16px 0;
+    }
+
+    .calc-pill {
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .pill-c {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: #10b981;
+    }
+
+    .pill-d {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border-color: #3b82f6;
+    }
+
+    .calc-input {
+      width: 100px;
+      padding: 8px 12px;
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      border-radius: 10px;
+      background: #0f172a;
+      border: 2px solid var(--gold);
+      color: #facc15;
+      outline: none;
+    }
+
+    .calc-result-box {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-top: 14px;
+      padding: 12px;
+      background: rgba(250, 204, 21, 0.1);
+      border-radius: 12px;
+      display: none;
+      animation: popIn 0.35s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Class Grand Board (全班大會師看板) */
+    .grand-board-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 30px;
+    }
+
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .board-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .board-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 14px;
+      min-width: 650px;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.85);
+      color: #94a3b8;
+      font-weight: 700;
+      padding: 14px 10px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    td {
+      padding: 14px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    tr:hover td {
+      background: rgba(30, 41, 59, 0.5);
+    }
+
+    .badge-done {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .badge-pending {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .pi-result-cell {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    /* Grand Summary Quote */
+    .summary-card {
+      margin-top: 20px;
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(30, 41, 59, 0.6));
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .summary-icon {
+      font-size: 40px;
+    }
+
+    .summary-text h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .summary-text p {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--gold);
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">提示訊息</span>
+  </div>
+
+  <div class="container">
+    
+    <!-- Top Header -->
+    <header>
+      <a href="../index.html" class="back-btn">⬅️ 返回遊戲大廳</a>
+      <button id="soundToggle" class="sound-toggle">🔊 音效: 開</button>
+      <h1>🌟 圓周率密碼實驗室</h1>
+      <p class="subtitle">六組探究任務 ✕ 雙擋板量直徑 ✕ 滾輪展周長 ✕ 全班大會師發現 π ≈ 3.14</p>
+    </header>
+
+    <!-- Group Selector Tabs -->
+    <div class="group-selector-title">
+      <span>👥 請選擇您的小組（或挑戰不同尺寸的物件）：</span>
+    </div>
+    <div class="group-tabs" id="groupTabs">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- Main Experiment Card -->
+    <div class="lab-card">
+      
+      <!-- 4 Steps Navigation -->
+      <div class="steps-nav" id="stepsNav">
+        <button class="step-nav-btn active" data-step="1">
+          <span>📏 步驟一：雙擋板量直徑</span>
+        </button>
+        <button class="step-nav-btn" data-step="2">
+          <span>🌀 步驟二：滾動展開圓周長</span>
+        </button>
+        <button class="step-nav-btn" data-step="3">
+          <span>🧩 步驟三：直徑尺排排看</span>
+        </button>
+        <button class="step-nav-btn" data-step="4">
+          <span>🧮 步驟四：除法計算 & 登錄</span>
+        </button>
+      </div>
+
+      <!-- Stage Header -->
+      <div class="stage-header">
+        <div class="stage-title" id="stageTitle">
+          <span>【步驟一】用左右雙擋板夾住圓，測量直徑</span>
+        </div>
+        <div class="stage-hint" id="stageHint">
+          💡 拖曳左右兩塊橘色擋板靠緊圓的邊緣，看下方直尺讀出直徑！
+        </div>
+      </div>
+
+      <!-- Interactive Canvas Stage -->
+      <div class="interactive-stage" id="interactiveStage">
+        <canvas id="mainCanvas" width="960" height="340"></canvas>
+      </div>
+
+      <!-- Stage Controls & Buttons -->
+      <div class="stage-controls" id="stageControls">
+        <!-- Rendered dynamically by current step -->
+      </div>
+
+    </div>
+
+    <!-- Grand Class Leaderboard (全班大會師看板) -->
+    <div class="grand-board-section" id="grandBoard">
+      <div class="board-header">
+        <div class="board-title">
+          <span>🏆 全班六組大會師數據看板</span>
+        </div>
+        <div class="board-actions">
+          <button class="btn" id="btnFillDemo">⚡ 一鍵填入示範數據</button>
+          <button class="btn" id="btnClearBoard">🧹 清空紀錄</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>組別</th>
+              <th>探索物件</th>
+              <th>測量直徑 (d)</th>
+              <th>展開圓周長 (C)</th>
+              <th>除法算式 (C ÷ d)</th>
+              <th>計算比值</th>
+              <th>狀態</th>
+            </tr>
+          </thead>
+          <tbody id="boardTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Grand Conclusion -->
+      <div class="summary-card">
+        <div class="summary-icon">💡</div>
+        <div class="summary-text">
+          <h3>全班重大發現：什麼是圓周率（π）？</h3>
+          <p>
+            仔細觀察上面的表格！不管是用小小的 <b>50 元硬幣</b>（直徑 2.8 公分），還是巨大的 <b>遊樂園摩天輪</b>（直徑 50 公尺），只要把 <b>【圓周長 ÷ 直徑】</b>，算出來的結果永遠都是 <b>3.14 多一點點</b>！數學家把這個固定不變的神奇比值命名為 <b>圓周率（π）</b>！
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+       1. DATA & CONSTANTS
+       ============================================================ */
+    const GROUPS = [
+      {
+        id: 1,
+        name: "第 1 組",
+        objName: "50 元硬幣",
+        icon: "🪙",
+        unit: "cm",
+        trueD: 2.8,
+        trueC: 8.8,
+        desc: "口袋裡的微型圓，直徑只有 2.8 公分！",
+        themeColor: "#facc15"
+      },
+      {
+        id: 2,
+        name: "第 2 組",
+        objName: "珍奶杯口",
+        icon: "🥤",
+        unit: "cm",
+        trueD: 9.5,
+        trueC: 29.8,
+        desc: "下課最愛的手搖杯，杯口圓圓一圈有多長？",
+        themeColor: "#06b6d4"
+      },
+      {
+        id: 3,
+        name: "第 3 組",
+        objName: "9 吋披薩盤",
+        icon: "🍕",
+        unit: "cm",
+        trueD: 23.0,
+        trueC: 72.2,
+        desc: "美味聚餐的披薩盤，切成直徑長度會是幾倍？",
+        themeColor: "#f97316"
+      },
+      {
+        id: 4,
+        name: "第 4 組",
+        objName: "腳踏車輪",
+        icon: "🚲",
+        unit: "cm",
+        trueD: 60.0,
+        trueC: 188.5,
+        desc: "上學騎的腳踏車，車輪滾一圈剛好推進多少？",
+        themeColor: "#3b82f6"
+      },
+      {
+        id: 5,
+        name: "第 5 組",
+        objName: "體育課大呼啦圈",
+        icon: "⭕",
+        unit: "cm",
+        trueD: 85.0,
+        trueC: 267.0,
+        desc: "體育器材室的超大呼啦圈，兩人合作測量！",
+        themeColor: "#ec4899"
+      },
+      {
+        id: 6,
+        name: "第 6 組",
+        objName: "遊樂園摩天輪",
+        icon: "🎡",
+        unit: "m",
+        trueD: 50.0,
+        trueC: 157.1,
+        desc: "高達 17 層樓高的旋轉摩天輪，轉一整圈有多壯觀？",
+        themeColor: "#a855f7"
+      }
+    ];
+
+    // State
+    let currentGroupId = 1;
+    let currentStep = 1;
+    let groupResults = {}; // { 1: { measuredD, measuredC, ratio, completed } }
+    let soundEnabled = true;
+
+    // Canvas & Animation State
+    const canvas = document.getElementById("mainCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Virtual Stage Coordinates
+    // For Step 1 (Double Caliper / Blocks)
+    let caliperLeftX = 140;   // Left block position (can be dragged)
+    let caliperRightX = 540;  // Right block position (can be dragged)
+    let draggingCaliper = null; // 'left' | 'right' | null
+    let circleCenterX = 300;
+    let circleRadius = 70; // in visual pixels
+    let isClamped = false;
+
+    // For Step 2 (Rolling)
+    let rollRotation = 0; // in radians, 0 to 2*PI
+    let isRolling = false;
+    let rollAnimFrame = null;
+    let wheelDragging = false;
+    let dragStartX = 0;
+    let dragStartRot = 0;
+
+    // For Step 3 (Diameter Sticks)
+    let sticksPlaced = 0; // 0, 1, 2, 3, or 4 (with remainder)
+
+    /* ============================================================
+       2. WEB AUDIO SYNTHESIZER
+       ============================================================ */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSnapSound() {
+      playTone(520, 'triangle', 0.08, 0.2);
+    }
+    function playClackSound() {
+      playTone(320, 'square', 0.06, 0.15);
+    }
+    function playSuccessFanfare() {
+      if (!soundEnabled) return;
+      const notes = [440, 554, 659, 880];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'triangle', 0.25, 0.25), idx * 110);
+      });
+    }
+
+    /* ============================================================
+       3. TOAST & NOTIFICATIONS
+       ============================================================ */
+    function showToast(msg, icon = '✨') {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastIcon").innerText = icon;
+      document.getElementById("toastMsg").innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    /* ============================================================
+       4. INITIALIZATION & UI SETUP
+       ============================================================ */
+    function init() {
+      renderGroupTabs();
+      renderBoardTable();
+      setupEvents();
+      switchGroup(1);
+    }
+
+    function setupEvents() {
+      // Sound Toggle
+      document.getElementById("soundToggle").addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById("soundToggle").innerText = soundEnabled ? "🔊 音效: 開" : "🔇 音效: 關";
+      });
+
+      // Steps Nav Click
+      document.querySelectorAll(".step-nav-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const step = parseInt(btn.dataset.step);
+          switchStep(step);
+        });
+      });
+
+      // Board Buttons
+      document.getElementById("btnFillDemo").addEventListener("click", fillDemoData);
+      document.getElementById("btnClearBoard").addEventListener("click", clearBoardData);
+
+      // Canvas Mouse & Touch Interaction
+      canvas.addEventListener("mousedown", handlePointerDown);
+      window.addEventListener("mousemove", handlePointerMove);
+      window.addEventListener("mouseup", handlePointerUp);
+
+      canvas.addEventListener("touchstart", handlePointerDown, { passive: false });
+      window.addEventListener("touchmove", handlePointerMove, { passive: false });
+      window.addEventListener("touchend", handlePointerUp);
+
+      // Resize observer for responsive canvas
+      window.addEventListener("resize", () => {
+        renderCanvas();
+      });
+    }
+
+    function renderGroupTabs() {
+      const container = document.getElementById("groupTabs");
+      container.innerHTML = GROUPS.map(g => {
+        const isDone = groupResults[g.id] && groupResults[g.id].completed;
+        return `
+          <button class="group-tab-btn ${g.id === currentGroupId ? 'active' : ''}" onclick="switchGroup(${g.id})">
+            <span class="tab-badge">${g.name}</span>
+            <span class="tab-icon">${g.icon}</span>
+            <span class="tab-name">${g.objName}</span>
+            <span class="tab-status">${isDone ? '✅ 3.14' : '待探究'}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchGroup(groupId) {
+      currentGroupId = groupId;
+      renderGroupTabs();
+
+      const group = GROUPS.find(g => g.id === groupId);
+      showToast(`已切換至 ${group.name}：${group.objName}`, group.icon);
+
+      // Reset experiment state for this group
+      resetStep1Positions();
+      rollRotation = 0;
+      isRolling = false;
+      sticksPlaced = 0;
+
+      // Default to Step 1 if not done, or remember
+      switchStep(1);
+    }
+
+    function switchStep(step) {
+      currentStep = step;
+      // Update nav UI
+      document.querySelectorAll(".step-nav-btn").forEach(btn => {
+        const s = parseInt(btn.dataset.step);
+        btn.classList.toggle("active", s === step);
+      });
+
+      updateStageHeader();
+      renderStageControls();
+      renderCanvas();
+    }
+
+    function updateStageHeader() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const titleEl = document.getElementById("stageTitle");
+      const hintEl = document.getElementById("stageHint");
+
+      if (currentStep === 1) {
+        titleEl.innerHTML = `<span>【步驟一】雙擋板量直徑 —— 探索 ${group.icon} ${group.objName}</span>`;
+        hintEl.innerHTML = `💡 拖曳左右兩塊橘色垂直擋板，夾緊圓的左右最邊緣，看下方直尺讀出直徑！`;
+      } else if (currentStep === 2) {
+        titleEl.innerHTML = `<span>【步驟二】滾動展開圓周長 —— 讓 ${group.icon} ${group.objName} 滾動一整圈</span>`;
+        hintEl.innerHTML = `💡 拖曳圓輪或點擊「自動滾動一圈」，看圓周像膠帶般撕開攤平在地上！`;
+      } else if (currentStep === 3) {
+        titleEl.innerHTML = `<span>【步驟三】直徑尺排排看 —— 用直徑去量圓周長！</span>`;
+        hintEl.innerHTML = `💡 點擊擺放直徑尺，親自驗證：圓周長剛好是幾根直徑長？`;
+      } else if (currentStep === 4) {
+        titleEl.innerHTML = `<span>【步驟四】除法計算 & 登錄 —— 揭曉神奇的圓周率！</span>`;
+        hintEl.innerHTML = `💡 把測量到的圓周長除以直徑，看看算出來是多少！`;
+      }
+    }
+
+    /* ============================================================
+       5. STAGE CONTROLS & STEP LOGIC
+       ============================================================ */
+    function renderStageControls() {
+      const container = document.getElementById("stageControls");
+      const group = GROUPS.find(g => g.id === currentGroupId);
+
+      if (currentStep === 1) {
+        container.innerHTML = `
+          <button class="btn" onclick="snapLeftCaliper()">👈 靠左貼齊 0 刻度</button>
+          <button class="btn" onclick="snapRightCaliper()">👉 靠右貼緊圓邊緣</button>
+          <button class="btn btn-gold" onclick="autoClampCaliper()">🎯 一鍵精準夾緊</button>
+          <button class="btn btn-primary" onclick="confirmDiameter()">✅ 記錄直徑並進入下一步 ➡️</button>
+        `;
+      } else if (currentStep === 2) {
+        container.innerHTML = `
+          <button class="btn btn-gold" onclick="toggleAutoRoll()">🌀 ${isRolling ? '暫停滾動' : '自動慢速滾動一整圈'}</button>
+          <button class="btn" onclick="resetRoll()">🔄 重設起點</button>
+          <button class="btn btn-primary" onclick="confirmCircumference()">✅ 記錄圓周長並進入下一步 ➡️</button>
+        `;
+      } else if (currentStep === 3) {
+        container.innerHTML = `
+          <button class="btn btn-gold" onclick="addStick()">➕ 擺放第 ${Math.min(sticksPlaced + 1, 3)} 根直徑尺</button>
+          <button class="btn" onclick="placeAllSticks()">⚡ 一鍵排滿比對</button>
+          <button class="btn" onclick="resetSticks()">🔄 重排</button>
+          <button class="btn btn-primary" onclick="switchStep(4)">✅ 進入第四步：親自計算 🧮</button>
+        `;
+      } else if (currentStep === 4) {
+        const currData = groupResults[group.id] || {};
+        const dVal = currData.measuredD || group.trueD;
+        const cVal = currData.measuredC || group.trueC;
+        container.innerHTML = `
+          <div class="calc-container">
+            <h3 style="color: var(--gold); margin-bottom: 8px;">🧮 ${group.name}【${group.objName}】算術小擂台</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">請將剛才測量到的【圓周長】除以【直徑】：</p>
+            
+            <div class="calc-equation">
+              <span class="calc-pill pill-c">圓周長 C = ${cVal} ${group.unit}</span>
+              <span>÷</span>
+              <span class="calc-pill pill-d">直徑 d = ${dVal} ${group.unit}</span>
+              <span>=</span>
+              <input type="number" step="0.01" class="calc-input" id="calcInput" placeholder="?" value="">
+              <button class="btn btn-gold" onclick="runCalculation()">計算驗證</button>
+            </div>
+
+            <div class="calc-result-box" id="calcResultBox">
+              🎉 算出來了！${cVal} ÷ ${dVal} ≈ <span style="font-size: 32px; color: #ffe600;">${(cVal / dVal).toFixed(2)}</span> ！
+            </div>
+
+            <div style="margin-top: 16px;">
+              <button class="btn btn-green" id="btnUploadBoard" style="font-size: 16px; padding: 12px 24px;" onclick="uploadToBoard()">
+                📝 登記到全班大會師看板！
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* STEP 1: CALIPER LOGIC */
+    function resetStep1Positions() {
+      circleRadius = 75;
+      circleCenterX = 350;
+      caliperLeftX = circleCenterX - circleRadius - 80;
+      caliperRightX = circleCenterX + circleRadius + 90;
+      checkClampStatus();
+    }
+
+    function snapLeftCaliper() {
+      caliperLeftX = circleCenterX - circleRadius;
+      playSnapSound();
+      checkClampStatus();
+      renderCanvas();
+    }
+
+    function snapRightCaliper() {
+      caliperRightX = circleCenterX + circleRadius;
+      playSnapSound();
+      checkClampStatus();
+      renderCanvas();
+    }
+
+    function autoClampCaliper() {
+      caliperLeftX = circleCenterX - circleRadius;
+      caliperRightX = circleCenterX + circleRadius;
+      playSnapSound();
+      checkClampStatus();
+      renderCanvas();
+      showToast("雙擋板已完美夾緊圓的最寬處！", "🎯");
+    }
+
+    function checkClampStatus() {
+      const leftTarget = circleCenterX - circleRadius;
+      const rightTarget = circleCenterX + circleRadius;
+      isClamped = (Math.abs(caliperLeftX - leftTarget) < 4 && Math.abs(caliperRightX - rightTarget) < 4);
+    }
+
+    function confirmDiameter() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      if (!isClamped) {
+        autoClampCaliper();
+      }
+      if (!groupResults[group.id]) groupResults[group.id] = {};
+      groupResults[group.id].measuredD = group.trueD;
+      playSnapSound();
+      showToast(`直徑測量完成：${group.trueD} ${group.unit}！`, "📏");
+      setTimeout(() => switchStep(2), 600);
+    }
+
+    /* STEP 2: ROLLING LOGIC */
+    function toggleAutoRoll() {
+      isRolling = !isRolling;
+      renderStageControls();
+      if (isRolling) {
+        runRollAnimation();
+      }
+    }
+
+    function runRollAnimation() {
+      if (!isRolling) return;
+      rollRotation += 0.035;
+      playTone(180 + Math.sin(rollRotation * 4) * 40, 'triangle', 0.02, 0.05);
+      if (rollRotation >= Math.PI * 2) {
+        rollRotation = Math.PI * 2;
+        isRolling = false;
+        playSnapSound();
+        showToast("滾動剛好一整圈（360°）完成！", "🎉");
+        renderStageControls();
+      }
+      renderCanvas();
+      if (isRolling) {
+        rollAnimFrame = requestAnimationFrame(runRollAnimation);
+      }
+    }
+
+    function resetRoll() {
+      isRolling = false;
+      rollRotation = 0;
+      renderStageControls();
+      renderCanvas();
+    }
+
+    function confirmCircumference() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      if (rollRotation < Math.PI * 2 * 0.95) {
+        rollRotation = Math.PI * 2;
+      }
+      if (!groupResults[group.id]) groupResults[group.id] = {};
+      groupResults[group.id].measuredC = group.trueC;
+      playSnapSound();
+      showToast(`圓周長測量完成：${group.trueC} ${group.unit}！`, "🌀");
+      setTimeout(() => switchStep(3), 600);
+    }
+
+    /* STEP 3: DIAMETER STICKS LOGIC */
+    function addStick() {
+      if (sticksPlaced < 3) {
+        sticksPlaced++;
+        playClackSound();
+        if (sticksPlaced === 3) {
+          setTimeout(() => {
+            showToast("放了 3 根直徑尺！發現還多出一小截（約 0.14）！", "🌟");
+          }, 300);
+        }
+      }
+      renderStageControls();
+      renderCanvas();
+    }
+
+    function placeAllSticks() {
+      sticksPlaced = 3;
+      playSuccessFanfare();
+      showToast("3 根直徑尺排滿！圓周長剛好是直徑的 3 倍多一點點！", "🎯");
+      renderStageControls();
+      renderCanvas();
+    }
+
+    function resetSticks() {
+      sticksPlaced = 0;
+      renderStageControls();
+      renderCanvas();
+    }
+
+    /* STEP 4: CALCULATION & UPLOAD LOGIC */
+    function runCalculation() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const curr = groupResults[group.id] || {};
+      const d = curr.measuredD || group.trueD;
+      const c = curr.measuredC || group.trueC;
+      const ratio = (c / d).toFixed(2);
+
+      const inputEl = document.getElementById("calcInput");
+      inputEl.value = ratio;
+
+      const resultBox = document.getElementById("calcResultBox");
+      resultBox.style.display = "block";
+      playSuccessFanfare();
+      showToast(`太神奇了！除出來的比值是 ${ratio}！`, "🎉");
+    }
+
+    function uploadToBoard() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const curr = groupResults[group.id] || {};
+      const d = curr.measuredD || group.trueD;
+      const c = curr.measuredC || group.trueC;
+      const ratio = (c / d).toFixed(2);
+
+      groupResults[group.id] = {
+        measuredD: d,
+        measuredC: c,
+        ratio: ratio,
+        completed: true
+      };
+
+      playSuccessFanfare();
+      renderGroupTabs();
+      renderBoardTable();
+      showToast(`🎉 ${group.name} 數據已成功登錄至全班大會師看板！`, "🏆");
+
+      // Scroll smoothly to board
+      document.getElementById("grandBoard").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function fillDemoData() {
+      GROUPS.forEach(g => {
+        groupResults[g.id] = {
+          measuredD: g.trueD,
+          measuredC: g.trueC,
+          ratio: (g.trueC / g.trueD).toFixed(2),
+          completed: true
+        };
+      });
+      playSuccessFanfare();
+      renderGroupTabs();
+      renderBoardTable();
+      showToast("已為全班六組一鍵填入實測示範數據！", "⚡");
+    }
+
+    function clearBoardData() {
+      groupResults = {};
+      renderGroupTabs();
+      renderBoardTable();
+      showToast("全班看板已重設清空！", "🧹");
+    }
+
+    function renderBoardTable() {
+      const tbody = document.getElementById("boardTableBody");
+      tbody.innerHTML = GROUPS.map(g => {
+        const res = groupResults[g.id];
+        if (res && res.completed) {
+          return `
+            <tr>
+              <td style="font-weight: 800; color: ${g.themeColor};">${g.name}</td>
+              <td style="font-weight: 700;">${g.icon} ${g.objName}</td>
+              <td>${res.measuredD} ${g.unit}</td>
+              <td>${res.measuredC} ${g.unit}</td>
+              <td>${res.measuredC} ÷ ${res.measuredD}</td>
+              <td class="pi-result-cell">≈ ${res.ratio}</td>
+              <td><span class="badge-done">✅ 探究完成</span></td>
+            </tr>
+          `;
+        } else {
+          return `
+            <tr>
+              <td style="font-weight: 800; color: #94a3b8;">${g.name}</td>
+              <td>${g.icon} ${g.objName}</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td style="color: #64748b;">--</td>
+              <td><span class="badge-pending">⏳ 待探究</span></td>
+            </tr>
+          `;
+        }
+      }).join('');
+    }
+
+    /* ============================================================
+       6. CANVAS RENDERING ENGINE
+       ============================================================ */
+    function renderCanvas() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const group = GROUPS.find(g => g.id === currentGroupId);
+
+      if (currentStep === 1) {
+        renderStep1Canvas(w, h, group);
+      } else if (currentStep === 2) {
+        renderStep2Canvas(w, h, group);
+      } else if (currentStep === 3) {
+        renderStep3Canvas(w, h, group);
+      } else if (currentStep === 4) {
+        renderStep4Canvas(w, h, group);
+      }
+    }
+
+    /* DRAW STEP 1: DOUBLE CALIPER & RULER */
+    function renderStep1Canvas(w, h, group) {
+      const groundY = 250;
+      const rulerY = 250;
+      const r = circleRadius;
+      const cx = circleCenterX;
+      const cy = groundY - r;
+
+      // Draw Ruler Background
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(80, rulerY, w - 160, 48);
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(80, rulerY, w - 160, 48);
+
+      // Draw Ruler Marks
+      const zeroX = cx - r;
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "11px monospace";
+      ctx.textAlign = "center";
+
+      // Draw ticks from zeroX - 100 to zeroX + 350
+      for (let offset = -40; offset <= 320; offset += 10) {
+        const tickX = zeroX + offset;
+        if (tickX < 90 || tickX > w - 90) continue;
+        const isMajor = offset % 50 === 0;
+        const isMid = offset % 10 === 0 && !isMajor;
+        ctx.strokeStyle = isMajor ? "#f8fafc" : (isMid ? "#64748b" : "#475569");
+        ctx.lineWidth = isMajor ? 2 : 1;
+        ctx.beginPath();
+        ctx.moveTo(tickX, rulerY);
+        ctx.lineTo(tickX, rulerY + (isMajor ? 16 : (isMid ? 10 : 6)));
+        ctx.stroke();
+
+        if (isMajor) {
+          const valCm = (offset / (r * 2) * group.trueD).toFixed(1);
+          ctx.fillText(`${valCm}`, tickX, rulerY + 30);
+        }
+      }
+      ctx.fillText(`刻度 (${group.unit})`, zeroX - 50, rulerY + 30);
+
+      // Draw Circle Object
+      drawStyledCircle(cx, cy, r, group, 0);
+
+      // Draw Left Caliper Block (Orange Triangle/Block)
+      drawCaliperBlock(caliperLeftX, groundY, 'left', isClamped);
+
+      // Draw Right Caliper Block (Orange Triangle/Block)
+      drawCaliperBlock(caliperRightX, groundY, 'right', isClamped);
+
+      // Draw Measurement Dimension Arrow between Calipers
+      if (caliperRightX > caliperLeftX) {
+        const dimY = cy - r - 25;
+        ctx.strokeStyle = isClamped ? "#facc15" : "#38bdf8";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        // Vertical projection lines
+        ctx.beginPath();
+        ctx.moveTo(caliperLeftX, rulerY);
+        ctx.lineTo(caliperLeftX, dimY);
+        ctx.moveTo(caliperRightX, rulerY);
+        ctx.lineTo(caliperRightX, dimY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Horizontal dimension line with arrows
+        drawArrow(caliperLeftX, dimY, caliperRightX, dimY, isClamped ? "#facc15" : "#38bdf8");
+
+        // Dimension text
+        ctx.fillStyle = isClamped ? "#facc15" : "#ffffff";
+        ctx.font = "bold 15px -apple-system, sans-serif";
+        ctx.textAlign = "center";
+        const measuredDist = (caliperRightX - caliperLeftX) / (r * 2) * group.trueD;
+        ctx.fillText(
+          isClamped ? `直徑 d = ${group.trueD} ${group.unit} (夾緊成功!)` : `擋板間距 ≈ ${measuredDist.toFixed(1)} ${group.unit}`,
+          (caliperLeftX + caliperRightX) / 2,
+          dimY - 10
+        );
+      }
+    }
+
+    function drawCaliperBlock(x, groundY, side, clamped) {
+      ctx.save();
+      const blockWidth = 50;
+      const blockHeight = 180;
+      const topY = groundY - blockHeight;
+
+      // Triangle / Caliper Body
+      ctx.fillStyle = clamped ? "rgba(234, 179, 8, 0.45)" : "rgba(249, 115, 22, 0.45)";
+      ctx.strokeStyle = clamped ? "#facc15" : "#fb923c";
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      if (side === 'left') {
+        // Flat vertical face on the right (at x)
+        ctx.moveTo(x, groundY + 15);
+        ctx.lineTo(x, topY);
+        ctx.lineTo(x - blockWidth, groundY);
+        ctx.closePath();
+      } else {
+        // Flat vertical face on the left (at x)
+        ctx.moveTo(x, groundY + 15);
+        ctx.lineTo(x, topY);
+        ctx.lineTo(x + blockWidth, groundY);
+        ctx.closePath();
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      // Top drag handle pill
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(side === 'left' ? x - 15 : x + 15, topY + 20, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(side === 'left' ? "左板" : "右板", side === 'left' ? x - 15 : x + 15, topY + 24);
+
+      // Alignment pointer at the bottom on ruler
+      ctx.fillStyle = clamped ? "#facc15" : "#f97316";
+      ctx.beginPath();
+      ctx.moveTo(x, groundY);
+      ctx.lineTo(x - 5, groundY - 10);
+      ctx.lineTo(x + 5, groundY - 10);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    /* DRAW STEP 2: ROLLING WHEEL & UNROLLED RIBBON */
+    function renderStep2Canvas(w, h, group) {
+      const groundY = 240;
+      const startX = 120;
+      const r = 55;
+      const circPx = 2 * Math.PI * r; // pixel circumference
+
+      // Current wheel center X
+      const currX = startX + (rollRotation / (2 * Math.PI)) * circPx;
+      const currY = groundY - r;
+
+      // Ground Line
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(40, groundY);
+      ctx.lineTo(w - 40, groundY);
+      ctx.stroke();
+
+      // Start line marker
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(startX, groundY - 15);
+      ctx.lineTo(startX, groundY + 25);
+      ctx.stroke();
+      ctx.fillStyle = "#ef4444";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("起點 0", startX, groundY + 40);
+
+      // Draw Unrolled Circumference Ribbon on Ground
+      const unrolledLen = (rollRotation / (2 * Math.PI)) * circPx;
+      if (unrolledLen > 0) {
+        ctx.fillStyle = "rgba(16, 185, 129, 0.4)";
+        ctx.fillRect(startX, groundY - 6, unrolledLen, 6);
+
+        ctx.strokeStyle = "#10b981";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(startX, groundY - 3);
+        ctx.lineTo(startX + unrolledLen, groundY - 3);
+        ctx.stroke();
+      }
+
+      // Draw Wheel at currX
+      drawStyledCircle(currX, currY, r, group, rollRotation);
+
+      // Contact point marker on wheel
+      const contactAngle = rollRotation - Math.PI / 2;
+      const pinX = currX + Math.cos(contactAngle) * (r - 2);
+      const pinY = currY + Math.sin(contactAngle) * (r - 2);
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(pinX, pinY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dimension of Unrolled Length
+      if (unrolledLen > 20) {
+        const dimY = groundY + 20;
+        drawArrow(startX, dimY, startX + unrolledLen, dimY, "#10b981");
+        ctx.fillStyle = "#34d399";
+        ctx.font = "bold 14px sans-serif";
+        ctx.textAlign = "center";
+        const currentCircVal = ((rollRotation / (2 * Math.PI)) * group.trueC).toFixed(1);
+        const isDone = rollRotation >= Math.PI * 2 * 0.98;
+        ctx.fillText(
+          isDone ? `圓周長 C = ${group.trueC} ${group.unit} (剛好一圈!)` : `已展開：${currentCircVal} ${group.unit}`,
+          startX + unrolledLen / 2,
+          dimY + 22
+        );
+      }
+
+      // Prompt text above
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🖱️ 滑鼠拖曳圓輪或點下方「自動慢速滾動」按鈕向前滾動", w / 2, 40);
+    }
+
+    /* DRAW STEP 3: DIAMETER STICKS COMPARISON */
+    function renderStep3Canvas(w, h, group) {
+      const lineY = 160;
+      const startX = 100;
+      const totalLenPx = 600; // Represents the full unrolled circumference C
+      const endX = startX + totalLenPx;
+
+      // 1. Draw Full Circumference Line (C)
+      ctx.fillStyle = "rgba(16, 185, 129, 0.2)";
+      ctx.fillRect(startX, lineY - 14, totalLenPx, 28);
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(startX, lineY - 14, totalLenPx, 28);
+
+      // Label for Circumference
+      ctx.fillStyle = "#34d399";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`展開的圓周長 C = ${group.trueC} ${group.unit}`, startX + totalLenPx / 2, lineY - 26);
+
+      // 2. Diameter stick unit length in px
+      // In real math, C = pi * d => 1 stick length in px = totalLenPx / (trueC / trueD)
+      const ratio = group.trueC / group.trueD; // ~ 3.14159
+      const stickLenPx = totalLenPx / ratio;
+
+      // Draw Placed Sticks
+      for (let i = 0; i < sticksPlaced; i++) {
+        const sx = startX + i * stickLenPx;
+        ctx.fillStyle = "rgba(250, 204, 21, 0.9)";
+        ctx.fillRect(sx + 2, lineY + 24, stickLenPx - 4, 32);
+        ctx.strokeStyle = "#eab308";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx + 2, lineY + 24, stickLenPx - 4, 32);
+
+        // Stick text
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText(`第 ${i + 1} 根直徑尺 (d)`, sx + stickLenPx / 2, lineY + 45);
+      }
+
+      // If 3 sticks placed, show the remainder
+      if (sticksPlaced === 3) {
+        const remStartX = startX + 3 * stickLenPx;
+        const remLenPx = totalLenPx - 3 * stickLenPx;
+
+        ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
+        ctx.fillRect(remStartX + 2, lineY + 24, remLenPx - 4, 32);
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(remStartX + 2, lineY + 24, remLenPx - 4, 32);
+
+        // Highlight remaining bracket
+        ctx.fillStyle = "#f87171";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText(`約 0.14 d`, remStartX + remLenPx / 2, lineY + 75);
+
+        // Grand Conclusion Banner
+        ctx.fillStyle = "#facc15";
+        ctx.font = "bold 20px -apple-system, sans-serif";
+        ctx.fillText(
+          `✨ 圓周長 C ＝ 3 根直徑尺 ＋ 0.14 根直徑 ＝ 約 3.14 個直徑長！`,
+          w / 2,
+          lineY + 125
+        );
+      } else {
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "14px sans-serif";
+        ctx.fillText(
+          `請點擊下方「擺放第 ${sticksPlaced + 1} 根直徑尺」，看看圓周長可以放下幾根直徑？`,
+          w / 2,
+          lineY + 105
+        );
+      }
+    }
+
+    /* DRAW STEP 4: CELEBRATION / MATH ART */
+    function renderStep4Canvas(w, h, group) {
+      // Dynamic glowing circle & ratio diagram
+      const cx = w / 2;
+      const cy = 110;
+      const r = 60;
+
+      drawStyledCircle(cx, cy, r, group, 0);
+
+      ctx.fillStyle = "#facc15";
+      ctx.font = "bold 24px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`π ≈ 3.14159...`, cx, 230);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "14px sans-serif";
+      ctx.fillText(`無論何種大小的圓，圓周長 ÷ 直徑永遠是個常數`, cx, 260);
+    }
+
+    /* HELPER: DRAW STYLED OBJECTS (COIN, CUP, PIZZA, BIKE, HOOP, FERRIS) */
+    function drawStyledCircle(cx, cy, r, group, rot) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+
+      if (group.id === 1) {
+        // 50 元硬幣 (Golden coin)
+        const grad = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r);
+        grad.addColorStop(0, "#fef08a");
+        grad.addColorStop(0.7, "#eab308");
+        grad.addColorStop(1, "#a16207");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#ca8a04";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Coin rim dent dots
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+          ctx.fillStyle = "#713f12";
+          ctx.beginPath();
+          ctx.arc(Math.cos(a) * (r - 7), Math.sin(a) * (r - 7), 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "#713f12";
+        ctx.font = "bold 28px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("50", 0, -2);
+        ctx.font = "bold 11px sans-serif";
+        ctx.fillText("圓", 0, 18);
+
+      } else if (group.id === 2) {
+        // 珍奶杯口 (Bubble Tea Top)
+        ctx.fillStyle = "rgba(6, 182, 212, 0.25)";
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#06b6d4";
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        // Pearls
+        const pearlCoords = [[-20, -10], [15, -20], [-10, 20], [20, 15], [0, 0], [-25, 10]];
+        pearlCoords.forEach(([px, py]) => {
+          ctx.fillStyle = "#1e293b";
+          ctx.beginPath();
+          ctx.arc(px, py, 7, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Straw hole
+        ctx.fillStyle = "#f43f5e";
+        ctx.beginPath();
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (group.id === 3) {
+        // 9 吋披薩盤 (Pizza)
+        ctx.fillStyle = "#ea580c";
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#fef08a";
+        ctx.beginPath();
+        ctx.arc(0, 0, r - 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pepperoni slices
+        const pep = [[-20, -15], [20, -10], [-5, 20], [15, 15], [-25, 10]];
+        pep.forEach(([px, py]) => {
+          ctx.fillStyle = "#b91c1c";
+          ctx.beginPath();
+          ctx.arc(px, py, 8, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+      } else if (group.id === 4) {
+        // 腳踏車輪 (Bicycle Wheel)
+        ctx.fillStyle = "#0f172a";
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        // Spokes
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 8; i++) {
+          const a = (i * Math.PI) / 4;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+          ctx.lineTo(-Math.cos(a) * r, -Math.sin(a) * r);
+          ctx.stroke();
+        }
+
+        // Hub & Valve
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (group.id === 5) {
+        // 大呼啦圈 (Hula Hoop)
+        ctx.strokeStyle = "#ec4899";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, r - 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Colored stripes on hoop
+        for (let i = 0; i < 12; i++) {
+          const a = (i * Math.PI) / 6;
+          ctx.strokeStyle = i % 2 === 0 ? "#facc15" : "#3b82f6";
+          ctx.lineWidth = 8;
+          ctx.beginPath();
+          ctx.arc(0, 0, r - 4, a, a + 0.25);
+          ctx.stroke();
+        }
+
+      } else if (group.id === 6) {
+        // 遊樂園摩天輪 (Ferris Wheel)
+        ctx.strokeStyle = "#a855f7";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Spokes & Cabins
+        for (let i = 0; i < 6; i++) {
+          const a = (i * Math.PI) / 3;
+          ctx.strokeStyle = "rgba(168, 85, 247, 0.6)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          ctx.stroke();
+
+          // Cabin
+          ctx.fillStyle = "#ec4899";
+          ctx.fillRect(Math.cos(a) * r - 6, Math.sin(a) * r - 6, 12, 12);
+        }
+
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.arc(0, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Draw Center Point & Origin mark
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Top alignment indicator
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(0, r - 2, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawArrow(fromX, fromY, toX, toY, color = "#fff") {
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+
+      const headlen = 8;
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+
+      // Arrowhead at from
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(fromX + headlen * Math.cos(angle + Math.PI / 6), fromY + headlen * Math.sin(angle + Math.PI / 6));
+      ctx.lineTo(fromX + headlen * Math.cos(angle - Math.PI / 6), fromY + headlen * Math.sin(angle - Math.PI / 6));
+      ctx.fill();
+
+      // Arrowhead at to
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.fill();
+    }
+
+    /* ============================================================
+       7. POINTER & TOUCH HANDLERS (DRAG CALIPERS & WHEEL)
+       ============================================================ */
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
+    function handlePointerDown(e) {
+      const pos = getCanvasPos(e);
+
+      if (currentStep === 1) {
+        // Check if clicked near left caliper
+        if (Math.abs(pos.x - caliperLeftX) < 40) {
+          draggingCaliper = 'left';
+          playTone(400, 'sine', 0.04, 0.1);
+        } else if (Math.abs(pos.x - caliperRightX) < 40) {
+          draggingCaliper = 'right';
+          playTone(400, 'sine', 0.04, 0.1);
+        }
+      } else if (currentStep === 2) {
+        // Drag to roll wheel
+        const startX = 120;
+        const r = 55;
+        const circPx = 2 * Math.PI * r;
+        const currX = startX + (rollRotation / (2 * Math.PI)) * circPx;
+        const currY = 240 - r;
+
+        const dist = Math.hypot(pos.x - currX, pos.y - currY);
+        if (dist < r + 20) {
+          wheelDragging = true;
+          dragStartX = pos.x;
+          dragStartRot = rollRotation;
+        }
+      }
+    }
+
+    function handlePointerMove(e) {
+      if (!draggingCaliper && !wheelDragging) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getCanvasPos(e);
+
+      if (draggingCaliper === 'left') {
+        caliperLeftX = Math.max(90, Math.min(circleCenterX - 10, pos.x));
+        checkClampStatus();
+        renderCanvas();
+      } else if (draggingCaliper === 'right') {
+        caliperRightX = Math.max(circleCenterX + 10, Math.min(canvas.width - 90, pos.x));
+        checkClampStatus();
+        renderCanvas();
+      } else if (wheelDragging) {
+        const dx = pos.x - dragStartX;
+        const r = 55;
+        const circPx = 2 * Math.PI * r;
+        const dRot = (dx / circPx) * (2 * Math.PI);
+        rollRotation = Math.max(0, Math.min(Math.PI * 2, dragStartRot + dRot));
+        renderCanvas();
+      }
+    }
+
+    function handlePointerUp() {
+      if (draggingCaliper) {
+        playSnapSound();
+        draggingCaliper = null;
+        if (isClamped) {
+          showToast("雙擋板已完美夾緊直徑！", "🎯");
+        }
+      }
+      if (wheelDragging) {
+        wheelDragging = false;
+        if (rollRotation >= Math.PI * 2 * 0.98) {
+          rollRotation = Math.PI * 2;
+          playSuccessFanfare();
+          showToast("剛好滾動一整圈！", "🎉");
+        }
+        renderCanvas();
+      }
+    }
+
+    // Start on load
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>

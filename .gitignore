@@ -1,6 +1,7 @@
 # .gitignore for prime factor defender game
 .DS_Store
 Thumbs.db
+node_modules/
 # Ignore the independent jukebox repository
 youtube-jukebox/
 *.tmp
