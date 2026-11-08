@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>📐 圓面積公式推導實驗室 - 扇形重組長方形 ✕ 分層堆疊三角形</title>
-  <meta name="description" content="國小六年級數學互動教具：將圓切成扇形重組成平行四邊形/長方形，或由下到上堆疊成等腰三角形，動手拖曳滑桿體驗幾何化曲為直與約分消去，證明半徑×半徑×3.14！">
+  <title>📐 圓面積公式推導實驗室 - 扇形重組長方形 ✕ 分層金字塔三角形</title>
+  <meta name="description" content="國小六年級數學互動教具：將圓切成扇形重組成平行四邊形/長方形，或由下到上堆疊成等腰三角形金字塔（4等分、16等分），動手拖曳滑桿體驗幾何化曲為直與約分消去，證明半徑×半徑×3.14！">
   <style>
     :root {
       --bg-dark: #070b18;
@@ -671,7 +671,7 @@
 
       <h1>📐 圓面積公式推導實驗室</h1>
       <p class="subtitle">
-        透過扇形重組為「長方形」，或由下到上堆疊為「三角形」，親眼見證幾何化曲為直與約分消去，證明 <b>半徑 × 半徑 × 3.14</b> 的神奇幾何原理！
+        透過扇形重組為「長方形」，或由下到上堆疊為「金字塔三角形」（4等分、16等分），親眼見證幾何化曲為直與約分消去，證明 <b>半徑 × 半徑 × 3.14</b> 的神奇幾何原理！
       </p>
     </header>
 
@@ -686,7 +686,7 @@
       <button class="tab-btn tab-gold" id="tabBtn2" onclick="switchTab(2)">
         <span class="tab-icon">🔺</span>
         <span class="tab-title">方法二：分層拼成三角形</span>
-        <span class="tab-desc">底＝半周長・高＝2r・約分消去 2</span>
+        <span class="tab-desc">金字塔堆疊・約分消去・殊途同歸</span>
       </button>
 
       <button class="tab-btn tab-purple" id="tabBtn3" onclick="switchTab(3)">
@@ -805,13 +805,13 @@
       </div>
     </div>
 
-    <!-- TAB 2: 分層拼成三角形 (老師手稿堆疊法) -->
+    <!-- TAB 2: 分層拼成三角形 (4等分手稿 ＆ 16等分金字塔) -->
     <div class="lab-card" id="tabContent2" style="display: none;">
       <div class="card-header-bar">
         <div class="card-title-group">
-          <h2><span>🔺 方法二：扇形由下到上分層堆疊成大三角形</span></h2>
-          <div class="card-hint">
-            💡 將圓形分成 4 個扇形：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），拼成大三角形！
+          <h2><span id="tab2Title">🔺 方法二：扇形由下到上分層堆疊成大三角形</span></h2>
+          <div class="card-hint" id="tab2Hint">
+            💡 經典手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），拼成大三角形！
           </div>
         </div>
       </div>
@@ -830,8 +830,8 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">🔪 分割模式：</span>
             <div class="pill-group" id="triSlicePills">
-              <button class="pill-btn gold active" onclick="setTriSlices(4)">4 等分 (經典手稿 1+3)</button>
-              <button class="pill-btn gold" onclick="setTriSlices(16)">16 等分 (4層金字塔 1+3+5+7)</button>
+              <button class="pill-btn gold active" id="btnTri4" onclick="setTriSlices(4)">4 等分 (老師手稿 1+3)</button>
+              <button class="pill-btn gold" id="btnTri16" onclick="setTriSlices(16)">16 等分 (4層金字塔 1+3+5+7)</button>
             </div>
           </div>
         </div>
@@ -859,53 +859,19 @@
         <canvas id="canvas2"></canvas>
       </div>
 
-      <!-- Formula Breakdown -->
+      <!-- Formula Breakdown (Dynamic according to triSlices) -->
       <div class="formula-section">
-        <div class="formula-steps-grid">
-          <div class="step-box">
-            <span class="step-tag">Step 1 • 幾何形狀對應</span>
-            <span class="step-content">三角形面積 ＝ (底 × 高) ÷ 2</span>
-            <span class="step-desc">扇形由下到上分層堆疊：頂層 1 個，底層 3 個（左右正立、中間倒扣）。</span>
-          </div>
-
-          <div class="step-box highlight">
-            <span class="step-tag">Step 2 • 底邊對應</span>
-            <span class="step-content">底 ＝ 圓周長的一半</span>
-            <span class="step-desc">
-              大三角形底邊由 ② 與 ③ 兩個底弧組成：<br>
-              <b style="color: var(--cyan);">底 ＝ C ÷ 4 ＋ C ÷ 4 ＝ 半徑 × 3.14</b>
-            </span>
-          </div>
-
-          <div class="step-box highlight">
-            <span class="step-tag">Step 3 • 高度對應</span>
-            <span class="step-content">高 ＝ 2 倍半徑 (2r)</span>
-            <span class="step-desc">
-              從大三角形頂點到底邊，跨越兩層扇形半徑：<br>
-              <b style="color: var(--gold);">高 ＝ 半徑 ＋ 半徑 ＝ 2 × 半徑 (直徑)</b>
-            </span>
-          </div>
-
-          <div class="step-box">
-            <span class="step-tag">Step 4 • 約分神奇消去！</span>
-            <span class="step-content">高裡的 2 與公式 ÷2 抵銷</span>
-            <span class="step-desc">
-              ＝ (半徑 × 3.14) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span> × 半徑) ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span><br>
-              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
-            </span>
-          </div>
+        <div class="formula-steps-grid" id="triFormulaGrid">
+          <!-- Populated by JS -->
         </div>
 
-        <div class="conclusion-banner">
-          <div class="math-title">🌟 三角形分層堆疊法 數學結論證明</div>
-          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(半徑 × 3.14) × (2 × 半徑)] ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+        <div class="conclusion-banner" id="triConclusionBanner">
+          <!-- Populated by JS -->
         </div>
       </div>
 
-      <div class="teacher-tip">
-        💡 <strong>震撼頓悟點</strong>：<br>
-        很多學生常常好奇：「為什麼三角形面積公式要『除以 2』，算出來的圓面積卻是 $r \times r \times 3.14$？」<br>
-        答案就在這裡：因為大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（$2 \times r$）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，完美得出 $r \times r \times 3.14$！
+      <div class="teacher-tip" id="triTeacherTip">
+        <!-- Populated by JS -->
       </div>
     </div>
 
@@ -951,8 +917,8 @@
 
         <div class="dual-card">
           <div class="dual-card-title">
-            <span style="color: var(--gold);">🔺 方案二：分層拼成三角形</span>
-            <span style="font-size: 12px; color: var(--text-muted);">底 ＝ 半個圓周，高 ＝ 2r</span>
+            <span style="color: var(--gold);" id="dualCardRightTitle">🔺 方案二：金字塔拼成三角形</span>
+            <span style="font-size: 12px; color: var(--text-muted);" id="dualCardRightSub">分層堆疊約分消去</span>
           </div>
           <canvas id="dualCanvasRight" class="dual-canvas"></canvas>
         </div>
@@ -964,14 +930,14 @@
           <tr>
             <th>比較項目</th>
             <th>方案一：重組為長方形</th>
-            <th>方案二：分層拼成三角形 (老師手稿法)</th>
+            <th>方案二：分層拼成三角形 (金字塔堆疊)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><b>目標幾何圖形</b></td>
             <td>平行四邊形 / 長方形</td>
-            <td>大等腰三角形（頂層 1 片，底層 3 片）</td>
+            <td>大等腰三角形（分層咬合金字塔）</td>
           </tr>
           <tr>
             <td><b>基礎面積公式</b></td>
@@ -981,17 +947,17 @@
           <tr>
             <td><b>底邊長度對應</b></td>
             <td>長 ＝ 圓周長的一半 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
-            <td>底 ＝ 底部兩扇形弧長相加 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
+            <td>底 ＝ 最下層底弧總和（4等分為 <span style="color: var(--cyan);">C ÷ 2</span>；16等分為 <span style="color: var(--cyan);">C ÷ 4</span>）</td>
           </tr>
           <tr>
             <td><b>高度/寬度對應</b></td>
             <td>寬 ＝ <span style="color: var(--gold);">1 個半徑 (r)</span></td>
-            <td>高 ＝ 兩層扇形半徑相加 ＝ <span style="color: var(--gold);">2 個半徑 (2r，即直徑)</span></td>
+            <td>高 ＝ 層數 × 半徑（4等分為 <span style="color: var(--gold);">2r</span>；16等分為 <span style="color: var(--gold);">4r</span>）</td>
           </tr>
           <tr>
-            <td><b>公式中的「2」如何處理？</b></td>
+            <td><b>公式中的「約分消去」</b></td>
             <td>算式裡只有 1 個半徑，直接相乘算出面積</td>
-            <td>高裡面的「<strong>2 × 半徑</strong>」，剛好與三角形面積公式的「<strong>÷ 2</strong>」約分消去！</td>
+            <td>高的倍數剛好與底邊的分母約分抵銷，最後必定導出 <strong>半徑 × 半徑 × 3.14</strong>！</td>
           </tr>
           <tr>
             <td><b>最終推導成果</b></td>
@@ -1003,7 +969,7 @@
 
       <div class="conclusion-banner">
         <div class="math-title">🌟 幾何學的崇高和諧</div>
-        <div class="math-equation">無論變成長方形還是三角形，割補前後面積永恆守恆，必為：半徑 × 半徑 × 3.14 ！</div>
+        <div class="math-equation">無論變成長方形還是金字塔三角形，割補前後面積永恆守恆，必為：半徑 × 半徑 × 3.14 ！</div>
       </div>
     </div>
 
@@ -1051,16 +1017,16 @@
               <span class="calc-pill pill-blue">長 × 寬</span>
             </div>
             <div class="calc-expression" id="calcRectExpr">
-              長 ＝ 31.4 ÷ 2 ＝ 15.7 cm<br>
-              面積 ＝ 15.7 × 5
+              長 ＝ 圓周長的一半 ＝ 31.4 ÷ 2 ＝ <b style="color: var(--cyan);">15.7 cm</b><br>
+              面積 ＝ 長 × 寬 ＝ 15.7 × 5
             </div>
             <div class="calc-final-val" id="calcRectVal">＝ 78.5 cm²</div>
           </div>
 
-          <!-- Card 2: 三角形法 (老師手稿堆疊法) -->
+          <!-- Card 2: 三角形法 (金字塔堆疊法) -->
           <div class="calc-card">
             <div class="calc-card-header">
-              <span style="color: var(--gold);">🔺 方案二：三角形計算過程 (手稿堆疊法)</span>
+              <span style="color: var(--gold);">🔺 方案二：三角形計算過程 (金字塔堆疊法)</span>
               <span class="calc-pill pill-gold">(底 × 高) ÷ 2</span>
             </div>
             <div class="calc-expression" id="calcTriExpr">
@@ -1173,6 +1139,8 @@
         if (content) content.style.display = (i === tabIndex) ? 'block' : 'none';
       }
 
+      if (tabIndex === 2) updateTriFormulaUI();
+
       syncAllSliders(progress);
       requestAnimationFrame(renderAll);
     }
@@ -1222,13 +1190,113 @@
     function setTriSlices(n) {
       triSlices = n;
       playTone(580);
-      const pills = document.getElementById('triSlicePills');
-      if (pills) {
-        const btns = pills.querySelectorAll('.pill-btn');
-        btns[0].classList.toggle('active', n === 4);
-        btns[1].classList.toggle('active', n === 16);
-      }
+      document.getElementById('btnTri4').classList.toggle('active', n === 4);
+      document.getElementById('btnTri16').classList.toggle('active', n === 16);
+      updateTriFormulaUI();
       renderAll();
+    }
+
+    function updateTriFormulaUI() {
+      const is4 = (triSlices === 4);
+      document.getElementById('tab2Title').innerHTML = is4
+        ? `<span>🔺 方法二：4 等分扇形由下到上堆疊成大三角形 (老師手稿 1+3)</span>`
+        : `<span>🔺 方法二：16 等分扇形 4 層金字塔幾何堆疊 (1+3+5+7 ＝ 16)</span>`;
+
+      document.getElementById('tab2Hint').innerHTML = is4
+        ? `💡 老師手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），高為 2r，與公式 ÷2 完美約分！`
+        : `💡 16 等分金字塔堆疊：第1層 1 個、第2層 3 個、第3層 5 個、第4層 7 個！高為 4r，底為 C÷4，4 與 4 完美約分消去！`;
+
+      const grid = document.getElementById('triFormulaGrid');
+      const banner = document.getElementById('triConclusionBanner');
+      const tip = document.getElementById('triTeacherTip');
+
+      if (is4) {
+        grid.innerHTML = `
+          <div class="step-box">
+            <span class="step-tag">Step 1 • 幾何形狀對應</span>
+            <span class="step-content">三角形面積 ＝ (底 × 高) ÷ 2</span>
+            <span class="step-desc">扇形由下到上分層堆疊：頂層 1 個，底層 3 個（左右正立、中間倒扣）。</span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 2 • 底邊對應</span>
+            <span class="step-content">底 ＝ 圓周長的一半</span>
+            <span class="step-desc">
+              大三角形底邊由 ② 與 ③ 兩個底弧組成：<br>
+              <b style="color: var(--cyan);">底 ＝ C ÷ 4 ＋ C ÷ 4 ＝ 半徑 × 3.14</b>
+            </span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 3 • 高度對應</span>
+            <span class="step-content">高 ＝ 2 倍半徑 (2r)</span>
+            <span class="step-desc">
+              從大三角形頂點到底邊，跨越兩層扇形半徑：<br>
+              <b style="color: var(--gold);">高 ＝ 半徑 ＋ 半徑 ＝ 2 × 半徑 (直徑)</b>
+            </span>
+          </div>
+
+          <div class="step-box">
+            <span class="step-tag">Step 4 • 約分神奇消去！</span>
+            <span class="step-content">高裡的 2 與公式 ÷2 抵銷</span>
+            <span class="step-desc">
+              ＝ (半徑 × 3.14) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span> × 半徑) ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span><br>
+              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
+            </span>
+          </div>
+        `;
+        banner.innerHTML = `
+          <div class="math-title">🌟 4 等分三角形分層堆疊法 數學結論證明</div>
+          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(半徑 × 3.14) × (2 × 半徑)] ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+        `;
+        tip.innerHTML = `
+          💡 <strong>震撼頓悟點</strong>：<br>
+          大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（2 × 半徑）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，得出完美的 $r \times r \times 3.14$！
+        `;
+      } else {
+        grid.innerHTML = `
+          <div class="step-box">
+            <span class="step-tag">Step 1 • 幾何金字塔結構</span>
+            <span class="step-content">1 + 3 + 5 + 7 ＝ 16 等分</span>
+            <span class="step-desc">4 層完整金字塔：10 個正立扇形 ＋ 6 個倒扣扇形嚴密鑲嵌！</span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 2 • 底邊對應</span>
+            <span class="step-content">底 ＝ 4 個底弧 ＝ C ÷ 4</span>
+            <span class="step-desc">
+              底邊由最下層第 4 層的 4 個正立底弧組成：<br>
+              <b style="color: var(--cyan);">底 ＝ 4 × (C ÷ 16) ＝ C ÷ 4 ＝ (半徑 × 3.14) ÷ 2</b>
+            </span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 3 • 高度對應</span>
+            <span class="step-content">高 ＝ 4 層半徑 ＝ 4r</span>
+            <span class="step-desc">
+              從金字塔頂點垂直到底部，跨越 4 層扇形：<br>
+              <b style="color: var(--gold);">高 ＝ 4 × 半徑 (4r)</b>
+            </span>
+          </div>
+
+          <div class="step-box">
+            <span class="step-tag">Step 4 • 雙重完美約分！</span>
+            <span class="step-content">底的 4 與高的 4 剛好抵銷！</span>
+            <span class="step-desc">
+              ＝ [(C ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">4</span>) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">4</span> × 半徑)] ÷ 2<br>
+              ＝ (C × 半徑) ÷ 2 ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
+            </span>
+          </div>
+        `;
+        banner.innerHTML = `
+          <div class="math-title">🌟 16 等分金字塔堆疊法 數學結論證明</div>
+          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(C ÷ 4) × 4r] ÷ 2 ＝ (C × r) ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+        `;
+        tip.innerHTML = `
+          👑 <strong>極限微積分思維</strong>：<br>
+          在 16 等分金字塔中，底邊由 4 個底弧組成（長度為 $C \div 4$），高為 4 層半徑（$4r$）！高裡的「4」剛好與底邊分母的「4」約分消去，圓周長自帶的「2」與三角形公式的「除以 2」約分消去！無論切成幾層平方數，結果必為 $r \times r \times 3.14$！
+        `;
+      }
     }
 
     function syncAllSliders(val) {
@@ -1537,7 +1605,6 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      // Top Dimension: "長 ＝ 圓周長的一半 ＝ 半徑 × 3.14"
       const bracketY = top - 20;
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2;
@@ -1554,7 +1621,6 @@
       ctx.textBaseline = 'bottom';
       ctx.fillText('長 ＝ 圓周長的一半 ＝ 半徑 × 3.14', left + w * 0.5, bracketY - 4);
 
-      // Right Dimension: "寬 ＝ 半徑 r"
       const bracketX = left + w + 24;
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 2;
@@ -1608,7 +1674,7 @@
     }
 
     /* ==========================================================================
-       RENDER METHOD 2: TEACHER'S 4-SECTOR LAYERED TRIANGLE STACKING
+       RENDER METHOD 2: 4-SLICE STACKING OR 16-SLICE PYRAMID
        ========================================================================== */
     function renderTab2() {
       const canvas = document.getElementById('canvas2');
@@ -1619,37 +1685,37 @@
       ctx.clearRect(0, 0, width, height);
 
       const t = progress / 100;
-      const R = Math.min(width * 0.15, height * 0.35, 110);
       const cx0 = width * 0.5;
       const cy0 = height * 0.44;
 
       if (triView === 'horizontal') {
-        // Teacher's notebook orientation: Base on left, Apex on right
         ctx.save();
         ctx.translate(width * 0.5, height * 0.5);
         ctx.rotate(Math.PI / 2);
         ctx.translate(-width * 0.5, -height * 0.5);
-        renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0);
+        if (triSlices === 4) {
+          render4SectorTriangle(ctx, width, height, t, cx0, cy0);
+        } else {
+          render16SectorPyramid(ctx, width, height, t, cx0, cy0);
+        }
         ctx.restore();
       } else {
-        // Upright view: Base at bottom, Apex at top
-        renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0);
+        if (triSlices === 4) {
+          render4SectorTriangle(ctx, width, height, t, cx0, cy0);
+        } else {
+          render16SectorPyramid(ctx, width, height, t, cx0, cy0);
+        }
       }
     }
 
-    function renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0) {
-      const sin45 = Math.SQRT1_2; // ~0.7071
+    /* --- 4-SECTOR TRIANGLE STACKING (1 TOP + 3 BOTTOM) --- */
+    function render4SectorTriangle(ctx, width, height, t, cx0, cy0) {
+      const R = Math.min(width * 0.15, height * 0.35, 110);
+      const sin45 = Math.SQRT1_2;
       const delta = R * sin45;
 
-      // Triangle apex (top of Sector 1)
       const apexX = width * 0.5;
       const apexY = height * 0.28;
-
-      // Four Sectors:
-      // ① Sector 1 (Top Wedge): Apex at apexX, apexY. Angle span 90 deg down.
-      // ② Sector 2 (Bottom-Left Wedge): Apex at (apexX - delta, apexY + delta).
-      // ③ Sector 3 (Bottom-Right Wedge): Apex at (apexX + delta, apexY + delta).
-      // ④ Sector 4 (Inverted Wedge): Apex at (apexX, apexY + 2*delta), angle span 90 deg UP.
 
       const targetPos = [
         { x: apexX, y: apexY, angle: Math.PI / 2, color: '#0284c7', label: '①' },
@@ -1658,24 +1724,12 @@
         { x: apexX, y: apexY + 2 * delta, angle: -Math.PI / 2, color: '#7c3aed', label: '④' }
       ];
 
-      // Initial circle angles for 4 sectors:
-      // Sector 1: top-right (angle -pi/4)
-      // Sector 2: top-left (angle -3pi/4)
-      // Sector 3: bottom-left (angle 3pi/4)
-      // Sector 4: bottom-right (angle pi/4)
-      const circleAngles = [
-        -Math.PI / 4,
-        -3 * Math.PI / 4,
-        3 * Math.PI / 4,
-        Math.PI / 4
-      ];
+      const circleAngles = [-Math.PI / 4, -3 * Math.PI / 4, 3 * Math.PI / 4, Math.PI / 4];
 
-      // Draw sectors
       for (let i = 0; i < 4; i++) {
         const curX = (1 - t) * cx0 + t * targetPos[i].x;
         const curY = (1 - t) * cy0 + t * targetPos[i].y;
 
-        // Smooth angle rotation
         let angleDiff = targetPos[i].angle - circleAngles[i];
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
@@ -1686,7 +1740,6 @@
         ctx.rotate(curAngle);
         drawWedge(ctx, R, Math.PI / 2, targetPos[i].color, 'rgba(255, 255, 255, 0.4)');
 
-        // Draw sector labels inside
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
@@ -1696,25 +1749,24 @@
         ctx.restore();
       }
 
-      // Annotations at t > 0.4
       if (t > 0.4) {
         const alpha = Math.min(1, (t - 0.4) * 2);
-        drawLayeredTriangleAnnotations(ctx, apexX, apexY, R, delta, alpha);
+        draw4TriangleAnnotations(ctx, apexX, apexY, R, delta, alpha);
       } else {
         const circleAlpha = Math.max(0, 1 - t * 2.5);
         drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
       }
     }
 
-    function drawLayeredTriangleAnnotations(ctx, apexX, apexY, R, delta, alpha) {
+    function draw4TriangleAnnotations(ctx, apexX, apexY, R, delta, alpha) {
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      const baseBottomY = apexY + 2 * delta + (R - delta); // bottom level of arcs
+      const baseBottomY = apexY + 2 * delta + (R - delta);
       const baseLeftX = apexX - 2 * delta;
       const baseRightX = apexX + 2 * delta;
 
-      // Height Dimension (Left side): Gold vertical line spanning 2r
+      // Height Dimension (Left side)
       const hLineX = baseLeftX - 35;
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 2;
@@ -1744,7 +1796,7 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Base Dimension (Bottom side): Cyan bracket along bottom arcs
+      // Base Dimension (Bottom side)
       const bracketY = baseBottomY + 16;
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2;
@@ -1763,6 +1815,176 @@
       ctx.fillStyle = '#94a3b8';
       ctx.font = '12px sans-serif';
       ctx.fillText('(由 ② 與 ③ 兩個底弧組成 ＝ C ÷ 4 ＋ C ÷ 4 ＝ C ÷ 2)', apexX, bracketY + 24);
+
+      ctx.restore();
+    }
+
+    /* --- 16-SECTOR 4-LAYER PYRAMID (1+3+5+7 = 16) --- */
+    function render16SectorPyramid(ctx, width, height, t, cx0, cy0) {
+      const N = 16;
+      const theta = (2 * Math.PI) / N; // 22.5 deg
+      const R = Math.min(width * 0.08, height * 0.17, 62);
+
+      const sinHalf = Math.sin(theta / 2);
+      const cosHalf = Math.cos(theta / 2);
+      const uLeft = { x: -sinHalf, y: cosHalf };
+      const uRight = { x: sinHalf, y: cosHalf };
+
+      // Apex of 16-sector pyramid
+      const apexX = width * 0.5;
+      const apexY = height * 0.14;
+
+      // Palette of 16 colors (vibrant cyan to emerald to orange to purple)
+      const colors = [
+        '#0284c7',
+        '#0369a1', '#059669', '#10b981',
+        '#0d9488', '#14b8a6', '#0284c7', '#0ea5e9', '#38bdf8',
+        '#ea580c', '#f97316', '#fb923c', '#d97706', '#f59e0b', '#7c3aed', '#a855f7'
+      ];
+
+      // Build 16 target positions in pyramid:
+      // Upright sectors: layer r = 0..3, c = 0..r
+      // Inverted sectors: layer r = 1..3, c = 0..r-1
+      const targets = [];
+      let colorIdx = 0;
+
+      for (let r = 0; r < 4; r++) {
+        // Upright sectors in layer r
+        for (let c = 0; c <= r; c++) {
+          const tx = apexX + (r - c) * R * uLeft.x + c * R * uRight.x;
+          const ty = apexY + (r - c) * R * uLeft.y + c * R * uRight.y;
+          targets.push({
+            x: tx,
+            y: ty,
+            angle: Math.PI / 2, // pointing down
+            color: colors[colorIdx % colors.length],
+            isInv: false,
+            row: r,
+            col: c
+          });
+          colorIdx++;
+        }
+        // Inverted sectors in layer r (if r >= 1)
+        if (r >= 1) {
+          for (let c = 0; c < r; c++) {
+            const tx = apexX + (r - c) * R * uLeft.x + (c + 1) * R * uRight.x;
+            const ty = apexY + (r - c) * R * uLeft.y + (c + 1) * R * uRight.y;
+            targets.push({
+              x: tx,
+              y: ty,
+              angle: -Math.PI / 2, // pointing up
+              color: colors[colorIdx % colors.length],
+              isInv: true,
+              row: r,
+              col: c
+            });
+            colorIdx++;
+          }
+        }
+      }
+
+      // Initial angles in circle for the 16 sectors
+      const circleAngles = [];
+      for (let i = 0; i < 16; i++) {
+        circleAngles.push((i + 0.5) * theta - Math.PI / 2);
+      }
+
+      // Draw all 16 sectors interpolating from circle to pyramid
+      for (let i = 0; i < 16; i++) {
+        const curX = (1 - t) * cx0 + t * targets[i].x;
+        const curY = (1 - t) * cy0 + t * targets[i].y;
+
+        let angleDiff = targets[i].angle - circleAngles[i];
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        const curAngle = circleAngles[i] + t * angleDiff;
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, theta, targets[i].color, 'rgba(255, 255, 255, 0.35)');
+
+        // Small index badge
+        if (R > 35) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${i + 1}`, R * 0.45, 0);
+        }
+
+        ctx.restore();
+      }
+
+      // Annotations at t > 0.4
+      if (t > 0.4) {
+        const alpha = Math.min(1, (t - 0.4) * 2);
+        draw16PyramidAnnotations(ctx, apexX, apexY, R, theta, uLeft, uRight, alpha);
+      } else {
+        const circleAlpha = Math.max(0, 1 - t * 2.5);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
+      }
+    }
+
+    function draw16PyramidAnnotations(ctx, apexX, apexY, R, theta, uLeft, uRight, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      const totalH = 4 * R * Math.cos(theta / 2);
+      const baseBottomY = apexY + totalH;
+      const baseSpan = 4 * R * Math.sin(theta / 2);
+      const baseLeftX = apexX - baseSpan;
+      const baseRightX = apexX + baseSpan;
+
+      // Height dimension (Left)
+      const hLineX = baseLeftX - 35;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hLineX + 8, apexY);
+      ctx.lineTo(hLineX, apexY);
+      ctx.lineTo(hLineX, baseBottomY);
+      ctx.lineTo(hLineX + 8, baseBottomY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('高 ＝ 4r', hLineX - 8, (apexY + baseBottomY) * 0.5 - 8);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('(4 層扇形半徑)', hLineX - 8, (apexY + baseBottomY) * 0.5 + 10);
+
+      // Height dashed line
+      ctx.strokeStyle = '#facc15';
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX, baseBottomY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Base dimension (Bottom)
+      const bracketY = baseBottomY + 16;
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(baseLeftX, bracketY - 8);
+      ctx.lineTo(baseLeftX, bracketY);
+      ctx.lineTo(baseRightX, bracketY);
+      ctx.lineTo(baseRightX, bracketY - 8);
+      ctx.stroke();
+
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('底 ＝ 4 個底弧 ＝ C ÷ 4 ＝ (半徑 × 3.14) ÷ 2', apexX, bracketY + 6);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('(由最下層第 4 層的 4 個正立扇形底弧構成)', apexX, bracketY + 24);
 
       ctx.restore();
     }
@@ -1797,10 +2019,17 @@
         drawRectAnnotations(resL.ctx, rectLeftL, rectTopL, rectWL, rectHL, RL, (t - 0.4) * 2);
       }
 
-      // Right: Layered Triangle (4 sectors)
+      // Right: Triangle (either 4-slice or 16-slice according to triSlices)
       resR.ctx.clearRect(0, 0, resR.width, resR.height);
-      const RR = Math.min(resR.width * 0.15, resR.height * 0.35, 68);
-      renderLayeredTriangle(resR.ctx, resR.width, resR.height, t, RR, resR.width * 0.5, resR.height * 0.44);
+      if (triSlices === 4) {
+        render4SectorTriangle(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.44);
+        document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：4 等分三角形 (老師手稿 1+3)';
+        document.getElementById('dualCardRightSub').textContent = '底 ＝ C÷2，高 ＝ 2r';
+      } else {
+        render16SectorPyramid(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.44);
+        document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：16 等分金字塔 (1+3+5+7)';
+        document.getElementById('dualCardRightSub').textContent = '底 ＝ C÷4，高 ＝ 4r';
+      }
     }
 
     /* ==========================================================================
@@ -1867,7 +2096,7 @@
       `;
       document.getElementById('calcRectVal').textContent = `＝ ${area} cm²`;
 
-      // Card 2: Triangle (Teacher's Method)
+      // Card 2: Triangle (Pyramid Method)
       document.getElementById('calcTriExpr').innerHTML = `
         底 ＝ ${halfC} cm，高 ＝ 2 × ${r} ＝ <b style="color: var(--gold);">${height2r} cm</b><br>
         面積 ＝ (${halfC} × ${height2r}) ÷ 2 ＝ ${halfC} × ${r}
@@ -1938,6 +2167,7 @@
     });
 
     window.addEventListener('load', () => {
+      updateTriFormulaUI();
       updateSandboxCalculations();
       renderAll();
     });
