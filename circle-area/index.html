@@ -896,6 +896,7 @@
             <span style="font-size: 13px; font-weight: 700; color: var(--gold);">🔪 分割模式：</span>
             <div class="pill-group" id="triSlicePills">
               <button class="pill-btn gold active" id="btnTri4" onclick="setTriSlices(4)">4 等分 (老師手稿 1+3)</button>
+              <button class="pill-btn gold" id="btnTri8" onclick="setTriSlices(8)">8 等分 (2層細分 2+6)</button>
               <button class="pill-btn gold" id="btnTri16" onclick="setTriSlices(16)">16 等分 (4層金字塔 1+3+5+7)</button>
             </div>
           </div>
@@ -1153,7 +1154,7 @@
     let sliceCount = 16;
     let halfWedgeEnabled = true;
     let triView = 'upright'; // 'upright' or 'horizontal'
-    let triSlices = 4; // 4 or 16
+    let triSlices = 4; // 4, 8, or 16
     let progress = 0; // 0 to 100
     let isPlaying = false;
     let animId = null;
@@ -1286,26 +1287,29 @@
       triSlices = n;
       playTone(580);
       document.getElementById('btnTri4').classList.toggle('active', n === 4);
+      document.getElementById('btnTri8').classList.toggle('active', n === 8);
       document.getElementById('btnTri16').classList.toggle('active', n === 16);
       updateTriFormulaUI();
       renderAll();
     }
 
     function updateTriFormulaUI() {
-      const is4 = (triSlices === 4);
-      document.getElementById('tab2Title').innerHTML = is4
-        ? `<span>🔺 方法二：4 等分扇形由下到上堆疊成大三角形 (老師手稿 1+3)</span>`
-        : `<span>🔺 方法二：16 等分扇形 4 層金字塔幾何堆疊 (1+3+5+7 ＝ 16)</span>`;
-
-      document.getElementById('tab2Hint').innerHTML = is4
-        ? `💡 老師手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），高為 2r，與公式 ÷2 完美約分！`
-        : `💡 16 等分金字塔堆疊：第1層 1 個、第2層 3 個、第3層 5 個、第4層 7 個！高為 4r，底為 C÷4，4 與 4 完美約分消去！`;
+      if (triSlices === 4) {
+        document.getElementById('tab2Title').innerHTML = `<span>🔺 方法二：4 等分扇形由下到上堆疊成大三角形 (老師手稿 1+3)</span>`;
+        document.getElementById('tab2Hint').innerHTML = `💡 老師手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），高為 2r，與公式 ÷2 完美約分！`;
+      } else if (triSlices === 8) {
+        document.getElementById('tab2Title').innerHTML = `<span>🔺 方法二：8 等分扇形 2 層細分堆疊成大三角形 (2+6 ＝ 8)</span>`;
+        document.getElementById('tab2Hint').innerHTML = `💡 8 等分金字塔堆疊：頂層 2 個、底層 6 個（4 個正立、2 個倒扣咬合）。高為 2r，底邊 4 個底弧為 C÷2，高裡的 2 與公式 ÷2 完美約分！`;
+      } else {
+        document.getElementById('tab2Title').innerHTML = `<span>🔺 方法二：16 等分扇形 4 層金字塔幾何堆疊 (1+3+5+7 ＝ 16)</span>`;
+        document.getElementById('tab2Hint').innerHTML = `💡 16 等分金字塔堆疊：第1層 1 個、第2層 3 個、第3層 5 個、第4層 7 個！高為 4r，底為 C÷4，4 與 4 完美約分消去！`;
+      }
 
       const grid = document.getElementById('triFormulaGrid');
       const banner = document.getElementById('triConclusionBanner');
       const tip = document.getElementById('triTeacherTip');
 
-      if (is4) {
+      if (triSlices === 4) {
         grid.innerHTML = `
           <div class="step-box">
             <span class="step-tag">Step 1 • 幾何形狀對應</span>
@@ -1346,7 +1350,50 @@
         `;
         tip.innerHTML = `
           💡 <strong>震撼頓悟點</strong>：<br>
-          大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（2 × 半徑）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，得出完美的 $r \times r \times 3.14$！
+          大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（2 × 半徑）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，得出完美的 $rr × r × 3.14！
+        `;
+      } else if (triSlices === 8) {
+        grid.innerHTML = `
+          <div class="step-box">
+            <span class="step-tag">Step 1 • 幾何細分結構</span>
+            <span class="step-content">頂層 2 個 ＋ 底層 6 個 ＝ 8 等分</span>
+            <span class="step-desc">將 4 等分再對半切細，扇形角由 90° 縮小為 45°，弧邊更趨近直線！</span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 2 • 底邊對應</span>
+            <span class="step-content">底 ＝ 4 個底弧 ＝ 圓周長的一半</span>
+            <span class="step-desc">
+              底邊由 ③④⑦⑧ 四個正立底弧組成：<br>
+              <b style="color: var(--cyan);">底 ＝ 4 × (C ÷ 8) ＝ C ÷ 2 ＝ 半徑 × 3.14</b>
+            </span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 3 • 高度對應</span>
+            <span class="step-content">高 ＝ 2 層半徑 ＝ 2r</span>
+            <span class="step-desc">
+              從大三角形頂點到底邊，跨越兩層扇形半徑：<br>
+              <b style="color: var(--gold);">高 ＝ 半徑 ＋ 半徑 ＝ 2 × 半徑 (直徑)</b>
+            </span>
+          </div>
+
+          <div class="step-box">
+            <span class="step-tag">Step 4 • 約分神奇消去！</span>
+            <span class="step-content">高裡的 2 與公式 ÷2 抵銷</span>
+            <span class="step-desc">
+              ＝ (半徑 × 3.14) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span> × 半徑) ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span><br>
+              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
+            </span>
+          </div>
+        `;
+        banner.innerHTML = `
+          <div class="math-title">🌟 8 等分三角形分層堆疊法 數學結論證明</div>
+          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(半徑 × 3.14) × (2 × 半徑)] ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+        `;
+        tip.innerHTML = `
+          💡 <strong>細分進階觀察</strong>：<br>
+          對比 4 等分與 8 等分，學生可以立刻看見：<strong>扇形切得越細（45° 比 90° 更小），底部的 4 個弧長就越平整、側邊空隙大幅縮小</strong>！而高依然是兩層半徑（2r），底依然是半個圓周長，精準證明了極限逼近的原理！
         `;
       } else {
         grid.innerHTML = `
@@ -1389,7 +1436,7 @@
         `;
         tip.innerHTML = `
           👑 <strong>極限微積分思維</strong>：<br>
-          在 16 等分金字塔中，底邊由 4 個底弧組成（長度為 $C \div 4$），高為 4 層半徑（$4r$）！高裡的「4」剛好與底邊分母的「4」約分消去，圓周長自帶的「2」與三角形公式的「除以 2」約分消去！無論切成幾層平方數，結果必為 $r \times r \times 3.14$！
+          在 16 等分金字塔中，底邊由 4 個底弧組成（長度為 $C \div 4$），高為 4 層半徑（$4r$）！高裡的「4」剛好與底邊分母的「4」約分消去，圓周長自帶的「2」與三角形公式的「除以 2」約分消去！無論切成幾層平方數，結果必為 $rr × r × 3.14！
         `;
       }
     }
@@ -1794,6 +1841,8 @@
         ctx.translate(-width * 0.5, -height * 0.5);
         if (triSlices === 4) {
           render4SectorTriangle(ctx, width, height, t, cx0, cy0);
+        } else if (triSlices === 8) {
+          render8SectorPyramid(ctx, width, height, t, cx0, cy0);
         } else {
           render16SectorPyramid(ctx, width, height, t, cx0, cy0);
         }
@@ -1801,6 +1850,8 @@
       } else {
         if (triSlices === 4) {
           render4SectorTriangle(ctx, width, height, t, cx0, cy0);
+        } else if (triSlices === 8) {
+          render8SectorPyramid(ctx, width, height, t, cx0, cy0);
         } else {
           render16SectorPyramid(ctx, width, height, t, cx0, cy0);
         }
@@ -1844,14 +1895,18 @@
         ctx.translate(curX, curY);
         ctx.rotate(curAngle);
         drawWedge(ctx, R, Math.PI / 2, targetPos[i].color, 'rgba(255, 255, 255, 0.45)');
+        ctx.restore();
 
-        // Clear badges for classroom viewing
+        // Clear upright badges for classroom viewing
+        ctx.save();
+        const labelDist = R * 0.48;
+        const lx = curX + labelDist * Math.cos(curAngle);
+        const ly = curY + labelDist * Math.sin(curAngle);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(targetPos[i].label, R * 0.45, 0);
-
+        ctx.fillText(targetPos[i].label, lx, ly);
         ctx.restore();
       }
 
@@ -1922,6 +1977,141 @@
       ctx.fillStyle = '#94a3b8';
       ctx.font = '13.5px sans-serif';
       ctx.fillText('(由 ② 與 ③ 兩個底弧組成 ＝ C ÷ 4 ＋ C ÷ 4 ＝ C ÷ 2)', apexX, bracketY + 30);
+
+      ctx.restore();
+    }
+
+
+    /* --- 8-SECTOR 2-LAYER PYRAMID (2+6 SUBDIVISION) --- */
+    function render8SectorPyramid(ctx, width, height, t, cx0, cy0) {
+      const R = Math.min(width * 0.18, height * 0.32, 150);
+      const theta = Math.PI / 4; // 45 deg
+      const sin45 = Math.SQRT1_2;
+      const delta = R * sin45;
+
+      const apexX = width * 0.5;
+      const apexY = height * 0.12;
+
+      const colors = [
+        '#0284c7', '#0ea5e9',
+        '#059669', '#10b981',
+        '#7c3aed', '#a855f7',
+        '#ea580c', '#f97316'
+      ];
+
+      // Left-to-right ordered target positions:
+      const targetPos = [
+        { x: apexX, y: apexY, angle: 5 * Math.PI / 8, color: colors[0], label: '①' },
+        { x: apexX, y: apexY, angle: 3 * Math.PI / 8, color: colors[1], label: '②' },
+        { x: apexX - delta, y: apexY + 2 * R - delta, angle: 5 * Math.PI / 8, color: colors[2], label: '③' },
+        { x: apexX - delta, y: apexY + 2 * R - delta, angle: 3 * Math.PI / 8, color: colors[3], label: '④' },
+        { x: apexX, y: apexY + 2 * R, angle: -5 * Math.PI / 8, color: colors[4], label: '⑤' },
+        { x: apexX, y: apexY + 2 * R, angle: -3 * Math.PI / 8, color: colors[5], label: '⑥' },
+        { x: apexX + delta, y: apexY + 2 * R - delta, angle: 5 * Math.PI / 8, color: colors[6], label: '⑦' },
+        { x: apexX + delta, y: apexY + 2 * R - delta, angle: 3 * Math.PI / 8, color: colors[7], label: '⑧' }
+      ];
+
+      const circleAngles = [];
+      for (let i = 0; i < 8; i++) {
+        circleAngles.push((i + 0.5) * theta - Math.PI / 2);
+      }
+
+      for (let i = 0; i < 8; i++) {
+        const curX = (1 - t) * cx0 + t * targetPos[i].x;
+        const curY = (1 - t) * cy0 + t * targetPos[i].y;
+
+        let angleDiff = targetPos[i].angle - circleAngles[i];
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        const curAngle = circleAngles[i] + t * angleDiff;
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, theta, targetPos[i].color, 'rgba(255, 255, 255, 0.45)');
+        ctx.restore();
+
+        // Draw upright badges for classroom readability
+        ctx.save();
+        const labelDist = R * 0.55;
+        const lx = curX + labelDist * Math.cos(curAngle);
+        const ly = curY + labelDist * Math.sin(curAngle);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(targetPos[i].label, lx, ly);
+        ctx.restore();
+      }
+
+      if (t > 0.4) {
+        const alpha = Math.min(1, (t - 0.4) * 2);
+        draw8PyramidAnnotations(ctx, apexX, apexY, R, delta, alpha);
+      } else {
+        const circleAlpha = Math.max(0, 1 - t * 2.5);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
+      }
+    }
+
+    function draw8PyramidAnnotations(ctx, apexX, apexY, R, delta, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      const baseCenterY = apexY + 2 * R;
+      const maxBottomY = baseCenterY + (R - delta);
+      const baseLeftX = apexX - 2 * delta;
+      const baseRightX = apexX + 2 * delta;
+
+      // Height Dimension (Left side) spanning exactly 2r
+      const hLineX = baseLeftX - 45;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hLineX + 10, apexY);
+      ctx.lineTo(hLineX, apexY);
+      ctx.lineTo(hLineX, baseCenterY);
+      ctx.lineTo(hLineX + 10, baseCenterY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('高 ＝ 2r', hLineX - 10, (apexY + baseCenterY) * 0.5 - 10);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('(兩層半徑相加)', hLineX - 10, (apexY + baseCenterY) * 0.5 + 12);
+
+      // Height dashed line through center
+      ctx.strokeStyle = '#facc15';
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX, baseCenterY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Base Dimension (Bottom side) below bottom arcs
+      const bracketY = maxBottomY + 20;
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(baseLeftX, bracketY - 10);
+      ctx.lineTo(baseLeftX, bracketY);
+      ctx.lineTo(baseRightX, bracketY);
+      ctx.lineTo(baseRightX, bracketY - 10);
+      ctx.stroke();
+
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('底 ＝ 圓周長的一半 ＝ 半徑 × 3.14', apexX, bracketY + 8);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('由 ③④⑦⑧ 4 個底弧組成 ＝ 4 × (C ÷ 8) ＝ C ÷ 2', apexX, bracketY + 32);
 
       ctx.restore();
     }
@@ -2114,6 +2304,10 @@
       if (triSlices === 4) {
         render4SectorTriangle(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.46);
         document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：4 等分三角形 (老師手稿 1+3)';
+        document.getElementById('dualCardRightSub').textContent = '底 ＝ C÷2，高 ＝ 2r';
+      } else if (triSlices === 8) {
+        render8SectorPyramid(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.46);
+        document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：8 等分金字塔 (2+6)';
         document.getElementById('dualCardRightSub').textContent = '底 ＝ C÷2，高 ＝ 2r';
       } else {
         render16SectorPyramid(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.46);
