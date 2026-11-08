@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>📐 圓面積公式推導實驗室 - 長方形與三角形雙重幾何證明</title>
+  <meta name="description" content="國小六年級數學互動教具：將圓切成扇形重組成平行四邊形/長方形，或展開成等腰三角形，動手拖曳滑桿體驗極限與幾何化曲為直，證明半徑×半徑×3.14！">
+  <style>
+    :root {
+      --bg-dark: #070b18;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --gold: #facc15;
+      --gold-dark: #ca8a04;
+      --cyan: #06b6d4;
+      --cyan-light: #67e8f9;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --green-light: #34d399;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-dark) 80%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px 12px 60px;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .header-btns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .back-btn, .sound-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .back-btn:hover, .sound-toggle:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--cyan);
+    }
+
+    h1 {
+      font-size: clamp(24px, 4.5vw, 36px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 20%, var(--gold) 60%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      font-size: clamp(13px, 2.8vw, 15px);
+      color: var(--text-muted);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* Main Tab Selector */
+    .tab-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .tab-nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .tab-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      border-color: rgba(6, 182, 212, 0.5);
+      background: rgba(51, 65, 85, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+      border-color: var(--cyan);
+      background: linear-gradient(145deg, rgba(6, 182, 212, 0.18), rgba(30, 41, 59, 0.95));
+      color: #fff;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    }
+
+    .tab-btn.active.tab-gold {
+      border-color: var(--gold);
+      background: linear-gradient(145deg, rgba(250, 204, 21, 0.18), rgba(30, 41, 59, 0.95));
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+    }
+
+    .tab-btn.active.tab-green {
+      border-color: var(--green);
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.18), rgba(30, 41, 59, 0.95));
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .tab-btn.active.tab-purple {
+      border-color: var(--purple);
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.18), rgba(30, 41, 59, 0.95));
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .tab-icon {
+      font-size: 24px;
+    }
+
+    .tab-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .tab-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* Lab Card Content */
+    .lab-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .card-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .card-title-group h2 {
+      font-size: clamp(18px, 3.5vw, 22px);
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-hint {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Control Toolbar */
+    .controls-panel {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pill-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .pill-btn.active {
+      background: var(--cyan);
+      color: #031024;
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.4);
+    }
+
+    .pill-btn.gold.active {
+      background: var(--gold);
+      color: #031024;
+      box-shadow: 0 2px 10px rgba(250, 204, 21, 0.4);
+    }
+
+    .toggle-chip {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .toggle-chip.active {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green-light);
+    }
+
+    /* Slider Row */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slider-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 140px;
+    }
+
+    .custom-range {
+      flex: 1;
+      height: 12px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .custom-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.8), inset 0 0 4px #000;
+      cursor: grab;
+      border: 2px solid #fff;
+      transition: transform 0.1s;
+    }
+    .custom-range::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--cyan);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, var(--cyan) 0%, #0284c7 100%);
+      color: #031024;
+      border: none;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    }
+    .btn-act.primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Canvas Stage */
+    .canvas-stage {
+      position: relative;
+      background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      touch-action: pan-y pinch-zoom;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 420px;
+    }
+
+    @media (max-width: 600px) {
+      canvas {
+        height: 340px;
+      }
+    }
+
+    /* Formula & Proof Cards */
+    .formula-section {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .formula-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .step-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .step-box.highlight {
+      border-color: rgba(250, 204, 21, 0.5);
+      background: rgba(250, 204, 21, 0.06);
+    }
+
+    .step-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .step-content {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .conclusion-banner {
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(16, 185, 129, 0.15));
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 14px 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(250, 204, 21, 0.15);
+    }
+
+    .conclusion-banner .math-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .conclusion-banner .math-equation {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 900;
+      color: #ffe600;
+      letter-spacing: 1px;
+      text-shadow: 0 0 16px rgba(250, 204, 21, 0.4);
+    }
+
+    /* Comparison Dual Mode */
+    .dual-canvas-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .dual-canvas-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dual-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dual-card-title {
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dual-canvas {
+      width: 100%;
+      height: 280px;
+      background: #030712;
+      border-radius: 10px;
+      display: block;
+    }
+
+    /* Comparison Table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13.5px;
+    }
+
+    .compare-table th, .compare-table td {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+
+    .compare-table th {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .compare-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Sandbox Interactive */
+    .sandbox-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 820px) {
+      .sandbox-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sandbox-preview-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sandbox-circle-canvas {
+      width: 240px;
+      height: 240px;
+      background: #030712;
+      border-radius: 12px;
+    }
+
+    .sandbox-calc-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .calc-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .calc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .calc-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .pill-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .pill-gold { background: rgba(250, 204, 21, 0.2); color: #fde047; border: 1px solid rgba(250, 204, 21, 0.4); }
+    .pill-green { background: rgba(16, 185, 129, 0.2); color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    .calc-expression {
+      font-size: 15px;
+      color: #cbd5e1;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+
+    .calc-final-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffe600;
+    }
+
+    /* Teacher Tip Box */
+    .teacher-tip {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 12px 12px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+    .teacher-tip strong {
+      color: #93c5fd;
+    }
+
+    /* Quiz Challenge in Sandbox */
+    .quiz-box {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px dashed rgba(250, 204, 21, 0.4);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .quiz-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .quiz-input {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      width: 140px;
+      outline: none;
+    }
+    .quiz-input:focus {
+      border-color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-btns">
+        <a href="../" class="back-btn">
+          <span>🏰 回數學遊戲吧大廳</span>
+        </a>
+        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">
+          <span id="soundIcon">🔊</span>
+          <span id="soundText">音效已開</span>
+        </button>
+      </div>
+
+      <h1>📐 圓面積公式推導實驗室</h1>
+      <p class="subtitle">
+        將圓形等分切成扇形，重組成「長方形」或展開成「三角形」，透過極限化曲為直，親眼見證 <b>半徑 × 半徑 × 3.14</b> 的神奇幾何證明！
+      </p>
+    </header>
+
+    <!-- Top Mode Tab Bar -->
+    <div class="tab-nav">
+      <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">
+        <span class="tab-icon">🟩</span>
+        <span class="tab-title">方法一：拼成長方形</span>
+        <span class="tab-desc">扇形上下交錯咬合・化曲為直</span>
+      </button>
+
+      <button class="tab-btn tab-gold" id="tabBtn2" onclick="switchTab(2)">
+        <span class="tab-icon">🔺</span>
+        <span class="tab-title">方法二：展開為三角形</span>
+        <span class="tab-desc">圓周拉平為底・圓心聚為高</span>
+      </button>
+
+      <button class="tab-btn tab-purple" id="tabBtn3" onclick="switchTab(3)">
+        <span class="tab-icon">⚖️</span>
+        <span class="tab-title">雙法同場對照</span>
+        <span class="tab-desc">長方形 vs 三角形・殊途同歸</span>
+      </button>
+
+      <button class="tab-btn tab-green" id="tabBtn4" onclick="switchTab(4)">
+        <span class="tab-icon">🧮</span>
+        <span class="tab-title">算術探索沙盒</span>
+        <span class="tab-desc">自訂半徑立即算・三法完全相等</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: 拼成長方形 -->
+    <div class="lab-card" id="tabContent1">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <h2><span>🟩 方法一：扇形上下交錯重組為長方形</span></h2>
+          <div class="card-hint">
+            💡 拖曳下方滑桿，將圓形切碎的扇形一上一下拼合，切得越細，邊界越直，就越接近長方形！
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="control-row">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--cyan);">🔪 切割細緻度：</span>
+            <div class="pill-group" id="slicePills1">
+              <button class="pill-btn" onclick="setSlices(4)">4 等分</button>
+              <button class="pill-btn" onclick="setSlices(8)">8 等分</button>
+              <button class="pill-btn active" onclick="setSlices(16)">16 等分</button>
+              <button class="pill-btn" onclick="setSlices(32)">32 等分</button>
+              <button class="pill-btn" onclick="setSlices(64)">64 等分</button>
+            </div>
+          </div>
+
+          <div class="toggle-chip active" id="halfWedgeChip" onclick="toggleHalfWedge()">
+            <span>📐 端點對半切直角化</span>
+            <span id="halfWedgeStatus">（已開啟）</span>
+          </div>
+        </div>
+
+        <!-- Slider Row -->
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>🔄 變形進度：</span>
+            <span id="progressText1" style="color: #ffe600; font-size: 16px;">0% (圓形)</span>
+          </div>
+          <input type="range" class="custom-range" id="progressSlider1" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
+          <div class="action-btn-group">
+            <button class="btn-act primary" id="playBtn1" onclick="togglePlay()">
+              <span id="playIcon1">▶</span>
+              <span id="playText1">播放</span>
+            </button>
+            <button class="btn-act" onclick="setProgress(0)">⏪ 重置</button>
+            <button class="btn-act" onclick="setProgress(100)">⏩ 拼滿</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Stage -->
+      <div class="canvas-stage">
+        <canvas id="canvas1"></canvas>
+      </div>
+
+      <!-- Formula Breakdown -->
+      <div class="formula-section">
+        <div class="formula-steps-grid">
+          <div class="step-box">
+            <span class="step-tag">Step 1 • 幾何形狀對應</span>
+            <span class="step-content">長方形面積 ＝ 長 × 寬</span>
+            <span class="step-desc">將扇形交錯拼合後，原本彎曲的圓形轉化為我們熟悉的長方形。</span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 2 • 長度對應</span>
+            <span class="step-content">長 ＝ 圓周長的一半</span>
+            <span class="step-desc">
+              上半部弧長排在上方、下半部排在下方：<br>
+              <b style="color: var(--cyan);">(2 × 半徑 × 3.14) ÷ 2 ＝ 半徑 × 3.14</b>
+            </span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 3 • 寬度對應</span>
+            <span class="step-content">寬 ＝ 圓的半徑</span>
+            <span class="step-desc">
+              從上下長方形的邊界量到頂點，剛好等於扇形的長度，也就是圓的 <b style="color: var(--gold);">半徑 (r)</b>。
+            </span>
+          </div>
+
+          <div class="step-box">
+            <span class="step-tag">Step 4 • 代入公式推導</span>
+            <span class="step-content">面積 ＝ 長 × 寬</span>
+            <span class="step-desc">
+              ＝ (半徑 × 3.14) × 半徑<br>
+              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
+            </span>
+          </div>
+        </div>
+
+        <div class="conclusion-banner">
+          <div class="math-title">🌟 長方形重組法 數學結論證明</div>
+          <div class="math-equation">圓面積 ＝ 長 × 寬 ＝ (半徑 × 3.14) × 半徑 ＝ 半徑 × 半徑 × 3.14</div>
+        </div>
+      </div>
+
+      <div class="teacher-tip">
+        👨‍🏫 <strong>教學引導小撇步</strong>：<br>
+        1. 讓學生先試「4 等分」或「8 等分」，觀察上下的邊緣還是彎曲的波浪形。<br>
+        2. 接著切換至「32 等分」或「64 等分」，波浪瞬間拉平！這正是數學家劉徽「割之彌細，所失彌少，割之又割，以至於不可割，則與圓合體而無所失矣」的極限思想。
+      </div>
+    </div>
+
+    <!-- TAB 2: 展開為三角形 -->
+    <div class="lab-card" id="tabContent2" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <h2><span>🔺 方法二：扇形底邊拉平展開為等腰三角形</span></h2>
+          <div class="card-hint">
+            💡 將圓周邊緣像拉鍊一樣在底邊完全拉平，所有扇形頂點（圓心）向上聚集，拼成巨大的等腰三角形！
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="control-row">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">模式切換：</span>
+            <div class="pill-group" id="triModePills">
+              <button class="pill-btn gold active" onclick="setTriMode('fan')">扇形底邊展開法 (經典)</button>
+              <button class="pill-btn gold" onclick="setTriMode('onion')">同心圓環洋蔥法 (阿基米德)</button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">🔪 細緻度：</span>
+            <div class="pill-group" id="slicePills2">
+              <button class="pill-btn gold" onclick="setSlices(4)">4</button>
+              <button class="pill-btn gold" onclick="setSlices(8)">8</button>
+              <button class="pill-btn gold active" onclick="setSlices(16)">16</button>
+              <button class="pill-btn gold" onclick="setSlices(32)">32</button>
+              <button class="pill-btn gold" onclick="setSlices(64)">64</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slider Row -->
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>🔄 展開進度：</span>
+            <span id="progressText2" style="color: #ffe600; font-size: 16px;">0% (圓形)</span>
+          </div>
+          <input type="range" class="custom-range" id="progressSlider2" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
+          <div class="action-btn-group">
+            <button class="btn-act primary" id="playBtn2" onclick="togglePlay()">
+              <span id="playIcon2">▶</span>
+              <span id="playText2">播放</span>
+            </button>
+            <button class="btn-act" onclick="setProgress(0)">⏪ 重置</button>
+            <button class="btn-act" onclick="setProgress(100)">⏩ 展平</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Stage -->
+      <div class="canvas-stage">
+        <canvas id="canvas2"></canvas>
+      </div>
+
+      <!-- Formula Breakdown -->
+      <div class="formula-section">
+        <div class="formula-steps-grid">
+          <div class="step-box">
+            <span class="step-tag">Step 1 • 幾何形狀對應</span>
+            <span class="step-content">三角形面積 ＝ (底 × 高) ÷ 2</span>
+            <span class="step-desc">所有的圓周弧度鋪在水平底線上，圓心拉起到頂部中央頂點。</span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 2 • 底邊對應</span>
+            <span class="step-content">底 ＝ 完整的圓周長</span>
+            <span class="step-desc">
+              整條圓周被拉直成一條線段：<br>
+              <b style="color: var(--cyan);">底 ＝ 2 × 半徑 × 3.14</b>
+            </span>
+          </div>
+
+          <div class="step-box highlight">
+            <span class="step-tag">Step 3 • 高度對應</span>
+            <span class="step-content">高 ＝ 圓的半徑</span>
+            <span class="step-desc">
+              從頂端圓心垂直量到底邊的距離，恰好等於圓的 <b style="color: var(--gold);">半徑 (r)</b>。
+            </span>
+          </div>
+
+          <div class="step-box">
+            <span class="step-tag">Step 4 • 約分神奇消去！</span>
+            <span class="step-content">公式裡的 2 剛好約分</span>
+            <span class="step-desc">
+              ＝ (2 × 半徑 × 3.14 × 半徑) ÷ 2<br>
+              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
+            </span>
+          </div>
+        </div>
+
+        <div class="conclusion-banner">
+          <div class="math-title">🌟 三角形展開法 數學結論證明</div>
+          <div class="math-equation">圓面積 ＝ (底 × 高) ÷ 2 ＝ (2 × 半徑 × 3.14 × 半徑) ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+        </div>
+      </div>
+
+      <div class="teacher-tip">
+        💡 <strong>震撼頓悟點</strong>：<br>
+        很多學生常常好奇：「為什麼圓面積公式是 $r \times r \times 3.14$，裡面的『2』跑去哪裡了？」<br>
+        透過三角形展開法，學生能親眼看見——圓周長自帶的「$2 \times r$」，在代入三角形公式「除以 2」時，<strong>分子與分母的 2 剛好完美消去</strong>！這種幾何契合感令人拍案叫絕！
+      </div>
+    </div>
+
+    <!-- TAB 3: 雙法對照 -->
+    <div class="lab-card" id="tabContent3" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <h2><span>⚖️ 雙法同場對照：長方形 vs 三角形 殊途同歸</span></h2>
+          <div class="card-hint">
+            💡 同一個進度滑桿，左右同步展開！比較兩者在幾何轉換上的絕妙共通點與差異！
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>🔄 同步變形：</span>
+            <span id="progressText3" style="color: #ffe600; font-size: 16px;">0%</span>
+          </div>
+          <input type="range" class="custom-range" id="progressSlider3" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
+          <div class="action-btn-group">
+            <button class="btn-act primary" id="playBtn3" onclick="togglePlay()">
+              <span id="playIcon3">▶</span>
+              <span id="playText3">播放</span>
+            </button>
+            <button class="btn-act" onclick="setProgress(0)">⏪ 重置</button>
+            <button class="btn-act" onclick="setProgress(100)">⏩ 展平</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dual Canvas Stage -->
+      <div class="dual-canvas-wrapper">
+        <div class="dual-card">
+          <div class="dual-card-title">
+            <span style="color: var(--cyan);">🟩 方案一：重組為長方形</span>
+            <span style="font-size: 12px; color: var(--text-muted);">長 ＝ 半個圓周</span>
+          </div>
+          <canvas id="dualCanvasLeft" class="dual-canvas"></canvas>
+        </div>
+
+        <div class="dual-card">
+          <div class="dual-card-title">
+            <span style="color: var(--gold);">🔺 方案二：展開為等腰三角形</span>
+            <span style="font-size: 12px; color: var(--text-muted);">底 ＝ 整條圓周</span>
+          </div>
+          <canvas id="dualCanvasRight" class="dual-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>比較項目</th>
+            <th>方案一：重組為長方形</th>
+            <th>方案二：展開為等腰三角形</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>目標圖形</b></td>
+            <td>平行四邊形 / 長方形</td>
+            <td>等腰三角形（或洋蔥直角三角形）</td>
+          </tr>
+          <tr>
+            <td><b>基礎面積公式</b></td>
+            <td>長方形面積 ＝ 長 × 寬</td>
+            <td>三角形面積 ＝ (底 × 高) ÷ 2</td>
+          </tr>
+          <tr>
+            <td><b>底邊長度對應</b></td>
+            <td>長 ＝ 圓周長的一半 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
+            <td>底 ＝ 完整的圓周長 ＝ <span style="color: var(--cyan);">2 × 半徑 × 3.14</span></td>
+          </tr>
+          <tr>
+            <td><b>高度/寬度對應</b></td>
+            <td>寬 ＝ <span style="color: var(--gold);">圓的半徑 (r)</span></td>
+            <td>高 ＝ <span style="color: var(--gold);">圓的半徑 (r)</span></td>
+          </tr>
+          <tr>
+            <td><b>公式中的「2」如何處理？</b></td>
+            <td>在計算「長」的時候，<strong>預先將圓周長除以 2</strong></td>
+            <td>在三角形面積公式中，<strong>透過除以 2 將分子圓周長的 2 約分消去</strong></td>
+          </tr>
+          <tr>
+            <td><b>最終推導成果</b></td>
+            <td><b style="color: #4ade80;">半徑 × 半徑 × 3.14</b></td>
+            <td><b style="color: #4ade80;">半徑 × 半徑 × 3.14</b></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="conclusion-banner">
+        <div class="math-title">🌟 幾何學的崇高和諧</div>
+        <div class="math-equation">無論變成長方形還是三角形，割補前後面積永恆守恆，必為：半徑 × 半徑 × 3.14 ！</div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 算術探索沙盒 -->
+    <div class="lab-card" id="tabContent4" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <h2><span>🧮 算術探索沙盒：自訂半徑立即驗證</span></h2>
+          <div class="card-hint">
+            💡 自由拉動半徑滑桿，看看長方形法、三角形法與圓面積公式三者計算出的數值，是不是分毫不差、百分之百吻合！
+          </div>
+        </div>
+      </div>
+
+      <div class="sandbox-layout">
+        <!-- Left: Interactive Radius Controller & Canvas -->
+        <div class="sandbox-preview-box">
+          <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 14px; font-weight: 800; color: var(--gold);">圓的半徑 (r)：</span>
+              <span id="radiusValText" style="font-size: 20px; font-weight: 900; color: #ffe600;">5 cm</span>
+            </div>
+            <input type="range" class="custom-range" id="radiusInput" min="1" max="15" value="5" step="0.5" oninput="onRadiusChange(this.value)">
+            <div style="display: flex; gap: 6px; margin-top: 8px; justify-content: center;">
+              <button class="pill-btn" onclick="setRadiusVal(3)">3 cm</button>
+              <button class="pill-btn active" id="btnR5" onclick="setRadiusVal(5)">5 cm</button>
+              <button class="pill-btn" onclick="setRadiusVal(7)">7 cm</button>
+              <button class="pill-btn" onclick="setRadiusVal(10)">10 cm</button>
+            </div>
+          </div>
+
+          <canvas id="sandboxCanvas" class="sandbox-circle-canvas"></canvas>
+
+          <div style="width: 100%; font-size: 13px; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+            圓周長 C ＝ 2 × 半徑 × 3.14 ＝ <b style="color: var(--cyan);" id="circDisplay">31.4 cm</b>
+          </div>
+        </div>
+
+        <!-- Right: Real-time Calculation Comparison Cards -->
+        <div class="sandbox-calc-cards">
+          <!-- Card 1: 長方形法 -->
+          <div class="calc-card">
+            <div class="calc-card-header">
+              <span style="color: var(--cyan);">🟩 方案一：長方形計算過程</span>
+              <span class="calc-pill pill-blue">長 × 寬</span>
+            </div>
+            <div class="calc-expression" id="calcRectExpr">
+              長 ＝ 31.4 ÷ 2 ＝ 15.7 cm<br>
+              面積 ＝ 15.7 × 5
+            </div>
+            <div class="calc-final-val" id="calcRectVal">＝ 78.5 cm²</div>
+          </div>
+
+          <!-- Card 2: 三角形法 -->
+          <div class="calc-card">
+            <div class="calc-card-header">
+              <span style="color: var(--gold);">🔺 方案二：三角形計算過程</span>
+              <span class="calc-pill pill-gold">(底 × 高) ÷ 2</span>
+            </div>
+            <div class="calc-expression" id="calcTriExpr">
+              底 ＝ 31.4 cm，高 ＝ 5 cm<br>
+              面積 ＝ (31.4 × 5) ÷ 2
+            </div>
+            <div class="calc-final-val" id="calcTriVal">＝ 78.5 cm²</div>
+          </div>
+
+          <!-- Card 3: 圓面積公式 -->
+          <div class="calc-card" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08);">
+            <div class="calc-card-header">
+              <span style="color: #4ade80;">⭕ 圓面積公式直接算</span>
+              <span class="calc-pill pill-green">半徑 × 半徑 × 3.14</span>
+            </div>
+            <div class="calc-expression" id="calcCircleExpr">
+              面積 ＝ 5 × 5 × 3.14
+            </div>
+            <div class="calc-final-val" id="calcCircleVal" style="color: #4ade80;">＝ 78.5 cm²</div>
+          </div>
+
+          <!-- Instant Check Quiz Challenge -->
+          <div class="quiz-box">
+            <div style="font-size: 13.5px; font-weight: 800; color: var(--gold);">🎯 隨堂速測挑戰</div>
+            <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;" id="quizPrompt">
+              如果一個圓的半徑是 4 cm，請問它的圓面積是多少？
+            </div>
+            <div class="quiz-input-row">
+              <input type="number" class="quiz-input" id="quizAnswer" placeholder="輸入面積">
+              <span style="font-size: 13px; color: var(--text-muted);">cm²</span>
+              <button class="btn-act primary" onclick="checkQuiz()">驗證答案</button>
+              <button class="btn-act" onclick="newQuiz()">換一題</button>
+            </div>
+            <div id="quizResult" style="font-size: 13.5px; font-weight: 700; margin-top: 6px; display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GLOBAL STATE & AUDIO SYNTHESIS
+       ========================================================================== */
+    let currentTab = 1;
+    let sliceCount = 16;
+    let halfWedgeEnabled = true;
+    let triMode = 'fan'; // 'fan' or 'onion'
+    let progress = 0; // 0 to 100
+    let isPlaying = false;
+    let animId = null;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Sandbox state
+    let currentRadius = 5;
+    let quizR = 4;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.12, gainLevel = 0.15) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainLevel, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSuccessChord() {
+      if (!soundEnabled) return;
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+        setTimeout(() => playTone(f, 'triangle', 0.35, 0.2), idx * 80);
+      });
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+      document.getElementById('soundText').textContent = soundEnabled ? '音效已開' : '音效已關';
+      if (soundEnabled) playTone(660);
+    }
+
+    /* ==========================================================================
+       TAB SWITCHING
+       ========================================================================== */
+    function switchTab(tabIndex) {
+      playTone(480);
+      currentTab = tabIndex;
+      pauseAnimation();
+
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`tabBtn${i}`);
+        const content = document.getElementById(`tabContent${i}`);
+        if (btn) btn.classList.toggle('active', i === tabIndex);
+        if (content) content.style.display = (i === tabIndex) ? 'block' : 'none';
+      }
+
+      // Sync progress across sliders
+      syncAllSliders(progress);
+      requestAnimationFrame(renderAll);
+    }
+
+    /* ==========================================================================
+       CONTROLS & PROGRESS
+       ========================================================================== */
+    function setSlices(n) {
+      playTone(560);
+      sliceCount = n;
+
+      // Update pill states
+      [1, 2].forEach(tab => {
+        const container = document.getElementById(`slicePills${tab}`);
+        if (container) {
+          const btns = container.querySelectorAll('.pill-btn');
+          btns.forEach(btn => {
+            const val = parseInt(btn.textContent);
+            btn.classList.toggle('active', val === n);
+          });
+        }
+      });
+
+      renderAll();
+    }
+
+    function toggleHalfWedge() {
+      halfWedgeEnabled = !halfWedgeEnabled;
+      playTone(520);
+      const chip = document.getElementById('halfWedgeChip');
+      const status = document.getElementById('halfWedgeStatus');
+      if (chip && status) {
+        chip.classList.toggle('active', halfWedgeEnabled);
+        status.textContent = halfWedgeEnabled ? '（已開啟）' : '（已關閉）';
+      }
+      renderAll();
+    }
+
+    function setTriMode(mode) {
+      triMode = mode;
+      playTone(600);
+      const pills = document.getElementById('triModePills');
+      if (pills) {
+        const btns = pills.querySelectorAll('.pill-btn');
+        btns[0].classList.toggle('active', mode === 'fan');
+        btns[1].classList.toggle('active', mode === 'onion');
+      }
+      renderAll();
+    }
+
+    function syncAllSliders(val) {
+      progress = parseFloat(val);
+      [1, 2, 3].forEach(id => {
+        const slider = document.getElementById(`progressSlider${id}`);
+        const text = document.getElementById(`progressText${id}`);
+        if (slider) slider.value = progress;
+        if (text) {
+          if (progress === 0) text.textContent = '0% (圓形)';
+          else if (progress === 100) text.textContent = id === 2 ? '100% (三角形)' : '100% (長方形)';
+          else text.textContent = `${Math.round(progress)}%`;
+        }
+      });
+    }
+
+    function onProgressChange(val) {
+      syncAllSliders(val);
+      if (progress >= 100 && isPlaying) {
+        pauseAnimation();
+        playSuccessChord();
+      }
+      renderAll();
+    }
+
+    function setProgress(val) {
+      pauseAnimation();
+      playTone(val === 100 ? 700 : 400);
+      syncAllSliders(val);
+      if (val === 100) playSuccessChord();
+      renderAll();
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseAnimation();
+      } else {
+        startAnimation();
+      }
+    }
+
+    function startAnimation() {
+      isPlaying = true;
+      if (progress >= 100) progress = 0;
+      updatePlayIcons(true);
+      playTone(540);
+
+      let lastTime = performance.now();
+      function loop(now) {
+        if (!isPlaying) return;
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+
+        // Move 25% per second
+        progress += dt * 25;
+        if (progress >= 100) {
+          progress = 100;
+          syncAllSliders(100);
+          pauseAnimation();
+          playSuccessChord();
+          renderAll();
+          return;
+        }
+
+        syncAllSliders(progress);
+        renderAll();
+        animId = requestAnimationFrame(loop);
+      }
+      animId = requestAnimationFrame(loop);
+    }
+
+    function pauseAnimation() {
+      isPlaying = false;
+      if (animId) cancelAnimationFrame(animId);
+      updatePlayIcons(false);
+    }
+
+    function updatePlayIcons(playing) {
+      [1, 2, 3].forEach(id => {
+        const icon = document.getElementById(`playIcon${id}`);
+        const txt = document.getElementById(`playText${id}`);
+        if (icon) icon.textContent = playing ? '⏸' : '▶';
+        if (txt) txt.textContent = playing ? '暫停' : '播放';
+      });
+    }
+
+    /* ==========================================================================
+       CANVAS RESIZING & RETINA DISPLAY SUPPORT
+       ========================================================================== */
+    function resizeCanvas(canvas) {
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = rect.width;
+      const height = rect.height;
+
+      if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+      }
+
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset
+      ctx.scale(dpr, dpr);
+      return { ctx, width, height };
+    }
+
+    /* ==========================================================================
+       RENDER METHOD 1: RECTANGLE / PARALLELOGRAM
+       ========================================================================== */
+    function renderTab1() {
+      const canvas = document.getElementById('canvas1');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const t = progress / 100; // 0 to 1
+      const N = sliceCount;
+      const R = Math.min(width * 0.16, height * 0.38, 120);
+
+      // Interpolate center and layout
+      // At t=0: circle at center (cx0, cy0)
+      // At t=1: rectangle centered horizontally, height R, width pi * R
+      const cx0 = width * 0.5;
+      const cy0 = height * 0.46;
+
+      const rectW = Math.PI * R;
+      const rectH = R;
+      const rectLeft = width * 0.5 - rectW * 0.5;
+      const rectTop = height * 0.46 - rectH * 0.5;
+
+      const sectorAngle = (2 * Math.PI) / N;
+      const halfN = N / 2;
+      const dx = rectW / halfN; // width per wedge base
+
+      // Draw background guidelines when t > 0.5
+      if (t > 0.1) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (t - 0.1) * 1.5) * 0.35;
+        ctx.strokeStyle = '#06b6d4';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1.5;
+        // top guide
+        ctx.beginPath();
+        ctx.moveTo(rectLeft, rectTop);
+        ctx.lineTo(rectLeft + rectW, rectTop);
+        ctx.stroke();
+        // bottom guide
+        ctx.beginPath();
+        ctx.moveTo(rectLeft, rectTop + rectH);
+        ctx.lineTo(rectLeft + rectW, rectTop + rectH);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw each sector
+      // Top group: pointing down. Bottom group: pointing up.
+      // If halfWedgeEnabled: split sector 0 into two halves at the ends!
+      if (halfWedgeEnabled) {
+        drawRectangleWithHalfWedges(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, sectorAngle, dx);
+      } else {
+        drawRectangleStandard(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, sectorAngle, dx);
+      }
+
+      // Draw Brackets and Labels at t > 0.6
+      if (t > 0.4) {
+        const labelAlpha = Math.min(1, (t - 0.4) * 2);
+        drawRectAnnotations(ctx, rectLeft, rectTop, rectW, rectH, R, labelAlpha);
+      } else {
+        // Draw circle annotations at t < 0.4
+        const circleAlpha = Math.max(0, 1 - t * 2.5);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
+      }
+    }
+
+    function drawWedge(ctx, R, angleSpan, fillColor, strokeColor) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, -angleSpan / 2, angleSpan / 2);
+      ctx.closePath();
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+      ctx.strokeStyle = strokeColor || 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    function drawRectangleStandard(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, theta, dx) {
+      const halfN = N / 2;
+
+      for (let i = 0; i < N; i++) {
+        const isUpper = i < halfN;
+        // Initial angle in circle
+        const angleCircle = (i + 0.5) * theta;
+
+        // Final target position & rotation
+        let targetX, targetY, angleRect;
+        if (isUpper) {
+          // Points DOWN from top line
+          targetX = rectLeft + (i + 0.5) * dx;
+          targetY = rectTop;
+          angleRect = Math.PI / 2;
+        } else {
+          // Points UP from bottom line
+          const k = i - halfN;
+          targetX = rectLeft + (k + 1.0) * dx;
+          targetY = rectTop + rectH;
+          angleRect = -Math.PI / 2;
+        }
+
+        // Interpolate
+        const curX = (1 - t) * cx0 + t * targetX;
+        const curY = (1 - t) * cy0 + t * targetY;
+        const curAngle = (1 - t) * angleCircle + t * angleRect;
+
+        // Color
+        const color = isUpper
+          ? (i % 2 === 0 ? '#0284c7' : '#0ea5e9')
+          : (i % 2 === 0 ? '#ea580c' : '#f97316');
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, theta, color, 'rgba(255, 255, 255, 0.3)');
+        ctx.restore();
+      }
+    }
+
+    function drawRectangleWithHalfWedges(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, theta, dx) {
+      const halfN = N / 2;
+
+      // Draw left half-wedge (from sector 0)
+      {
+        const angleCircle = 0.25 * theta;
+        const targetX = rectLeft;
+        const targetY = rectTop;
+        const angleRect = Math.PI / 2 + theta * 0.25;
+
+        const curX = (1 - t) * cx0 + t * targetX;
+        const curY = (1 - t) * cy0 + t * targetY;
+        const curAngle = (1 - t) * angleCircle + t * angleRect;
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        // Draw half wedge (span theta/2)
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, R, -theta / 2, 0);
+        ctx.closePath();
+        ctx.fillStyle = '#0284c7';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw intermediate full wedges (1 to halfN - 1 pointing DOWN)
+      for (let i = 1; i < halfN; i++) {
+        const angleCircle = (i + 0.5) * theta;
+        const targetX = rectLeft + i * dx;
+        const targetY = rectTop;
+        const angleRect = Math.PI / 2;
+
+        const curX = (1 - t) * cx0 + t * targetX;
+        const curY = (1 - t) * cy0 + t * targetY;
+        const curAngle = (1 - t) * angleCircle + t * angleRect;
+        const color = (i % 2 === 0 ? '#0284c7' : '#0ea5e9');
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, theta, color, 'rgba(255, 255, 255, 0.3)');
+        ctx.restore();
+      }
+
+      // Draw bottom row pointing UP (halfN wedges, index halfN to N-1)
+      for (let k = 0; k < halfN; k++) {
+        const i = halfN + k;
+        const angleCircle = (i + 0.5) * theta;
+        const targetX = rectLeft + (k + 0.5) * dx;
+        const targetY = rectTop + rectH;
+        const angleRect = -Math.PI / 2;
+
+        const curX = (1 - t) * cx0 + t * targetX;
+        const curY = (1 - t) * cy0 + t * targetY;
+        const curAngle = (1 - t) * angleCircle + t * angleRect;
+        const color = (k % 2 === 0 ? '#ea580c' : '#f97316');
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, theta, color, 'rgba(255, 255, 255, 0.3)');
+        ctx.restore();
+      }
+
+      // Draw right half-wedge (other half of sector 0)
+      {
+        const angleCircle = (N - 0.25) * theta;
+        const targetX = rectLeft + rectW;
+        const targetY = rectTop;
+        const angleRect = Math.PI / 2 - theta * 0.25;
+
+        const curX = (1 - t) * cx0 + t * targetX;
+        const curY = (1 - t) * cy0 + t * targetY;
+        const curAngle = (1 - t) * angleCircle + t * angleRect;
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, R, 0, theta / 2);
+        ctx.closePath();
+        ctx.fillStyle = '#0ea5e9';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawRectAnnotations(ctx, left, top, w, h, R, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Top Dimension: "長 ＝ 圓周長的一半 ＝ 半徑 × 3.14"
+      const bracketY = top - 20;
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(left, bracketY + 8);
+      ctx.lineTo(left, bracketY);
+      ctx.lineTo(left + w, bracketY);
+      ctx.lineTo(left + w, bracketY + 8);
+      ctx.stroke();
+
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('長 ＝ 圓周長的一半 ＝ 半徑 × 3.14', left + w * 0.5, bracketY - 4);
+
+      // Right Dimension: "寬 ＝ 半徑 r"
+      const bracketX = left + w + 24;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(bracketX - 8, top);
+      ctx.lineTo(bracketX, top);
+      ctx.lineTo(bracketX, top + h);
+      ctx.lineTo(bracketX - 8, top + h);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(bracketX + 18, top + h * 0.5);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('寬 ＝ 半徑 r', 0, 0);
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    function drawCircleAnnotations(ctx, cx, cy, R, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Center dot
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Radius line
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + R, cy);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('半徑 r', cx + R * 0.5, cy - 6);
+
+      // Bottom guidance note
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('完整的圓（面積 ＝ A）', cx, cy + R + 28);
+
+      ctx.restore();
+    }
+
+    /* ==========================================================================
+       RENDER METHOD 2: TRIANGLE (FAN & ONION)
+       ========================================================================== */
+    function renderTab2() {
+      const canvas = document.getElementById('canvas2');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const t = progress / 100; // 0 to 1
+      const N = sliceCount;
+
+      if (triMode === 'fan') {
+        renderTriangleFan(ctx, width, height, t, N);
+      } else {
+        renderTriangleOnion(ctx, width, height, t);
+      }
+    }
+
+    function renderTriangleFan(ctx, width, height, t, N) {
+      const R = Math.min(width * 0.14, height * 0.36, 115);
+      const cx0 = width * 0.5;
+      const cy0 = height * 0.44;
+
+      const baseLength = 2 * Math.PI * R; // Circumference C
+      const baseLeft = width * 0.5 - baseLength * 0.5;
+      const baseBottom = height * 0.72;
+      const apexX = width * 0.5;
+      const apexY = baseBottom - R;
+
+      const sectorAngle = (2 * Math.PI) / N;
+      const dx = baseLength / N;
+
+      // Draw background baseline if t > 0.1
+      if (t > 0.1) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (t - 0.1) * 1.5) * 0.35;
+        ctx.strokeStyle = '#06b6d4';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(baseLeft, baseBottom);
+        ctx.lineTo(baseLeft + baseLength, baseBottom);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw each sector unfolding
+      for (let i = 0; i < N; i++) {
+        // In circle (t=0)
+        const angleCircle = (i + 0.5) * sectorAngle;
+
+        // In triangle (t=1):
+        // Base center of sector i sits on baseBottom
+        const targetBaseX = baseLeft + (i + 0.5) * dx;
+        const targetBaseY = baseBottom;
+        const targetApexX = apexX;
+        const targetApexY = apexY;
+
+        // Circle tip position
+        const tipX = (1 - t) * cx0 + t * targetApexX;
+        const tipY = (1 - t) * cy0 + t * targetApexY;
+
+        // Base center position
+        const circBaseX = cx0 + R * Math.cos(angleCircle - Math.PI / 2);
+        const circBaseY = cy0 + R * Math.sin(angleCircle - Math.PI / 2);
+
+        const curBaseX = (1 - t) * circBaseX + t * targetBaseX;
+        const curBaseY = (1 - t) * circBaseY + t * targetBaseY;
+
+        // Color based on hue around circle
+        const hue = Math.floor((i / N) * 320) + 160; // cyan to purple to orange
+        const color = `hsl(${hue % 360}, 85%, 55%)`;
+
+        // Render wedge or skewed sector
+        if (t < 0.2) {
+          // Standard radial wedge
+          ctx.save();
+          ctx.translate(tipX, tipY);
+          ctx.rotate(angleCircle - Math.PI / 2);
+          drawWedge(ctx, R, sectorAngle, color, 'rgba(255, 255, 255, 0.25)');
+          ctx.restore();
+        } else {
+          // Morphing polygon connecting apex to base segment
+          const halfW = (dx * 0.5) * t + (Math.sin(sectorAngle / 2) * R) * (1 - t);
+          ctx.beginPath();
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(curBaseX - halfW, curBaseY);
+          // Curve or line along bottom
+          if (t > 0.8) {
+            ctx.lineTo(curBaseX + halfW, curBaseY);
+          } else {
+            ctx.quadraticCurveTo(curBaseX, curBaseY + 4 * (1 - t), curBaseX + halfW, curBaseY);
+          }
+          ctx.closePath();
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      // Annotations
+      if (t > 0.4) {
+        const labelAlpha = Math.min(1, (t - 0.4) * 2);
+        drawTriangleAnnotations(ctx, baseLeft, baseBottom, baseLength, apexX, apexY, R, labelAlpha);
+      } else {
+        const circleAlpha = Math.max(0, 1 - t * 2.5);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
+      }
+    }
+
+    function renderTriangleOnion(ctx, width, height, t) {
+      const R = Math.min(width * 0.16, height * 0.38, 120);
+      const cx0 = width * 0.5;
+      const cy0 = height * 0.46;
+      const ringCount = 10;
+
+      const baseLength = 2 * Math.PI * R;
+      const baseLeft = width * 0.5 - baseLength * 0.5;
+      const baseBottom = height * 0.76;
+
+      for (let k = ringCount; k >= 1; k--) {
+        const rK = (k / ringCount) * R;
+        const stripLen = 2 * Math.PI * rK;
+        const color = `hsl(${180 + k * 16}, 80%, 55%)`;
+
+        if (t < 0.1) {
+          // Concentric circles
+          ctx.beginPath();
+          ctx.arc(cx0, cy0, rK, 0, Math.PI * 2);
+          ctx.lineWidth = (R / ringCount) * 0.9;
+          ctx.strokeStyle = color;
+          ctx.stroke();
+        } else {
+          // Unrolling into strips
+          const curY = (1 - t) * (cy0 + rK) + t * (baseBottom - (k - 1) * (R / ringCount));
+          const curW = (1 - t) * (rK * 2) + t * stripLen;
+          const curLeft = width * 0.5 - curW * 0.5;
+
+          ctx.fillStyle = color;
+          ctx.fillRect(curLeft, curY - (R / ringCount), curW, (R / ringCount) * 0.85);
+        }
+      }
+
+      if (t > 0.5) {
+        const alpha = Math.min(1, (t - 0.5) * 2);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Base label
+        ctx.fillStyle = '#67e8f9';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('底 ＝ 最外圈圓周長 ＝ 2 × 半徑 × 3.14', width * 0.5, baseBottom + 22);
+
+        // Height label
+        ctx.fillStyle = '#fde047';
+        ctx.textAlign = 'left';
+        ctx.fillText('高 ＝ 半徑 r', width * 0.5 + baseLength * 0.5 + 16, baseBottom - R * 0.5);
+
+        ctx.restore();
+      }
+    }
+
+    function drawTriangleAnnotations(ctx, baseLeft, baseBottom, baseLen, apexX, apexY, R, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Bottom bracket: "底 ＝ 完整的圓周長 ＝ 2 × 半徑 × 3.14"
+      const bracketY = baseBottom + 16;
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(baseLeft, bracketY - 8);
+      ctx.lineTo(baseLeft, bracketY);
+      ctx.lineTo(baseLeft + baseLen, bracketY);
+      ctx.lineTo(baseLeft + baseLen, bracketY - 8);
+      ctx.stroke();
+
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('底 ＝ 完整的圓周長 ＝ 2 × 半徑 × 3.14', baseLeft + baseLen * 0.5, bracketY + 6);
+
+      // Height line: Gold dashed line from apex to base
+      ctx.strokeStyle = '#facc15';
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX, baseBottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Top dot at apex
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(apexX, apexY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Height text
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('高 ＝ 半徑 r', apexX + 12, apexY + R * 0.5);
+
+      ctx.restore();
+    }
+
+    /* ==========================================================================
+       RENDER TAB 3: DUAL VIEW (LEFT & RIGHT)
+       ========================================================================== */
+    function renderTab3() {
+      const cLeft = document.getElementById('dualCanvasLeft');
+      const cRight = document.getElementById('dualCanvasRight');
+      const resL = resizeCanvas(cLeft);
+      const resR = resizeCanvas(cRight);
+      if (!resL || !resR) return;
+
+      const t = progress / 100;
+      const N = 16;
+
+      // Left: Rectangle
+      resL.ctx.clearRect(0, 0, resL.width, resL.height);
+      const RL = Math.min(resL.width * 0.16, resL.height * 0.38, 70);
+      const cxL = resL.width * 0.5;
+      const cyL = resL.height * 0.5;
+      const rectWL = Math.PI * RL;
+      const rectHL = RL;
+      const rectLeftL = resL.width * 0.5 - rectWL * 0.5;
+      const rectTopL = resL.height * 0.5 - rectHL * 0.5;
+      const thetaL = (2 * Math.PI) / N;
+      const dxL = rectWL / (N / 2);
+
+      drawRectangleWithHalfWedges(resL.ctx, t, N, RL, cxL, cyL, rectLeftL, rectTopL, rectWL, rectHL, thetaL, dxL);
+      if (t > 0.4) {
+        drawRectAnnotations(resL.ctx, rectLeftL, rectTopL, rectWL, rectHL, RL, (t - 0.4) * 2);
+      }
+
+      // Right: Triangle
+      resR.ctx.clearRect(0, 0, resR.width, resR.height);
+      renderTriangleFan(resR.ctx, resR.width, resR.height, t, N);
+    }
+
+    /* ==========================================================================
+       RENDER TAB 4: SANDBOX & QUIZ
+       ========================================================================== */
+    function renderTab4() {
+      const canvas = document.getElementById('sandboxCanvas');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width * 0.5;
+      const cy = height * 0.5;
+      const maxR = Math.min(width, height) * 0.42;
+      const visualR = (currentRadius / 15) * maxR + 15;
+
+      // Circle fill & glow
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, visualR);
+      grad.addColorStop(0, 'rgba(6, 182, 212, 0.35)');
+      grad.addColorStop(1, 'rgba(2, 132, 199, 0.1)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, visualR, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Center dot & radius line
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + visualR, cy);
+      ctx.stroke();
+
+      // Radius text
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(`r = ${currentRadius} cm`, cx + visualR * 0.5, cy - 6);
+    }
+
+    function updateSandboxCalculations() {
+      const r = currentRadius;
+      const c = parseFloat((2 * r * 3.14).toFixed(2));
+      const halfC = parseFloat((c / 2).toFixed(2));
+      const area = parseFloat((r * r * 3.14).toFixed(2));
+
+      document.getElementById('radiusValText').textContent = `${r} cm`;
+      document.getElementById('circDisplay').textContent = `${c} cm`;
+
+      // Card 1: Rect
+      document.getElementById('calcRectExpr').innerHTML = `
+        長 ＝ ${c} ÷ 2 ＝ <b style="color: var(--cyan);">${halfC} cm</b><br>
+        面積 ＝ ${halfC} × ${r}
+      `;
+      document.getElementById('calcRectVal').textContent = `＝ ${area} cm²`;
+
+      // Card 2: Tri
+      document.getElementById('calcTriExpr').innerHTML = `
+        底 ＝ <b style="color: var(--cyan);">${c} cm</b>，高 ＝ <b style="color: var(--gold);">${r} cm</b><br>
+        面積 ＝ (${c} × ${r}) ÷ 2
+      `;
+      document.getElementById('calcTriVal').textContent = `＝ ${area} cm²`;
+
+      // Card 3: Circle
+      document.getElementById('calcCircleExpr').innerHTML = `
+        面積 ＝ ${r} × ${r} × 3.14
+      `;
+      document.getElementById('calcCircleVal').textContent = `＝ ${area} cm²`;
+
+      renderTab4();
+    }
+
+    function onRadiusChange(val) {
+      currentRadius = parseFloat(val);
+      playTone(450 + currentRadius * 15);
+      updateSandboxCalculations();
+    }
+
+    function setRadiusVal(r) {
+      currentRadius = r;
+      document.getElementById('radiusInput').value = r;
+      playTone(550);
+      updateSandboxCalculations();
+    }
+
+    function newQuiz() {
+      playTone(480);
+      const candidates = [2, 3, 4, 6, 8, 10];
+      quizR = candidates[Math.floor(Math.random() * candidates.length)];
+      document.getElementById('quizPrompt').innerHTML = `如果一個圓的半徑是 <b>${quizR} cm</b>，請問它的圓面積是多少？`;
+      document.getElementById('quizAnswer').value = '';
+      const res = document.getElementById('quizResult');
+      res.style.display = 'none';
+    }
+
+    function checkQuiz() {
+      const input = parseFloat(document.getElementById('quizAnswer').value);
+      const expected = parseFloat((quizR * quizR * 3.14).toFixed(2));
+      const res = document.getElementById('quizResult');
+      res.style.display = 'block';
+
+      if (!isNaN(input) && Math.abs(input - expected) < 0.1) {
+        res.style.color = '#4ade80';
+        res.innerHTML = `🎉 太棒了！答對了！算式：${quizR} × ${quizR} × 3.14 ＝ ${expected} cm²！`;
+        playSuccessChord();
+      } else {
+        res.style.color = '#f87171';
+        res.innerHTML = `💡 再試一次看看！提示：圓面積 ＝ 半徑 × 半徑 × 3.14 （${quizR} × ${quizR} × 3.14）`;
+        playTone(300, 'sawtooth', 0.2);
+      }
+    }
+
+    /* ==========================================================================
+       RENDER MASTER DISPATCHER & WINDOW RESIZE
+       ========================================================================== */
+    function renderAll() {
+      if (currentTab === 1) renderTab1();
+      else if (currentTab === 2) renderTab2();
+      else if (currentTab === 3) renderTab3();
+      else if (currentTab === 4) renderTab4();
+    }
+
+    window.addEventListener('resize', () => {
+      renderAll();
+    });
+
+    window.addEventListener('load', () => {
+      updateSandboxCalculations();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
