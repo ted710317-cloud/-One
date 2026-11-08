@@ -276,7 +276,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 16px;
-      min-height: 380px;
+      min-height: 420px;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -290,7 +290,7 @@
     canvas {
       display: block;
       width: 100%;
-      height: 340px;
+      height: 380px;
       touch-action: none;
     }
 
@@ -622,7 +622,7 @@
 
       <!-- Interactive Canvas Stage -->
       <div class="interactive-stage" id="interactiveStage">
-        <canvas id="mainCanvas" width="960" height="340"></canvas>
+        <canvas id="mainCanvas" width="960" height="380"></canvas>
       </div>
 
       <!-- Stage Controls & Buttons -->
@@ -948,9 +948,9 @@
       const hintEl = document.getElementById("stageHint");
       const placedCount = step3Sticks.filter(s => s.slot !== null).length;
       if (placedCount < 3) {
-        hintEl.innerHTML = `💡 <b>操作提示</b>：請用手指將下方工具區的【直徑尺（${group.trueD} ${group.unit}）】拖曳到數線上排排看（已排 ${placedCount}/3 根）！`;
+        hintEl.innerHTML = `💡 <b>操作提示</b>：請用手指將下方工具區標有直徑的【${group.objName}】拖曳到數線上排排看（已排 ${placedCount}/3 個）！`;
       } else {
-        hintEl.innerHTML = `<span style="color:#4ade80; font-weight:800;">✨ 太神了！排滿 3 根後還多出一小截（約 0.14），剛好是直徑的 3 倍多一點點！</span>`;
+        hintEl.innerHTML = `<span style="color:#4ade80; font-weight:800;">✨ 太棒了！排滿 3 個直徑長後還多出一小截，圓周長是直徑的 3.多倍！</span>`;
       }
     }
 
@@ -1001,7 +1001,7 @@
         container.innerHTML = `
           <button class="btn" onclick="resetSticks()">🔄 重新排尺</button>
           <button class="btn ${placedCount === 3 ? 'btn-gold' : 'btn-primary'}" onclick="confirmStep3()">
-            ${placedCount === 3 ? '✅ 進入第四步：親自計算 🧮' : '🧩 請用手指將 3 根直徑尺拖入數線排排看 (' + placedCount + '/3)'}
+            ${placedCount === 3 ? '✅ 進入第四步：親自計算 🧮' : '🧩 請將 3 個標有直徑的圖案拖入數線排排看 (' + placedCount + '/3)'}
           </button>
         `;
       } else if (currentStep === 4) {
@@ -1098,25 +1098,24 @@
       setTimeout(() => switchStep(3), 600);
     }
 
-    /* STEP 3: DIAMETER STICKS LOGIC */
+    /* STEP 3: DIAMETER STICKS / OBJECTS LOGIC */
     function initStep3Sticks() {
       const group = GROUPS.find(g => g.id === currentGroupId);
-      const totalLenPx = 640;
-      const startX = 80;
-      const ratio = group.trueC / group.trueD;
-      const stickLenPx = totalLenPx / ratio;
+      const startX = 250;
+      const r = 68;
+      const slotCenterY = 116;
 
       step3Sticks = [];
       for (let i = 0; i < 3; i++) {
-        const trayX = 80 + i * (stickLenPx + 14);
-        const trayY = 250;
+        const trayX = 260 + i * 220;
+        const trayY = 318;
         step3Sticks.push({
           id: i,
           num: i + 1,
           val: group.trueD,
           unit: group.unit,
-          w: stickLenPx,
-          h: 40,
+          r: r,
+          trayR: 42,
           x: trayX,
           y: trayY,
           origX: trayX,
@@ -1131,14 +1130,14 @@
       renderStageControls();
       updateStageHeader();
       renderCanvas();
-      showToast("直徑尺已歸位，請重新拖曳排排看！", "🔄");
+      showToast("圖案已歸位，請重新拖曳排排看！", "🔄");
     }
 
     function confirmStep3() {
       const placedCount = step3Sticks.filter(s => s.slot !== null).length;
       if (placedCount < 3) {
         playTone(260, 'sawtooth', 0.1, 0.15);
-        showToast("請先將下方的 3 根直徑尺全部拖曳排到數線上喔！", "💡");
+        showToast("請先將下方的 3 個圖案全部拖曳排到數線上比對喔！", "💡");
         return;
       }
       switchStep(4);
@@ -1511,77 +1510,77 @@
       ctx.fillText(`👆 請用手指或滑鼠按住圓輪向右慢慢滾動一整圈！ (目前已滾動：${deg}° / 360°)`, w / 2, 40);
     }
 
-    /* DRAW STEP 3: DIAMETER STICKS COMPARISON */
+    /* DRAW STEP 3: CIRCLE OBJECTS WITH DIAMETER COMPARISON */
     function renderStep3Canvas(w, h, group) {
-      const startX = 80;
-      const totalLenPx = 640;
-      const lineY = 60;
-      const slotY = 96;
-      const rulerY = 142;
+      const startX = 250;
+      const D = 136; // pixel diameter
+      const r = D / 2; // 68px
+      const totalLenPx = D * (group.trueC / group.trueD); // ~427.3px
+      const endX = startX + totalLenPx;
+      const slotCenterY = 116;
+      const rulerY = 184;
 
-      const ratio = group.trueC / group.trueD;
-      const stickLenPx = totalLenPx / ratio;
-
-      // 1. Draw Circumference Line (C) at top
+      // 1. Draw Circumference Line (C) at top (y = 48)
       ctx.fillStyle = "rgba(16, 185, 129, 0.25)";
-      ctx.fillRect(startX, lineY - 12, totalLenPx, 24);
+      ctx.fillRect(startX, 36, totalLenPx, 14);
       ctx.strokeStyle = "#10b981";
       ctx.lineWidth = 3;
-      ctx.strokeRect(startX, lineY - 12, totalLenPx, 24);
+      ctx.strokeRect(startX, 36, totalLenPx, 14);
 
       ctx.fillStyle = "#34d399";
-      ctx.font = "bold 15px sans-serif";
+      ctx.font = "bold 14px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`展開的圓周長 C = ${group.trueC} ${group.unit}`, startX + totalLenPx / 2, lineY - 20);
+      ctx.fillText(`展開的圓周長 C = ${group.trueC} ${group.unit}`, startX + totalLenPx / 2, 26);
 
-      // 2. Draw Target Slots (Slot 0, 1, 2 and Remainder)
+      // 2. Draw Target Circle Outlines (Slots 0, 1, 2)
       for (let i = 0; i < 3; i++) {
-        const slotX = startX + i * stickLenPx;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        const slotCX = startX + r + i * D;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
-        ctx.strokeRect(slotX, slotY, stickLenPx, 40);
+        ctx.beginPath();
+        ctx.arc(slotCX, slotCenterY, r, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.setLineDash([]);
 
-        // Slot ghost hint if empty
         const isOccupied = step3Sticks.some(s => s.slot === i);
         if (!isOccupied) {
-          ctx.fillStyle = "rgba(148, 163, 184, 0.35)";
+          ctx.fillStyle = "rgba(148, 163, 184, 0.4)";
           ctx.font = "12px sans-serif";
-          ctx.fillText(`[ 放置第 ${i + 1} 根直徑尺 ]`, slotX + stickLenPx / 2, slotY + 25);
+          ctx.fillText(`[ 放置第 ${i + 1} 個 ]`, slotCX, slotCenterY + 4);
         }
       }
 
-      // Remainder Slot
-      const remX = startX + 3 * stickLenPx;
-      const remW = totalLenPx - 3 * stickLenPx;
+      // Remainder Slot (from 3D to C)
+      const remStartX = startX + 3 * D;
+      const remW = totalLenPx - 3 * D;
       const placedCount = step3Sticks.filter(s => s.slot !== null).length;
 
       if (placedCount === 3) {
         ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
-        ctx.fillRect(remX, slotY, remW, 40);
+        ctx.fillRect(remStartX, 48, remW, 136);
         ctx.strokeStyle = "#ef4444";
         ctx.lineWidth = 2;
-        ctx.strokeRect(remX, slotY, remW, 40);
+        ctx.strokeRect(remStartX, 48, remW, 136);
 
-        ctx.fillStyle = "#fecaca";
-        ctx.font = "bold 11px sans-serif";
-        ctx.fillText("剩餘", remX + remW / 2, slotY + 16);
-        ctx.fillText("約0.14d", remX + remW / 2, slotY + 32);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText("多出", remStartX + remW / 2, slotCenterY - 8);
+        ctx.fillText("一小截", remStartX + remW / 2, slotCenterY + 12);
       } else {
-        ctx.strokeStyle = "rgba(239, 68, 68, 0.3)";
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.35)";
         ctx.lineWidth = 1.5;
-        ctx.setLineDash([2, 2]);
-        ctx.strokeRect(remX, slotY, remW, 40);
+        ctx.setLineDash([3, 3]);
+        ctx.strokeRect(remStartX, 48, remW, 136);
         ctx.setLineDash([]);
       }
 
-      // 3. Draw Number Line / Ruler Underneath
+      // 3. Draw Number Line / Ruler Underneath (y = 184)
       ctx.fillStyle = "#1e293b";
-      ctx.fillRect(startX, rulerY, totalLenPx + 40, 36);
+      ctx.fillRect(startX, rulerY, totalLenPx + 30, 36);
       ctx.strokeStyle = "#475569";
       ctx.lineWidth = 2;
-      ctx.strokeRect(startX, rulerY, totalLenPx + 40, 36);
+      ctx.strokeRect(startX, rulerY, totalLenPx + 30, 36);
 
       // Ticks on Ruler
       ctx.fillStyle = "#94a3b8";
@@ -1592,69 +1591,71 @@
       drawRulerTick(startX, rulerY, "0");
 
       // 1d tick
-      const d1X = startX + stickLenPx;
-      drawRulerTick(d1X, rulerY, `${group.trueD}`, "1d");
+      drawRulerTick(startX + D, rulerY, `${group.trueD}`, "1個直徑");
 
       // 2d tick
-      const d2X = startX + 2 * stickLenPx;
-      drawRulerTick(d2X, rulerY, `${(group.trueD * 2).toFixed(1)}`, "2d");
+      drawRulerTick(startX + 2 * D, rulerY, `${(group.trueD * 2).toFixed(1)}`, "2個直徑");
 
       // 3d tick
-      const d3X = startX + 3 * stickLenPx;
-      drawRulerTick(d3X, rulerY, `${(group.trueD * 3).toFixed(1)}`, "3d");
+      drawRulerTick(startX + 3 * D, rulerY, `${(group.trueD * 3).toFixed(1)}`, "3個直徑");
 
       // End tick (Full Circumference)
-      const endX = startX + totalLenPx;
       drawRulerTick(endX, rulerY, `${group.trueC} ${group.unit}`, "圓周長 C", true);
 
-      // 4. Draw Grand Summary Banner when all 3 placed
+      // 4. Draw Conclusion Banner (y = 236)
       if (placedCount === 3) {
         ctx.fillStyle = "#facc15";
-        ctx.font = "bold 16px -apple-system, sans-serif";
+        ctx.font = "bold 17px -apple-system, sans-serif";
         ctx.fillText(
-          `✨ 圓周長 (${group.trueC} ${group.unit}) ＝ 3 根直徑尺 (${(group.trueD * 3).toFixed(1)} ${group.unit}) ＋ 剩餘約 0.14 個直徑長 ＝ 約 3.14 倍！`,
+          `✨ 圓周長（${group.trueC} ${group.unit}） ＝ 3 個直徑長 ＋ 剩餘一小截 ＝ 直徑的 3.多倍！`,
           w / 2,
-          198
+          238
         );
       } else {
         ctx.fillStyle = "#94a3b8";
         ctx.font = "13px sans-serif";
-        ctx.fillText(`請用手指將下方 3 根直徑尺拖曳放到對應數線上（已排 ${placedCount} / 3 根）`, w / 2, 198);
+        ctx.fillText(`請用手指將下方的圓形圖案（標有直徑）拖曳放到數線上排排看（已排 ${placedCount} / 3 個）`, w / 2, 238);
       }
 
-      // 5. Bottom Tray for Sticks
+      // 5. Bottom Tray for Objects (y = 256 ~ 368)
       ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
-      ctx.fillRect(60, 225, w - 120, 95);
+      ctx.fillRect(100, 256, 760, 114);
       ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(60, 225, w - 120, 95);
+      ctx.strokeRect(100, 256, 760, 114);
 
       ctx.fillStyle = "#94a3b8";
       ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText("📦 直徑尺工具區（拖曳直徑尺排入上方數線）", 75, 243);
+      ctx.fillText("📦 直徑尺工具區（請用手指將圖案拖曳排入上方數線）", 115, 274);
 
-      // Draw all sticks
+      // Draw all items (placed in slot or in tray)
       step3Sticks.forEach(s => {
         if (s.slot !== null) {
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          // Ghost silhouette in tray
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
           ctx.lineWidth = 1.5;
           ctx.setLineDash([3, 3]);
-          ctx.strokeRect(s.origX, s.origY, s.w, s.h);
+          ctx.beginPath();
+          ctx.arc(s.origX, s.origY, s.trayR, 0, Math.PI * 2);
+          ctx.stroke();
           ctx.setLineDash([]);
           ctx.fillStyle = "rgba(148, 163, 184, 0.25)";
           ctx.font = "11px sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText(`第 ${s.num} 根 (已排入)`, s.origX + s.w / 2, s.origY + 24);
+          ctx.fillText(`第 ${s.num} 個 (已排入)`, s.origX, s.origY + 4);
 
-          drawDiameterStick(s, false);
+          // Draw item in slot
+          drawDiameterObject(s.x, s.y, s.r, s.num, group, false);
         } else if (s !== draggingStick) {
-          drawDiameterStick(s, false);
+          // Draw item in tray
+          drawDiameterObject(s.x, s.y, s.trayR, s.num, group, false);
         }
       });
 
+      // Draw dragging item on top
       if (draggingStick) {
-        drawDiameterStick(draggingStick, true);
+        drawDiameterObject(draggingStick.x, draggingStick.y, draggingStick.r, draggingStick.num, group, true);
       }
     }
 
@@ -1678,45 +1679,70 @@
       }
     }
 
-    function drawDiameterStick(s, isDragging) {
+    function drawDiameterObject(x, y, r, num, group, isDragging) {
       ctx.save();
-      ctx.translate(s.x, s.y);
 
       if (isDragging) {
-        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-        ctx.shadowBlur = 12;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+        ctx.shadowBlur = 18;
         ctx.shadowOffsetY = 6;
       }
 
-      const grad = ctx.createLinearGradient(0, 0, 0, s.h);
-      grad.addColorStop(0, "#fde047");
-      grad.addColorStop(1, "#eab308");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.roundRect ? ctx.roundRect(0, 0, s.w, s.h, 8) : ctx.rect(0, 0, s.w, s.h);
-      ctx.fill();
+      // 1. Draw the exact object pattern from Step 1
+      drawStyledCircle(x, y, r, group, 0);
 
-      ctx.strokeStyle = isDragging ? "#fff" : "#ca8a04";
-      ctx.lineWidth = isDragging ? 3 : 2;
+      // 2. Draw prominent horizontal diameter line passing through center
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x - r + 3, y);
+      ctx.lineTo(x + r - 3, y);
       ctx.stroke();
 
-      // Grip handle on left
-      ctx.fillStyle = "#854d0e";
-      for (let dotY = 10; dotY <= s.h - 10; dotY += 7) {
-        ctx.beginPath();
-        ctx.arc(10, dotY, 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      // Arrowheads at left (x - r) and right (x + r)
+      ctx.fillStyle = "#ffffff";
+      // Left arrow
+      ctx.beginPath();
+      ctx.moveTo(x - r + 3, y);
+      ctx.lineTo(x - r + 10, y - 4);
+      ctx.lineTo(x - r + 10, y + 4);
+      ctx.closePath();
+      ctx.fill();
 
-      // Stick Labels
-      ctx.fillStyle = "#000000";
+      // Right arrow
+      ctx.beginPath();
+      ctx.moveTo(x + r - 3, y);
+      ctx.lineTo(x + r - 10, y - 4);
+      ctx.lineTo(x + r - 10, y + 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // 3. Diameter value badge in the center
+      const badgeText = `直徑 ＝ ${group.trueD} ${group.unit}`;
       ctx.font = "bold 12px -apple-system, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`第 ${s.num} 根直徑尺`, s.w / 2, 16);
+      const tw = ctx.measureText(badgeText).width;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+      ctx.strokeStyle = "#facc15";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x - tw / 2 - 7, y - 9, tw + 14, 18, 5) : ctx.rect(x - tw / 2 - 7, y - 9, tw + 14, 18);
+      ctx.fill();
+      ctx.stroke();
 
-      ctx.font = "900 14px monospace";
-      ctx.fillStyle = "#713f12";
-      ctx.fillText(`直徑 ＝ ${s.val} ${s.unit}`, s.w / 2, 32);
+      ctx.fillStyle = "#facc15";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(badgeText, x, y);
+
+      // 4. Number label badge at top
+      const numText = `第 ${num} 個`;
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x - 22, y - r + 3, 44, 16, 7) : ctx.rect(x - 22, y - r + 3, 44, 16);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(numText, x, y - r + 11);
 
       ctx.restore();
     }
@@ -1989,7 +2015,9 @@
       } else if (currentStep === 3) {
         for (let i = step3Sticks.length - 1; i >= 0; i--) {
           const s = step3Sticks[i];
-          if (pos.x >= s.x && pos.x <= s.x + s.w && pos.y >= s.y && pos.y <= s.y + s.h) {
+          const curR = s.slot !== null ? s.r : s.trayR;
+          const dist = Math.hypot(pos.x - s.x, pos.y - s.y);
+          if (dist <= curR + 15) {
             draggingStick = s;
             dragStickOffsetX = pos.x - s.x;
             dragStickOffsetY = pos.y - s.y;
@@ -2064,23 +2092,21 @@
         renderCanvas();
       }
       if (draggingStick) {
-        const startX = 80;
-        const totalLenPx = 640;
-        const group = GROUPS.find(g => g.id === currentGroupId);
-        const ratio = group.trueC / group.trueD;
-        const stickLenPx = totalLenPx / ratio;
-        const slotY = 96;
+        const startX = 250;
+        const D = 136;
+        const r = D / 2;
+        const slotCenterY = 116;
 
         let snapped = false;
         for (let i = 0; i < 3; i++) {
-          const targetSlotX = startX + i * stickLenPx;
+          const targetSlotX = startX + r + i * D;
           const occupied = step3Sticks.some(s => s !== draggingStick && s.slot === i);
           if (!occupied) {
-            const dist = Math.hypot(draggingStick.x - targetSlotX, draggingStick.y - slotY);
-            if (dist < 60 || (Math.abs(draggingStick.x - targetSlotX) < 45 && draggingStick.y < 160)) {
+            const dist = Math.hypot(draggingStick.x - targetSlotX, draggingStick.y - slotCenterY);
+            if (dist < 75 || (Math.abs(draggingStick.x - targetSlotX) < 55 && Math.abs(draggingStick.y - slotCenterY) < 70)) {
               draggingStick.slot = i;
               draggingStick.x = targetSlotX;
-              draggingStick.y = slotY;
+              draggingStick.y = slotCenterY;
               snapped = true;
               playClackSound();
               break;
@@ -2097,7 +2123,7 @@
         const placedCount = step3Sticks.filter(s => s.slot !== null).length;
         if (placedCount === 3) {
           playSuccessFanfare();
-          showToast("🎉 3 根直徑尺排滿！親眼見證：剛好 3 根多出一截（約 0.14）！", "✨");
+          showToast("🎉 3 個圖案排滿！親眼見證：剛好 3 個還多出一小截（3.多倍）！", "✨");
         }
         draggingStick = null;
         updateStageHeader();
