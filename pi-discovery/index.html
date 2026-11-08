@@ -937,8 +937,8 @@
         titleEl.innerHTML = `<span>【步驟三】直徑尺排排看 —— 探索 ${group.icon} ${group.objName} 的直徑倍數</span>`;
         updateStep3Hint();
       } else if (currentStep === 4) {
-        titleEl.innerHTML = `<span>【步驟四】除法計算 & 登錄 —— 揭曉神奇的圓周率！</span>`;
-        hintEl.innerHTML = `💡 把測量到的圓周長除以直徑，看看算出來是多少！`;
+        titleEl.innerHTML = `<span>【步驟四】除法計算 & 登錄 —— 算出本組的圓周長與直徑比值！</span>`;
+        hintEl.innerHTML = `💡 請將本組測量到的【圓周長 ÷ 直徑】，算出結果並登記至全班大會師看板！`;
       }
     }
 
@@ -1158,7 +1158,7 @@
       const resultBox = document.getElementById("calcResultBox");
       resultBox.style.display = "block";
       playSuccessFanfare();
-      showToast(`太神奇了！除出來的比值是 ${ratio}！`, "🎉");
+      showToast(`本組計算完成！除出來的比值是 ${ratio}！`, "🎉");
     }
 
     function uploadToBoard() {
@@ -1721,23 +1721,31 @@
       ctx.restore();
     }
 
-    /* DRAW STEP 4: CELEBRATION / MATH ART */
+    /* DRAW STEP 4: OBJECT DISPLAY & FORMULA PREVIEW */
     function renderStep4Canvas(w, h, group) {
-      // Dynamic glowing circle & ratio diagram
       const cx = w / 2;
-      const cy = 110;
+      const cy = 95;
       const r = 60;
 
+      // Draw the object explored by this group
       drawStyledCircle(cx, cy, r, group, 0);
 
-      ctx.fillStyle = "#facc15";
-      ctx.font = "bold 24px monospace";
+      const curr = groupResults[group.id] || {};
+      const dVal = curr.measuredD || group.trueD;
+      const cVal = curr.measuredC || group.trueC;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px -apple-system, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`π ≈ 3.14159...`, cx, 230);
+      ctx.fillText(`${group.name} 探索物件：${group.icon} ${group.objName}`, cx, cy + r + 35);
+
+      ctx.fillStyle = "#38bdf8";
+      ctx.font = "bold 15px -apple-system, sans-serif";
+      ctx.fillText(`實測直徑 d = ${dVal} ${group.unit}　｜　實測圓周長 C = ${cVal} ${group.unit}`, cx, cy + r + 64);
 
       ctx.fillStyle = "#94a3b8";
       ctx.font = "14px sans-serif";
-      ctx.fillText(`無論何種大小的圓，圓周長 ÷ 直徑永遠是個常數`, cx, 260);
+      ctx.fillText(`請在下方算式中進行計算，求出本組「圓周長 ÷ 直徑」的比值！`, cx, cy + r + 92);
     }
 
     /* HELPER: DRAW STYLED OBJECTS (COIN, CUP, PIZZA, BIKE, HOOP, FERRIS) */
