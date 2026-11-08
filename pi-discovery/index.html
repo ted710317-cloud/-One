@@ -653,7 +653,7 @@
               <th>測量直徑 (d)</th>
               <th>展開圓周長 (C)</th>
               <th>除法算式 (C ÷ d)</th>
-              <th>計算比值</th>
+              <th>計算比值<br><span style="font-size: 11px; font-weight: normal; color: #cbd5e1;">(四捨五入至小數第二位)</span></th>
               <th>狀態</th>
             </tr>
           </thead>
@@ -938,7 +938,7 @@
         updateStep3Hint();
       } else if (currentStep === 4) {
         titleEl.innerHTML = `<span>【步驟四】除法計算 & 登錄 —— 算出本組的圓周長與直徑比值！</span>`;
-        hintEl.innerHTML = `💡 請將本組測量到的【圓周長 ÷ 直徑】，算出結果並登記至全班大會師看板！`;
+        hintEl.innerHTML = `💡 請將本組測量到的【圓周長 ÷ 直徑】（<b>四捨五入到小數點後第二位</b>），算出結果並登記至全班大會師看板！`;
       }
     }
 
@@ -1011,7 +1011,7 @@
         container.innerHTML = `
           <div class="calc-container">
             <h3 style="color: var(--gold); margin-bottom: 8px;">🧮 ${group.name}【${group.objName}】算術小擂台</h3>
-            <p style="color: var(--text-muted); font-size: 14px;">請將剛才測量到的【圓周長】除以【直徑】：</p>
+            <p style="color: var(--text-muted); font-size: 14px;">請將剛才測量到的【圓周長】除以【直徑】<span style="color: var(--gold); font-weight: 700;">（條件：四捨五入到小數點後第二位）</span>：</p>
             
             <div class="calc-equation">
               <span class="calc-pill pill-c">圓周長 C = ${cVal} ${group.unit}</span>
@@ -1023,7 +1023,8 @@
             </div>
 
             <div class="calc-result-box" id="calcResultBox">
-              🎉 算出來了！${cVal} ÷ ${dVal} ≈ <span style="font-size: 32px; color: #ffe600;">${(cVal / dVal).toFixed(2)}</span> ！
+              🎉 算出來了！${cVal} ÷ ${dVal} ＝ ${(cVal / dVal).toFixed(4)}… ≈ <span style="font-size: 32px; color: #ffe600;">${(cVal / dVal).toFixed(2)}</span><br>
+              <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">（四捨五入到小數點後第二位）</span>
             </div>
 
             <div style="margin-top: 16px;">
@@ -1771,7 +1772,7 @@
 
       ctx.fillStyle = "#94a3b8";
       ctx.font = "14px sans-serif";
-      ctx.fillText(`請在下方算式中進行計算，求出本組「圓周長 ÷ 直徑」的比值！`, cx, cy + r + 92);
+      ctx.fillText(`請在下方算式中進行計算（四捨五入到小數點後第二位），求出本組比值！`, cx, cy + r + 92);
     }
 
     /* HELPER: DRAW STYLED OBJECTS (COIN, CUP, PIZZA, BIKE, HOOP, FERRIS) */
