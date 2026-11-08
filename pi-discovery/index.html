@@ -924,7 +924,7 @@
 
       if (currentStep === 1) {
         titleEl.innerHTML = `<span>【步驟一】雙擋板量直徑 —— 探索 ${group.icon} ${group.objName}</span>`;
-        hintEl.innerHTML = `💡 拖曳左右兩塊橘色垂直擋板，夾緊圓的左右最邊緣，看下方直尺讀出直徑！`;
+        updateStep1Hint();
       } else if (currentStep === 2) {
         titleEl.innerHTML = `<span>【步驟二】滾動展開圓周長 —— 讓 ${group.icon} ${group.objName} 滾動一整圈</span>`;
         hintEl.innerHTML = `💡 拖曳圓輪或點擊「自動滾動一圈」，看圓周像膠帶般撕開攤平在地上！`;
@@ -937,6 +937,26 @@
       }
     }
 
+    function updateStep1Hint() {
+      if (currentStep !== 1) return;
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const hintEl = document.getElementById("stageHint");
+      const leftTarget = circleCenterX - circleRadius;
+      const rightTarget = circleCenterX + circleRadius;
+      const leftAligned = Math.abs(caliperLeftX - leftTarget) <= 5;
+      const rightAligned = Math.abs(caliperRightX - rightTarget) <= 5;
+
+      if (!leftAligned && !rightAligned) {
+        hintEl.innerHTML = `💡 <b>操作提示</b>：請拖曳【左橘板】貼齊 0 刻度與圓左緣，再拖曳【右橘板】貼緊圓右緣！`;
+      } else if (!leftAligned) {
+        hintEl.innerHTML = `💡 <b>操作提示</b>：請拖曳【左橘色擋板】貼齊直尺 0 刻度與圓的最左邊緣`;
+      } else if (!rightAligned) {
+        hintEl.innerHTML = `💡 <b>操作提示</b>：左邊已對齊！請拖曳【右橘色擋板】向左靠攏，貼緊圓的最右邊緣`;
+      } else {
+        hintEl.innerHTML = `<span style="color:#4ade80; font-weight:800;">🎯 夾緊成功！下方直尺讀出直徑 d = ${group.trueD} ${group.unit}，請按下方按鈕記錄直徑！</span>`;
+      }
+    }
+
     /* ============================================================
        5. STAGE CONTROLS & STEP LOGIC
        ============================================================ */
@@ -946,10 +966,10 @@
 
       if (currentStep === 1) {
         container.innerHTML = `
-          <button class="btn" onclick="snapLeftCaliper()">👈 靠左貼齊 0 刻度</button>
-          <button class="btn" onclick="snapRightCaliper()">👉 靠右貼緊圓邊緣</button>
-          <button class="btn btn-gold" onclick="autoClampCaliper()">🎯 一鍵精準夾緊</button>
-          <button class="btn btn-primary" onclick="confirmDiameter()">✅ 記錄直徑並進入下一步 ➡️</button>
+          <button class="btn" onclick="resetStep1Positions()">🔄 重設擋板位置</button>
+          <button class="btn ${isClamped ? 'btn-gold' : 'btn-primary'}" onclick="confirmDiameter()">
+            ${isClamped ? '✅ 記錄直徑 ' + group.trueD + ' ' + group.unit + ' 並進入下一步 ➡️' : '📏 請先用手指夾緊左右擋板'}
+          </button>
         `;
       } else if (currentStep === 2) {
         container.innerHTML = `
@@ -1003,41 +1023,31 @@
       caliperLeftX = circleCenterX - circleRadius - 80;
       caliperRightX = circleCenterX + circleRadius + 90;
       checkClampStatus();
-    }
-
-    function snapLeftCaliper() {
-      caliperLeftX = circleCenterX - circleRadius;
-      playSnapSound();
-      checkClampStatus();
+      renderStageControls();
       renderCanvas();
-    }
-
-    function snapRightCaliper() {
-      caliperRightX = circleCenterX + circleRadius;
-      playSnapSound();
-      checkClampStatus();
-      renderCanvas();
-    }
-
-    function autoClampCaliper() {
-      caliperLeftX = circleCenterX - circleRadius;
-      caliperRightX = circleCenterX + circleRadius;
-      playSnapSound();
-      checkClampStatus();
-      renderCanvas();
-      showToast("雙擋板已完美夾緊圓的最寬處！", "🎯");
     }
 
     function checkClampStatus() {
       const leftTarget = circleCenterX - circleRadius;
       const rightTarget = circleCenterX + circleRadius;
-      isClamped = (Math.abs(caliperLeftX - leftTarget) < 4 && Math.abs(caliperRightX - rightTarget) < 4);
+      const prevClamped = isClamped;
+      isClamped = (Math.abs(caliperLeftX - leftTarget) <= 5 && Math.abs(caliperRightX - rightTarget) <= 5);
+      if (!prevClamped && isClamped) {
+        playSnapSound();
+        showToast("🎯 完美夾緊！直尺讀數已就緒！", "📏");
+        renderStageControls();
+      } else if (prevClamped && !isClamped) {
+        renderStageControls();
+      }
+      updateStep1Hint();
     }
 
     function confirmDiameter() {
       const group = GROUPS.find(g => g.id === currentGroupId);
       if (!isClamped) {
-        autoClampCaliper();
+        playTone(260, 'sawtooth', 0.1, 0.15);
+        showToast("尚未夾緊圓的左右兩端喔！請用手指拖曳擋板夾緊！", "💡");
+        return;
       }
       if (!groupResults[group.id]) groupResults[group.id] = {};
       groupResults[group.id].measuredD = group.trueD;
@@ -1279,11 +1289,51 @@
       // Draw Circle Object
       drawStyledCircle(cx, cy, r, group, 0);
 
+      // Target Guides (Dotted lines at edges to guide students)
+      const leftTargetX = cx - r;
+      const rightTargetX = cx + r;
+      const isLeftAligned = Math.abs(caliperLeftX - leftTargetX) <= 5;
+      const isRightAligned = Math.abs(caliperRightX - rightTargetX) <= 5;
+
+      // Left edge guide if not yet aligned
+      if (!isLeftAligned) {
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(leftTargetX, groundY - 170);
+        ctx.lineTo(leftTargetX, rulerY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("📍 目標：貼齊 0 刻度", leftTargetX - 10, groundY - 180);
+      }
+
+      // Right edge guide if not yet aligned
+      if (!isRightAligned) {
+        ctx.strokeStyle = "rgba(249, 115, 22, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(rightTargetX, groundY - 170);
+        ctx.lineTo(rightTargetX, rulerY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#fb923c";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("📍 目標：貼緊圓右緣", rightTargetX + 10, groundY - 180);
+      }
+
       // Draw Left Caliper Block (Orange Triangle/Block)
-      drawCaliperBlock(caliperLeftX, groundY, 'left', isClamped);
+      drawCaliperBlock(caliperLeftX, groundY, 'left', isLeftAligned);
 
       // Draw Right Caliper Block (Orange Triangle/Block)
-      drawCaliperBlock(caliperRightX, groundY, 'right', isClamped);
+      drawCaliperBlock(caliperRightX, groundY, 'right', isRightAligned);
 
       // Draw Measurement Dimension Arrow between Calipers
       if (caliperRightX > caliperLeftX) {
@@ -1759,11 +1809,11 @@
       const pos = getCanvasPos(e);
 
       if (currentStep === 1) {
-        // Check if clicked near left caliper
-        if (Math.abs(pos.x - caliperLeftX) < 40) {
+        // Generous touch hit area for tablets (55px)
+        if (Math.abs(pos.x - caliperLeftX) < 55) {
           draggingCaliper = 'left';
           playTone(400, 'sine', 0.04, 0.1);
-        } else if (Math.abs(pos.x - caliperRightX) < 40) {
+        } else if (Math.abs(pos.x - caliperRightX) < 55) {
           draggingCaliper = 'right';
           playTone(400, 'sine', 0.04, 0.1);
         }
@@ -1790,11 +1840,21 @@
       const pos = getCanvasPos(e);
 
       if (draggingCaliper === 'left') {
-        caliperLeftX = Math.max(90, Math.min(circleCenterX - 10, pos.x));
+        const targetX = circleCenterX - circleRadius;
+        let newX = Math.max(90, Math.min(circleCenterX - 10, pos.x));
+        if (Math.abs(newX - targetX) < 8) {
+          newX = targetX;
+        }
+        caliperLeftX = newX;
         checkClampStatus();
         renderCanvas();
       } else if (draggingCaliper === 'right') {
-        caliperRightX = Math.max(circleCenterX + 10, Math.min(canvas.width - 90, pos.x));
+        const targetX = circleCenterX + circleRadius;
+        let newX = Math.max(circleCenterX + 10, Math.min(canvas.width - 90, pos.x));
+        if (Math.abs(newX - targetX) < 8) {
+          newX = targetX;
+        }
+        caliperRightX = newX;
         checkClampStatus();
         renderCanvas();
       } else if (wheelDragging) {
