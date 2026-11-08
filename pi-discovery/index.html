@@ -772,14 +772,16 @@
 
     // For Step 2 (Rolling)
     let rollRotation = 0; // in radians, 0 to 2*PI
-    let isRolling = false;
-    let rollAnimFrame = null;
     let wheelDragging = false;
     let dragStartX = 0;
     let dragStartRot = 0;
+    let lastTickRot = 0;
 
-    // For Step 3 (Diameter Sticks)
-    let sticksPlaced = 0; // 0, 1, 2, 3, or 4 (with remainder)
+    // For Step 3 (Draggable Diameter Sticks & Ruler)
+    let step3Sticks = [];
+    let draggingStick = null;
+    let dragStickOffsetX = 0;
+    let dragStickOffsetY = 0;
 
     /* ============================================================
        2. WEB AUDIO SYNTHESIZER
@@ -897,8 +899,7 @@
       // Reset experiment state for this group
       resetStep1Positions();
       rollRotation = 0;
-      isRolling = false;
-      sticksPlaced = 0;
+      initStep3Sticks();
 
       // Default to Step 1 if not done, or remember
       switchStep(1);
@@ -911,6 +912,10 @@
         const s = parseInt(btn.dataset.step);
         btn.classList.toggle("active", s === step);
       });
+
+      if (step === 3 && step3Sticks.length === 0) {
+        initStep3Sticks();
+      }
 
       updateStageHeader();
       renderStageControls();
@@ -926,14 +931,26 @@
         titleEl.innerHTML = `<span>【步驟一】雙擋板量直徑 —— 探索 ${group.icon} ${group.objName}</span>`;
         updateStep1Hint();
       } else if (currentStep === 2) {
-        titleEl.innerHTML = `<span>【步驟二】滾動展開圓周長 —— 讓 ${group.icon} ${group.objName} 滾動一整圈</span>`;
-        hintEl.innerHTML = `💡 拖曳圓輪或點擊「自動滾動一圈」，看圓周像膠帶般撕開攤平在地上！`;
+        titleEl.innerHTML = `<span>【步驟二】滾動展開圓周長 —— 親手推動 ${group.icon} ${group.objName} 滾動一整圈</span>`;
+        hintEl.innerHTML = `💡 <b>操作提示</b>：請用手指或滑鼠按住圓輪，向右慢慢滾動一整圈（360°），親手感受圓周在地面攤平成直線！`;
       } else if (currentStep === 3) {
-        titleEl.innerHTML = `<span>【步驟三】直徑尺排排看 —— 用直徑去量圓周長！</span>`;
-        hintEl.innerHTML = `💡 點擊擺放直徑尺，親自驗證：圓周長剛好是幾根直徑長？`;
+        titleEl.innerHTML = `<span>【步驟三】直徑尺排排看 —— 探索 ${group.icon} ${group.objName} 的直徑倍數</span>`;
+        updateStep3Hint();
       } else if (currentStep === 4) {
         titleEl.innerHTML = `<span>【步驟四】除法計算 & 登錄 —— 揭曉神奇的圓周率！</span>`;
         hintEl.innerHTML = `💡 把測量到的圓周長除以直徑，看看算出來是多少！`;
+      }
+    }
+
+    function updateStep3Hint() {
+      if (currentStep !== 3) return;
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const hintEl = document.getElementById("stageHint");
+      const placedCount = step3Sticks.filter(s => s.slot !== null).length;
+      if (placedCount < 3) {
+        hintEl.innerHTML = `💡 <b>操作提示</b>：請用手指將下方工具區的【直徑尺（${group.trueD} ${group.unit}）】拖曳到數線上排排看（已排 ${placedCount}/3 根）！`;
+      } else {
+        hintEl.innerHTML = `<span style="color:#4ade80; font-weight:800;">✨ 太神了！排滿 3 根後還多出一小截（約 0.14），剛好是直徑的 3 倍多一點點！</span>`;
       }
     }
 
@@ -972,17 +989,20 @@
           </button>
         `;
       } else if (currentStep === 2) {
+        const isDone = rollRotation >= Math.PI * 2 * 0.98;
         container.innerHTML = `
-          <button class="btn btn-gold" onclick="toggleAutoRoll()">🌀 ${isRolling ? '暫停滾動' : '自動慢速滾動一整圈'}</button>
           <button class="btn" onclick="resetRoll()">🔄 重設起點</button>
-          <button class="btn btn-primary" onclick="confirmCircumference()">✅ 記錄圓周長並進入下一步 ➡️</button>
+          <button class="btn ${isDone ? 'btn-gold' : 'btn-primary'}" onclick="confirmCircumference()">
+            ${isDone ? '✅ 記錄圓周長 ' + group.trueC + ' ' + group.unit + ' 並進入下一步 ➡️' : '🌀 請先用手指按住圓輪滾完一整圈'}
+          </button>
         `;
       } else if (currentStep === 3) {
+        const placedCount = step3Sticks.filter(s => s.slot !== null).length;
         container.innerHTML = `
-          <button class="btn btn-gold" onclick="addStick()">➕ 擺放第 ${Math.min(sticksPlaced + 1, 3)} 根直徑尺</button>
-          <button class="btn" onclick="placeAllSticks()">⚡ 一鍵排滿比對</button>
-          <button class="btn" onclick="resetSticks()">🔄 重排</button>
-          <button class="btn btn-primary" onclick="switchStep(4)">✅ 進入第四步：親自計算 🧮</button>
+          <button class="btn" onclick="resetSticks()">🔄 重新排尺</button>
+          <button class="btn ${placedCount === 3 ? 'btn-gold' : 'btn-primary'}" onclick="confirmStep3()">
+            ${placedCount === 3 ? '✅ 進入第四步：親自計算 🧮' : '🧩 請用手指將 3 根直徑尺拖入數線排排看 (' + placedCount + '/3)'}
+          </button>
         `;
       } else if (currentStep === 4) {
         const currData = groupResults[group.id] || {};
@@ -1057,77 +1077,71 @@
     }
 
     /* STEP 2: ROLLING LOGIC */
-    function toggleAutoRoll() {
-      isRolling = !isRolling;
-      renderStageControls();
-      if (isRolling) {
-        runRollAnimation();
-      }
-    }
-
-    function runRollAnimation() {
-      if (!isRolling) return;
-      rollRotation += 0.035;
-      playTone(180 + Math.sin(rollRotation * 4) * 40, 'triangle', 0.02, 0.05);
-      if (rollRotation >= Math.PI * 2) {
-        rollRotation = Math.PI * 2;
-        isRolling = false;
-        playSnapSound();
-        showToast("滾動剛好一整圈（360°）完成！", "🎉");
-        renderStageControls();
-      }
-      renderCanvas();
-      if (isRolling) {
-        rollAnimFrame = requestAnimationFrame(runRollAnimation);
-      }
-    }
-
     function resetRoll() {
-      isRolling = false;
       rollRotation = 0;
       renderStageControls();
       renderCanvas();
+      showToast("圓輪位置已歸零起點！", "🔄");
     }
 
     function confirmCircumference() {
       const group = GROUPS.find(g => g.id === currentGroupId);
-      if (rollRotation < Math.PI * 2 * 0.95) {
-        rollRotation = Math.PI * 2;
+      if (rollRotation < Math.PI * 2 * 0.98) {
+        playTone(260, 'sawtooth', 0.1, 0.15);
+        showToast("尚未滾滿一整圈（360°）喔！請用手指按住圓輪向前滾動！", "💡");
+        return;
       }
       if (!groupResults[group.id]) groupResults[group.id] = {};
       groupResults[group.id].measuredC = group.trueC;
-      playSnapSound();
+      playSuccessFanfare();
       showToast(`圓周長測量完成：${group.trueC} ${group.unit}！`, "🌀");
       setTimeout(() => switchStep(3), 600);
     }
 
     /* STEP 3: DIAMETER STICKS LOGIC */
-    function addStick() {
-      if (sticksPlaced < 3) {
-        sticksPlaced++;
-        playClackSound();
-        if (sticksPlaced === 3) {
-          setTimeout(() => {
-            showToast("放了 3 根直徑尺！發現還多出一小截（約 0.14）！", "🌟");
-          }, 300);
-        }
-      }
-      renderStageControls();
-      renderCanvas();
-    }
+    function initStep3Sticks() {
+      const group = GROUPS.find(g => g.id === currentGroupId);
+      const totalLenPx = 640;
+      const startX = 80;
+      const ratio = group.trueC / group.trueD;
+      const stickLenPx = totalLenPx / ratio;
 
-    function placeAllSticks() {
-      sticksPlaced = 3;
-      playSuccessFanfare();
-      showToast("3 根直徑尺排滿！圓周長剛好是直徑的 3 倍多一點點！", "🎯");
-      renderStageControls();
-      renderCanvas();
+      step3Sticks = [];
+      for (let i = 0; i < 3; i++) {
+        const trayX = 80 + i * (stickLenPx + 14);
+        const trayY = 250;
+        step3Sticks.push({
+          id: i,
+          num: i + 1,
+          val: group.trueD,
+          unit: group.unit,
+          w: stickLenPx,
+          h: 40,
+          x: trayX,
+          y: trayY,
+          origX: trayX,
+          origY: trayY,
+          slot: null
+        });
+      }
     }
 
     function resetSticks() {
-      sticksPlaced = 0;
+      initStep3Sticks();
       renderStageControls();
+      updateStageHeader();
       renderCanvas();
+      showToast("直徑尺已歸位，請重新拖曳排排看！", "🔄");
+    }
+
+    function confirmStep3() {
+      const placedCount = step3Sticks.filter(s => s.slot !== null).length;
+      if (placedCount < 3) {
+        playTone(260, 'sawtooth', 0.1, 0.15);
+        showToast("請先將下方的 3 根直徑尺全部拖曳排到數線上喔！", "💡");
+        return;
+      }
+      switchStep(4);
     }
 
     /* STEP 4: CALCULATION & UPLOAD LOGIC */
@@ -1422,9 +1436,8 @@
       const groundY = 240;
       const startX = 120;
       const r = 55;
-      const circPx = 2 * Math.PI * r; // pixel circumference
+      const circPx = 2 * Math.PI * r;
 
-      // Current wheel center X
       const currX = startX + (rollRotation / (2 * Math.PI)) * circPx;
       const currY = groundY - r;
 
@@ -1490,86 +1503,222 @@
         );
       }
 
-      // Prompt text above
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "14px sans-serif";
+      // Prompt & Rotation Degrees
+      ctx.fillStyle = "#facc15";
+      ctx.font = "bold 15px -apple-system, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🖱️ 滑鼠拖曳圓輪或點下方「自動慢速滾動」按鈕向前滾動", w / 2, 40);
+      const deg = Math.round((rollRotation / (Math.PI * 2)) * 360);
+      ctx.fillText(`👆 請用手指或滑鼠按住圓輪向右慢慢滾動一整圈！ (目前已滾動：${deg}° / 360°)`, w / 2, 40);
     }
 
     /* DRAW STEP 3: DIAMETER STICKS COMPARISON */
     function renderStep3Canvas(w, h, group) {
-      const lineY = 160;
-      const startX = 100;
-      const totalLenPx = 600; // Represents the full unrolled circumference C
-      const endX = startX + totalLenPx;
+      const startX = 80;
+      const totalLenPx = 640;
+      const lineY = 60;
+      const slotY = 96;
+      const rulerY = 142;
 
-      // 1. Draw Full Circumference Line (C)
-      ctx.fillStyle = "rgba(16, 185, 129, 0.2)";
-      ctx.fillRect(startX, lineY - 14, totalLenPx, 28);
-      ctx.strokeStyle = "#10b981";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(startX, lineY - 14, totalLenPx, 28);
-
-      // Label for Circumference
-      ctx.fillStyle = "#34d399";
-      ctx.font = "bold 16px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`展開的圓周長 C = ${group.trueC} ${group.unit}`, startX + totalLenPx / 2, lineY - 26);
-
-      // 2. Diameter stick unit length in px
-      // In real math, C = pi * d => 1 stick length in px = totalLenPx / (trueC / trueD)
-      const ratio = group.trueC / group.trueD; // ~ 3.14159
+      const ratio = group.trueC / group.trueD;
       const stickLenPx = totalLenPx / ratio;
 
-      // Draw Placed Sticks
-      for (let i = 0; i < sticksPlaced; i++) {
-        const sx = startX + i * stickLenPx;
-        ctx.fillStyle = "rgba(250, 204, 21, 0.9)";
-        ctx.fillRect(sx + 2, lineY + 24, stickLenPx - 4, 32);
-        ctx.strokeStyle = "#eab308";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(sx + 2, lineY + 24, stickLenPx - 4, 32);
+      // 1. Draw Circumference Line (C) at top
+      ctx.fillStyle = "rgba(16, 185, 129, 0.25)";
+      ctx.fillRect(startX, lineY - 12, totalLenPx, 24);
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(startX, lineY - 12, totalLenPx, 24);
 
-        // Stick text
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText(`第 ${i + 1} 根直徑尺 (d)`, sx + stickLenPx / 2, lineY + 45);
+      ctx.fillStyle = "#34d399";
+      ctx.font = "bold 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`展開的圓周長 C = ${group.trueC} ${group.unit}`, startX + totalLenPx / 2, lineY - 20);
+
+      // 2. Draw Target Slots (Slot 0, 1, 2 and Remainder)
+      for (let i = 0; i < 3; i++) {
+        const slotX = startX + i * stickLenPx;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(slotX, slotY, stickLenPx, 40);
+        ctx.setLineDash([]);
+
+        // Slot ghost hint if empty
+        const isOccupied = step3Sticks.some(s => s.slot === i);
+        if (!isOccupied) {
+          ctx.fillStyle = "rgba(148, 163, 184, 0.35)";
+          ctx.font = "12px sans-serif";
+          ctx.fillText(`[ 放置第 ${i + 1} 根直徑尺 ]`, slotX + stickLenPx / 2, slotY + 25);
+        }
       }
 
-      // If 3 sticks placed, show the remainder
-      if (sticksPlaced === 3) {
-        const remStartX = startX + 3 * stickLenPx;
-        const remLenPx = totalLenPx - 3 * stickLenPx;
+      // Remainder Slot
+      const remX = startX + 3 * stickLenPx;
+      const remW = totalLenPx - 3 * stickLenPx;
+      const placedCount = step3Sticks.filter(s => s.slot !== null).length;
 
+      if (placedCount === 3) {
         ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
-        ctx.fillRect(remStartX + 2, lineY + 24, remLenPx - 4, 32);
+        ctx.fillRect(remX, slotY, remW, 40);
         ctx.strokeStyle = "#ef4444";
         ctx.lineWidth = 2;
-        ctx.strokeRect(remStartX + 2, lineY + 24, remLenPx - 4, 32);
+        ctx.strokeRect(remX, slotY, remW, 40);
 
-        // Highlight remaining bracket
-        ctx.fillStyle = "#f87171";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText(`約 0.14 d`, remStartX + remLenPx / 2, lineY + 75);
+        ctx.fillStyle = "#fecaca";
+        ctx.font = "bold 11px sans-serif";
+        ctx.fillText("剩餘", remX + remW / 2, slotY + 16);
+        ctx.fillText("約0.14d", remX + remW / 2, slotY + 32);
+      } else {
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.3)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 2]);
+        ctx.strokeRect(remX, slotY, remW, 40);
+        ctx.setLineDash([]);
+      }
 
-        // Grand Conclusion Banner
+      // 3. Draw Number Line / Ruler Underneath
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(startX, rulerY, totalLenPx + 40, 36);
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(startX, rulerY, totalLenPx + 40, 36);
+
+      // Ticks on Ruler
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "11px monospace";
+      ctx.textAlign = "center";
+
+      // 0 tick
+      drawRulerTick(startX, rulerY, "0");
+
+      // 1d tick
+      const d1X = startX + stickLenPx;
+      drawRulerTick(d1X, rulerY, `${group.trueD}`, "1d");
+
+      // 2d tick
+      const d2X = startX + 2 * stickLenPx;
+      drawRulerTick(d2X, rulerY, `${(group.trueD * 2).toFixed(1)}`, "2d");
+
+      // 3d tick
+      const d3X = startX + 3 * stickLenPx;
+      drawRulerTick(d3X, rulerY, `${(group.trueD * 3).toFixed(1)}`, "3d");
+
+      // End tick (Full Circumference)
+      const endX = startX + totalLenPx;
+      drawRulerTick(endX, rulerY, `${group.trueC} ${group.unit}`, "圓周長 C", true);
+
+      // 4. Draw Grand Summary Banner when all 3 placed
+      if (placedCount === 3) {
         ctx.fillStyle = "#facc15";
-        ctx.font = "bold 20px -apple-system, sans-serif";
+        ctx.font = "bold 16px -apple-system, sans-serif";
         ctx.fillText(
-          `✨ 圓周長 C ＝ 3 根直徑尺 ＋ 0.14 根直徑 ＝ 約 3.14 個直徑長！`,
+          `✨ 圓周長 (${group.trueC} ${group.unit}) ＝ 3 根直徑尺 (${(group.trueD * 3).toFixed(1)} ${group.unit}) ＋ 剩餘約 0.14 個直徑長 ＝ 約 3.14 倍！`,
           w / 2,
-          lineY + 125
+          198
         );
       } else {
         ctx.fillStyle = "#94a3b8";
-        ctx.font = "14px sans-serif";
-        ctx.fillText(
-          `請點擊下方「擺放第 ${sticksPlaced + 1} 根直徑尺」，看看圓周長可以放下幾根直徑？`,
-          w / 2,
-          lineY + 105
-        );
+        ctx.font = "13px sans-serif";
+        ctx.fillText(`請用手指將下方 3 根直徑尺拖曳放到對應數線上（已排 ${placedCount} / 3 根）`, w / 2, 198);
       }
+
+      // 5. Bottom Tray for Sticks
+      ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+      ctx.fillRect(60, 225, w - 120, 95);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(60, 225, w - 120, 95);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("📦 直徑尺工具區（拖曳直徑尺排入上方數線）", 75, 243);
+
+      // Draw all sticks
+      step3Sticks.forEach(s => {
+        if (s.slot !== null) {
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
+          ctx.strokeRect(s.origX, s.origY, s.w, s.h);
+          ctx.setLineDash([]);
+          ctx.fillStyle = "rgba(148, 163, 184, 0.25)";
+          ctx.font = "11px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`第 ${s.num} 根 (已排入)`, s.origX + s.w / 2, s.origY + 24);
+
+          drawDiameterStick(s, false);
+        } else if (s !== draggingStick) {
+          drawDiameterStick(s, false);
+        }
+      });
+
+      if (draggingStick) {
+        drawDiameterStick(draggingStick, true);
+      }
+    }
+
+    function drawRulerTick(x, rulerY, valStr, subStr = "", isHighlight = false) {
+      ctx.strokeStyle = isHighlight ? "#10b981" : "#94a3b8";
+      ctx.lineWidth = isHighlight ? 3 : 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, rulerY);
+      ctx.lineTo(x, rulerY + (isHighlight ? 20 : 12));
+      ctx.stroke();
+
+      ctx.fillStyle = isHighlight ? "#34d399" : "#f8fafc";
+      ctx.font = isHighlight ? "bold 12px sans-serif" : "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(valStr, x, rulerY + (isHighlight ? 30 : 25));
+
+      if (subStr) {
+        ctx.fillStyle = isHighlight ? "#10b981" : "#facc15";
+        ctx.font = "bold 10px sans-serif";
+        ctx.fillText(subStr, x, rulerY - 6);
+      }
+    }
+
+    function drawDiameterStick(s, isDragging) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+
+      if (isDragging) {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 6;
+      }
+
+      const grad = ctx.createLinearGradient(0, 0, 0, s.h);
+      grad.addColorStop(0, "#fde047");
+      grad.addColorStop(1, "#eab308");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(0, 0, s.w, s.h, 8) : ctx.rect(0, 0, s.w, s.h);
+      ctx.fill();
+
+      ctx.strokeStyle = isDragging ? "#fff" : "#ca8a04";
+      ctx.lineWidth = isDragging ? 3 : 2;
+      ctx.stroke();
+
+      // Grip handle on left
+      ctx.fillStyle = "#854d0e";
+      for (let dotY = 10; dotY <= s.h - 10; dotY += 7) {
+        ctx.beginPath();
+        ctx.arc(10, dotY, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Stick Labels
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 12px -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`第 ${s.num} 根直徑尺`, s.w / 2, 16);
+
+      ctx.font = "900 14px monospace";
+      ctx.fillStyle = "#713f12";
+      ctx.fillText(`直徑 ＝ ${s.val} ${s.unit}`, s.w / 2, 32);
+
+      ctx.restore();
     }
 
     /* DRAW STEP 4: CELEBRATION / MATH ART */
@@ -1809,7 +1958,6 @@
       const pos = getCanvasPos(e);
 
       if (currentStep === 1) {
-        // Generous touch hit area for tablets (55px)
         if (Math.abs(pos.x - caliperLeftX) < 55) {
           draggingCaliper = 'left';
           playTone(400, 'sine', 0.04, 0.1);
@@ -1818,7 +1966,6 @@
           playTone(400, 'sine', 0.04, 0.1);
         }
       } else if (currentStep === 2) {
-        // Drag to roll wheel
         const startX = 120;
         const r = 55;
         const circPx = 2 * Math.PI * r;
@@ -1826,34 +1973,45 @@
         const currY = 240 - r;
 
         const dist = Math.hypot(pos.x - currX, pos.y - currY);
-        if (dist < r + 20) {
+        if (dist < r + 25) {
           wheelDragging = true;
           dragStartX = pos.x;
           dragStartRot = rollRotation;
+        }
+      } else if (currentStep === 3) {
+        for (let i = step3Sticks.length - 1; i >= 0; i--) {
+          const s = step3Sticks[i];
+          if (pos.x >= s.x && pos.x <= s.x + s.w && pos.y >= s.y && pos.y <= s.y + s.h) {
+            draggingStick = s;
+            dragStickOffsetX = pos.x - s.x;
+            dragStickOffsetY = pos.y - s.y;
+            s.slot = null;
+            playTone(480, 'sine', 0.05, 0.1);
+            updateStageHeader();
+            renderStageControls();
+            renderCanvas();
+            break;
+          }
         }
       }
     }
 
     function handlePointerMove(e) {
-      if (!draggingCaliper && !wheelDragging) return;
+      if (!draggingCaliper && !wheelDragging && !draggingStick) return;
       if (e.cancelable) e.preventDefault();
       const pos = getCanvasPos(e);
 
       if (draggingCaliper === 'left') {
         const targetX = circleCenterX - circleRadius;
         let newX = Math.max(90, Math.min(circleCenterX - 10, pos.x));
-        if (Math.abs(newX - targetX) < 8) {
-          newX = targetX;
-        }
+        if (Math.abs(newX - targetX) < 8) newX = targetX;
         caliperLeftX = newX;
         checkClampStatus();
         renderCanvas();
       } else if (draggingCaliper === 'right') {
         const targetX = circleCenterX + circleRadius;
         let newX = Math.max(circleCenterX + 10, Math.min(canvas.width - 90, pos.x));
-        if (Math.abs(newX - targetX) < 8) {
-          newX = targetX;
-        }
+        if (Math.abs(newX - targetX) < 8) newX = targetX;
         caliperRightX = newX;
         checkClampStatus();
         renderCanvas();
@@ -1863,6 +2021,18 @@
         const circPx = 2 * Math.PI * r;
         const dRot = (dx / circPx) * (2 * Math.PI);
         rollRotation = Math.max(0, Math.min(Math.PI * 2, dragStartRot + dRot));
+        if (Math.abs(rollRotation - lastTickRot) > 0.35) {
+          playTone(200 + Math.sin(rollRotation * 3) * 35, 'triangle', 0.02, 0.04);
+          lastTickRot = rollRotation;
+        }
+        if (rollRotation >= Math.PI * 2 * 0.98) {
+          rollRotation = Math.PI * 2;
+        }
+        renderStageControls();
+        renderCanvas();
+      } else if (draggingStick) {
+        draggingStick.x = pos.x - dragStickOffsetX;
+        draggingStick.y = pos.y - dragStickOffsetY;
         renderCanvas();
       }
     }
@@ -1880,13 +2050,54 @@
         if (rollRotation >= Math.PI * 2 * 0.98) {
           rollRotation = Math.PI * 2;
           playSuccessFanfare();
-          showToast("剛好滾動一整圈！", "🎉");
+          showToast("🎉 太棒了！親手滾完一整圈，圓周長已完全展開！", "✨");
+          renderStageControls();
         }
+        renderCanvas();
+      }
+      if (draggingStick) {
+        const startX = 80;
+        const totalLenPx = 640;
+        const group = GROUPS.find(g => g.id === currentGroupId);
+        const ratio = group.trueC / group.trueD;
+        const stickLenPx = totalLenPx / ratio;
+        const slotY = 96;
+
+        let snapped = false;
+        for (let i = 0; i < 3; i++) {
+          const targetSlotX = startX + i * stickLenPx;
+          const occupied = step3Sticks.some(s => s !== draggingStick && s.slot === i);
+          if (!occupied) {
+            const dist = Math.hypot(draggingStick.x - targetSlotX, draggingStick.y - slotY);
+            if (dist < 60 || (Math.abs(draggingStick.x - targetSlotX) < 45 && draggingStick.y < 160)) {
+              draggingStick.slot = i;
+              draggingStick.x = targetSlotX;
+              draggingStick.y = slotY;
+              snapped = true;
+              playClackSound();
+              break;
+            }
+          }
+        }
+        if (!snapped) {
+          draggingStick.slot = null;
+          draggingStick.x = draggingStick.origX;
+          draggingStick.y = draggingStick.origY;
+          playTone(250, 'sine', 0.08, 0.1);
+        }
+
+        const placedCount = step3Sticks.filter(s => s.slot !== null).length;
+        if (placedCount === 3) {
+          playSuccessFanfare();
+          showToast("🎉 3 根直徑尺排滿！親眼見證：剛好 3 根多出一截（約 0.14）！", "✨");
+        }
+        draggingStick = null;
+        updateStageHeader();
+        renderStageControls();
         renderCanvas();
       }
     }
 
-    // Start on load
     window.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
