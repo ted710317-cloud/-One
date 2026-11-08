@@ -1809,19 +1809,24 @@
 
     /* --- 4-SECTOR TRIANGLE STACKING (ENLARGED FOR CLASSROOM) --- */
     function render4SectorTriangle(ctx, width, height, t, cx0, cy0) {
-      // Enlarged R for high visibility
-      const R = Math.min(width * 0.18, height * 0.36, 165);
+      // Adjusted R and apexY to fit comfortably with no overlap between Sector 1 and Sector 4
+      const R = Math.min(width * 0.18, height * 0.32, 150);
       const sin45 = Math.SQRT1_2;
       const delta = R * sin45;
 
       const apexX = width * 0.5;
-      const apexY = height * 0.22;
+      const apexY = height * 0.12;
 
+      // NON-OVERLAPPING GEOMETRY:
+      // Sector 1: Apex at (apexX, apexY), pointing down. Arc bottom at apexY + R.
+      // Sector 4: Apex at (apexX, apexY + 2*R), pointing UP. Arc top at apexY + 2*R - R = apexY + R!
+      // They touch tangentially at (apexX, apexY + R) with ZERO overlap!
+      // Sector 2 & 3: Straight edges flush with Sector 4, bottom arcs form base.
       const targetPos = [
         { x: apexX, y: apexY, angle: Math.PI / 2, color: '#0284c7', label: '①' },
-        { x: apexX - delta, y: apexY + delta, angle: Math.PI / 2, color: '#059669', label: '②' },
-        { x: apexX + delta, y: apexY + delta, angle: Math.PI / 2, color: '#ea580c', label: '③' },
-        { x: apexX, y: apexY + 2 * delta, angle: -Math.PI / 2, color: '#7c3aed', label: '④' }
+        { x: apexX - delta, y: apexY + 2 * R - delta, angle: Math.PI / 2, color: '#059669', label: '②' },
+        { x: apexX + delta, y: apexY + 2 * R - delta, angle: Math.PI / 2, color: '#ea580c', label: '③' },
+        { x: apexX, y: apexY + 2 * R, angle: -Math.PI / 2, color: '#7c3aed', label: '④' }
       ];
 
       const circleAngles = [-Math.PI / 4, -3 * Math.PI / 4, 3 * Math.PI / 4, Math.PI / 4];
@@ -1840,7 +1845,7 @@
         ctx.rotate(curAngle);
         drawWedge(ctx, R, Math.PI / 2, targetPos[i].color, 'rgba(255, 255, 255, 0.45)');
 
-        // Big clear badges for classroom viewing
+        // Clear badges for classroom viewing
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'center';
@@ -1863,42 +1868,43 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      const baseBottomY = apexY + 2 * delta + (R - delta);
+      const baseCenterY = apexY + 2 * R;
+      const maxBottomY = baseCenterY + (R - delta);
       const baseLeftX = apexX - 2 * delta;
       const baseRightX = apexX + 2 * delta;
 
-      // Height Dimension (Left side)
+      // Height Dimension (Left side) spanning exactly 2r
       const hLineX = baseLeftX - 45;
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(hLineX + 10, apexY);
       ctx.lineTo(hLineX, apexY);
-      ctx.lineTo(hLineX, baseBottomY);
-      ctx.lineTo(hLineX + 10, baseBottomY);
+      ctx.lineTo(hLineX, baseCenterY);
+      ctx.lineTo(hLineX + 10, baseCenterY);
       ctx.stroke();
 
       ctx.fillStyle = '#fde047';
       ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText('高 ＝ 2r', hLineX - 10, (apexY + baseBottomY) * 0.5 - 10);
+      ctx.fillText('高 ＝ 2r', hLineX - 10, (apexY + baseCenterY) * 0.5 - 10);
       ctx.fillStyle = '#cbd5e1';
       ctx.font = '13px sans-serif';
-      ctx.fillText('(兩層半徑相加)', hLineX - 10, (apexY + baseBottomY) * 0.5 + 12);
+      ctx.fillText('(兩層半徑相加)', hLineX - 10, (apexY + baseCenterY) * 0.5 + 12);
 
-      // Height line through center
+      // Height dashed line through center
       ctx.strokeStyle = '#facc15';
       ctx.setLineDash([5, 5]);
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(apexX, apexY);
-      ctx.lineTo(apexX, baseBottomY);
+      ctx.lineTo(apexX, baseCenterY);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Base Dimension (Bottom side)
-      const bracketY = baseBottomY + 20;
+      // Base Dimension (Bottom side) below bottom arcs
+      const bracketY = maxBottomY + 20;
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
