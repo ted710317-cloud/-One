@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>📐 圓面積公式推導實驗室 - 長方形與三角形雙重幾何證明</title>
-  <meta name="description" content="國小六年級數學互動教具：將圓切成扇形重組成平行四邊形/長方形，或展開成等腰三角形，動手拖曳滑桿體驗極限與幾何化曲為直，證明半徑×半徑×3.14！">
+  <title>📐 圓面積公式推導實驗室 - 扇形重組長方形 ✕ 分層堆疊三角形</title>
+  <meta name="description" content="國小六年級數學互動教具：將圓切成扇形重組成平行四邊形/長方形，或由下到上堆疊成等腰三角形，動手拖曳滑桿體驗幾何化曲為直與約分消去，證明半徑×半徑×3.14！">
   <style>
     :root {
       --bg-dark: #070b18;
@@ -43,7 +43,7 @@
     }
 
     .container {
-      max-width: 1120px;
+      max-width: 1140px;
       margin: 0 auto;
     }
 
@@ -82,7 +82,7 @@
     }
 
     h1 {
-      font-size: clamp(24px, 4.5vw, 36px);
+      font-size: clamp(23px, 4.5vw, 36px);
       font-weight: 900;
       background: linear-gradient(135deg, #ffffff 20%, var(--gold) 60%, var(--cyan) 100%);
       -webkit-background-clip: text;
@@ -94,7 +94,7 @@
     .subtitle {
       font-size: clamp(13px, 2.8vw, 15px);
       color: var(--text-muted);
-      max-width: 780px;
+      max-width: 820px;
       margin: 0 auto;
     }
 
@@ -386,7 +386,7 @@
 
     @media (max-width: 600px) {
       canvas {
-        height: 340px;
+        height: 350px;
       }
     }
 
@@ -460,10 +460,10 @@
     }
 
     .conclusion-banner .math-equation {
-      font-size: clamp(20px, 4vw, 28px);
+      font-size: clamp(19px, 3.8vw, 26px);
       font-weight: 900;
       color: #ffe600;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       text-shadow: 0 0 16px rgba(250, 204, 21, 0.4);
     }
 
@@ -501,7 +501,7 @@
 
     .dual-canvas {
       width: 100%;
-      height: 280px;
+      height: 300px;
       background: #030712;
       border-radius: 10px;
       display: block;
@@ -671,7 +671,7 @@
 
       <h1>📐 圓面積公式推導實驗室</h1>
       <p class="subtitle">
-        將圓形等分切成扇形，重組成「長方形」或展開成「三角形」，透過極限化曲為直，親眼見證 <b>半徑 × 半徑 × 3.14</b> 的神奇幾何證明！
+        透過扇形重組為「長方形」，或由下到上堆疊為「三角形」，親眼見證幾何化曲為直與約分消去，證明 <b>半徑 × 半徑 × 3.14</b> 的神奇幾何原理！
       </p>
     </header>
 
@@ -685,8 +685,8 @@
 
       <button class="tab-btn tab-gold" id="tabBtn2" onclick="switchTab(2)">
         <span class="tab-icon">🔺</span>
-        <span class="tab-title">方法二：展開為三角形</span>
-        <span class="tab-desc">圓周拉平為底・圓心聚為高</span>
+        <span class="tab-title">方法二：分層拼成三角形</span>
+        <span class="tab-desc">底＝半周長・高＝2r・約分消去 2</span>
       </button>
 
       <button class="tab-btn tab-purple" id="tabBtn3" onclick="switchTab(3)">
@@ -805,13 +805,13 @@
       </div>
     </div>
 
-    <!-- TAB 2: 展開為三角形 -->
+    <!-- TAB 2: 分層拼成三角形 (老師手稿堆疊法) -->
     <div class="lab-card" id="tabContent2" style="display: none;">
       <div class="card-header-bar">
         <div class="card-title-group">
-          <h2><span>🔺 方法二：扇形底邊拉平展開為等腰三角形</span></h2>
+          <h2><span>🔺 方法二：扇形由下到上分層堆疊成大三角形</span></h2>
           <div class="card-hint">
-            💡 將圓周邊緣像拉鍊一樣在底邊完全拉平，所有扇形頂點（圓心）向上聚集，拼成巨大的等腰三角形！
+            💡 將圓形分成 4 個扇形：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），拼成大三角形！
           </div>
         </div>
       </div>
@@ -820,21 +820,18 @@
       <div class="controls-panel">
         <div class="control-row">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">模式切換：</span>
-            <div class="pill-group" id="triModePills">
-              <button class="pill-btn gold active" onclick="setTriMode('fan')">扇形底邊展開法 (經典)</button>
-              <button class="pill-btn gold" onclick="setTriMode('onion')">同心圓環洋蔥法 (阿基米德)</button>
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">🔄 視角切換：</span>
+            <div class="pill-group" id="triViewPills">
+              <button class="pill-btn gold active" onclick="setTriView('upright')">直立視角（底在下、高由下到上）</button>
+              <button class="pill-btn gold" onclick="setTriView('horizontal')">手稿視角（底在左、尖端朝右）</button>
             </div>
           </div>
 
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">🔪 細緻度：</span>
-            <div class="pill-group" id="slicePills2">
-              <button class="pill-btn gold" onclick="setSlices(4)">4</button>
-              <button class="pill-btn gold" onclick="setSlices(8)">8</button>
-              <button class="pill-btn gold active" onclick="setSlices(16)">16</button>
-              <button class="pill-btn gold" onclick="setSlices(32)">32</button>
-              <button class="pill-btn gold" onclick="setSlices(64)">64</button>
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--gold);">🔪 分割模式：</span>
+            <div class="pill-group" id="triSlicePills">
+              <button class="pill-btn gold active" onclick="setTriSlices(4)">4 等分 (經典手稿 1+3)</button>
+              <button class="pill-btn gold" onclick="setTriSlices(16)">16 等分 (4層金字塔 1+3+5+7)</button>
             </div>
           </div>
         </div>
@@ -842,7 +839,7 @@
         <!-- Slider Row -->
         <div class="slider-row">
           <div class="slider-label">
-            <span>🔄 展開進度：</span>
+            <span>🔄 組裝進度：</span>
             <span id="progressText2" style="color: #ffe600; font-size: 16px;">0% (圓形)</span>
           </div>
           <input type="range" class="custom-range" id="progressSlider2" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
@@ -852,7 +849,7 @@
               <span id="playText2">播放</span>
             </button>
             <button class="btn-act" onclick="setProgress(0)">⏪ 重置</button>
-            <button class="btn-act" onclick="setProgress(100)">⏩ 展平</button>
+            <button class="btn-act" onclick="setProgress(100)">⏩ 拼滿</button>
           </div>
         </div>
       </div>
@@ -868,46 +865,47 @@
           <div class="step-box">
             <span class="step-tag">Step 1 • 幾何形狀對應</span>
             <span class="step-content">三角形面積 ＝ (底 × 高) ÷ 2</span>
-            <span class="step-desc">所有的圓周弧度鋪在水平底線上，圓心拉起到頂部中央頂點。</span>
+            <span class="step-desc">扇形由下到上分層堆疊：頂層 1 個，底層 3 個（左右正立、中間倒扣）。</span>
           </div>
 
           <div class="step-box highlight">
             <span class="step-tag">Step 2 • 底邊對應</span>
-            <span class="step-content">底 ＝ 完整的圓周長</span>
+            <span class="step-content">底 ＝ 圓周長的一半</span>
             <span class="step-desc">
-              整條圓周被拉直成一條線段：<br>
-              <b style="color: var(--cyan);">底 ＝ 2 × 半徑 × 3.14</b>
+              大三角形底邊由 ② 與 ③ 兩個底弧組成：<br>
+              <b style="color: var(--cyan);">底 ＝ C ÷ 4 ＋ C ÷ 4 ＝ 半徑 × 3.14</b>
             </span>
           </div>
 
           <div class="step-box highlight">
             <span class="step-tag">Step 3 • 高度對應</span>
-            <span class="step-content">高 ＝ 圓的半徑</span>
+            <span class="step-content">高 ＝ 2 倍半徑 (2r)</span>
             <span class="step-desc">
-              從頂端圓心垂直量到底邊的距離，恰好等於圓的 <b style="color: var(--gold);">半徑 (r)</b>。
+              從大三角形頂點到底邊，跨越兩層扇形半徑：<br>
+              <b style="color: var(--gold);">高 ＝ 半徑 ＋ 半徑 ＝ 2 × 半徑 (直徑)</b>
             </span>
           </div>
 
           <div class="step-box">
             <span class="step-tag">Step 4 • 約分神奇消去！</span>
-            <span class="step-content">公式裡的 2 剛好約分</span>
+            <span class="step-content">高裡的 2 與公式 ÷2 抵銷</span>
             <span class="step-desc">
-              ＝ (2 × 半徑 × 3.14 × 半徑) ÷ 2<br>
+              ＝ (半徑 × 3.14) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span> × 半徑) ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span><br>
               ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
             </span>
           </div>
         </div>
 
         <div class="conclusion-banner">
-          <div class="math-title">🌟 三角形展開法 數學結論證明</div>
-          <div class="math-equation">圓面積 ＝ (底 × 高) ÷ 2 ＝ (2 × 半徑 × 3.14 × 半徑) ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
+          <div class="math-title">🌟 三角形分層堆疊法 數學結論證明</div>
+          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(半徑 × 3.14) × (2 × 半徑)] ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
         </div>
       </div>
 
       <div class="teacher-tip">
         💡 <strong>震撼頓悟點</strong>：<br>
-        很多學生常常好奇：「為什麼圓面積公式是 $r \times r \times 3.14$，裡面的『2』跑去哪裡了？」<br>
-        透過三角形展開法，學生能親眼看見——圓周長自帶的「$2 \times r$」，在代入三角形公式「除以 2」時，<strong>分子與分母的 2 剛好完美消去</strong>！這種幾何契合感令人拍案叫絕！
+        很多學生常常好奇：「為什麼三角形面積公式要『除以 2』，算出來的圓面積卻是 $r \times r \times 3.14$？」<br>
+        答案就在這裡：因為大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（$2 \times r$）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，完美得出 $r \times r \times 3.14$！
       </div>
     </div>
 
@@ -936,7 +934,7 @@
               <span id="playText3">播放</span>
             </button>
             <button class="btn-act" onclick="setProgress(0)">⏪ 重置</button>
-            <button class="btn-act" onclick="setProgress(100)">⏩ 展平</button>
+            <button class="btn-act" onclick="setProgress(100)">⏩ 拼滿</button>
           </div>
         </div>
       </div>
@@ -946,15 +944,15 @@
         <div class="dual-card">
           <div class="dual-card-title">
             <span style="color: var(--cyan);">🟩 方案一：重組為長方形</span>
-            <span style="font-size: 12px; color: var(--text-muted);">長 ＝ 半個圓周</span>
+            <span style="font-size: 12px; color: var(--text-muted);">長 ＝ 半個圓周，寬 ＝ r</span>
           </div>
           <canvas id="dualCanvasLeft" class="dual-canvas"></canvas>
         </div>
 
         <div class="dual-card">
           <div class="dual-card-title">
-            <span style="color: var(--gold);">🔺 方案二：展開為等腰三角形</span>
-            <span style="font-size: 12px; color: var(--text-muted);">底 ＝ 整條圓周</span>
+            <span style="color: var(--gold);">🔺 方案二：分層拼成三角形</span>
+            <span style="font-size: 12px; color: var(--text-muted);">底 ＝ 半個圓周，高 ＝ 2r</span>
           </div>
           <canvas id="dualCanvasRight" class="dual-canvas"></canvas>
         </div>
@@ -966,14 +964,14 @@
           <tr>
             <th>比較項目</th>
             <th>方案一：重組為長方形</th>
-            <th>方案二：展開為等腰三角形</th>
+            <th>方案二：分層拼成三角形 (老師手稿法)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><b>目標圖形</b></td>
+            <td><b>目標幾何圖形</b></td>
             <td>平行四邊形 / 長方形</td>
-            <td>等腰三角形（或洋蔥直角三角形）</td>
+            <td>大等腰三角形（頂層 1 片，底層 3 片）</td>
           </tr>
           <tr>
             <td><b>基礎面積公式</b></td>
@@ -983,17 +981,17 @@
           <tr>
             <td><b>底邊長度對應</b></td>
             <td>長 ＝ 圓周長的一半 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
-            <td>底 ＝ 完整的圓周長 ＝ <span style="color: var(--cyan);">2 × 半徑 × 3.14</span></td>
+            <td>底 ＝ 底部兩扇形弧長相加 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
           </tr>
           <tr>
             <td><b>高度/寬度對應</b></td>
-            <td>寬 ＝ <span style="color: var(--gold);">圓的半徑 (r)</span></td>
-            <td>高 ＝ <span style="color: var(--gold);">圓的半徑 (r)</span></td>
+            <td>寬 ＝ <span style="color: var(--gold);">1 個半徑 (r)</span></td>
+            <td>高 ＝ 兩層扇形半徑相加 ＝ <span style="color: var(--gold);">2 個半徑 (2r，即直徑)</span></td>
           </tr>
           <tr>
             <td><b>公式中的「2」如何處理？</b></td>
-            <td>在計算「長」的時候，<strong>預先將圓周長除以 2</strong></td>
-            <td>在三角形面積公式中，<strong>透過除以 2 將分子圓周長的 2 約分消去</strong></td>
+            <td>算式裡只有 1 個半徑，直接相乘算出面積</td>
+            <td>高裡面的「<strong>2 × 半徑</strong>」，剛好與三角形面積公式的「<strong>÷ 2</strong>」約分消去！</td>
           </tr>
           <tr>
             <td><b>最終推導成果</b></td>
@@ -1059,15 +1057,15 @@
             <div class="calc-final-val" id="calcRectVal">＝ 78.5 cm²</div>
           </div>
 
-          <!-- Card 2: 三角形法 -->
+          <!-- Card 2: 三角形法 (老師手稿堆疊法) -->
           <div class="calc-card">
             <div class="calc-card-header">
-              <span style="color: var(--gold);">🔺 方案二：三角形計算過程</span>
+              <span style="color: var(--gold);">🔺 方案二：三角形計算過程 (手稿堆疊法)</span>
               <span class="calc-pill pill-gold">(底 × 高) ÷ 2</span>
             </div>
             <div class="calc-expression" id="calcTriExpr">
-              底 ＝ 31.4 cm，高 ＝ 5 cm<br>
-              面積 ＝ (31.4 × 5) ÷ 2
+              底 ＝ 31.4 ÷ 2 ＝ 15.7 cm，高 ＝ 2 × 5 ＝ 10 cm<br>
+              面積 ＝ (15.7 × 10) ÷ 2 ＝ 15.7 × 5
             </div>
             <div class="calc-final-val" id="calcTriVal">＝ 78.5 cm²</div>
           </div>
@@ -1110,7 +1108,8 @@
     let currentTab = 1;
     let sliceCount = 16;
     let halfWedgeEnabled = true;
-    let triMode = 'fan'; // 'fan' or 'onion'
+    let triView = 'upright'; // 'upright' or 'horizontal'
+    let triSlices = 4; // 4 or 16
     let progress = 0; // 0 to 100
     let isPlaying = false;
     let animId = null;
@@ -1174,7 +1173,6 @@
         if (content) content.style.display = (i === tabIndex) ? 'block' : 'none';
       }
 
-      // Sync progress across sliders
       syncAllSliders(progress);
       requestAnimationFrame(renderAll);
     }
@@ -1186,18 +1184,14 @@
       playTone(560);
       sliceCount = n;
 
-      // Update pill states
-      [1, 2].forEach(tab => {
-        const container = document.getElementById(`slicePills${tab}`);
-        if (container) {
-          const btns = container.querySelectorAll('.pill-btn');
-          btns.forEach(btn => {
-            const val = parseInt(btn.textContent);
-            btn.classList.toggle('active', val === n);
-          });
-        }
-      });
-
+      const container = document.getElementById('slicePills1');
+      if (container) {
+        const btns = container.querySelectorAll('.pill-btn');
+        btns.forEach(btn => {
+          const val = parseInt(btn.textContent);
+          btn.classList.toggle('active', val === n);
+        });
+      }
       renderAll();
     }
 
@@ -1213,14 +1207,26 @@
       renderAll();
     }
 
-    function setTriMode(mode) {
-      triMode = mode;
+    function setTriView(view) {
+      triView = view;
       playTone(600);
-      const pills = document.getElementById('triModePills');
+      const pills = document.getElementById('triViewPills');
       if (pills) {
         const btns = pills.querySelectorAll('.pill-btn');
-        btns[0].classList.toggle('active', mode === 'fan');
-        btns[1].classList.toggle('active', mode === 'onion');
+        btns[0].classList.toggle('active', view === 'upright');
+        btns[1].classList.toggle('active', view === 'horizontal');
+      }
+      renderAll();
+    }
+
+    function setTriSlices(n) {
+      triSlices = n;
+      playTone(580);
+      const pills = document.getElementById('triSlicePills');
+      if (pills) {
+        const btns = pills.querySelectorAll('.pill-btn');
+        btns[0].classList.toggle('active', n === 4);
+        btns[1].classList.toggle('active', n === 16);
       }
       renderAll();
     }
@@ -1276,7 +1282,6 @@
         const dt = (now - lastTime) / 1000;
         lastTime = now;
 
-        // Move 25% per second
         progress += dt * 25;
         if (progress >= 100) {
           progress = 100;
@@ -1325,7 +1330,7 @@
       }
 
       const ctx = canvas.getContext('2d');
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
       return { ctx, width, height };
     }
@@ -1341,13 +1346,10 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      const t = progress / 100; // 0 to 1
+      const t = progress / 100;
       const N = sliceCount;
       const R = Math.min(width * 0.16, height * 0.38, 120);
 
-      // Interpolate center and layout
-      // At t=0: circle at center (cx0, cy0)
-      // At t=1: rectangle centered horizontally, height R, width pi * R
       const cx0 = width * 0.5;
       const cy0 = height * 0.46;
 
@@ -1358,43 +1360,33 @@
 
       const sectorAngle = (2 * Math.PI) / N;
       const halfN = N / 2;
-      const dx = rectW / halfN; // width per wedge base
+      const dx = rectW / halfN;
 
-      // Draw background guidelines when t > 0.5
       if (t > 0.1) {
         ctx.save();
         ctx.globalAlpha = Math.min(1, (t - 0.1) * 1.5) * 0.35;
         ctx.strokeStyle = '#06b6d4';
         ctx.setLineDash([4, 4]);
         ctx.lineWidth = 1.5;
-        // top guide
         ctx.beginPath();
         ctx.moveTo(rectLeft, rectTop);
         ctx.lineTo(rectLeft + rectW, rectTop);
-        ctx.stroke();
-        // bottom guide
-        ctx.beginPath();
         ctx.moveTo(rectLeft, rectTop + rectH);
         ctx.lineTo(rectLeft + rectW, rectTop + rectH);
         ctx.stroke();
         ctx.restore();
       }
 
-      // Draw each sector
-      // Top group: pointing down. Bottom group: pointing up.
-      // If halfWedgeEnabled: split sector 0 into two halves at the ends!
       if (halfWedgeEnabled) {
         drawRectangleWithHalfWedges(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, sectorAngle, dx);
       } else {
         drawRectangleStandard(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, sectorAngle, dx);
       }
 
-      // Draw Brackets and Labels at t > 0.6
       if (t > 0.4) {
         const labelAlpha = Math.min(1, (t - 0.4) * 2);
         drawRectAnnotations(ctx, rectLeft, rectTop, rectW, rectH, R, labelAlpha);
       } else {
-        // Draw circle annotations at t < 0.4
         const circleAlpha = Math.max(0, 1 - t * 2.5);
         drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
       }
@@ -1414,33 +1406,26 @@
 
     function drawRectangleStandard(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, theta, dx) {
       const halfN = N / 2;
-
       for (let i = 0; i < N; i++) {
         const isUpper = i < halfN;
-        // Initial angle in circle
         const angleCircle = (i + 0.5) * theta;
 
-        // Final target position & rotation
         let targetX, targetY, angleRect;
         if (isUpper) {
-          // Points DOWN from top line
           targetX = rectLeft + (i + 0.5) * dx;
           targetY = rectTop;
           angleRect = Math.PI / 2;
         } else {
-          // Points UP from bottom line
           const k = i - halfN;
           targetX = rectLeft + (k + 1.0) * dx;
           targetY = rectTop + rectH;
           angleRect = -Math.PI / 2;
         }
 
-        // Interpolate
         const curX = (1 - t) * cx0 + t * targetX;
         const curY = (1 - t) * cy0 + t * targetY;
         const curAngle = (1 - t) * angleCircle + t * angleRect;
 
-        // Color
         const color = isUpper
           ? (i % 2 === 0 ? '#0284c7' : '#0ea5e9')
           : (i % 2 === 0 ? '#ea580c' : '#f97316');
@@ -1456,7 +1441,7 @@
     function drawRectangleWithHalfWedges(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, theta, dx) {
       const halfN = N / 2;
 
-      // Draw left half-wedge (from sector 0)
+      // Left half-wedge
       {
         const angleCircle = 0.25 * theta;
         const targetX = rectLeft;
@@ -1470,7 +1455,6 @@
         ctx.save();
         ctx.translate(curX, curY);
         ctx.rotate(curAngle);
-        // Draw half wedge (span theta/2)
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, R, -theta / 2, 0);
@@ -1483,7 +1467,7 @@
         ctx.restore();
       }
 
-      // Draw intermediate full wedges (1 to halfN - 1 pointing DOWN)
+      // Middle top wedges
       for (let i = 1; i < halfN; i++) {
         const angleCircle = (i + 0.5) * theta;
         const targetX = rectLeft + i * dx;
@@ -1502,7 +1486,7 @@
         ctx.restore();
       }
 
-      // Draw bottom row pointing UP (halfN wedges, index halfN to N-1)
+      // Bottom wedges
       for (let k = 0; k < halfN; k++) {
         const i = halfN + k;
         const angleCircle = (i + 0.5) * theta;
@@ -1522,7 +1506,7 @@
         ctx.restore();
       }
 
-      // Draw right half-wedge (other half of sector 0)
+      // Right half-wedge
       {
         const angleCircle = (N - 0.25) * theta;
         const targetX = rectLeft + rectW;
@@ -1598,13 +1582,11 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      // Center dot
       ctx.fillStyle = '#facc15';
       ctx.beginPath();
       ctx.arc(cx, cy, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Radius line
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -1618,7 +1600,6 @@
       ctx.textBaseline = 'bottom';
       ctx.fillText('半徑 r', cx + R * 0.5, cy - 6);
 
-      // Bottom guidance note
       ctx.fillStyle = '#94a3b8';
       ctx.font = '13px sans-serif';
       ctx.fillText('完整的圓（面積 ＝ A）', cx, cy + R + 28);
@@ -1627,7 +1608,7 @@
     }
 
     /* ==========================================================================
-       RENDER METHOD 2: TRIANGLE (FAN & ONION)
+       RENDER METHOD 2: TEACHER'S 4-SECTOR LAYERED TRIANGLE STACKING
        ========================================================================== */
     function renderTab2() {
       const canvas = document.getElementById('canvas2');
@@ -1637,206 +1618,151 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      const t = progress / 100; // 0 to 1
-      const N = sliceCount;
-
-      if (triMode === 'fan') {
-        renderTriangleFan(ctx, width, height, t, N);
-      } else {
-        renderTriangleOnion(ctx, width, height, t);
-      }
-    }
-
-    function renderTriangleFan(ctx, width, height, t, N) {
-      const R = Math.min(width * 0.14, height * 0.36, 115);
+      const t = progress / 100;
+      const R = Math.min(width * 0.15, height * 0.35, 110);
       const cx0 = width * 0.5;
       const cy0 = height * 0.44;
 
-      const baseLength = 2 * Math.PI * R; // Circumference C
-      const baseLeft = width * 0.5 - baseLength * 0.5;
-      const baseBottom = height * 0.72;
-      const apexX = width * 0.5;
-      const apexY = baseBottom - R;
-
-      const sectorAngle = (2 * Math.PI) / N;
-      const dx = baseLength / N;
-
-      // Draw background baseline if t > 0.1
-      if (t > 0.1) {
+      if (triView === 'horizontal') {
+        // Teacher's notebook orientation: Base on left, Apex on right
         ctx.save();
-        ctx.globalAlpha = Math.min(1, (t - 0.1) * 1.5) * 0.35;
-        ctx.strokeStyle = '#06b6d4';
-        ctx.setLineDash([4, 4]);
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(baseLeft, baseBottom);
-        ctx.lineTo(baseLeft + baseLength, baseBottom);
-        ctx.stroke();
+        ctx.translate(width * 0.5, height * 0.5);
+        ctx.rotate(Math.PI / 2);
+        ctx.translate(-width * 0.5, -height * 0.5);
+        renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0);
+        ctx.restore();
+      } else {
+        // Upright view: Base at bottom, Apex at top
+        renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0);
+      }
+    }
+
+    function renderLayeredTriangle(ctx, width, height, t, R, cx0, cy0) {
+      const sin45 = Math.SQRT1_2; // ~0.7071
+      const delta = R * sin45;
+
+      // Triangle apex (top of Sector 1)
+      const apexX = width * 0.5;
+      const apexY = height * 0.28;
+
+      // Four Sectors:
+      // ① Sector 1 (Top Wedge): Apex at apexX, apexY. Angle span 90 deg down.
+      // ② Sector 2 (Bottom-Left Wedge): Apex at (apexX - delta, apexY + delta).
+      // ③ Sector 3 (Bottom-Right Wedge): Apex at (apexX + delta, apexY + delta).
+      // ④ Sector 4 (Inverted Wedge): Apex at (apexX, apexY + 2*delta), angle span 90 deg UP.
+
+      const targetPos = [
+        { x: apexX, y: apexY, angle: Math.PI / 2, color: '#0284c7', label: '①' },
+        { x: apexX - delta, y: apexY + delta, angle: Math.PI / 2, color: '#059669', label: '②' },
+        { x: apexX + delta, y: apexY + delta, angle: Math.PI / 2, color: '#ea580c', label: '③' },
+        { x: apexX, y: apexY + 2 * delta, angle: -Math.PI / 2, color: '#7c3aed', label: '④' }
+      ];
+
+      // Initial circle angles for 4 sectors:
+      // Sector 1: top-right (angle -pi/4)
+      // Sector 2: top-left (angle -3pi/4)
+      // Sector 3: bottom-left (angle 3pi/4)
+      // Sector 4: bottom-right (angle pi/4)
+      const circleAngles = [
+        -Math.PI / 4,
+        -3 * Math.PI / 4,
+        3 * Math.PI / 4,
+        Math.PI / 4
+      ];
+
+      // Draw sectors
+      for (let i = 0; i < 4; i++) {
+        const curX = (1 - t) * cx0 + t * targetPos[i].x;
+        const curY = (1 - t) * cy0 + t * targetPos[i].y;
+
+        // Smooth angle rotation
+        let angleDiff = targetPos[i].angle - circleAngles[i];
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        const curAngle = circleAngles[i] + t * angleDiff;
+
+        ctx.save();
+        ctx.translate(curX, curY);
+        ctx.rotate(curAngle);
+        drawWedge(ctx, R, Math.PI / 2, targetPos[i].color, 'rgba(255, 255, 255, 0.4)');
+
+        // Draw sector labels inside
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(targetPos[i].label, R * 0.45, 0);
+
         ctx.restore();
       }
 
-      // Draw each sector unfolding
-      for (let i = 0; i < N; i++) {
-        // In circle (t=0)
-        const angleCircle = (i + 0.5) * sectorAngle;
-
-        // In triangle (t=1):
-        // Base center of sector i sits on baseBottom
-        const targetBaseX = baseLeft + (i + 0.5) * dx;
-        const targetBaseY = baseBottom;
-        const targetApexX = apexX;
-        const targetApexY = apexY;
-
-        // Circle tip position
-        const tipX = (1 - t) * cx0 + t * targetApexX;
-        const tipY = (1 - t) * cy0 + t * targetApexY;
-
-        // Base center position
-        const circBaseX = cx0 + R * Math.cos(angleCircle - Math.PI / 2);
-        const circBaseY = cy0 + R * Math.sin(angleCircle - Math.PI / 2);
-
-        const curBaseX = (1 - t) * circBaseX + t * targetBaseX;
-        const curBaseY = (1 - t) * circBaseY + t * targetBaseY;
-
-        // Color based on hue around circle
-        const hue = Math.floor((i / N) * 320) + 160; // cyan to purple to orange
-        const color = `hsl(${hue % 360}, 85%, 55%)`;
-
-        // Render wedge or skewed sector
-        if (t < 0.2) {
-          // Standard radial wedge
-          ctx.save();
-          ctx.translate(tipX, tipY);
-          ctx.rotate(angleCircle - Math.PI / 2);
-          drawWedge(ctx, R, sectorAngle, color, 'rgba(255, 255, 255, 0.25)');
-          ctx.restore();
-        } else {
-          // Morphing polygon connecting apex to base segment
-          const halfW = (dx * 0.5) * t + (Math.sin(sectorAngle / 2) * R) * (1 - t);
-          ctx.beginPath();
-          ctx.moveTo(tipX, tipY);
-          ctx.lineTo(curBaseX - halfW, curBaseY);
-          // Curve or line along bottom
-          if (t > 0.8) {
-            ctx.lineTo(curBaseX + halfW, curBaseY);
-          } else {
-            ctx.quadraticCurveTo(curBaseX, curBaseY + 4 * (1 - t), curBaseX + halfW, curBaseY);
-          }
-          ctx.closePath();
-          ctx.fillStyle = color;
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-
-      // Annotations
+      // Annotations at t > 0.4
       if (t > 0.4) {
-        const labelAlpha = Math.min(1, (t - 0.4) * 2);
-        drawTriangleAnnotations(ctx, baseLeft, baseBottom, baseLength, apexX, apexY, R, labelAlpha);
+        const alpha = Math.min(1, (t - 0.4) * 2);
+        drawLayeredTriangleAnnotations(ctx, apexX, apexY, R, delta, alpha);
       } else {
         const circleAlpha = Math.max(0, 1 - t * 2.5);
         drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
       }
     }
 
-    function renderTriangleOnion(ctx, width, height, t) {
-      const R = Math.min(width * 0.16, height * 0.38, 120);
-      const cx0 = width * 0.5;
-      const cy0 = height * 0.46;
-      const ringCount = 10;
-
-      const baseLength = 2 * Math.PI * R;
-      const baseLeft = width * 0.5 - baseLength * 0.5;
-      const baseBottom = height * 0.76;
-
-      for (let k = ringCount; k >= 1; k--) {
-        const rK = (k / ringCount) * R;
-        const stripLen = 2 * Math.PI * rK;
-        const color = `hsl(${180 + k * 16}, 80%, 55%)`;
-
-        if (t < 0.1) {
-          // Concentric circles
-          ctx.beginPath();
-          ctx.arc(cx0, cy0, rK, 0, Math.PI * 2);
-          ctx.lineWidth = (R / ringCount) * 0.9;
-          ctx.strokeStyle = color;
-          ctx.stroke();
-        } else {
-          // Unrolling into strips
-          const curY = (1 - t) * (cy0 + rK) + t * (baseBottom - (k - 1) * (R / ringCount));
-          const curW = (1 - t) * (rK * 2) + t * stripLen;
-          const curLeft = width * 0.5 - curW * 0.5;
-
-          ctx.fillStyle = color;
-          ctx.fillRect(curLeft, curY - (R / ringCount), curW, (R / ringCount) * 0.85);
-        }
-      }
-
-      if (t > 0.5) {
-        const alpha = Math.min(1, (t - 0.5) * 2);
-        ctx.save();
-        ctx.globalAlpha = alpha;
-
-        // Base label
-        ctx.fillStyle = '#67e8f9';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('底 ＝ 最外圈圓周長 ＝ 2 × 半徑 × 3.14', width * 0.5, baseBottom + 22);
-
-        // Height label
-        ctx.fillStyle = '#fde047';
-        ctx.textAlign = 'left';
-        ctx.fillText('高 ＝ 半徑 r', width * 0.5 + baseLength * 0.5 + 16, baseBottom - R * 0.5);
-
-        ctx.restore();
-      }
-    }
-
-    function drawTriangleAnnotations(ctx, baseLeft, baseBottom, baseLen, apexX, apexY, R, alpha) {
+    function drawLayeredTriangleAnnotations(ctx, apexX, apexY, R, delta, alpha) {
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      // Bottom bracket: "底 ＝ 完整的圓周長 ＝ 2 × 半徑 × 3.14"
-      const bracketY = baseBottom + 16;
+      const baseBottomY = apexY + 2 * delta + (R - delta); // bottom level of arcs
+      const baseLeftX = apexX - 2 * delta;
+      const baseRightX = apexX + 2 * delta;
+
+      // Height Dimension (Left side): Gold vertical line spanning 2r
+      const hLineX = baseLeftX - 35;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hLineX + 8, apexY);
+      ctx.lineTo(hLineX, apexY);
+      ctx.lineTo(hLineX, baseBottomY);
+      ctx.lineTo(hLineX + 8, baseBottomY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('高 ＝ 2r', hLineX - 8, (apexY + baseBottomY) * 0.5 - 8);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('(兩層半徑相加)', hLineX - 8, (apexY + baseBottomY) * 0.5 + 10);
+
+      // Height line through center
+      ctx.strokeStyle = '#facc15';
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX, baseBottomY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Base Dimension (Bottom side): Cyan bracket along bottom arcs
+      const bracketY = baseBottomY + 16;
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(baseLeft, bracketY - 8);
-      ctx.lineTo(baseLeft, bracketY);
-      ctx.lineTo(baseLeft + baseLen, bracketY);
-      ctx.lineTo(baseLeft + baseLen, bracketY - 8);
+      ctx.moveTo(baseLeftX, bracketY - 8);
+      ctx.lineTo(baseLeftX, bracketY);
+      ctx.lineTo(baseRightX, bracketY);
+      ctx.lineTo(baseRightX, bracketY - 8);
       ctx.stroke();
 
       ctx.fillStyle = '#67e8f9';
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('底 ＝ 完整的圓周長 ＝ 2 × 半徑 × 3.14', baseLeft + baseLen * 0.5, bracketY + 6);
-
-      // Height line: Gold dashed line from apex to base
-      ctx.strokeStyle = '#facc15';
-      ctx.setLineDash([5, 5]);
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(apexX, apexY);
-      ctx.lineTo(apexX, baseBottom);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Top dot at apex
-      ctx.fillStyle = '#facc15';
-      ctx.beginPath();
-      ctx.arc(apexX, apexY, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Height text
-      ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('高 ＝ 半徑 r', apexX + 12, apexY + R * 0.5);
+      ctx.fillText('底 ＝ 圓周長的一半 ＝ 半徑 × 3.14', apexX, bracketY + 6);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('(由 ② 與 ③ 兩個底弧組成 ＝ C ÷ 4 ＋ C ÷ 4 ＝ C ÷ 2)', apexX, bracketY + 24);
 
       ctx.restore();
     }
@@ -1871,9 +1797,10 @@
         drawRectAnnotations(resL.ctx, rectLeftL, rectTopL, rectWL, rectHL, RL, (t - 0.4) * 2);
       }
 
-      // Right: Triangle
+      // Right: Layered Triangle (4 sectors)
       resR.ctx.clearRect(0, 0, resR.width, resR.height);
-      renderTriangleFan(resR.ctx, resR.width, resR.height, t, N);
+      const RR = Math.min(resR.width * 0.15, resR.height * 0.35, 68);
+      renderLayeredTriangle(resR.ctx, resR.width, resR.height, t, RR, resR.width * 0.5, resR.height * 0.44);
     }
 
     /* ==========================================================================
@@ -1892,7 +1819,6 @@
       const maxR = Math.min(width, height) * 0.42;
       const visualR = (currentRadius / 15) * maxR + 15;
 
-      // Circle fill & glow
       const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, visualR);
       grad.addColorStop(0, 'rgba(6, 182, 212, 0.35)');
       grad.addColorStop(1, 'rgba(2, 132, 199, 0.1)');
@@ -1905,7 +1831,6 @@
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Center dot & radius line
       ctx.fillStyle = '#facc15';
       ctx.beginPath();
       ctx.arc(cx, cy, 4, 0, Math.PI * 2);
@@ -1918,7 +1843,6 @@
       ctx.lineTo(cx + visualR, cy);
       ctx.stroke();
 
-      // Radius text
       ctx.fillStyle = '#fde047';
       ctx.font = 'bold 13px sans-serif';
       ctx.textAlign = 'center';
@@ -1930,6 +1854,7 @@
       const r = currentRadius;
       const c = parseFloat((2 * r * 3.14).toFixed(2));
       const halfC = parseFloat((c / 2).toFixed(2));
+      const height2r = parseFloat((2 * r).toFixed(2));
       const area = parseFloat((r * r * 3.14).toFixed(2));
 
       document.getElementById('radiusValText').textContent = `${r} cm`;
@@ -1937,19 +1862,19 @@
 
       // Card 1: Rect
       document.getElementById('calcRectExpr').innerHTML = `
-        長 ＝ ${c} ÷ 2 ＝ <b style="color: var(--cyan);">${halfC} cm</b><br>
-        面積 ＝ ${halfC} × ${r}
+        長 ＝ 圓周長的一半 ＝ ${c} ÷ 2 ＝ <b style="color: var(--cyan);">${halfC} cm</b><br>
+        面積 ＝ 長 × 寬 ＝ ${halfC} × ${r}
       `;
       document.getElementById('calcRectVal').textContent = `＝ ${area} cm²`;
 
-      // Card 2: Tri
+      // Card 2: Triangle (Teacher's Method)
       document.getElementById('calcTriExpr').innerHTML = `
-        底 ＝ <b style="color: var(--cyan);">${c} cm</b>，高 ＝ <b style="color: var(--gold);">${r} cm</b><br>
-        面積 ＝ (${c} × ${r}) ÷ 2
+        底 ＝ ${halfC} cm，高 ＝ 2 × ${r} ＝ <b style="color: var(--gold);">${height2r} cm</b><br>
+        面積 ＝ (${halfC} × ${height2r}) ÷ 2 ＝ ${halfC} × ${r}
       `;
       document.getElementById('calcTriVal').textContent = `＝ ${area} cm²`;
 
-      // Card 3: Circle
+      // Card 3: Circle Formula
       document.getElementById('calcCircleExpr').innerHTML = `
         面積 ＝ ${r} × ${r} × 3.14
       `;
