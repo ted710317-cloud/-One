@@ -365,7 +365,7 @@
       color: #fff;
     }
 
-    /* Track Container & Runners */
+    /* Track Arena & Moving Sprites */
     .track-arena {
       background: #090e1f;
       border-radius: 14px;
@@ -373,7 +373,7 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
       position: relative;
       overflow: hidden;
     }
@@ -393,9 +393,9 @@
     }
 
     .lane-track-bg {
-      height: 48px;
+      height: 52px;
       background: rgba(255, 255, 255, 0.04);
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px dashed rgba(255, 255, 255, 0.15);
       position: relative;
       display: flex;
@@ -404,27 +404,75 @@
       overflow: hidden;
     }
 
+    /* ========================================================
+       CRITICAL ORIENTATION FIX:
+       In standard Unicode emoji fonts, runners, cars, trains,
+       bicycles, cheetahs naturally face LEFT.
+       Because all our tracks move from LEFT to RIGHT,
+       we apply transform: scaleX(-1) to flip them so they
+       face forward (RIGHT) in the direction of motion!
+       ======================================================== */
+    .face-forward,
+    .runner-icon,
+    .car-icon,
+    .bike-icon,
+    .train-icon,
+    .cheetah-icon {
+      display: inline-block;
+      transform: scaleX(-1);
+    }
+
+    /* Runner sprite with overhead name tag */
     .runner-sprite {
       position: absolute;
       left: 8px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 1px;
       transition: left 0.1s linear;
       z-index: 2;
+    }
+    .runner-tag {
+      background: rgba(0, 0, 0, 0.82);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
     .runner-icon {
       font-size: 28px;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
-    .runner-tag {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
+
+    /* Car sprite on track */
+    .car-sprite {
+      position: absolute;
+      left: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      transition: left 0.1s linear;
+      z-index: 2;
+    }
+    .car-tag {
+      background: rgba(0, 0, 0, 0.82);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
       font-weight: 700;
       white-space: nowrap;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .car-icon {
+      font-size: 26px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
 
     .finish-line {
@@ -520,11 +568,6 @@
       color: var(--gold);
       font-weight: 900;
     }
-    .ratio-arrow-label {
-      font-size: 11px;
-      color: #38bdf8;
-      font-weight: 700;
-    }
 
     /* Triangle Formula Disc */
     .triangle-disc {
@@ -544,10 +587,6 @@
     .tri-sector:hover {
       opacity: 0.85;
       filter: brightness(1.2);
-    }
-    .tri-sector.active {
-      stroke: var(--gold);
-      stroke-width: 3;
     }
 
     /* Unit Step Ladder (Tab 3) */
@@ -758,7 +797,8 @@
         <span>📖 康軒版 六年級上學期 數學第八單元</span>
       </div>
       <h1>
-        <span>🏃 認識速率 互動學習實驗室</span>
+        <span class="face-forward">🏃</span>
+        <span>認識速率 互動學習實驗室</span>
       </h1>
       <p class="subtitle">
         專為康軒六上課本脈絡設計：從運動會短跑比快慢、四車競速每小時平分刀，到正比倍數表格與大換小單位階梯！
@@ -773,7 +813,7 @@
         <span class="tab-desc">快慢比較 ✕ 四車平分刀 ✕ 單位</span>
       </button>
       <button class="tab-btn" onclick="switchTab(1)">
-        <span class="tab-icon">🚂</span>
+        <span class="tab-icon"><span class="face-forward">🚂</span></span>
         <span class="tab-title">活動 8-2 三者關係</span>
         <span class="tab-desc">火車正比表格 ✕ 知二求一三角盤</span>
       </button>
@@ -803,10 +843,10 @@
           </div>
           <div class="sub-tabs">
             <button class="sub-tab-btn active" onclick="switchTab1Sub(0)">
-              <span>🏃 步驟 1：運動會短跑比快慢</span>
+              <span><span class="face-forward">🏃</span> 步驟 1：運動會短跑比快慢</span>
             </button>
             <button class="sub-tab-btn" onclick="switchTab1Sub(1)">
-              <span>🚗 步驟 2：四車競速 ✕ 🔪 平分刀</span>
+              <span><span class="face-forward">🚗</span> 步驟 2：四車競速 ✕ 🔪 平分刀</span>
             </button>
             <button class="sub-tab-btn" onclick="switchTab1Sub(2)">
               <span>🌍 步驟 3：認識三大常用單位</span>
@@ -826,7 +866,7 @@
               </button>
             </div>
             <button class="btn-action" onclick="startRaceAnimation()">
-              <span>▶️ 預備～起跑！</span>
+              <span>▶️ 預備～衝刺！</span>
             </button>
           </div>
 
@@ -839,8 +879,8 @@
               </div>
               <div class="lane-track-bg">
                 <div id="runner-1-sprite" class="runner-sprite">
-                  <span class="runner-icon">🏃‍♂️</span>
                   <span id="runner-1-tag" class="runner-tag">豆豆</span>
+                  <span id="runner-1-icon" class="runner-icon">🏃‍♂️</span>
                 </div>
                 <div class="finish-line"></div>
               </div>
@@ -854,8 +894,8 @@
               </div>
               <div class="lane-track-bg">
                 <div id="runner-2-sprite" class="runner-sprite">
-                  <span class="runner-icon">🏃</span>
                   <span id="runner-2-tag" class="runner-tag">奇奇</span>
+                  <span id="runner-2-icon" class="runner-icon">🏃</span>
                 </div>
                 <div class="finish-line"></div>
               </div>
@@ -867,7 +907,7 @@
             <div class="compare-left">
               <span class="result-badge">🏆</span>
               <div>
-                <div id="race-result-title" class="result-text">點擊「預備～起跑」觀看快慢比較！</div>
+                <div id="race-result-title" class="result-text">點擊「預備～衝刺」觀看正面前進快慢比較！</div>
                 <div id="race-result-detail" class="result-calc">時間相同時，距離跑越長就跑得越快！</div>
               </div>
             </div>
@@ -888,9 +928,14 @@
               <strong>🚗 課本第 115 頁情境：</strong>甲車走 280km(4h)、乙車走 260km(4h)、丙車走 280km(5h)、丁車走 240km(3h)。<br>
               <span style="color:#fde047;">❓ 甲車與丁車「距離與時間都不同」，到底誰比較快？</span>
             </div>
-            <button class="btn-chop" onclick="triggerCarChop()">
-              <span>🔪 啟動每小時平分切刀！</span>
-            </button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-action" onclick="startCarRace()">
+                <span>▶️ 兩車開車衝刺！</span>
+              </button>
+              <button class="btn-chop" onclick="triggerCarChop()">
+                <span>🔪 啟動每小時平分切刀！</span>
+              </button>
+            </div>
           </div>
 
           <!-- Car Track Arena -->
@@ -898,13 +943,15 @@
             <!-- Car A -->
             <div class="runner-lane">
               <div class="lane-label-row">
-                <span style="color:#67e8f9;">🚗 甲車：總距離 280 公里，花了 4 小時</span>
+                <span style="color:#67e8f9;"><span class="face-forward">🚗</span> 甲車：總距離 280 公里，花了 4 小時</span>
                 <span id="car-a-rate" style="color:var(--gold); font-weight:800;">點擊切刀求平均每小時</span>
               </div>
-              <div class="lane-track-bg" style="height:44px;">
-                <div style="width:85%; height:100%; background:rgba(6, 182, 212, 0.2); border:1px solid #06b6d4; border-radius:6px; display:flex; align-items:center; padding-left:10px; font-size:13px; font-weight:700;">
-                  總長 280 公里 (4 小時)
+              <div class="lane-track-bg">
+                <div id="car-a-sprite" class="car-sprite">
+                  <span class="car-tag">甲車 280km</span>
+                  <span class="car-icon">🚗</span>
                 </div>
+                <div class="finish-line"></div>
               </div>
               <div id="car-a-segments" class="chop-segments-row" style="display:none;">
                 <div class="chop-seg">第1小時: 70km</div>
@@ -917,13 +964,15 @@
             <!-- Car D -->
             <div class="runner-lane" style="margin-top:8px;">
               <div class="lane-label-row">
-                <span style="color:#f472b6;">🚙 丁車：總距離 240 公里，花了 3 小時</span>
+                <span style="color:#f472b6;"><span class="face-forward">🚙</span> 丁車：總距離 240 公里，花了 3 小時</span>
                 <span id="car-d-rate" style="color:var(--gold); font-weight:800;">點擊切刀求平均每小時</span>
               </div>
-              <div class="lane-track-bg" style="height:44px;">
-                <div style="width:75%; height:100%; background:rgba(236, 72, 153, 0.2); border:1px solid #ec4899; border-radius:6px; display:flex; align-items:center; padding-left:10px; font-size:13px; font-weight:700;">
-                  總長 240 公里 (3 小時)
+              <div class="lane-track-bg">
+                <div id="car-d-sprite" class="car-sprite">
+                  <span class="car-tag">丁車 240km</span>
+                  <span class="car-icon">🚙</span>
                 </div>
+                <div class="finish-line"></div>
               </div>
               <div id="car-d-segments" class="chop-segments-row" style="display:none;">
                 <div class="chop-seg" style="background:rgba(236,72,153,0.25); border-color:#ec4899;">第1小時: 80km</div>
@@ -1004,7 +1053,7 @@
             <!-- Cheetah Card -->
             <div class="step-item active">
               <div class="step-title" style="color:#f472b6;">
-                <span>🐆 秒速（獵豹狂奔）</span>
+                <span><span class="face-forward">🐆</span> 秒速（獵豹狂奔）</span>
               </div>
               <div class="step-body">
                 <div>獵豹奔跑 <strong>900 公尺</strong>，花了 <strong>30 秒鐘</strong>。</div>
@@ -1030,7 +1079,7 @@
         <div class="card-header-bar">
           <div class="card-title-group">
             <div class="card-title">
-              <span>🚂 活動 8-2：距離、時間和速率的關係與正比思考</span>
+              <span><span class="face-forward">🚂</span> 活動 8-2：距離、時間和速率的關係與正比思考</span>
             </div>
             <div class="card-hint">
               課本第 118~119 頁重點：觀察數據表格察覺倍數變化（正比思考），並熟練「知二求一」互逆推導。
@@ -1038,13 +1087,13 @@
           </div>
           <div class="sub-tabs">
             <button class="sub-tab-btn active" onclick="switchTab2Sub(0)">
-              <span>🚂 探索 1：火車求距離 (距離＝速率×時間)</span>
+              <span><span class="face-forward">🚂</span> 探索 1：火車求距離 (距離＝速率×時間)</span>
             </button>
             <button class="sub-tab-btn" onclick="switchTab2Sub(1)">
               <span>🤖 探索 2：機器人求時間 (時間＝距離÷速率)</span>
             </button>
             <button class="sub-tab-btn" onclick="switchTab2Sub(2)">
-              <span>🏎️ 探索 3：遙控車時間固定倍數</span>
+              <span><span class="face-forward">🏎️</span> 探索 3：遙控車時間固定倍數</span>
             </button>
             <button class="sub-tab-btn" onclick="switchTab2Sub(3)">
               <span>📐 探索 4：神奇三角盤 ✕ 課本例題</span>
@@ -1056,7 +1105,7 @@
         <div id="t2-sub-0" class="sub-content">
           <div style="display:flex; flex-direction:column; gap:12px;">
             <div style="font-size:14px; color:#cbd5e1;">
-              有一輛火車以<strong>固定時速 50 公里/時</strong>行駛。拖動滑桿調整行駛時間，觀察火車行駛距離與表格倍數變化：
+              有一輛火車以<strong>固定時速 50 公里/時</strong>正面前進。拖動滑桿調整行駛時間，觀察火車行駛距離與表格倍數變化：
             </div>
 
             <div class="slider-row">
@@ -1075,9 +1124,9 @@
                 <span>200 km</span>
                 <span>250 km (終點)</span>
               </div>
-              <div class="lane-track-bg" style="height:44px;">
-                <div id="train-bar" style="height:100%; width:60%; background:linear-gradient(90deg, #3b82f6, #06b6d4); border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:20px; transition:width 0.3s ease;">
-                  🚂
+              <div class="lane-track-bg" style="height:48px;">
+                <div id="train-bar" style="height:100%; width:60%; background:linear-gradient(90deg, #3b82f6, #06b6d4); border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; transition:width 0.3s ease;">
+                  <span class="train-icon" style="font-size:26px;">🚂</span>
                 </div>
               </div>
               <div id="train-calc-banner" style="font-size:14px; color:#38bdf8; font-weight:800; text-align:center; margin-top:4px;">
@@ -1139,8 +1188,8 @@
                 <span>20 m</span>
                 <span>30 m</span>
               </div>
-              <div class="lane-track-bg" style="height:44px;">
-                <div id="bot-bar" style="height:100%; width:66.6%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:20px; transition:width 0.3s ease;">
+              <div class="lane-track-bg" style="height:48px;">
+                <div id="bot-bar" style="height:100%; width:66.6%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:24px; transition:width 0.3s ease;">
                   🤖
                 </div>
               </div>
@@ -1186,11 +1235,61 @@
 
         <!-- Tab 2 Sub 2: 遙控車時間固定 -->
         <div id="t2-sub-2" class="sub-content" style="display:none;">
-          <div style="font-size:14px; color:#cbd5e1; margin-bottom:12px;">
-            課本第 118 頁下半部：有 3 輛遙控車的速率不同，各行駛 <strong>10 秒鐘</strong>（時間固定）：
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <div style="font-size:14px; color:#cbd5e1;">
+              課本第 118 頁下半部：3 輛遙控車的速率不同，各跑 <strong>10 秒鐘</strong>（時間固定）：
+            </div>
+            <button class="btn-action" onclick="startRcCars()">
+              <span>▶️ 三車同時衝刺 10 秒！</span>
+            </button>
           </div>
 
-          <div class="table-wrapper">
+          <!-- RC Cars Visual Track -->
+          <div class="track-arena">
+            <!-- RC Car A -->
+            <div class="runner-lane">
+              <div class="lane-label-row">
+                <span style="color:#67e8f9;"><span class="face-forward">🏎️</span> 甲車 (20 cm/s)</span>
+                <span id="rc-a-dist" style="color:var(--text-muted);">行駛 200 公分</span>
+              </div>
+              <div class="lane-track-bg">
+                <div id="rc-a-sprite" class="car-sprite">
+                  <span class="car-tag">甲: 20cm/s</span>
+                  <span class="car-icon">🏎️</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RC Car B -->
+            <div class="runner-lane">
+              <div class="lane-label-row">
+                <span style="color:#fde047;"><span class="face-forward">🏎️</span> 乙車 (40 cm/s，甲車的 2 倍速)</span>
+                <span id="rc-b-dist" style="color:var(--text-muted);">行駛 400 公分 (2倍)</span>
+              </div>
+              <div class="lane-track-bg">
+                <div id="rc-b-sprite" class="car-sprite">
+                  <span class="car-tag">乙: 40cm/s</span>
+                  <span class="car-icon">🏎️</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RC Car C -->
+            <div class="runner-lane">
+              <div class="lane-label-row">
+                <span style="color:#f472b6;"><span class="face-forward">🏎️</span> 丙車 (60 cm/s，甲車的 3 倍速)</span>
+                <span id="rc-c-dist" style="color:var(--text-muted);">行駛 600 公分 (3倍)</span>
+              </div>
+              <div class="lane-track-bg">
+                <div id="rc-c-sprite" class="car-sprite">
+                  <span class="car-tag">丙: 60cm/s</span>
+                  <span class="car-icon">🏎️</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrapper" style="margin-top:12px;">
             <table class="ratio-table">
               <tr>
                 <th>遙控車</th>
@@ -1249,7 +1348,7 @@
             <div style="display:flex; flex-direction:column; gap:12px;">
               <!-- Problem 1: Motorbike -->
               <div class="step-item">
-                <div class="step-title" style="color:#6ee7b7;">🛵 課本第 119 頁例題：求距離</div>
+                <div class="step-title" style="color:#6ee7b7;"><span class="face-forward">🛵</span> 課本第 119 頁例題：求距離</div>
                 <div class="step-body">
                   有一輛機車以<strong>每小時 40 公里</strong>的速率行駛，騎了 <strong>3.5 小時</strong>，共行駛了幾公里？
                   <div class="formula-flow">
@@ -1260,7 +1359,7 @@
 
               <!-- Problem 2: Cruise -->
               <div class="step-item">
-                <div class="step-title" style="color:#fde047;">🚢 課本第 119 頁例題：求時間</div>
+                <div class="step-title" style="color:#fde047;"><span class="face-forward">🚢</span> 課本第 119 頁例題：求時間</div>
                 <div class="step-body">
                   從基隆港到花蓮港距離約 <strong>166.95 公里</strong>，郵輪以時速 <strong>31.5 公里/時</strong>航行，大約需要幾小時？
                   <div class="formula-flow">
@@ -1298,13 +1397,13 @@
               <span style="font-size:12px; color:var(--gold); font-weight:700;">1公里＝1000公尺 ｜ 1公尺＝100公分</span>
             </div>
             <div class="step-body">
-              <div><strong>例題 1（爸爸在高速公路開車）：</strong>時速 95 公里/時 ＝ 幾公尺/時？</div>
+              <div><strong>例題 1（爸爸在高速公路開車）：</strong>時速 <span class="face-forward">🚗</span> 95 公里/時 ＝ 幾公尺/時？</div>
               <div class="formula-flow">
                 <span>95 公里/時</span>
                 <span class="flow-arrow">➔ 1公里=1000公尺 ➔</span>
                 <span>1000 × 95 ＝ <strong>95000 公尺/時</strong></span>
               </div>
-              <div style="margin-top:4px;"><strong>例題 2（豆豆跑操場）：</strong>秒速 6.2 公尺/秒 ＝ 幾公分/秒？</div>
+              <div style="margin-top:4px;"><strong>例題 2（豆豆跑操場）：</strong>秒速 <span class="face-forward">🏃‍♂️</span> 6.2 公尺/秒 ＝ 幾公分/秒？</div>
               <div class="formula-flow">
                 <span>6.2 公尺/秒</span>
                 <span class="flow-arrow">➔ 1公尺=100公分 ➔</span>
@@ -1325,17 +1424,25 @@
               <div style="background:rgba(16, 185, 129, 0.1); border-left:3px solid #10b981; padding:6px 10px; border-radius:4px; font-size:12.5px;">
                 💡 <strong>為什麼要除以 60？</strong> 1小時有 60 分鐘，1小時走的路程要<strong>平均分給 60 個 1 分鐘</strong>，所以要 ÷ 60！同理 1分鐘有 60 秒，分速換秒速也是 ÷ 60！
               </div>
-              <div><strong>例題 1（獵鷹飛行）：</strong>時速 180 公里 ＝ 幾公里/分？</div>
+              <div><strong>例題 1（獵鷹飛行）：</strong>時速 <span class="face-forward">🦅</span> 180 公里 ＝ 幾公里/分？</div>
               <div class="formula-flow">
                 <span>180 公里/時</span>
                 <span class="flow-arrow">➔ ÷ 60 (平分給60分) ➔</span>
                 <span>180 ÷ 60 ＝ <strong>3 公里/分</strong></span>
               </div>
-              <div style="margin-top:4px;"><strong>例題 2（撒哈拉銀蟻）：</strong>分速 54 公尺 ＝ 幾公尺/秒？</div>
+              <div style="margin-top:4px;"><strong>例題 2（撒哈拉銀蟻）：</strong>分速 <span class="face-forward">🐜</span> 54 公尺 ＝ 幾公尺/秒？</div>
               <div class="formula-flow">
                 <span>54 公尺/分</span>
                 <span class="flow-arrow">➔ ÷ 60 (平分給60秒) ➔</span>
                 <span>54 ÷ 60 ＝ <strong>0.9 公尺/秒</strong></span>
+              </div>
+              <div style="margin-top:4px;"><strong>補充例題（學生騎腳踏車）：</strong>時速 <span class="bike-icon">🚲</span> 18 公里 ＝ 幾公尺/分？</div>
+              <div class="formula-flow">
+                <span>18 km/h</span>
+                <span class="flow-arrow">×1000➔</span>
+                <span>18000 m/h</span>
+                <span class="flow-arrow">÷60➔</span>
+                <span><strong>300 公尺/分</strong></span>
               </div>
             </div>
           </div>
@@ -1375,7 +1482,7 @@
 
               <!-- High speed rail example -->
               <div style="margin-top:8px; padding:10px; background:rgba(250,204,21,0.06); border:1px dashed rgba(250,204,21,0.3); border-radius:8px;">
-                <div style="font-weight:800; color:var(--gold); margin-bottom:4px;">🚄 台灣高鐵連續轉換：時速 288 公里/時 ➔ 秒速是幾公尺？</div>
+                <div style="font-weight:800; color:var(--gold); margin-bottom:4px;"><span class="face-forward">🚄</span> 台灣高鐵連續轉換：時速 288 公里/時 ➔ 秒速是幾公尺？</div>
                 <div class="formula-flow" style="font-size:13px;">
                   <span>288 km/h</span>
                   <span class="flow-arrow">×1000</span>
@@ -1400,7 +1507,7 @@
               </span>
             </div>
             <div class="step-body">
-              <div><strong>課本第 123 頁例題：</strong>羚羊奔跑秒速 <strong>23 公尺/秒</strong>，獵豹奔跑時速 <strong>108 公里/時</strong>，誰跑得比較快？</div>
+              <div><strong>課本第 123 頁例題：</strong>羚羊奔跑秒速 <span class="face-forward">🦌</span> <strong>23 公尺/秒</strong>，獵豹奔跑時速 <span class="face-forward">🐆</span> <strong>108 公里/時</strong>，誰跑得比較快？</div>
               <div class="formula-flow">
                 <span>獵豹：108 × 1000 ＝ 108000 m/h ➔ 108000 ÷ 3600 ＝ 30 公尺/秒</span>
               </div>
@@ -1431,7 +1538,7 @@
         <!-- Section 1: Speedometer Dashboard -->
         <div class="speedo-container">
           <div style="font-size:15px; font-weight:800; color:#fde047;">
-            🚗 課本第 125 頁：汽車儀表板時速表讀數互動
+            <span class="face-forward">🚗</span> 課本第 125 頁：汽車儀表板時速表讀數互動
           </div>
           <canvas id="speedo-canvas" width="280" height="160"></canvas>
           <div class="slider-row" style="width:100%; max-width:400px;">
@@ -1687,10 +1794,12 @@
       const r1Name = document.getElementById('runner-1-name');
       const r1Stat = document.getElementById('runner-1-stat');
       const r1Tag = document.getElementById('runner-1-tag');
+      const r1Icon = document.getElementById('runner-1-icon');
 
       const r2Name = document.getElementById('runner-2-name');
       const r2Stat = document.getElementById('runner-2-stat');
       const r2Tag = document.getElementById('runner-2-tag');
+      const r2Icon = document.getElementById('runner-2-icon');
 
       // reset sprites
       document.getElementById('runner-1-sprite').style.left = '8px';
@@ -1707,13 +1816,15 @@
         r1Name.textContent = '👦 豆豆';
         r1Stat.textContent = '1 分鐘跑 300 公尺';
         r1Tag.textContent = '豆豆 (300m)';
+        r1Icon.textContent = '🏃‍♂️';
 
         r2Name.textContent = '👦 奇奇';
         r2Stat.textContent = '1 分鐘跑 350 公尺';
         r2Tag.textContent = '奇奇 (350m)';
+        r2Icon.textContent = '🏃';
 
         document.getElementById('race-result-title').textContent = '情境一：時間都是 1 分鐘，誰跑得比較快？';
-        document.getElementById('race-result-detail').textContent = '點擊「預備～起跑」觀看衝刺！';
+        document.getElementById('race-result-detail').textContent = '點擊「預備～衝刺」觀看正面前進！';
       } else {
         b1.style.background = 'var(--blue)';
         b1.classList.add('btn-action');
@@ -1725,13 +1836,15 @@
         r1Name.textContent = '👧 妮妮';
         r1Stat.textContent = '跑 100 公尺花 16 秒';
         r1Tag.textContent = '妮妮 (16秒)';
+        r1Icon.textContent = '🏃‍♀️';
 
         r2Name.textContent = '👧 妙妙';
         r2Stat.textContent = '跑 100 公尺花 20 秒';
         r2Tag.textContent = '妙妙 (20秒)';
+        r2Icon.textContent = '🏃‍♀️';
 
         document.getElementById('race-result-title').textContent = '情境二：距離都是 100 公尺，誰跑得比較快？';
-        document.getElementById('race-result-detail').textContent = '點擊「預備～起跑」觀看衝刺！';
+        document.getElementById('race-result-detail').textContent = '點擊「預備～衝刺」觀看正面前進！';
       }
       playTone(480, 'sine', 0.08, 0.1);
     }
@@ -1756,24 +1869,47 @@
         }
 
         if (raceMode === 0) {
-          // 豆豆 300m (progress * 70%), 奇奇 350m (progress * 88%)
-          s1.style.left = `calc(8px + ${progress * 65}% )`;
-          s2.style.left = `calc(8px + ${progress * 85}% )`;
+          // 豆豆 300m (progress * 65%), 奇奇 350m (progress * 82%)
+          s1.style.left = `calc(8px + ${progress * 62}%)`;
+          s2.style.left = `calc(8px + ${progress * 80}%)`;
 
           if (progress === 1) {
             document.getElementById('race-result-title').textContent = '🏆 奇奇跑得比較快！';
             document.getElementById('race-result-detail').textContent = '同樣花 1 分鐘，奇奇跑 350m ＞ 豆豆跑 300m。時間相同，距離長的快！';
           }
         } else {
-          // 妮妮 16s (先到, 到終點90%), 妙妙 20s (慢到, 72%)
-          s1.style.left = `calc(8px + ${progress * 88}% )`;
-          s2.style.left = `calc(8px + ${progress * 70}% )`;
+          // 妮妮 16s (先到終點80%), 妙妙 20s (慢到, 64%)
+          s1.style.left = `calc(8px + ${progress * 80}%)`;
+          s2.style.left = `calc(8px + ${progress * 64}%)`;
 
           if (progress === 1) {
             document.getElementById('race-result-title').textContent = '🏆 妮妮跑得比較快！';
             document.getElementById('race-result-detail').textContent = '同樣跑 100 公尺，妮妮花 16 秒 ＜ 妙妙花 20 秒。距離相同，花的時間短的快！';
           }
         }
+      }, 30);
+    }
+
+    let carTimer = null;
+    function startCarRace() {
+      soundWhistle();
+      if (carTimer) clearInterval(carTimer);
+      const c1 = document.getElementById('car-a-sprite');
+      const c2 = document.getElementById('car-d-sprite');
+      c1.style.left = '8px';
+      c2.style.left = '8px';
+
+      let prog = 0;
+      carTimer = setInterval(() => {
+        prog += 0.02;
+        if (prog > 1) {
+          prog = 1;
+          clearInterval(carTimer);
+          soundCorrect();
+        }
+        // 甲車 70km/h (prog * 70%), 丁車 80km/h (prog * 80%)
+        c1.style.left = `calc(8px + ${prog * 70}%)`;
+        c2.style.left = `calc(8px + ${prog * 80}%)`;
       }, 30);
     }
 
@@ -1843,6 +1979,32 @@
       document.getElementById('bot-bar').style.width = ((dist / 30) * 100) + '%';
 
       playTone(450 + time * 25, 'sine', 0.05, 0.1);
+    }
+
+    let rcTimer = null;
+    function startRcCars() {
+      soundWhistle();
+      if (rcTimer) clearInterval(rcTimer);
+      const rca = document.getElementById('rc-a-sprite');
+      const rcb = document.getElementById('rc-b-sprite');
+      const rcc = document.getElementById('rc-c-sprite');
+      rca.style.left = '8px';
+      rcb.style.left = '8px';
+      rcc.style.left = '8px';
+
+      let p = 0;
+      rcTimer = setInterval(() => {
+        p += 0.02;
+        if (p > 1) {
+          p = 1;
+          clearInterval(rcTimer);
+          soundCorrect();
+        }
+        // 甲 200cm (p * 27%), 乙 400cm (p * 54%), 丙 600cm (p * 81%)
+        rca.style.left = `calc(8px + ${p * 27}%)`;
+        rcb.style.left = `calc(8px + ${p * 54}%)`;
+        rcc.style.left = `calc(8px + ${p * 81}%)`;
+      }, 30);
     }
 
     function selectTriFormula(type) {
