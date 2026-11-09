@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>🏃 速率概念探索實驗室 - 國小六年級數學互動教具</title>
+  <meta name="description" content="國小六年級數學速率互動教學：透過田徑賽跑對決、每秒等分切刀、火車數線步伐、三速換算齒輪箱，親身體驗『距離 ÷ 時間 ＝ 速率（每單位時間走的距離）』的神奇算理！">
+  <style>
+    :root {
+      --bg-dark: #070b18;
+      --card-bg: rgba(15, 23, 42, 0.94);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --gold: #facc15;
+      --gold-dark: #ca8a04;
+      --cyan: #06b6d4;
+      --cyan-light: #67e8f9;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --green-light: #34d399;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-dark) 80%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 14px 12px 60px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top Nav Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      font-size: 14px;
+    }
+
+    .btn-lobby {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .btn-lobby:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(-2px);
+    }
+
+    .btn-sound {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-sound:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Main Header */
+    header {
+      text-align: center;
+      margin: 4px 0 8px 0;
+    }
+    h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #facc15 0%, #38bdf8 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* Mode Navigation Tabs */
+    .tab-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    @media (max-width: 820px) {
+      .tab-nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .tab-btn {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .tab-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+    .tab-btn.active {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, rgba(250, 204, 21, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(250, 204, 21, 0.25);
+    }
+    .tab-icon {
+      font-size: 24px;
+    }
+    .tab-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .tab-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .tab-btn.active .tab-desc {
+      color: #fde047;
+    }
+
+    /* Lab Card Container */
+    .lab-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-header-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .card-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-hint {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.5);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pill-group {
+      display: inline-flex;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .pill-btn:hover {
+      color: #fff;
+    }
+    .pill-btn.active {
+      background: var(--cyan);
+      color: #042f2e;
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.4);
+    }
+    .pill-btn.gold.active {
+      background: var(--gold);
+      color: #451a03;
+      box-shadow: 0 2px 10px rgba(250, 204, 21, 0.4);
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-action:hover {
+      transform: translateY(-1px);
+    }
+    .btn-action:active {
+      transform: translateY(1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(6, 182, 212, 0.5);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-cut {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(245, 158, 11, 0.4);
+    }
+    .btn-cut:hover {
+      box-shadow: 0 4px 18px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Presentation Canvas Stage */
+    .canvas-stage {
+      position: relative;
+      background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      overflow: hidden;
+      touch-action: pan-y pinch-zoom;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+    .canvas-stage:fullscreen,
+    .canvas-stage:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-fullscreen {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-fullscreen:hover {
+      background: var(--gold);
+      color: #0f172a;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: clamp(520px, 68vh, 760px);
+    }
+    @media (max-width: 600px) {
+      canvas {
+        height: 440px;
+      }
+    }
+
+    /* Formula Breakdown Grid & Cards */
+    .formula-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      .formula-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 500px) {
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .step-box {
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .step-box.highlight {
+      border-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.12);
+    }
+    .step-box.gold {
+      border-color: var(--gold);
+      background: rgba(250, 204, 21, 0.12);
+    }
+    .step-tag {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .step-content {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .step-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    /* Conclusion Banner */
+    .conclusion-banner {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+      border: 2px solid rgba(6, 182, 212, 0.4);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+    }
+    .conclusion-banner.gold {
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%);
+      border-color: rgba(250, 204, 21, 0.4);
+    }
+    .conclusion-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .conclusion-math {
+      font-size: clamp(17px, 2.5vw, 22px);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .teacher-tip {
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 4px solid var(--gold);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      font-size: 13.5px;
+      color: #fef08a;
+      line-height: 1.5;
+    }
+
+    /* Unit Gearbox Specifics (Tab 3) */
+    .gearbox-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .unit-cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 700px) {
+      .unit-cards-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .unit-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .unit-card.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.25);
+    }
+    .unit-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .unit-val {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    /* Sandbox & Quiz (Tab 4) */
+    .sandbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 800px) {
+      .sandbox-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .input-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .custom-range {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .custom-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+      border: 2px solid #fff;
+    }
+
+    .quiz-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quiz-q {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: #fff;
+    }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-opt {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-opt:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--cyan);
+    }
+    .btn-opt.correct {
+      background: #059669;
+      border-color: #34d399;
+    }
+    .btn-opt.wrong {
+      background: #dc2626;
+      border-color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Nav Bar -->
+    <div class="top-bar">
+      <a href="../" class="btn-lobby">
+        <span>🏠 回數學遊戲吧大廳</span>
+      </a>
+      <div style="font-weight: 800; color: var(--gold); display: flex; align-items: center; gap: 6px;">
+        <span>🏃 國小六年級數學：速率單元</span>
+      </div>
+      <button class="btn-sound" id="btnSound" onclick="toggleSound()">
+        🔊 音效已開啟
+      </button>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+      <h1>🏃 速率概念探索實驗室</h1>
+      <p class="subtitle">
+        透過賽跑競速對決、每秒等分切刀、火車數線步伐與換算齒輪箱，親身理解 <b>「距離 ÷ 時間 ＝ 速率」</b> 的深刻幾何意義！
+      </p>
+    </header>
+
+    <!-- 4 Tabs -->
+    <div class="tab-nav">
+      <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">
+        <span class="tab-icon">🏁</span>
+        <span class="tab-title">田徑賽跑實驗室</span>
+        <span class="tab-desc">賽跑對決 ✕ 等分切刀</span>
+      </button>
+
+      <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">
+        <span class="tab-icon">🚂</span>
+        <span class="tab-title">火車數線積木工坊</span>
+        <span class="tab-desc">滴答步伐 ✕ 平分還原</span>
+      </button>
+
+      <button class="tab-btn" id="tabBtn3" onclick="switchTab(3)">
+        <span class="tab-icon">⏱️</span>
+        <span class="tab-title">生活速率與齒輪箱</span>
+        <span class="tab-desc">秒速/分速/時速換算</span>
+      </button>
+
+      <button class="tab-btn" id="tabBtn4" onclick="switchTab(4)">
+        <span class="tab-icon">🧮</span>
+        <span class="tab-title">算術沙盒與挑戰</span>
+        <span class="tab-desc">自訂探索 ✕ 實境解題</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: 田徑賽跑實驗室 -->
+    <div class="lab-card" id="tabContent1">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <div class="card-title">
+            <span>🏁 實驗一：田徑賽跑對決與每秒等分切刀</span>
+          </div>
+          <div class="card-hint" id="tab1Hint">
+            💡 探究三部曲：先比「同時間」、再比「同距離」，最後「異距異時」啟動每秒等分切刀，徹底看懂為什麼要除以時間！
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--cyan);">🎮 實驗模式：</span>
+            <div class="pill-group" id="raceModePills">
+              <button class="pill-btn active" id="btnExp1" onclick="setRaceMode(1)">1. 時間相同 (同跑 10 秒)</button>
+              <button class="pill-btn" id="btnExp2" onclick="setRaceMode(2)">2. 距離相同 (同跑 100 公尺)</button>
+              <button class="pill-btn gold" id="btnExp3" onclick="setRaceMode(3)">3. 異距異時大對決 (核心頓悟)</button>
+            </div>
+          </div>
+
+          <div class="action-group">
+            <button class="btn-action btn-primary" id="btnRaceStart" onclick="startRace()">
+              <span>▶️ 開始起跑</span>
+            </button>
+            <button class="btn-action btn-secondary" onclick="resetRace()">
+              <span>⏪ 重置跑道</span>
+            </button>
+            <button class="btn-action btn-cut" id="btnChop" onclick="toggleChop()" style="display: none;">
+              <span>🔪 啟動每秒等分切刀！</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Stage -->
+      <div class="canvas-stage" id="stage1">
+        <button class="btn-fullscreen" onclick="toggleFullscreen('stage1')">
+          <span>⛶ 全螢幕講課模式</span>
+        </button>
+        <canvas id="canvas1"></canvas>
+      </div>
+
+      <!-- Formula Breakdown -->
+      <div class="formula-section" id="tab1FormulaSec">
+        <div class="formula-grid" id="tab1FormulaGrid">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="conclusion-banner" id="tab1ConclusionBanner">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="teacher-tip" id="tab1TeacherTip">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 火車數線積木工坊 -->
+    <div class="lab-card" id="tabContent2" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <div class="card-title">
+            <span>🚂 實驗二：火車數線軌道與時間滴答步伐</span>
+          </div>
+          <div class="card-hint">
+            💡 體驗乘除互逆：每秒前進一步鋪下「1秒積木」，累積成總距離；再拉下「還原平分刀」，將總距離平分成每一秒！
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--gold);">⚙️ 設定每秒步伐：</span>
+            <div class="pill-group" id="trainSpeedPills">
+              <button class="pill-btn gold" onclick="setTrainSpeed(3)">每秒 3 公尺</button>
+              <button class="pill-btn gold active" onclick="setTrainSpeed(4)">每秒 4 公尺</button>
+              <button class="pill-btn gold" onclick="setTrainSpeed(5)">每秒 5 公尺</button>
+              <button class="pill-btn gold" onclick="setTrainSpeed(6)">每秒 6 公尺</button>
+            </div>
+          </div>
+
+          <div class="action-group">
+            <button class="btn-action btn-primary" onclick="stepTrain(1)">
+              <span>⏱️ 滴答（＋1 秒）</span>
+            </button>
+            <button class="btn-action btn-cut" onclick="chopTrain()">
+              <span>🔪 還原平分刀（距離 ÷ 時間）</span>
+            </button>
+            <button class="btn-action btn-secondary" onclick="resetTrain()">
+              <span>⏪ 重置火車</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Stage -->
+      <div class="canvas-stage" id="stage2">
+        <button class="btn-fullscreen" onclick="toggleFullscreen('stage2')">
+          <span>⛶ 全螢幕講課模式</span>
+        </button>
+        <canvas id="canvas2"></canvas>
+      </div>
+
+      <!-- Step Formula -->
+      <div class="formula-section">
+        <div class="formula-grid">
+          <div class="step-box highlight">
+            <span class="step-tag">Step 1 • 乘法正向累積</span>
+            <span class="step-content">總距離 ＝ 速率 × 時間</span>
+            <span class="step-desc" id="trainStep1">每秒前進 4 公尺，走 1 秒得 4 公尺。</span>
+          </div>
+          <div class="step-box gold">
+            <span class="step-tag">Step 2 • 除法逆向平分</span>
+            <span class="step-content">速率 ＝ 總距離 ÷ 時間</span>
+            <span class="step-desc" id="trainStep2">把總長度平分成各秒的份數，還原每秒距離！</span>
+          </div>
+          <div class="step-box">
+            <span class="step-tag">Step 3 • 數線量感心像</span>
+            <span class="step-content">每 1 秒積木的長度</span>
+            <span class="step-desc">積木越長代表走得越快，積木越短代表走得越慢。</span>
+          </div>
+          <div class="step-box highlight">
+            <span class="step-tag">Step 4 • 公式神髓</span>
+            <span class="step-content">單位時間行進量</span>
+            <span class="step-desc">速率本質：不是別的，就是「1 個時間單位所走的距離」！</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 生活速率與換算齒輪箱 -->
+    <div class="lab-card" id="tabContent3" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <div class="card-title">
+            <span>⏱️ 實驗三：生活速率排行榜與三速換算齒輪箱</span>
+          </div>
+          <div class="card-hint">
+            💡 高年級秒殺痛點：為什麼秒速變時速要乘 3600？點擊齒輪放大鏡，親眼看見 60 個 1 秒聚集成 1 分鐘！
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--cyan);">🐾 選擇生活角色：</span>
+            <div class="pill-group" id="lifeSpeedPills">
+              <button class="pill-btn active" onclick="setLifeRole('turtle')">🐢 烏龜</button>
+              <button class="pill-btn" onclick="setLifeRole('walk')">🚶 走路散步</button>
+              <button class="pill-btn" onclick="setLifeRole('bike')">🚲 自行車</button>
+              <button class="pill-btn" onclick="setLifeRole('cheetah')">🐆 獵豹</button>
+              <button class="pill-btn" onclick="setLifeRole('hsr')">🚄 台灣高鐵</button>
+              <button class="pill-btn" onclick="setLifeRole('jet')">✈️ 噴射客機</button>
+            </div>
+          </div>
+
+          <div class="action-group">
+            <button class="btn-action btn-primary" onclick="animateLifeRace()">
+              <span>🚀 實速奔馳模擬</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gearbox Units Row -->
+      <div class="gearbox-container">
+        <div class="unit-cards-row">
+          <div class="unit-card" id="uCardSec">
+            <div class="unit-name">
+              <span>⏱️ 秒速（公尺/秒）</span>
+            </div>
+            <div class="unit-val" id="uValSec">5 m/s</div>
+            <p style="font-size: 12.5px; color: var(--text-muted);">每 1 秒鐘所走的公尺數</p>
+          </div>
+
+          <div class="unit-card" id="uCardMin">
+            <div class="unit-name">
+              <span>🕒 分速（公尺/分）</span>
+            </div>
+            <div class="unit-val" id="uValMin">300 m/min</div>
+            <p style="font-size: 12.5px; color: var(--text-muted);">1 分鐘＝60 秒，所以 × 60！</p>
+          </div>
+
+          <div class="unit-card" id="uCardHr">
+            <div class="unit-name">
+              <span>🚗 時速（公里/時）</span>
+            </div>
+            <div class="unit-val" id="uValHr">18 km/h</div>
+            <p style="font-size: 12.5px; color: var(--text-muted);">1 小時＝60 分，再 × 60 並 ÷ 1000！</p>
+          </div>
+        </div>
+
+        <!-- Canvas Stage -->
+        <div class="canvas-stage" id="stage3">
+          <button class="btn-fullscreen" onclick="toggleFullscreen('stage3')">
+            <span>⛶ 全螢幕講課模式</span>
+          </button>
+          <canvas id="canvas3"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 算術沙盒與實境挑戰 -->
+    <div class="lab-card" id="tabContent4" style="display: none;">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <div class="card-title">
+            <span>🧮 實驗四：自由探索沙盒與六年級隨堂測驗</span>
+          </div>
+          <div class="card-hint">
+            💡 自由拉動距離與時間滑桿觀察速率變化，並完成六年級生活實境解題挑戰！
+          </div>
+        </div>
+      </div>
+
+      <div class="sandbox-grid">
+        <!-- Left: Interactive Sandbox Slider -->
+        <div style="display: flex; flex-direction: column; gap: 14px; background: rgba(30, 41, 59, 0.4); padding: 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <h3 style="font-size: 16px; color: var(--cyan); display: flex; align-items: center; gap: 6px;">
+            <span>🎛️ 自由調整滑桿</span>
+          </h3>
+
+          <div class="input-row">
+            <div class="input-label">
+              <span>總距離 (Distance)：</span>
+              <span id="sbDistText" style="color: var(--cyan); font-weight: 800;">120 公尺</span>
+            </div>
+            <input type="range" class="custom-range" id="sbDistRange" min="20" max="400" step="10" value="120" oninput="updateSandbox()">
+          </div>
+
+          <div class="input-row">
+            <div class="input-label">
+              <span>總時間 (Time)：</span>
+              <span id="sbTimeText" style="color: var(--gold); font-weight: 800;">15 秒</span>
+            </div>
+            <input type="range" class="custom-range" id="sbTimeRange" min="2" max="60" step="1" value="15" oninput="updateSandbox()">
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.8); border: 2px solid var(--gold); border-radius: 12px; padding: 14px; text-align: center;">
+            <div style="font-size: 13px; color: var(--text-muted); font-weight: 700;">計算結果（平分到每一秒）：</div>
+            <div id="sbFormulaResult" style="font-size: 24px; font-weight: 900; color: #fff; margin: 6px 0;">
+              120 ÷ 15 ＝ 8 公尺/秒
+            </div>
+            <div id="sbSpeedNote" style="font-size: 13.5px; color: #fde047;">
+              代表每 1 秒鐘前進 8 公尺！
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Quiz Box -->
+        <div class="quiz-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 16px; color: var(--gold); display: flex; align-items: center; gap: 6px;">
+              <span>📝 六年級速率隨堂小挑戰</span>
+            </h3>
+            <button class="btn-action btn-secondary" onclick="newQuiz()" style="padding: 4px 10px; font-size: 12px;">
+              <span>🔄 換一題</span>
+            </button>
+          </div>
+
+          <div class="quiz-q" id="quizQuestion">
+            題目載入中...
+          </div>
+
+          <div class="quiz-options" id="quizOptions">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div id="quizFeedback" style="display: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 700;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GLOBAL STATE & AUDIO SYNTHESIS
+       ========================================================================== */
+    let currentTab = 1;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playWhistle() {
+      if (!soundEnabled) return;
+      playTone(1200, 'triangle', 0.25, 0.2);
+      setTimeout(() => playTone(1500, 'triangle', 0.4, 0.25), 100);
+    }
+
+    function playChopSound() {
+      if (!soundEnabled) return;
+      playTone(400, 'sawtooth', 0.08, 0.2);
+      setTimeout(() => playTone(800, 'sine', 0.15, 0.15), 50);
+    }
+
+    function playFanfare() {
+      if (!soundEnabled) return;
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'triangle', 0.25, 0.2), idx * 120);
+      });
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('btnSound');
+      btn.textContent = soundEnabled ? '🔊 音效已開啟' : '🔇 音效已關閉';
+      if (soundEnabled) playTone(600);
+    }
+
+    function toggleFullscreen(elementId) {
+      const elem = document.getElementById(elementId);
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function switchTab(tabIndex) {
+      currentTab = parseInt(tabIndex, 10);
+      playTone(550);
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById('tabBtn' + i);
+        const content = document.getElementById('tabContent' + i);
+        if (btn) {
+          if (i === currentTab) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+        if (content) {
+          content.style.display = (i === currentTab) ? 'flex' : 'none';
+        }
+      }
+
+      setTimeout(() => {
+        if (currentTab === 1) renderTab1();
+        else if (currentTab === 2) renderTab2();
+        else if (currentTab === 3) renderTab3();
+        else if (currentTab === 4) updateSandbox();
+      }, 50);
+    }
+
+    function resizeCanvas(canvas) {
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    /* ==========================================================================
+       TAB 1: 田徑賽跑實驗室
+       ========================================================================== */
+    let raceMode = 1; // 1: Same Time, 2: Same Dist, 3: Diff Dist & Time
+    let isRacing = false;
+    let raceProgress = 0; // 0 to 1
+    let raceStartTime = null;
+    let raceDuration = 5000; // 5s animation
+    let isChopped = false; // whether "每秒等分切刀" is active
+
+    // Runners config
+    const runnersMode1 = [
+      { name: '🐢 烏龜隊長', color: '#10b981', dist: 30, time: 10, speed: 3 },
+      { name: '🚶 小明慢跑', color: '#06b6d4', dist: 60, time: 10, speed: 6 },
+      { name: '🐆 閃電獵豹', color: '#f59e0b', dist: 120, time: 10, speed: 12 }
+    ];
+
+    const runnersMode2 = [
+      { name: '🐆 閃電獵豹', color: '#f59e0b', dist: 100, time: 5, speed: 20 },
+      { name: '🚲 自行車小華', color: '#06b6d4', dist: 100, time: 10, speed: 10 },
+      { name: '🚶 慢跑小明', color: '#10b981', dist: 100, time: 20, speed: 5 }
+    ];
+
+    const runnersMode3 = [
+      { name: '🏃 選手 A (小明)', color: '#06b6d4', dist: 60, time: 10, speed: 6 },
+      { name: '🏃 選手 B (小華)', color: '#ea580c', dist: 100, time: 20, speed: 5 }
+    ];
+
+    function getRunners() {
+      if (raceMode === 1) return runnersMode1;
+      if (raceMode === 2) return runnersMode2;
+      return runnersMode3;
+    }
+
+    function setRaceMode(mode) {
+      raceMode = mode;
+      isRacing = false;
+      raceProgress = 0;
+      isChopped = false;
+      playTone(580);
+
+      [1, 2, 3].forEach(m => {
+        const btn = document.getElementById(`btnExp${m}`);
+        if (btn) btn.classList.toggle('active', m === mode);
+      });
+
+      const btnChop = document.getElementById('btnChop');
+      if (btnChop) {
+        btnChop.style.display = (mode === 3) ? 'inline-flex' : 'none';
+        btnChop.textContent = '🔪 啟動每秒等分切刀！';
+      }
+
+      updateTab1FormulaUI();
+      renderTab1();
+    }
+
+    function startRace() {
+      if (isRacing) return;
+      isRacing = true;
+      raceProgress = 0;
+      isChopped = false;
+      playWhistle();
+      raceStartTime = performance.now();
+      requestAnimationFrame(raceAnimLoop);
+    }
+
+    function resetRace() {
+      isRacing = false;
+      raceProgress = 0;
+      isChopped = false;
+      playTone(450);
+      const btnChop = document.getElementById('btnChop');
+      if (btnChop) btnChop.textContent = '🔪 啟動每秒等分切刀！';
+      renderTab1();
+    }
+
+    function toggleChop() {
+      isChopped = !isChopped;
+      playChopSound();
+      const btnChop = document.getElementById('btnChop');
+      if (btnChop) {
+        btnChop.textContent = isChopped ? '↩️ 還原總跑道' : '🔪 啟動每秒等分切刀！';
+      }
+      renderTab1();
+    }
+
+    function raceAnimLoop(now) {
+      if (!isRacing) return;
+      const elapsed = now - raceStartTime;
+      raceProgress = Math.min(1, elapsed / raceDuration);
+
+      renderTab1();
+
+      if (raceProgress < 1) {
+        requestAnimationFrame(raceAnimLoop);
+      } else {
+        isRacing = false;
+        playFanfare();
+        renderTab1();
+      }
+    }
+
+    function renderTab1() {
+      const canvas = document.getElementById('canvas1');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const runners = getRunners();
+      const numTracks = runners.length;
+      const topPadding = 50;
+      const bottomPadding = 110;
+      const trackHeight = (height - topPadding - bottomPadding) / numTracks;
+      const maxTrackWidth = width * 0.76;
+      const trackStartX = width * 0.18;
+
+      // Find max distance across current runners to scale
+      const maxDist = Math.max(...runners.map(r => r.dist));
+
+      // Draw background track lanes
+      for (let i = 0; i < numTracks; i++) {
+        const laneY = topPadding + i * trackHeight;
+        const r = runners[i];
+
+        // Track border
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
+        ctx.fillRect(trackStartX, laneY + 8, maxTrackWidth, trackHeight - 16);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(trackStartX, laneY + 8, maxTrackWidth, trackHeight - 16);
+
+        // Distance scale bar at target distance
+        const runnerTargetX = trackStartX + (r.dist / maxDist) * maxTrackWidth;
+
+        // Draw start line
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(trackStartX, laneY + 8);
+        ctx.lineTo(trackStartX, laneY + trackHeight - 8);
+        ctx.stroke();
+
+        // Draw target finish marker
+        ctx.strokeStyle = '#facc15';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(runnerTargetX, laneY + 8);
+        ctx.lineTo(runnerTargetX, laneY + trackHeight - 8);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Track Label (Name + Info)
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(r.name, trackStartX - 14, laneY + (trackHeight * 0.5) - 10);
+
+        ctx.fillStyle = varColor(r.color);
+        ctx.font = '13px sans-serif';
+        ctx.fillText(`${r.dist} m / ${r.time} 秒`, trackStartX - 14, laneY + (trackHeight * 0.5) + 12);
+
+        // Current runner position along the track
+        let currentRunnerDist = 0;
+        if (raceMode === 1) {
+          // Same time: all finish at progress = 1, their distance is r.dist * progress
+          currentRunnerDist = r.dist * raceProgress;
+        } else if (raceMode === 2) {
+          // Same distance (100m): faster runners finish earlier!
+          // Finish time fraction is r.time / max(r.time)
+          const maxTime = Math.max(...runners.map(x => x.time));
+          const finishProgressFrac = r.time / maxTime;
+          const currentFrac = Math.min(1, raceProgress / finishProgressFrac);
+          currentRunnerDist = r.dist * currentFrac;
+        } else {
+          // Diff dist & time:
+          currentRunnerDist = r.dist * raceProgress;
+        }
+
+        const runnerCurrentX = trackStartX + (currentRunnerDist / maxDist) * maxTrackWidth;
+
+        // Draw distance trail
+        const trailW = runnerCurrentX - trackStartX;
+        if (trailW > 0) {
+          const grad = ctx.createLinearGradient(trackStartX, 0, runnerCurrentX, 0);
+          grad.addColorStop(0, hexToRgba(r.color, 0.2));
+          grad.addColorStop(1, hexToRgba(r.color, 0.6));
+          ctx.fillStyle = grad;
+          ctx.fillRect(trackStartX, laneY + 12, trailW, trackHeight - 24);
+        }
+
+        // Mode 3 "每秒等分切刀" visualization: Chop the track into segments!
+        if (raceMode === 3 && isChopped) {
+          const numSlices = r.time;
+          const unitDist = r.dist / r.time; // meters per second
+          const slicePx = (r.dist / maxDist * maxTrackWidth) / numSlices;
+
+          for (let s = 1; s <= numSlices; s++) {
+            const cutX = trackStartX + s * slicePx;
+            // Draw cut knife line
+            ctx.strokeStyle = '#fef08a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cutX, laneY + 10);
+            ctx.lineTo(cutX, laneY + trackHeight - 10);
+            ctx.stroke();
+
+            // Highlight 1st slice unit
+            if (s === 1) {
+              ctx.fillStyle = '#fde047';
+              ctx.font = 'bold 12px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.fillText(`1秒=${unitDist}m`, trackStartX + slicePx * 0.5, laneY + 8);
+            }
+          }
+        }
+
+        // Draw runner avatar
+        ctx.fillStyle = r.color;
+        ctx.beginPath();
+        ctx.arc(runnerCurrentX, laneY + trackHeight * 0.5, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Runner number
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${i + 1}`, runnerCurrentX, laneY + trackHeight * 0.5);
+
+        // Distance text badge over runner
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(`${Math.round(currentRunnerDist)} m`, runnerCurrentX, laneY + trackHeight * 0.5 + 20);
+      }
+
+      // Mode 3 Comparison Shelf when chopped: Align 1-second blocks side by side!
+      if (raceMode === 3 && isChopped) {
+        drawUnitBlockComparison(ctx, width, height, trackStartX, topPadding + numTracks * trackHeight + 15);
+      }
+    }
+
+    function drawUnitBlockComparison(ctx, width, height, startX, startY) {
+      ctx.save();
+      const blockScale = 24; // 1 meter = 24px
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('🌟 兩人「每 1 秒走的距離」並排對決：', startX, startY);
+
+      // Runner A 1-second block (6m)
+      const yA = startY + 18;
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(startX, yA, 6 * blockScale, 22);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(startX, yA, 6 * blockScale, 22);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('選手 A（小明）：1秒走 6 公尺 (6 m/s) 🏆 贏了！', startX + 6 * blockScale + 12, yA + 11);
+
+      // Runner B 1-second block (5m)
+      const yB = startY + 46;
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(startX, yB, 5 * blockScale, 22);
+      ctx.strokeRect(startX, yB, 5 * blockScale, 22);
+
+      ctx.fillStyle = '#fff';
+      ctx.fillText('選手 B（小華）：1秒走 5 公尺 (5 m/s)', startX + 5 * blockScale + 12, yB + 11);
+
+      ctx.restore();
+    }
+
+    function updateTab1FormulaUI() {
+      const grid = document.getElementById('tab1FormulaGrid');
+      const banner = document.getElementById('tab1ConclusionBanner');
+      const tip = document.getElementById('tab1TeacherTip');
+      const hint = document.getElementById('tab1Hint');
+
+      if (raceMode === 1) {
+        hint.innerHTML = `💡 <b>實驗一：時間相同（10 秒）</b>。大家同時跑 10 秒哨音響起，觀察停下的位置：誰跑越遠，誰就越快！`;
+        grid.innerHTML = `
+          <div class="step-box highlight">
+            <span class="step-tag">條件 1</span>
+            <span class="step-content">時間相同 (10 秒)</span>
+            <span class="step-desc">三位選手同時起跑，跑滿 10 秒同時吹哨停下。</span>
+          </div>
+          <div class="step-box">
+            <span class="step-tag">條件 2</span>
+            <span class="step-content">距離不同</span>
+            <span class="step-desc">獵豹 120m ＞ 小明 60m ＞ 烏龜 30m。</span>
+          </div>
+          <div class="step-box gold">
+            <span class="step-tag">比較結果</span>
+            <span class="step-content">距離越長 ＝ 越快</span>
+            <span class="step-desc">相同時間內，能跑出越長距離的代表跑得越快！</span>
+          </div>
+          <div class="step-box">
+            <span class="step-tag">算理連結</span>
+            <span class="step-content">每秒走的距離</span>
+            <span class="step-desc">獵豹每秒 12m、小明每秒 6m、烏龜每秒 3m。</span>
+          </div>
+        `;
+        banner.className = 'conclusion-banner';
+        banner.innerHTML = `
+          <div class="conclusion-title">🏁 實驗一 核心結論</div>
+          <div class="conclusion-math">當「時間相同」時，跑的「距離越長」越快！</div>
+        `;
+        tip.innerHTML = `
+          💡 <strong>課堂提問引導</strong>：<br>
+          「同學們，如果下課只有 10 分鐘，小明能跑 60 公尺，獵豹能跑 120 公尺，誰跑得比較快？為什麼？」
+        `;
+      } else if (raceMode === 2) {
+        hint.innerHTML = `💡 <b>實驗二：距離相同（100 公尺）</b>。終點線都在 100 公尺處，觀察碼表時間：誰花的時間越少，誰就越快！`;
+        grid.innerHTML = `
+          <div class="step-box highlight">
+            <span class="step-tag">條件 1</span>
+            <span class="step-content">距離相同 (100 公尺)</span>
+            <span class="step-desc">大家跑一樣的百米賽道，目標都是衝過終點線。</span>
+          </div>
+          <div class="step-box">
+            <span class="step-tag">條件 2</span>
+            <span class="step-content">時間不同</span>
+            <span class="step-desc">獵豹 5 秒 ＜ 自行車 10 秒 ＜ 慢跑 20 秒。</span>
+          </div>
+          <div class="step-box gold">
+            <span class="step-tag">比較結果</span>
+            <span class="step-content">時間越少 ＝ 越快</span>
+            <span class="step-desc">跑相同的距離，花費的時間越少，代表越快抵達！</span>
+          </div>
+          <div class="step-box">
+            <span class="step-tag">學生迷思釐清</span>
+            <span class="step-content">時間少才是快！</span>
+            <span class="step-desc">學生常被「數字大＝快」誤導，在此建立「秒數少＝快」！</span>
+          </div>
+        `;
+        banner.className = 'conclusion-banner gold';
+        banner.innerHTML = `
+          <div class="conclusion-title">🏁 實驗二 核心結論</div>
+          <div class="conclusion-math">當「距離相同」時，花的「時間越少」越快！</div>
+        `;
+        tip.innerHTML = `
+          💡 <strong>課堂提問引導</strong>：<br>
+          「學校運動會跑百米賽跑，第一名選手花了 12 秒，最後一名花了 18 秒，為什麼數字比較小的 12 秒反而贏了？」
+        `;
+      } else {
+        hint.innerHTML = `💡 <b>實驗三：核心大對決！距離與時間都不同！</b> 小明跑 60m 花 10s，小華跑 100m 花 20s，快點擊「啟動每秒等分切刀」，看誰贏！`;
+        grid.innerHTML = `
+          <div class="step-box">
+            <span class="step-tag">難題出現</span>
+            <span class="step-content">距離、時間都不同！</span>
+            <span class="step-desc">小明 (60m / 10s) vs 小華 (100m / 20s)，誰快？</span>
+          </div>
+          <div class="step-box highlight">
+            <span class="step-tag">等分切刀</span>
+            <span class="step-content">小明：60 ÷ 10 ＝ 6</span>
+            <span class="step-desc">把 60m 平分成 10 份，算出一秒走 <b>6 公尺</b>！</span>
+          </div>
+          <div class="step-box highlight">
+            <span class="step-tag">等分切刀</span>
+            <span class="step-content">小華：100 ÷ 20 ＝ 5</span>
+            <span class="step-desc">把 100m 平分成 20 份，算出一秒走 <b>5 公尺</b>！</span>
+          </div>
+          <div class="step-box gold">
+            <span class="step-tag">對決揭曉</span>
+            <span class="step-content">6 m/s ＞ 5 m/s</span>
+            <span class="step-desc">小明每一秒都比小華多走 1 公尺，小明獲勝！</span>
+          </div>
+        `;
+        banner.className = 'conclusion-banner gold';
+        banner.innerHTML = `
+          <div class="conclusion-title">🌟 速率核心公式誕生</div>
+          <div class="conclusion-math">速率 ＝ 距離 ÷ 時間（代表每 1 單位時間所走的距離）</div>
+        `;
+        tip.innerHTML = `
+          👑 <strong>震撼頓悟關鍵點</strong>：<br>
+          為什麼是「距離 ÷ 時間」而不是反過來？因為我們是要把**「總距離拿來平分給每一秒」**！除以時間，就是求出**「1 秒鐘到底走了多少公尺」**！
+        `;
+      }
+    }
+
+    /* ==========================================================================
+       TAB 2: 火車數線積木工坊
+       ========================================================================== */
+    let trainSpeed = 4; // meters per second
+    let trainSeconds = 0; // accumulated seconds
+    let isTrainChopped = false;
+
+    function setTrainSpeed(s) {
+      trainSpeed = s;
+      trainSeconds = 0;
+      isTrainChopped = false;
+      playTone(550);
+
+      const btns = document.querySelectorAll('#trainSpeedPills .pill-btn');
+      btns.forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(`${s} 公尺`));
+      });
+
+      updateTrainUI();
+      renderTab2();
+    }
+
+    function stepTrain(n = 1) {
+      if (trainSeconds >= 12) return;
+      trainSeconds += n;
+      playTone(400 + trainSeconds * 30, 'triangle', 0.12);
+      updateTrainUI();
+      renderTab2();
+    }
+
+    function chopTrain() {
+      if (trainSeconds === 0) return;
+      isTrainChopped = !isTrainChopped;
+      playChopSound();
+      updateTrainUI();
+      renderTab2();
+    }
+
+    function resetTrain() {
+      trainSeconds = 0;
+      isTrainChopped = false;
+      playTone(450);
+      updateTrainUI();
+      renderTab2();
+    }
+
+    function updateTrainUI() {
+      const totalDist = trainSpeed * trainSeconds;
+      const s1 = document.getElementById('trainStep1');
+      const s2 = document.getElementById('trainStep2');
+      if (s1) s1.innerHTML = `每秒走 ${trainSpeed}m，走了 ${trainSeconds} 秒 ＝ 總共 <b>${totalDist} 公尺</b>！`;
+      if (s2) s2.innerHTML = `逆向平分：總距離 ${totalDist}m ÷ ${trainSeconds}秒 ＝ <b>${trainSeconds > 0 ? (totalDist / trainSeconds) : 0} 公尺/秒</b>！`;
+    }
+
+    function renderTab2() {
+      const canvas = document.getElementById('canvas2');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const trackStartX = 60;
+      const trackEndX = width - 60;
+      const trackW = trackEndX - trackStartX;
+      const trackY = height * 0.55;
+
+      const maxTrackDist = 60; // 60 meters max on line
+      const pxPerMeter = trackW / maxTrackDist;
+
+      // Draw Number Line Axis
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(trackStartX, trackY);
+      ctx.lineTo(trackEndX, trackY);
+      ctx.stroke();
+
+      // Tick marks every 5m and 10m
+      for (let m = 0; m <= maxTrackDist; m += 5) {
+        const x = trackStartX + m * pxPerMeter;
+        const isMajor = (m % 10 === 0);
+        ctx.strokeStyle = isMajor ? '#facc15' : 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = isMajor ? 2.5 : 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, trackY - (isMajor ? 12 : 6));
+        ctx.lineTo(x, trackY + (isMajor ? 12 : 6));
+        ctx.stroke();
+
+        ctx.fillStyle = isMajor ? '#fde047' : '#94a3b8';
+        ctx.font = isMajor ? 'bold 13px sans-serif' : '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(`${m}m`, x, trackY + 16);
+      }
+
+      // Draw accumulated 1-second blocks
+      for (let s = 0; s < trainSeconds; s++) {
+        const bStartX = trackStartX + (s * trainSpeed) * pxPerMeter;
+        const bW = trainSpeed * pxPerMeter;
+        const bY = trackY - 50;
+
+        ctx.fillStyle = s % 2 === 0 ? 'rgba(6, 182, 212, 0.75)' : 'rgba(14, 165, 233, 0.75)';
+        ctx.fillRect(bStartX, bY, bW, 36);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bStartX, bY, bW, 36);
+
+        // Block label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`第${s + 1}秒 (+${trainSpeed}m)`, bStartX + bW * 0.5, bY + 18);
+      }
+
+      // Train Locomotive at current position
+      const trainDist = trainSpeed * trainSeconds;
+      const trainX = trackStartX + trainDist * pxPerMeter;
+      const trainY = trackY - 45;
+
+      // Draw Train Cabin
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.roundRect(trainX - 25, trainY - 20, 50, 35, 6);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Train Chimney
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(trainX + 8, trainY - 32, 12, 14);
+
+      // Train Wheels
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(trainX - 14, trainY + 16, 7, 0, Math.PI * 2);
+      ctx.arc(trainX + 14, trainY + 16, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Train text
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🚂', trainX, trainY - 3);
+
+      // Above: Total dimension line
+      if (trainSeconds > 0) {
+        const bracketY = trackY - 80;
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(trackStartX, bracketY + 8);
+        ctx.lineTo(trackStartX, bracketY);
+        ctx.lineTo(trainX, bracketY);
+        ctx.lineTo(trainX, bracketY + 8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(`總距離 ＝ ${trainDist} 公尺（共花了 ${trainSeconds} 秒）`, (trackStartX + trainX) * 0.5, bracketY - 6);
+
+        // If chopped: draw division arrow & explanation
+        if (isTrainChopped) {
+          ctx.fillStyle = '#34d399';
+          ctx.font = 'bold 17px sans-serif';
+          ctx.fillText(`🔪 平分運算：${trainDist} 公尺 ÷ ${trainSeconds} 秒 ＝ 每秒走 ${trainSpeed} 公尺（速率）！`, width * 0.5, trackY + 70);
+        }
+      }
+    }
+
+    /* ==========================================================================
+       TAB 3: 生活速率與換算齒輪箱
+       ========================================================================== */
+    let currentRole = 'walk';
+    let lifeProgress = 0;
+    let isLifeRacing = false;
+    let lifeStartTime = null;
+
+    const lifeData = {
+      turtle: { name: '🐢 烏龜', sec: 0.05, min: 3, hr: 0.18, animSpeed: 0.05 },
+      walk: { name: '🚶 散步健走', sec: 1.25, min: 75, hr: 4.5, animSpeed: 0.2 },
+      bike: { name: '🚲 自行車', sec: 5, min: 300, hr: 18, animSpeed: 0.4 },
+      cheetah: { name: '🐆 獵豹狂奔', sec: 30, min: 1800, hr: 108, animSpeed: 0.8 },
+      hsr: { name: '🚄 台灣高鐵', sec: 83.3, min: 5000, hr: 300, animSpeed: 1.2 },
+      jet: { name: '✈️ 噴射客機', sec: 250, min: 15000, hr: 900, animSpeed: 1.8 }
+    };
+
+    function setLifeRole(role) {
+      currentRole = role;
+      lifeProgress = 0;
+      isLifeRacing = false;
+      playTone(560);
+
+      const btns = document.querySelectorAll('#lifeSpeedPills .pill-btn');
+      btns.forEach(b => {
+        b.classList.toggle('active', b.onclick.toString().includes(role));
+      });
+
+      const d = lifeData[role];
+      document.getElementById('uValSec').textContent = `${d.sec} m/s`;
+      document.getElementById('uValMin').textContent = `${d.min} m/min`;
+      document.getElementById('uValHr').textContent = `${d.hr} km/h`;
+
+      renderTab3();
+    }
+
+    function animateLifeRace() {
+      if (isLifeRacing) return;
+      isLifeRacing = true;
+      lifeProgress = 0;
+      playWhistle();
+      lifeStartTime = performance.now();
+      requestAnimationFrame(lifeAnimLoop);
+    }
+
+    function lifeAnimLoop(now) {
+      if (!isLifeRacing) return;
+      const elapsed = (now - lifeStartTime) / 1000;
+      const d = lifeData[currentRole];
+      lifeProgress = Math.min(1, elapsed * d.animSpeed);
+
+      renderTab3();
+
+      if (lifeProgress < 1) {
+        requestAnimationFrame(lifeAnimLoop);
+      } else {
+        isLifeRacing = false;
+        playFanfare();
+        renderTab3();
+      }
+    }
+
+    function renderTab3() {
+      const canvas = document.getElementById('canvas3');
+      const res = resizeCanvas(canvas);
+      if (!res) return;
+      const { ctx, width, height } = res;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const d = lifeData[currentRole];
+
+      // Draw Gearbox Visual Pipeline:
+      // Left: 秒速 block (1s) -> (x60) -> Center: 分速 block (60s) -> (x60 / 1000) -> Right: 時速
+      const cy = height * 0.35;
+      const nodeX1 = width * 0.2;
+      const nodeX2 = width * 0.5;
+      const nodeX3 = width * 0.8;
+
+      // Connecting Arrows
+      drawArrow(ctx, nodeX1 + 55, cy, nodeX2 - 55, cy, '× 60 秒');
+      drawArrow(ctx, nodeX2 + 55, cy, nodeX3 - 55, cy, '× 60 分 (÷1000m)');
+
+      // Draw Node 1: 秒速
+      drawGearNode(ctx, nodeX1, cy, '秒速', `${d.sec} m`, '#06b6d4', '每 1 秒鐘');
+
+      // Draw Node 2: 分速
+      drawGearNode(ctx, nodeX2, cy, '分速', `${d.min} m`, '#3b82f6', '每 1 分鐘 (60秒)');
+
+      // Draw Node 3: 時速
+      drawGearNode(ctx, nodeX3, cy, '時速', `${d.hr} km`, '#f59e0b', '每 1 小時 (60分)');
+
+      // Bottom Track: Visual runner animation
+      const trackY = height * 0.78;
+      const trackStartX = 60;
+      const trackEndX = width - 60;
+      const trackW = trackEndX - trackStartX;
+
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
+      ctx.fillRect(trackStartX, trackY - 20, trackW, 40);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeRect(trackStartX, trackY - 20, trackW, 40);
+
+      const curX = trackStartX + lifeProgress * trackW;
+      ctx.fillStyle = '#fde047';
+      ctx.font = '28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(d.name.split(' ')[0], curX, trackY);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(`${d.name} 奔馳中...`, width * 0.5, trackY + 36);
+    }
+
+    function drawGearNode(ctx, x, y, title, val, color, sub) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.beginPath();
+      ctx.arc(x, y, 48, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = color;
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(title, x, y - 18);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText(val, x, y + 4);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(sub, x, y + 24);
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, label) {
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      // Arrow head
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - 8, y2 - 5);
+      ctx.lineTo(x2 - 8, y2 + 5);
+      ctx.closePath();
+      ctx.fill();
+
+      // Label
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(label, (x1 + x2) * 0.5, y1 - 8);
+    }
+
+    /* ==========================================================================
+       TAB 4: 算術沙盒與隨堂挑戰
+       ========================================================================== */
+    function updateSandbox() {
+      const dist = parseFloat(document.getElementById('sbDistRange').value);
+      const time = parseFloat(document.getElementById('sbTimeRange').value);
+
+      document.getElementById('sbDistText').textContent = `${dist} 公尺`;
+      document.getElementById('sbTimeText').textContent = `${time} 秒`;
+
+      const speed = (dist / time).toFixed(2);
+      const speedClean = parseFloat(speed);
+
+      document.getElementById('sbFormulaResult').textContent = `${dist} ÷ ${time} ＝ ${speedClean} 公尺/秒`;
+      document.getElementById('sbSpeedNote').textContent = `代表把 ${dist} 公尺平分成 ${time} 份，每 1 秒鐘前進 ${speedClean} 公尺！`;
+    }
+
+    const quizBank = [
+      {
+        q: '小明跑 100 公尺花了 20 秒，小華跑 100 公尺花了 16 秒，請問誰跑得比較快？',
+        opts: ['小華比較快', '小明比較快', '兩人一樣快', '無法比較'],
+        ans: 0,
+        exp: '距離相同時，花的時間越少越快！小華只花 16 秒，比小明的 20 秒更快！'
+      },
+      {
+        q: '獵豹在 5 秒內狂奔了 150 公尺，請問獵豹的秒速是多少？',
+        opts: ['30 公尺/秒', '750 公尺/秒', '25 公尺/秒', '15 公尺/秒'],
+        ans: 0,
+        exp: '速率 ＝ 距離 ÷ 時間 ＝ 150 ÷ 5 ＝ 30 公尺/秒！'
+      },
+      {
+        q: '小強 10 秒跑 50 公尺，小美 10 秒跑 70 公尺，請問誰比較快？',
+        opts: ['小美比較快', '小強比較快', '兩人一樣快', '需要用除法才知道'],
+        ans: 0,
+        exp: '時間相同時，跑越遠的越快！小美跑了 70 公尺，所以小美比較快！'
+      },
+      {
+        q: '一輛自行車的時速是 18 公里/時，請問它相當於每小時行駛多少公里？',
+        opts: ['18 公里', '1.8 公里', '180 公里', '300 公里'],
+        ans: 0,
+        exp: '時速 18 公里/時，其定義就是「每 1 小時行駛 18 公里」！'
+      },
+      {
+        q: '為什麼計算速率時，要用「距離 ÷ 時間」？',
+        opts: ['因為要把總距離平分成每一秒', '因為時間永遠比距離大', '只是數學家的規定', '因為乘法算不出來'],
+        ans: 0,
+        exp: '除以時間就是「平分」的概念，把總距離平分給每一秒，算出單位時間走多少！'
+      }
+    ];
+
+    let currentQuizIdx = 0;
+
+    function newQuiz() {
+      currentQuizIdx = Math.floor(Math.random() * quizBank.length);
+      const q = quizBank[currentQuizIdx];
+      document.getElementById('quizQuestion').textContent = `Q: ${q.q}`;
+
+      const optsContainer = document.getElementById('quizOptions');
+      optsContainer.innerHTML = '';
+
+      q.opts.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-opt';
+        btn.textContent = optText;
+        btn.onclick = () => checkQuiz(idx, btn);
+        optsContainer.appendChild(btn);
+      });
+
+      const fb = document.getElementById('quizFeedback');
+      fb.style.display = 'none';
+      playTone(520);
+    }
+
+    function checkQuiz(choiceIdx, clickedBtn) {
+      const q = quizBank[currentQuizIdx];
+      const fb = document.getElementById('quizFeedback');
+      fb.style.display = 'block';
+
+      const btns = document.querySelectorAll('#quizOptions .btn-opt');
+      btns.forEach(b => b.disabled = true);
+
+      if (choiceIdx === q.ans) {
+        clickedBtn.classList.add('correct');
+        fb.style.background = 'rgba(16, 185, 129, 0.2)';
+        fb.style.color = '#34d399';
+        fb.innerHTML = `🎉 答對了！${q.exp}`;
+        playFanfare();
+      } else {
+        clickedBtn.classList.add('wrong');
+        btns[q.ans].classList.add('correct');
+        fb.style.background = 'rgba(239, 68, 68, 0.2)';
+        fb.style.color = '#f87171';
+        fb.innerHTML = `❌ 差一點點！正確答案是「${q.opts[q.ans]}」。<br>${q.exp}`;
+        playTone(250, 'sawtooth', 0.25);
+      }
+    }
+
+    /* ==========================================================================
+       INITIALIZATION
+       ========================================================================== */
+    window.addEventListener('load', () => {
+      setRaceMode(1);
+      updateTab1FormulaUI();
+      renderTab1();
+      newQuiz();
+      updateSandbox();
+    });
+
+    window.addEventListener('resize', () => {
+      if (currentTab === 1) renderTab1();
+      else if (currentTab === 2) renderTab2();
+      else if (currentTab === 3) renderTab3();
+    });
+
+    // Helper functions
+    function varColor(c) {
+      return c;
+    }
+
+    function hexToRgba(hex, alpha) {
+      let r = 0, g = 0, b = 0;
+      if (hex.length === 7) {
+        r = parseInt(hex.slice(1, 3), 16);
+        g = parseInt(hex.slice(3, 5), 16);
+        b = parseInt(hex.slice(5, 7), 16);
+      }
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  </script>
+</body>
+</html>
