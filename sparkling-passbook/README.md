@@ -1,20 +1,22 @@
-# 羚藝汽泡水電子存摺（前後端分離多帳號相容版）
+# 班級電子存摺（前後端分離＋一鍵複製分享版）
 
-本版本將前端頁面改為獨立靜態網頁（可透過 GitHub Pages 託管），Google Apps Script 僅作為純 JSON API 後端，徹底解決 Google 多帳號登入時的 `/u/1/` 404 與 `google.script.run` 失效問題，並將老師管理密碼移至後端驗證。
+本系統採用「GitHub Pages 前端 ＋ Google Apps Script 純 JSON API 後端」，徹底解決 Google 多帳號登入時的 `/u/1/` 404 與 `google.script.run` 失效問題，並將老師管理密碼移至後端驗證。
 
-## 部署步驟
+## 線上使用與一鍵分享
 
-### 1. 更新 Google Apps Script 後端 (`Code.gs`)
-1. 開啟原本的 Google Apps Script 專案。
-2. 將本資料夾中的 [`google_apps_script.js`](./google_apps_script.js) 完整覆蓋貼入 `Code.gs`（可將編輯器左側原本的 `index.html` 刪除或保留皆不影響）。
-3. **設定老師管理密碼（二選一，推薦方法 A）**：
-   - **方法 A（推薦）**：點選 Apps Script 左側齒輪「**專案設定**」→ 最下方「**指令碼屬性**」→ 新增屬性：
-     - 屬性：`TEACHER_PWD`
-     - 值：您的老師管理密碼
-   - **方法 B**：直接把 `Code.gs` 裡的 `DEFAULT_TEACHER_PWD = 'CHANGE_ME'` 改成您的密碼（請勿把真實密碼推上公開 GitHub）。
-4. 點右上角「**部署**」→「**管理部署作業**」→ 點筆形「**編輯**」→ 版本選「**建立新版本**」→ 確認「執行身分：`我`」、「誰可以存取：`所有人`」→ 按「**部署**」。
-   > 若使用原本同一個部署項目更新版本，網址 `AKfycbyE4xFxBiNIUjGqltcTxyO42seKtjYg4n9EodUuZCaH8EW2LR1izfSgsBTAmIROJ2dqcw` 會保持不變；若建立了全新部署，請將新的 `/macros/s/.../exec` 網址（勿含 `/u/1/`）更新到 [`config.js`](./config.js)。
+- **預設示範網址（羚藝汽泡水電子存摺）**：  
+  `https://ted710317-cloud.github.io/-One/sparkling-passbook/`
+- **其他老師一鍵建立精靈（直接貼網址即可複製套用）**：  
+  `https://ted710317-cloud.github.io/-One/sparkling-passbook/setup.html`
 
-### 2. 發佈前端至 GitHub Pages
-將 `sparkling-passbook/` 資料夾推送至 GitHub 後，學生與老師即可直接透過獨立網址存取：
-`https://ted710317-cloud.github.io/-One/sparkling-passbook/`
+## 支援的網址參數
+
+- `?id=<GAS部署ID>`：連接指定老師的 Google Apps Script 部署（亦支援完整 `?api=https://script.google.com/macros/s/.../exec`）。
+- `?title=<班級存摺名稱>`：自訂頁面與頂部標題名稱。
+
+## 檔案說明
+
+- `index.html`：電子存摺主頁面（支援預設 `config.js` 與 `?id=` / `?title=` 多班共用）。
+- `setup.html`：給其他老師使用的免 GitHub 一鍵建置與 QR Code 分享精靈。
+- `config.js`：預設班級的 GAS API 設定檔。
+- `google_apps_script.js`：Google Apps Script 後端範本（綁定試算表後免填 ID，自動建立 `Students` 與 `History` 工作表）。

@@ -1,25 +1,23 @@
 // ============================================================================
-// 羚藝汽泡水電子存摺 - Google Apps Script 純 JSON API 後端 (Code.gs)
+// 班級電子存摺 - Google Apps Script 純 JSON API 後端 (Code.gs)
 // ============================================================================
-// 💡 部署設定（Apps Script 編輯器右上角「部署」→「管理部署作業」）：
-// 1. 類型：網頁應用程式
-// 2. 執行身分：我（專案擁有者）
-// 3. 誰可以存取：所有人
-//
-// 🔐 老師管理密碼設定方式（二選一，推薦方式 A）：
-// A. 至 Apps Script 左側「專案設定」→「指令碼屬性」新增：
-//    屬性名稱：TEACHER_PWD  |  值：您的老師管理密碼
-// B. 直接修改下方 DEFAULT_TEACHER_PWD（切勿將真實密碼上傳至公開 GitHub）
+// 💡 使用方式（推薦綁定在 Google 試算表內，免填試算表 ID）：
+// 1. 新增或開啟一份 Google 試算表 →「擴充功能」→「Apps Script」
+// 2. 將本程式完整貼上覆蓋 Code.gs 並存檔（會自動建立 Students 與 History 工作表）
+// 3. 設定老師管理密碼（二選一，推薦方法 A）：
+//    A. 左側齒輪「專案設定」→「指令碼屬性」新增：
+//       屬性：TEACHER_PWD  |  值：您的老師管理密碼
+//    B. 直接修改下方 DEFAULT_TEACHER_PWD（切勿將真實密碼公開上傳至 GitHub）
+// 4. 右上角「部署」→「新增部署作業」→ 類型選「網頁應用程式」：
+//    - 執行身分：我
+//    - 誰可以存取：所有人
 // ============================================================================
 
-const SPREADSHEET_ID = '1tM6JBi16arTzUmN0ERFd9-WR3hoTqisUgHXb6zSro_k';
+// 若為綁定試算表的指令碼，此處留空即可自動抓當下試算表；
+// 若為獨立專案，可在此填入試算表 ID，或留空由系統自動在雲端硬碟建立新試算表。
+const SPREADSHEET_ID = '';
 const DEFAULT_TEACHER_PWD = 'CHANGE_ME';
-
-const INITIAL_POINTS = {
-  1: 80, 2: 60, 3: 90, 4: 1960, 5: 20, 6: 0, 7: 10, 8: 90, 9: 0, 10: 30,
-  11: 60, 12: 2330, 13: 10, 14: 50, 15: 270, 16: 40, 17: 460, 18: 400, 19: 10, 20: 170,
-  21: 650, 22: 220, 23: 520, 24: 120, 25: 20, 26: 2150
-};
+const DEFAULT_STUDENT_COUNT = 26;
 
 function doGet(e) {
   try {
@@ -27,9 +25,12 @@ function doGet(e) {
     const action = params.action || 'getData';
 
     if (action === 'ping') {
+      const sheets = getSheets_();
       return createJsonResponse_({
         status: 'success',
-        message: '羚藝汽泡水電子存摺 API 連線正常'
+        message: '電子存摺 API 連線正常',
+        sheetName: sheets.ss.getName(),
+        pwdConfigured: isPasswordConfigured_()
       });
     }
 
@@ -135,10 +136,18 @@ function doPost(e) {
   }
 }
 
-function checkTeacherPassword_(inputPwd) {
+function getExpectedPassword_() {
   const propPwd = PropertiesService.getScriptProperties().getProperty('TEACHER_PWD');
-  const expected = (propPwd && propPwd.trim()) ? propPwd.trim() : DEFAULT_TEACHER_PWD;
+  return (propPwd && propPwd.trim()) ? propPwd.trim() : DEFAULT_TEACHER_PWD;
+}
 
+function isPasswordConfigured_() {
+  const expected = getExpectedPassword_();
+  return !!(expected && expected !== 'CHANGE_ME');
+}
+
+function checkTeacherPassword_(inputPwd) {
+  const expected = getExpectedPassword_();
   if (!expected || expected === 'CHANGE_ME') {
     return {
       ok: false,
@@ -158,14 +167,48 @@ function checkTeacherPassword_(inputPwd) {
   return { ok: true };
 }
 
-function getSheets_() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const studentSheet = ss.getSheetByName('Students');
-  const historySheet = ss.getSheetByName('History');
-  if (!studentSheet || !historySheet) {
-    throw new Error('試算表缺少 Students 或 History 工作表');
+function getSpreadsheet_() {
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+
+  if (SPREADSHEET_ID && SPREADSHEET_ID.trim()) {
+    return SpreadsheetApp.openById(SPREADSHEET_ID.trim());
   }
-  return { studentSheet: studentSheet, historySheet: historySheet };
+
+  const props = PropertiesService.getScriptProperties();
+  const savedId = props.getProperty('SPREADSHEET_ID');
+  if (savedId) {
+    try {
+      const saved = SpreadsheetApp.openById(savedId);
+      if (saved) return saved;
+    } catch (e) {}
+  }
+
+  const created = SpreadsheetApp.create('班級電子存摺雲端資料');
+  props.setProperty('SPREADSHEET_ID', created.getId());
+  return created;
+}
+
+function getOrCreateSheet_(ss, name, headers) {
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  } else if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function getSheets_() {
+  const ss = getSpreadsheet_();
+  const studentSheet = getOrCreateSheet_(ss, 'Students', ['座號', '姓名', '點數', '幹部職稱', '薪水點數', '發放週期', '最後發薪日']);
+  const historySheet = getOrCreateSheet_(ss, 'History', ['時間', '座號', '姓名', '異動點數', '原因']);
+  return { ss: ss, studentSheet: studentSheet, historySheet: historySheet };
 }
 
 function formatTimestamp_(val) {
@@ -173,6 +216,21 @@ function formatTimestamp_(val) {
     return Utilities.formatDate(val, 'GMT+8', 'yyyy/MM/dd HH:mm:ss');
   }
   return String(val || '');
+}
+
+function writeColumnValues_(sheet, colIndex, rowsData, rowValueIndex) {
+  if (rowsData.length <= 1) return;
+  const colValues = [];
+  for (let i = 1; i < rowsData.length; i++) {
+    colValues.push([rowsData[i][rowValueIndex]]);
+  }
+  sheet.getRange(2, colIndex, colValues.length, 1).setValues(colValues);
+}
+
+function appendHistoryRows_(historySheet, historyRows) {
+  if (!historyRows || historyRows.length === 0) return;
+  const startRow = historySheet.getLastRow() + 1;
+  historySheet.getRange(startRow, 1, historyRows.length, 5).setValues(historyRows);
 }
 
 // 1. 取得雲端試算表資料
@@ -185,8 +243,8 @@ function getCloudData_() {
 
   if (studentData.length <= 1) {
     const defaultStudents = [];
-    for (let i = 1; i <= 26; i++) {
-      defaultStudents.push([i, '學生 ' + i, INITIAL_POINTS[i] || 0, '', 0, 'none', '']);
+    for (let i = 1; i <= DEFAULT_STUDENT_COUNT; i++) {
+      defaultStudents.push([i, '學生 ' + i, 0, '', 0, 'none', '']);
     }
     studentSheet.getRange(2, 1, defaultStudents.length, 7).setValues(defaultStudents);
     studentData = studentSheet.getDataRange().getValues();
@@ -262,15 +320,9 @@ function updateStudentPointsCloud_(payload) {
     }
   });
 
-  if (historyRows.length > 0 && studentData.length > 1) {
-    const pointsCol = [];
-    for (let i = 1; i < studentData.length; i++) {
-      pointsCol.push([studentData[i][2]]);
-    }
-    studentSheet.getRange(2, 3, pointsCol.length, 1).setValues(pointsCol);
-
-    const startRow = historySheet.getLastRow() + 1;
-    historySheet.getRange(startRow, 1, historyRows.length, 5).setValues(historyRows);
+  if (historyRows.length > 0) {
+    writeColumnValues_(studentSheet, 3, studentData, 2);
+    appendHistoryRows_(historySheet, historyRows);
   }
 
   return getCloudData_();
@@ -324,18 +376,10 @@ function payAllSalariesCloud_() {
     }
   }
 
-  if (paidCount > 0 && studentData.length > 1) {
-    const pointsCol = [];
-    const lastPaidCol = [];
-    for (let i = 1; i < studentData.length; i++) {
-      pointsCol.push([studentData[i][2]]);
-      lastPaidCol.push([studentData[i][6]]);
-    }
-    studentSheet.getRange(2, 3, pointsCol.length, 1).setValues(pointsCol);
-    studentSheet.getRange(2, 7, lastPaidCol.length, 1).setValues(lastPaidCol);
-
-    const startRow = historySheet.getLastRow() + 1;
-    historySheet.getRange(startRow, 1, historyRows.length, 5).setValues(historyRows);
+  if (paidCount > 0) {
+    writeColumnValues_(studentSheet, 3, studentData, 2);
+    writeColumnValues_(studentSheet, 7, studentData, 6);
+    appendHistoryRows_(historySheet, historyRows);
   }
 
   return { data: getCloudData_(), paidCount: paidCount };

@@ -95,6 +95,12 @@
                     <button onclick="app.login('teacher')" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 font-bold py-2 rounded-lg transition shadow">管理登入</button>
                 </div>
             </div>
+            <div class="text-center pt-1">
+                <a href="./setup.html" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 transition">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>老師想複製這套電子存摺給自己班級使用？點此一鍵建立專屬網址</span>
+                </a>
+            </div>
         </div>
 
         <!-- 學生專區 -->
@@ -161,15 +167,59 @@
             },
 
             init() {
+                this.applyUrlConfig();
                 lucide.createIcons();
                 this.fetchCloudData();
             },
 
+            applyUrlConfig() {
+                const params = new URLSearchParams(window.location.search);
+                const customId = (params.get('id') || '').trim();
+                const customApi = (params.get('api') || '').trim();
+                const customTitle = (params.get('title') || '').trim().slice(0, 40);
+
+                if (customTitle) {
+                    document.title = customTitle;
+                    document.getElementById('header-title').textContent = customTitle;
+                } else if (customId || customApi) {
+                    const fallbackTitle = '班級電子存摺';
+                    document.title = fallbackTitle;
+                    document.getElementById('header-title').textContent = fallbackTitle;
+                }
+            },
+
+            normalizeGasUrl(rawUrl) {
+                const clean = String(rawUrl || '')
+                    .trim()
+                    .replace(/\/a\/u\/\d+\/macros\//, '/a/macros/')
+                    .replace(/\/macros\/u\/\d+\/s\//, '/macros/s/')
+                    .replace(/(\/a\/macros\/[^/]+)\/u\/\d+\/s\//, '$1/s/');
+                if (/^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.-]+\/s|macros\/s)\/[A-Za-z0-9_-]{20,}\/exec$/.test(clean)) {
+                    return clean;
+                }
+                return '';
+            },
+
             getApiUrl() {
-                const raw = (window.PASSBOOK_CONFIG && window.PASSBOOK_CONFIG.cloudApiUrl) ? String(window.PASSBOOK_CONFIG.cloudApiUrl).trim() : '';
-                if (!raw) return '';
-                // 自動移除可能誤貼的 /u/數字/ 多帳號索引路徑
-                return raw.replace(/\/macros\/u\/\d+\/s\//, '/macros/s/');
+                const params = new URLSearchParams(window.location.search);
+                const customId = (params.get('id') || '').trim();
+                const customDomain = (params.get('domain') || '').trim();
+                if (customId) {
+                    if (!/^[A-Za-z0-9_-]{20,}$/.test(customId)) return '';
+                    if (customDomain) {
+                        if (!/^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(customDomain)) return '';
+                        return `https://script.google.com/a/macros/${customDomain}/s/${customId}/exec`;
+                    }
+                    return `https://script.google.com/macros/s/${customId}/exec`;
+                }
+
+                const customApi = (params.get('api') || '').trim();
+                if (customApi) {
+                    return this.normalizeGasUrl(customApi);
+                }
+
+                const raw = (window.PASSBOOK_CONFIG && window.PASSBOOK_CONFIG.cloudApiUrl) ? window.PASSBOOK_CONFIG.cloudApiUrl : '';
+                return this.normalizeGasUrl(raw);
             },
 
             escapeHtml(str) {
@@ -201,8 +251,8 @@
 
             async requestCloud(method, payload = null, queryAction = 'getData') {
                 const apiUrl = this.getApiUrl();
-                if (!apiUrl || !apiUrl.startsWith('https://script.google.com/macros/')) {
-                    throw new Error('config.js 尚未設定正確的 Google Apps Script 網址');
+                if (!apiUrl) {
+                    throw new Error('Google Apps Script 部署網址格式不正確（應為 https://script.google.com/macros/s/.../exec）');
                 }
 
                 const controller = new AbortController();

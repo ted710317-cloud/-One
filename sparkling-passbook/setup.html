@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級電子存摺 · 教師一鍵建置與分享精靈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-animate { animation: slideIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-6 h-6 text-amber-300"></i>
+                <h1 class="text-lg sm:text-xl font-bold tracking-wide">班級電子存摺 · 教師一鍵建立精靈</h1>
+            </div>
+            <a href="./index.html" class="bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded text-sm transition flex items-center gap-1 shrink-0">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> 返回存摺
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- 分享給其他老師 -->
+        <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-6 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <i data-lucide="share-2" class="w-5 h-5"></i> 分享本建置精靈給其他老師
+                    </h2>
+                    <p class="text-blue-100 text-sm mt-1">
+                        免申請 GitHub、免寫網頁！其他老師只要複製自己的一份 Google 試算表，3 分鐘就能擁有獨立班級電子存摺。
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2 shrink-0">
+                    <button onclick="wizard.copySetupUrl()" class="bg-white text-blue-700 hover:bg-blue-50 px-3.5 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1.5">
+                        <i data-lucide="link" class="w-4 h-4"></i> 複製本教學頁網址
+                    </button>
+                    <button onclick="wizard.copyTeacherInvite()" class="bg-amber-400 text-slate-900 hover:bg-amber-300 px-3.5 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1.5">
+                        <i data-lucide="message-square" class="w-4 h-4"></i> 複製群組分享文案
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 教育局 Google 帳號提醒 -->
+        <section class="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-2">
+            <h3 class="font-bold text-amber-900 flex items-center gap-2 text-base">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i>
+                給只有「教育局 Google 帳號」老師的行前提醒
+            </h3>
+            <p class="text-sm text-amber-800 leading-relaxed">
+                能否使用教育局帳號建立給學生／家長查詢，取決於貴縣市教育局 Google Workspace 管理員有沒有開放對外分享：
+            </p>
+            <ul class="text-sm text-amber-900 list-disc pl-5 space-y-1">
+                <li><strong>有開放「誰可以存取：所有人」</strong> → 直接用教育局帳號即可完成以下所有步驟！</li>
+                <li><strong>找不到「所有人」（只看得到「僅限網域內」或被停用）</strong> → 代表教育局帳號鎖住了對外存取，建議改用<strong>個人免費 <code>@gmail.com</code> 帳號</strong>建立試算表與部署即可不受限制。</li>
+            </ul>
+        </section>
+
+        <!-- 步驟 1 -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">建立專屬試算表並貼上後端程式</h2>
+                    <p class="text-xs text-slate-500">程式會自動建立「Students」與「History」工作表，並自動綁定該試算表，完全不用查 ID。</p>
+                </div>
+            </div>
+
+            <ol class="text-sm text-slate-700 space-y-2 list-decimal pl-5">
+                <li>
+                    點此快速建立空白試算表：
+                    <a href="https://sheets.new" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-blue-600 hover:underline font-medium">
+                        開啟新的 Google 試算表 (sheets.new) <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    </a>
+                    （建議先改個檔名，例如「三年甲班電子存摺」）。
+                </li>
+                <li>點選試算表上方選單列「<strong>擴充功能</strong>」→「<strong>Apps Script</strong>」。</li>
+                <li>點擊下方按鈕複製新版程式，全選刪除 Apps Script 編輯器裡原本預設的內容後貼上，並按 <kbd class="px-1.5 py-0.5 bg-slate-100 border rounded text-xs">Ctrl</kbd>+<kbd class="px-1.5 py-0.5 bg-slate-100 border rounded text-xs">S</kbd> 存檔。</li>
+            </ol>
+
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+                <button onclick="wizard.copyGasCode()" id="btn-copy-gas" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-2">
+                    <i data-lucide="copy" class="w-4 h-4"></i> 一鍵複製 Code.gs 程式碼
+                </button>
+                <button onclick="wizard.toggleCodePreview()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm transition flex items-center gap-1.5">
+                    <i data-lucide="code" class="w-4 h-4"></i> <span id="code-toggle-label">展開檢視程式碼</span>
+                </button>
+                <a href="./google_apps_script.js" target="_blank" class="text-xs text-slate-500 hover:text-blue-600 underline">直接檢視原始檔</a>
+            </div>
+
+            <pre id="gas-code-preview" class="hidden bg-slate-900 text-slate-100 text-xs p-4 rounded-lg overflow-x-auto max-h-72 leading-relaxed"></pre>
+        </section>
+
+        <!-- 步驟 2 -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">2</span>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">設定管理密碼並部署成「所有人可存取」</h2>
+                    <p class="text-xs text-slate-500">管理密碼只存在您的 Google 雲端後台，學生絕對看不到。</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-2">
+                    <h3 class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i data-lucide="key-round" class="w-4 h-4 text-emerald-600"></i> A. 設定老師管理密碼
+                    </h3>
+                    <ol class="list-decimal pl-5 space-y-1 text-slate-600">
+                        <li>在 Apps Script 左側欄點齒輪「<strong>專案設定</strong>」。</li>
+                        <li>滑到最下方點「<strong>新增指令碼屬性</strong>」。</li>
+                        <li>屬性填 <code class="bg-white px-1.5 py-0.5 rounded border text-rose-600 font-bold">TEACHER_PWD</code>，值填您自訂的管理密碼後儲存。</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-2">
+                    <h3 class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i data-lucide="rocket" class="w-4 h-4 text-blue-600"></i> B. 部署網頁應用程式
+                    </h3>
+                    <ol class="list-decimal pl-5 space-y-1 text-slate-600">
+                        <li>點右上角「<strong>部署</strong>」→「<strong>新增部署作業</strong>」。</li>
+                        <li>類型選齒輪「<strong>網頁應用程式</strong>」。</li>
+                        <li>執行身分選「<strong>我</strong>」、誰可以存取選「<strong>所有人</strong>」。</li>
+                        <li>按「部署」（若跳出未驗證提醒，點「進階 → 前往專案 → 允許」），複製「<strong>網頁應用程式網址</strong>」。</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步驟 3 -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">貼上您的部署網址，一鍵測試並產生班級專屬連結</h2>
+                    <p class="text-xs text-slate-500">系統會自動過濾多帳號 <code>/u/1/</code> 路徑並生成極簡分享網址與 QR Code。</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="input-class-title">班級電子存摺名稱</label>
+                    <input type="text" id="input-class-title" maxlength="40" placeholder="例如：三年甲班汽泡水存摺" oninput="wizard.updateOutput()" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="input-gas-url">貼上 Google Apps Script 部署網址 (<code>/exec</code>)</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="url" id="input-gas-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" oninput="wizard.updateOutput()" spellcheck="false" autocomplete="off" class="flex-1 border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <button onclick="wizard.testApiConnection()" id="btn-test-api" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition flex items-center justify-center gap-1.5 shrink-0">
+                            <i data-lucide="activity" class="w-4 h-4"></i> 測試 API 連線
+                        </button>
+                    </div>
+                </div>
+
+                <div id="test-result-box" class="hidden rounded-lg p-3.5 text-sm border"></div>
+            </div>
+
+            <!-- 產生結果 -->
+            <div id="output-card" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-4">
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="flex-1 w-full space-y-3">
+                        <div class="text-sm font-bold text-blue-900 flex items-center gap-1.5">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> 您的班級專屬存摺網址已產生！
+                        </div>
+                        <input type="text" id="generated-url" readonly onclick="this.select()" class="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-xs sm:text-sm font-mono text-slate-700 outline-none">
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="wizard.copyGeneratedUrl()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1.5">
+                                <i data-lucide="copy" class="w-4 h-4"></i> 複製班級網址
+                            </button>
+                            <a id="btn-open-preview" href="#" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1.5">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> 開啟測試
+                            </a>
+                            <button onclick="wizard.downloadQr()" id="btn-download-qr" class="hidden bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+                                <i data-lucide="download" class="w-4 h-4"></i> 下載 QR Code
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            💡 學生姓名可隨時直接在您的 Google 試算表 <code>Students</code> 分頁修改（A 欄座號、B 欄姓名）。
+                        </p>
+                    </div>
+                    <div id="qr-container" class="hidden shrink-0 bg-white p-3 rounded-xl border border-blue-200 shadow-sm text-center">
+                        <canvas id="qr-canvas"></canvas>
+                        <div class="text-[11px] text-slate-500 mt-1">學生掃碼查詢</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const wizard = {
+            cachedGasCode: '',
+
+            init() {
+                lucide.createIcons();
+                this.loadGasCode();
+            },
+
+            async loadGasCode() {
+                try {
+                    const res = await fetch('./google_apps_script.js');
+                    if (res.ok) {
+                        this.cachedGasCode = await res.text();
+                        document.getElementById('gas-code-preview').textContent = this.cachedGasCode;
+                    }
+                } catch (e) {}
+            },
+
+            getSetupPageUrl() {
+                return window.location.origin + window.location.pathname;
+            },
+
+            getAppBaseUrl() {
+                return this.getSetupPageUrl().replace(/\/setup(?:\.html)?$/, '/');
+            },
+
+            parseGasUrl(rawUrl) {
+                const clean = String(rawUrl || '')
+                    .trim()
+                    .replace(/\/a\/u\/\d+\/macros\//, '/a/macros/')
+                    .replace(/\/macros\/u\/\d+\/s\//, '/macros/s/')
+                    .replace(/(\/a\/macros\/[^/]+)\/u\/\d+\/s\//, '$1/s/');
+
+                let match = clean.match(/^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]{20,})\/exec(?:\?.*)?$/);
+                if (match) {
+                    return {
+                        id: match[1],
+                        domain: '',
+                        url: `https://script.google.com/macros/s/${match[1]}/exec`
+                    };
+                }
+
+                match = clean.match(/^https:\/\/script\.google\.com\/a\/macros\/([A-Za-z0-9.-]+\.[A-Za-z]{2,})\/s\/([A-Za-z0-9_-]{20,})\/exec(?:\?.*)?$/);
+                if (match) {
+                    return {
+                        id: match[2],
+                        domain: match[1],
+                        url: `https://script.google.com/a/macros/${match[1]}/s/${match[2]}/exec`
+                    };
+                }
+
+                return null;
+            },
+
+            async copyText(text, successMsg) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.showToast(successMsg, 'success');
+                } catch (e) {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    this.showToast(successMsg, 'success');
+                }
+            },
+
+            copySetupUrl() {
+                this.copyText(this.getSetupPageUrl(), '已複製建置精靈網址！');
+            },
+
+            copyTeacherInvite() {
+                const msg = `分享一個好用的免費「班級電子存摺」工具！\n只要建一份自己的 Google 試算表、跟著這頁 3 分鐘設定好，全班和家長免登入就能查點數，而且不受多帳號登入干擾：\n${this.getSetupPageUrl()}`;
+                this.copyText(msg, '已複製教師群組分享文案！');
+            },
+
+            async copyGasCode() {
+                if (!this.cachedGasCode) {
+                    await this.loadGasCode();
+                }
+                if (!this.cachedGasCode) {
+                    this.showToast('無法自動載入程式碼，請點擊右側「直接檢視原始檔」複製', 'error');
+                    return;
+                }
+                this.copyText(this.cachedGasCode, '已複製 Code.gs 程式碼，請貼到 Apps Script！');
+            },
+
+            toggleCodePreview() {
+                const pre = document.getElementById('gas-code-preview');
+                const label = document.getElementById('code-toggle-label');
+                const isHidden = pre.classList.contains('hidden');
+                if (isHidden) {
+                    pre.classList.remove('hidden');
+                    label.textContent = '收合程式碼';
+                } else {
+                    pre.classList.add('hidden');
+                    label.textContent = '展開檢視程式碼';
+                }
+            },
+
+            updateOutput() {
+                const rawUrl = document.getElementById('input-gas-url').value;
+                const title = document.getElementById('input-class-title').value.trim();
+                const parsed = this.parseGasUrl(rawUrl);
+                const card = document.getElementById('output-card');
+
+                if (!parsed) {
+                    card.classList.add('hidden');
+                    return;
+                }
+
+                const params = new URLSearchParams();
+                params.set('id', parsed.id);
+                if (parsed.domain) params.set('domain', parsed.domain);
+                if (title) params.set('title', title);
+
+                const shareUrl = `${this.getAppBaseUrl()}?${params.toString()}`;
+                document.getElementById('generated-url').value = shareUrl;
+                document.getElementById('btn-open-preview').href = shareUrl;
+                card.classList.remove('hidden');
+
+                const qrWrap = document.getElementById('qr-container');
+                const dlBtn = document.getElementById('btn-download-qr');
+                if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
+                    const canvas = document.getElementById('qr-canvas');
+                    window.QRCode.toCanvas(canvas, shareUrl, { width: 156, margin: 1 }, err => {
+                        if (!err) {
+                            qrWrap.classList.remove('hidden');
+                            dlBtn.classList.remove('hidden');
+                        }
+                    });
+                }
+            },
+
+            copyGeneratedUrl() {
+                const url = document.getElementById('generated-url').value;
+                if (url) this.copyText(url, '已複製班級專屬存摺網址！');
+            },
+
+            downloadQr() {
+                const canvas = document.getElementById('qr-canvas');
+                const title = (document.getElementById('input-class-title').value.trim() || '班級電子存摺').replace(/[\\/:*?"<>|]/g, '_');
+                const link = document.createElement('a');
+                link.download = `${title}_QRCode.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            },
+
+            async testApiConnection() {
+                const rawUrl = document.getElementById('input-gas-url').value;
+                const parsed = this.parseGasUrl(rawUrl);
+                const box = document.getElementById('test-result-box');
+
+                if (!parsed) {
+                    box.className = 'rounded-lg p-3.5 text-sm border bg-rose-50 border-rose-200 text-rose-800';
+                    box.textContent = '網址格式不正確：請貼上完整的 Google Apps Script 部署網址（例如 https://script.google.com/macros/s/.../exec）。';
+                    box.classList.remove('hidden');
+                    return;
+                }
+
+                const canonicalUrl = parsed.url;
+                const btn = document.getElementById('btn-test-api');
+                btn.disabled = true;
+                btn.classList.add('opacity-60');
+                box.className = 'rounded-lg p-3.5 text-sm border bg-slate-50 border-slate-200 text-slate-700';
+                box.textContent = '正在連線測試雲端試算表，請稍候...';
+                box.classList.remove('hidden');
+
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 20000);
+
+                try {
+                    const res = await fetch(`${canonicalUrl}?action=ping&t=${Date.now()}`, { signal: controller.signal });
+                    const text = await res.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('回傳非 JSON 格式：請確認「誰可以存取」是否確實設為「所有人」（若為教育局帳號且沒有此選項，請改用個人 Gmail 部署）。');
+                    }
+
+                    if (!data || data.status !== 'success') {
+                        throw new Error((data && data.message) || 'API 回傳錯誤');
+                    }
+
+                    this.updateOutput();
+                    const pwdMsg = data.pwdConfigured
+                        ? '管理密碼已設定完成！'
+                        : '提醒：尚未設定 TEACHER_PWD 管理密碼，請回到步驟 2A 完成設定後再提供使用。';
+
+                    box.className = data.pwdConfigured
+                        ? 'rounded-lg p-3.5 text-sm border bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'rounded-lg p-3.5 text-sm border bg-amber-50 border-amber-200 text-amber-800';
+                    box.textContent = `連線成功！已連結試算表「${data.sheetName || '預設試算表'}」。${pwdMsg}`;
+                } catch (err) {
+                    const msg = err.name === 'AbortError'
+                        ? '連線逾時，請稍後再試。'
+                        : (/Failed to fetch|NetworkError|Load failed/i.test(err.message)
+                            ? '無法連線至該網址：請確認「誰可以存取」是否設為「所有人」，或是否被教育局網域政策阻擋外部存取。'
+                            : err.message);
+                    box.className = 'rounded-lg p-3.5 text-sm border bg-rose-50 border-rose-200 text-rose-800';
+                    box.textContent = msg;
+                } finally {
+                    clearTimeout(timer);
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-60');
+                }
+            },
+
+            showToast(msg, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = { success: 'bg-emerald-500', error: 'bg-rose-500', warning: 'bg-amber-500', info: 'bg-blue-500' };
+                toast.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg toast-animate font-medium text-sm`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.transition = 'all 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => wizard.init());
+    </script>
+</body>
+</html>
