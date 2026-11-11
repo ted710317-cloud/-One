@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">羚藝汽泡水電子存摺</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./config.js"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-animate { animation: slideIn 0.3s ease-out forwards; }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Loading 遮罩 -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/50 z-50 flex flex-col items-center justify-center text-white gap-3" style="display: none;">
+        <div class="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        <p id="loading-text" class="font-medium text-sm">與雲端試算表同步中...</p>
+    </div>
+
+    <!-- 幹部設定彈出視窗 -->
+    <div id="modal-role" class="hidden-view fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="font-bold mb-4 text-lg flex items-center gap-2"><i data-lucide="award" class="text-amber-500"></i> 設定幹部與薪水</h3>
+            <input type="hidden" id="role-stu-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">幹部名稱 (留白即為移除)</label>
+                    <input type="text" id="role-name" placeholder="例如：班長、風紀股長" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">薪水點數</label>
+                        <input type="number" id="role-salary" min="0" placeholder="0" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">發放週期</label>
+                        <select id="role-cycle" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="weekly">每週</option>
+                            <option value="monthly">每月</option>
+                            <option value="none">無</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button onclick="app.closeModal('modal-role')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm transition">取消</button>
+                <button onclick="app.submitRole()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm shadow transition font-medium">儲存設定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <i data-lucide="droplets" class="w-6 h-6 text-blue-200"></i>
+                <h1 id="header-title" class="text-xl font-bold tracking-wide">羚藝氣泡水電子存摺</h1>
+            </div>
+            <div id="user-info" class="hidden-view flex items-center gap-2 sm:gap-3">
+                <span id="welcome-text" class="text-sm font-medium hidden sm:inline"></span>
+                <button onclick="app.fetchCloudData(true)" class="bg-blue-500 hover:bg-blue-700 px-3 py-1.5 rounded text-sm transition flex items-center gap-1" title="重新同步雲端資料">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 重新整理
+                </button>
+                <button onclick="app.logout()" class="bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded text-sm transition shadow">登出</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+        <!-- 登入畫面 -->
+        <div id="view-login" class="max-w-md mx-auto mt-10 space-y-6">
+            <div id="connection-alert" class="hidden-view bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm flex items-center justify-between gap-3">
+                <span id="connection-alert-text">無法連線至雲端試算表</span>
+                <button onclick="app.fetchCloudData(true)" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition">重試</button>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-2 mb-4 text-blue-600"><i data-lucide="user"></i><h2 class="text-lg font-bold">學生查詢</h2></div>
+                <div class="space-y-4">
+                    <input type="number" id="login-seat" class="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="請輸入座號 (例: 1)" onkeypress="if(event.key === 'Enter') app.login('student')">
+                    <button onclick="app.login('student')" class="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold py-2 rounded-lg transition">查詢點數</button>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-2 mb-4 text-emerald-600"><i data-lucide="shield-check"></i><h2 class="text-lg font-bold">老師管理</h2></div>
+                <div class="space-y-4">
+                    <input type="password" id="login-pwd" class="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-emerald-500" placeholder="請輸入管理密碼" onkeypress="if(event.key === 'Enter') app.login('teacher')">
+                    <button onclick="app.login('teacher')" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 font-bold py-2 rounded-lg transition shadow">管理登入</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 學生專區 -->
+        <div id="view-student" class="hidden-view space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-blue-50 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shadow-inner"><i data-lucide="user" class="w-8 h-8"></i></div>
+                        <div>
+                            <div class="text-sm text-slate-500 mb-1">座號 <span id="stu-seat" class="font-bold text-slate-700"></span></div>
+                            <h2 id="stu-name" class="text-2xl font-bold text-slate-800"></h2>
+                            <div id="stu-role-badge" class="hidden mt-2"><span id="stu-role" class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold border border-amber-200"></span></div>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <div class="text-sm text-slate-500 mb-1">目前點數</div>
+                        <div class="text-4xl font-bold text-blue-600 flex items-center justify-center md:justify-end gap-1"><i data-lucide="coins" class="w-6 h-6"></i><span id="stu-points"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="history"></i> 個人點數異動紀錄</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 border-b"><tr><th class="p-3">時間</th><th class="p-3">異動</th><th class="p-3">原因</th></tr></thead>
+                        <tbody id="stu-history-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 老師專區 -->
+        <div id="view-teacher" class="hidden-view space-y-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-end justify-between">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="app.selectAllStudents()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">全選</button>
+                    <button onclick="app.clearSelection()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">清除選取</button>
+                    <button onclick="app.payAllSalaries()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-sm font-medium shadow flex items-center gap-1 transition ml-2"><i data-lucide="banknote" class="w-4 h-4"></i> 發放薪水</button>
+                </div>
+                <div class="flex flex-wrap items-end gap-2 flex-grow justify-end">
+                    <select id="bulk-action" class="border rounded px-2 py-1.5 text-sm outline-none"><option value="add">加點 (+)</option><option value="deduct">扣點 (-)</option></select>
+                    <input type="number" id="bulk-points" min="1" placeholder="點數" class="border rounded px-2 py-1.5 text-sm w-20 outline-none">
+                    <input type="text" id="bulk-reason" placeholder="原因說明" class="border rounded px-2 py-1.5 text-sm w-40 outline-none">
+                    <button onclick="app.submitBulkAction()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium shadow transition flex items-center gap-1"><i data-lucide="zap" class="w-4 h-4"></i> 批量執行</button>
+                </div>
+            </div>
+            <div id="teacher-student-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+        </div>
+    </main>
+
+    <script>
+        const REQUEST_TIMEOUT_MS = 25000;
+
+        const app = {
+            state: {
+                role: null,
+                currentUser: null,
+                teacherPassword: null,
+                students: [],
+                history: [],
+                selectedIds: new Set(),
+                isBusy: false,
+                cloudReady: false
+            },
+
+            init() {
+                lucide.createIcons();
+                this.fetchCloudData();
+            },
+
+            getApiUrl() {
+                const raw = (window.PASSBOOK_CONFIG && window.PASSBOOK_CONFIG.cloudApiUrl) ? String(window.PASSBOOK_CONFIG.cloudApiUrl).trim() : '';
+                if (!raw) return '';
+                // 自動移除可能誤貼的 /u/數字/ 多帳號索引路徑
+                return raw.replace(/\/macros\/u\/\d+\/s\//, '/macros/s/');
+            },
+
+            escapeHtml(str) {
+                return String(str == null ? '' : str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            },
+
+            showLoading(show, text = '與雲端試算表同步中...') {
+                this.state.isBusy = show;
+                document.getElementById('loading-text').innerText = text;
+                document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+            },
+
+            setConnectionAlert(show, text = '') {
+                const el = document.getElementById('connection-alert');
+                if (show) {
+                    document.getElementById('connection-alert-text').innerText = text;
+                    el.classList.remove('hidden-view');
+                } else {
+                    el.classList.add('hidden-view');
+                }
+            },
+
+            closeModal(id) { document.getElementById(id).classList.add('hidden-view'); },
+
+            async requestCloud(method, payload = null, queryAction = 'getData') {
+                const apiUrl = this.getApiUrl();
+                if (!apiUrl || !apiUrl.startsWith('https://script.google.com/macros/')) {
+                    throw new Error('config.js 尚未設定正確的 Google Apps Script 網址');
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+                try {
+                    const options = {
+                        method: method,
+                        signal: controller.signal
+                    };
+                    let url = apiUrl;
+
+                    if (method === 'GET') {
+                        const sep = apiUrl.includes('?') ? '&' : '?';
+                        url = `${apiUrl}${sep}action=${encodeURIComponent(queryAction)}&t=${Date.now()}`;
+                    } else {
+                        options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+                        options.body = JSON.stringify(payload || {});
+                    }
+
+                    const res = await fetch(url, options);
+                    const text = await res.text();
+
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (parseErr) {
+                        throw new Error('雲端 API 回傳非 JSON 格式，請確認已將新版 Code.gs 部署為網頁應用程式（誰可以存取：所有人）');
+                    }
+
+                    if (!res.ok) {
+                        throw new Error((data && data.message) || `HTTP ${res.status}`);
+                    }
+
+                    if (!data || data.status !== 'success') {
+                        const err = new Error((data && data.message) || '雲端處理失敗');
+                        err.code = data && data.code ? data.code : '';
+                        throw err;
+                    }
+
+                    return data;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') {
+                        throw new Error('連線逾時，請檢查網路後再試');
+                    }
+                    if (err instanceof TypeError && /Failed to fetch|NetworkError|Load failed/i.test(err.message)) {
+                        throw new Error('無法連線至雲端 API：請確認網路正常，並確認新版 Code.gs 已部署且「誰可以存取」設為「所有人」');
+                    }
+                    throw err;
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            },
+
+            applyCloudData(data) {
+                this.state.students = Array.isArray(data.students) ? data.students : [];
+                this.state.history = Array.isArray(data.history) ? data.history : [];
+                this.state.cloudReady = true;
+                this.setConnectionAlert(false);
+
+                if (this.state.role === 'teacher') this.renderTeacherStudents();
+                if (this.state.role === 'student') this.updateStudentDashboard();
+            },
+
+            async fetchCloudData(showSuccessToast = false) {
+                if (this.state.isBusy) return;
+                this.showLoading(true, '正在從雲端試算表讀取最新資料...');
+                try {
+                    const data = await this.requestCloud('GET', null, 'getData');
+                    this.applyCloudData(data);
+                    if (showSuccessToast) this.showToast('資料已更新至最新狀態', 'success');
+                } catch (err) {
+                    this.state.cloudReady = false;
+                    this.setConnectionAlert(true, err.message || '無法連線至雲端試算表');
+                    this.showToast(err.message || '雲端資料讀取失敗', 'error');
+                } finally {
+                    this.showLoading(false);
+                }
+            },
+
+            async login(type) {
+                if (this.state.isBusy) return;
+
+                if (type === 'teacher') {
+                    const pwd = document.getElementById('login-pwd').value;
+                    if (!pwd) return this.showToast('請輸入管理密碼', 'error');
+
+                    this.showLoading(true, '正在驗證管理密碼...');
+                    try {
+                        const data = await this.requestCloud('POST', {
+                            action: 'verifyTeacher',
+                            password: pwd
+                        });
+                        this.state.teacherPassword = pwd;
+                        this.state.role = 'teacher';
+                        this.applyCloudData(data);
+                        this.renderTeacherView();
+                    } catch (err) {
+                        this.showToast(err.message || '登入失敗', 'error');
+                    } finally {
+                        this.showLoading(false);
+                    }
+                } else {
+                    const seat = parseInt(document.getElementById('login-seat').value, 10);
+                    if (!seat) return this.showToast('請輸入座號', 'error');
+
+                    if (!this.state.cloudReady) {
+                        await this.fetchCloudData(false);
+                    }
+
+                    const stu = this.state.students.find(s => s.id === seat);
+                    if (stu) {
+                        this.state.role = 'student';
+                        this.state.currentUser = stu;
+                        this.renderStudentView();
+                    } else {
+                        this.showToast(this.state.cloudReady ? '找不到此座號' : '雲端尚未連線成功，請稍後再試', 'error');
+                    }
+                }
+            },
+
+            logout(silent = false) {
+                this.state.role = null;
+                this.state.currentUser = null;
+                this.state.teacherPassword = null;
+                this.state.selectedIds.clear();
+                document.getElementById('login-pwd').value = '';
+                document.getElementById('login-seat').value = '';
+                document.getElementById('view-login').classList.remove('hidden-view');
+                document.getElementById('view-teacher').classList.add('hidden-view');
+                document.getElementById('view-student').classList.add('hidden-view');
+                document.getElementById('user-info').classList.add('hidden-view');
+                if (!silent) this.showToast('已登出系統', 'info');
+            },
+
+            renderTeacherView() {
+                document.getElementById('view-login').classList.add('hidden-view');
+                document.getElementById('view-teacher').classList.remove('hidden-view');
+                document.getElementById('user-info').classList.remove('hidden-view');
+                document.getElementById('welcome-text').innerText = '老師您好';
+                this.renderTeacherStudents();
+            },
+
+            renderStudentView() {
+                document.getElementById('view-login').classList.add('hidden-view');
+                document.getElementById('view-student').classList.remove('hidden-view');
+                document.getElementById('user-info').classList.remove('hidden-view');
+                document.getElementById('welcome-text').innerText = `${this.state.currentUser.name} 同學`;
+                this.updateStudentDashboard();
+            },
+
+            updateStudentDashboard() {
+                if (!this.state.currentUser) return;
+                const stu = this.state.students.find(s => s.id === this.state.currentUser.id);
+                if (!stu) return;
+                this.state.currentUser = stu;
+
+                document.getElementById('stu-seat').innerText = stu.id;
+                document.getElementById('stu-name').innerText = stu.name;
+                document.getElementById('stu-points').innerText = stu.points;
+
+                if (stu.role) {
+                    document.getElementById('stu-role-badge').classList.remove('hidden');
+                    document.getElementById('stu-role').innerText = stu.role;
+                } else {
+                    document.getElementById('stu-role-badge').classList.add('hidden');
+                }
+
+                const tbody = document.getElementById('stu-history-list');
+                tbody.innerHTML = '';
+                const myHistory = this.state.history.filter(h => h.studentId === stu.id).slice(0, 100);
+
+                if (myHistory.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400">尚無異動紀錄</td></tr>';
+                    return;
+                }
+
+                myHistory.forEach(h => {
+                    const isAdd = h.change >= 0;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="p-3 text-slate-500">${this.escapeHtml(h.timestamp)}</td><td class="p-3 font-bold ${isAdd ? 'text-emerald-500' : 'text-rose-500'}">${isAdd ? '+' : ''}${h.change}</td><td class="p-3 text-slate-700">${this.escapeHtml(h.reason)}</td>`;
+                    tbody.appendChild(tr);
+                });
+            },
+
+            renderTeacherStudents() {
+                const grid = document.getElementById('teacher-student-grid');
+                grid.innerHTML = '';
+                this.state.students.forEach(s => {
+                    const isSelected = this.state.selectedIds.has(s.id);
+                    const div = document.createElement('div');
+                    div.className = `relative p-3 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-blue-50 border-blue-400 ring-1 ring-blue-400' : 'bg-white border-slate-200 hover:border-blue-300'}`;
+
+                    div.onclick = (e) => {
+                        if (e.target.closest('button')) return;
+                        this.toggleSelection(s.id);
+                    };
+
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 rounded">${s.id} 號</span>
+                            <button onclick="app.openRoleModal(${s.id})" class="text-slate-400 hover:text-amber-500 transition p-1" title="設定幹部"><i data-lucide="award" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="text-center mb-1">
+                            <div class="font-bold text-lg truncate">${this.escapeHtml(s.name)}</div>
+                            ${s.role ? `<div class="text-[10px] text-amber-600 bg-amber-50 rounded-full inline-block px-2 border border-amber-100 mt-1 truncate max-w-full">${this.escapeHtml(s.role)}</div>` : '<div class="h-4 mt-1"></div>'}
+                        </div>
+                        <div class="text-2xl font-black text-center text-blue-600">${s.points}</div>
+                    `;
+                    grid.appendChild(div);
+                });
+                lucide.createIcons();
+            },
+
+            toggleSelection(id) {
+                if (this.state.selectedIds.has(id)) this.state.selectedIds.delete(id);
+                else this.state.selectedIds.add(id);
+                this.renderTeacherStudents();
+            },
+            selectAllStudents() { this.state.students.forEach(s => this.state.selectedIds.add(s.id)); this.renderTeacherStudents(); },
+            clearSelection() { this.state.selectedIds.clear(); this.renderTeacherStudents(); },
+
+            handleWriteError(err) {
+                if (err && err.code === 'UNAUTHORIZED') {
+                    this.logout(true);
+                    this.showToast('管理密碼已失效或錯誤，請重新登入', 'error');
+                    return;
+                }
+                this.showToast((err && err.message) || '同步失敗，請稍後再試', 'error');
+            },
+
+            openRoleModal(id) {
+                const s = this.state.students.find(st => st.id === id);
+                if (!s) return;
+                document.getElementById('role-stu-id').value = id;
+                document.getElementById('role-name').value = s.role || '';
+                document.getElementById('role-salary').value = s.salary || 0;
+                document.getElementById('role-cycle').value = s.cycle || 'none';
+                document.getElementById('modal-role').classList.remove('hidden-view');
+            },
+
+            async submitRole() {
+                if (this.state.isBusy) return;
+                const id = parseInt(document.getElementById('role-stu-id').value, 10);
+                const role = document.getElementById('role-name').value.trim();
+                const salary = parseInt(document.getElementById('role-salary').value, 10) || 0;
+                const cycle = document.getElementById('role-cycle').value;
+
+                this.closeModal('modal-role');
+                this.showLoading(true, '正在儲存幹部設定...');
+
+                try {
+                    const data = await this.requestCloud('POST', {
+                        action: 'updateRole',
+                        password: this.state.teacherPassword,
+                        id: id,
+                        role: role,
+                        salary: role ? salary : 0,
+                        cycle: role ? cycle : 'none'
+                    });
+                    this.applyCloudData(data);
+                    this.showToast('幹部設定已儲存', 'success');
+                } catch (err) {
+                    this.handleWriteError(err);
+                } finally {
+                    this.showLoading(false);
+                }
+            },
+
+            async payAllSalaries() {
+                if (this.state.isBusy) return;
+                if (!confirm('確定要發放所有幹部的薪水嗎？')) return;
+
+                this.showLoading(true, '正在發放幹部薪水...');
+                try {
+                    const data = await this.requestCloud('POST', {
+                        action: 'paySalaries',
+                        password: this.state.teacherPassword
+                    });
+                    this.applyCloudData(data);
+                    if (data.paidCount > 0) {
+                        this.showToast(`成功發放 ${data.paidCount} 位幹部的薪水！`, 'success');
+                    } else {
+                        this.showToast('目前沒有符合發放條件的幹部。', 'warning');
+                    }
+                } catch (err) {
+                    this.handleWriteError(err);
+                } finally {
+                    this.showLoading(false);
+                }
+            },
+
+            async submitBulkAction() {
+                if (this.state.isBusy) return;
+                if (this.state.selectedIds.size === 0) return this.showToast('請先選取學生', 'warning');
+                const action = document.getElementById('bulk-action').value;
+                const val = parseInt(document.getElementById('bulk-points').value, 10);
+                const reason = document.getElementById('bulk-reason').value.trim() || '加扣點';
+
+                if (!val || val <= 0) return this.showToast('請輸入有效點數', 'error');
+
+                const updates = [];
+                this.state.selectedIds.forEach(id => {
+                    updates.push({ id: id, change: action === 'add' ? val : -val, reason: reason });
+                });
+
+                this.showLoading(true, '正在同步點數至雲端試算表...');
+                try {
+                    const data = await this.requestCloud('POST', {
+                        action: 'updatePoints',
+                        password: this.state.teacherPassword,
+                        updates: updates
+                    });
+                    this.clearSelection();
+                    document.getElementById('bulk-points').value = '';
+                    document.getElementById('bulk-reason').value = '';
+                    this.applyCloudData(data);
+                    this.showToast('點數已成功同步至雲端試算表！', 'success');
+                } catch (err) {
+                    this.handleWriteError(err);
+                } finally {
+                    this.showLoading(false);
+                }
+            },
+
+            showToast(msg, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = { success: 'bg-emerald-500', error: 'bg-rose-500', warning: 'bg-amber-500', info: 'bg-blue-500' };
+                toast.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 toast-animate font-medium text-sm`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.transition = 'all 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
