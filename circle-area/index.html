@@ -1653,12 +1653,12 @@
     function drawRectangleWithHalfWedges(ctx, t, N, R, cx0, cy0, rectLeft, rectTop, rectW, rectH, theta, dx) {
       const halfN = N / 2;
 
-      // Left half-wedge
+      // Left half-wedge: in circle spans [0, theta/2]; in rectangle sits at (rectLeft, rectTop) spanning [PI/2 - theta/2, PI/2]
       {
-        const angleCircle = 0.25 * theta;
+        const angleCircle = 0.5 * theta;
         const targetX = rectLeft;
         const targetY = rectTop;
-        const angleRect = Math.PI / 2 + theta * 0.25;
+        const angleRect = Math.PI / 2;
 
         const curX = (1 - t) * cx0 + t * targetX;
         const curY = (1 - t) * cy0 + t * targetY;
@@ -1679,7 +1679,7 @@
         ctx.restore();
       }
 
-      // Middle top wedges
+      // Middle top wedges: in circle span [i*theta, (i+1)*theta] for i = 1..halfN-1
       for (let i = 1; i < halfN; i++) {
         const angleCircle = (i + 0.5) * theta;
         const targetX = rectLeft + i * dx;
@@ -1698,7 +1698,7 @@
         ctx.restore();
       }
 
-      // Bottom wedges
+      // Bottom wedges: in circle span [i*theta, (i+1)*theta] for i = halfN..N-1
       for (let k = 0; k < halfN; k++) {
         const i = halfN + k;
         const angleCircle = (i + 0.5) * theta;
@@ -1718,12 +1718,12 @@
         ctx.restore();
       }
 
-      // Right half-wedge
+      // Right half-wedge: in circle spans [theta/2, theta]; in rectangle sits at (rectLeft + rectW, rectTop) spanning [PI/2, PI/2 + theta/2]
       {
-        const angleCircle = (N - 0.25) * theta;
+        const angleCircle = 0.5 * theta;
         const targetX = rectLeft + rectW;
         const targetY = rectTop;
-        const angleRect = Math.PI / 2 - theta * 0.25;
+        const angleRect = Math.PI / 2;
 
         const curX = (1 - t) * cx0 + t * targetX;
         const curY = (1 - t) * cy0 + t * targetY;
@@ -1736,7 +1736,7 @@
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, R, 0, theta / 2);
         ctx.closePath();
-        ctx.fillStyle = '#0ea5e9';
+        ctx.fillStyle = '#0284c7';
         ctx.fill();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.lineWidth = 2;
