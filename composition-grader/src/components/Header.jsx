@@ -4,7 +4,9 @@ import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck, UserChec
 export default function Header({
   onOpenSettings,
   onLoadDemo,
-  onPrint,
+  onDownloadPdf,
+  isExportingPdf,
+  pdfProgressMsg,
   hasResult,
   apiKey,
   hasServerKey,
@@ -56,13 +58,28 @@ export default function Header({
 
           {hasResult && (
             <button
-              onClick={onPrint}
-              className="flex items-center gap-1 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-xs"
-              title="下載評分報告（格式化為標準 A4 兩頁式 PDF 報告書）"
+              onClick={onDownloadPdf}
+              disabled={isExportingPdf}
+              className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-base font-bold text-white transition-all cursor-pointer shadow-xs ${
+                isExportingPdf
+                  ? 'bg-emerald-400 cursor-wait'
+                  : 'bg-emerald-600 hover:bg-emerald-700 active:scale-98'
+              }`}
+              title="直接產出並下載為標準 A4 兩頁式 PDF 診斷報告書"
             >
-              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">下載評分報告</span>
-              <span className="sm:hidden">報告</span>
+              {isExportingPdf ? (
+                <>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="hidden sm:inline">{pdfProgressMsg || '正在產出 PDF...'}</span>
+                  <span className="sm:hidden">產製中</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span className="hidden sm:inline">下載 PDF 報告</span>
+                  <span className="sm:hidden">下載 PDF</span>
+                </>
+              )}
             </button>
           )}
 
@@ -75,7 +92,7 @@ export default function Header({
             }`}
             title="AI 模型與自訂金鑰設定"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">{hasServerKey ? '伺服器設定' : apiKey ? '自訂 Key' : '設定 Key'}</span>
           </button>
         </div>

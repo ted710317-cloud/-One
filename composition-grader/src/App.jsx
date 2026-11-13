@@ -8,6 +8,7 @@ import ReportSection from './components/ReportSection';
 import PrintReport from './components/PrintReport';
 import { SAMPLE_ESSAY_BASKETBALL } from './constants/presets';
 import { gradeEssay, checkServerStatus } from './services/gemini';
+import { exportReportToPdf } from './utils/pdfExport';
 
 export default function App() {
   const [apiKey, setApiKey] = useState('');
@@ -29,6 +30,10 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // PDF Export states: 控制直接下載 PDF 的載入狀態
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [pdfProgressMsg, setPdfProgressMsg] = useState('');
 
   // Load API key from localStorage and check backend status on mount
   useEffect(() => {
@@ -111,8 +116,23 @@ export default function App() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  // 一鍵直接產出並下載 .pdf 檔案
+  const handleDownloadPdf = async () => {
+    if (isExportingPdf || !result) return;
+    setIsExportingPdf(true);
+    setPdfProgressMsg('準備繪製報告...');
+
+    try {
+      const reportTitle = title || result?.meta?.title || '作文診斷報告書';
+      await exportReportToPdf(reportTitle, (msg) => setPdfProgressMsg(msg));
+    } catch (err) {
+      console.error('下載 PDF 失敗:', err);
+      // 若有異常，呼叫原生列印作為備援
+      window.print();
+    } finally {
+      setIsExportingPdf(false);
+      setPdfProgressMsg('');
+    }
   };
 
   return (
@@ -121,7 +141,9 @@ export default function App() {
       <Header
         onOpenSettings={() => setIsSettingsOpen(true)}
         onLoadDemo={handleLoadDemo}
-        onPrint={handlePrint}
+        onDownloadPdf={handleDownloadPdf}
+        isExportingPdf={isExportingPdf}
+        pdfProgressMsg={pdfProgressMsg}
         hasResult={Boolean(result)}
         apiKey={apiKey}
         hasServerKey={hasServerKey}
@@ -186,7 +208,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* Printable Report Component (hidden in web view, rendered when printing / exporting PDF) */}
+      {/* Printable Report Component (hidden in web view, rendered when exporting PDF) */}
       <PrintReport result={result} originalContent={content} />
 
       {/* Footer */}

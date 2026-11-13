@@ -6,36 +6,47 @@ export default function PrintReport({ result, originalContent }) {
   const { meta, overall, four_dimensions, rhetoric_diagnosis, interactive_learning, level_6_model_essay } = result;
 
   return (
-    <div className="hidden print:block font-sans text-slate-900 leading-normal text-[11px] max-w-[190mm] mx-auto">
+    <div id="print-report-container" className="print-report-wrapper font-sans text-slate-900 leading-normal text-[11px]">
       {/* ═══════════ PAGE 1: 寫作診斷報告書 ═══════════ */}
-      <div className="print-page print-page-1 min-h-[270mm] flex flex-col justify-between py-2">
+      <div
+        id="print-page-1"
+        className="print-page print-page-1 flex flex-col justify-between"
+        style={{
+          width: '794px',
+          height: '1123px',
+          padding: '38px 44px',
+          boxSizing: 'border-box',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden',
+        }}
+      >
         <div>
           {/* Header */}
-          <div className="border-b-2 border-slate-900 pb-2 mb-3 flex items-center justify-between">
+          <div className="border-b-2 border-slate-900 pb-2.5 mb-3 flex items-center justify-between">
             <div>
-              <div className="text-[10px] text-indigo-700 font-bold uppercase tracking-wider flex items-center gap-2">
+              <div className="text-[11px] text-indigo-700 font-bold uppercase tracking-wider flex items-center gap-2">
                 <span>朕的會考六級分作文AI診斷室</span>
-                <span className="text-[9px] px-1.5 py-0.2 bg-indigo-50 border border-indigo-200 rounded text-indigo-800">
+                <span className="text-[10px] px-1.5 py-0.2 bg-indigo-50 border border-indigo-200 rounded text-indigo-800">
                   研發設計：偉朕老師
                 </span>
               </div>
-              <h1 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+              <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1">
                 A4 寫作診斷報告書：{meta.title}
               </h1>
-              <div className="text-[10px] text-slate-500 mt-0.5">
+              <div className="text-[11px] text-slate-500 mt-0.5">
                 評估日期：{new Date().toLocaleDateString('zh-TW')} · 四向度全面診斷與修辭達成追蹤
               </div>
             </div>
 
             {/* Seal Stamp */}
             <div className="border-2 border-slate-900 px-4 py-1.5 rounded-lg text-center bg-slate-50 shrink-0">
-              <div className="text-[9px] font-bold text-slate-600 tracking-wider">會考評定</div>
-              <div className="text-base font-black text-slate-900">{overall.grade_name || `${overall.score} 級分`}</div>
+              <div className="text-[10px] font-bold text-slate-600 tracking-wider">會考評定</div>
+              <div className="text-lg font-black text-slate-900">{overall.grade_name || `${overall.score} 級分`}</div>
             </div>
           </div>
 
           {/* Meta Statistics Bar */}
-          <div className="grid grid-cols-3 gap-2 bg-slate-100 p-2 rounded-md mb-3 text-[10px]">
+          <div className="grid grid-cols-3 gap-2 bg-slate-100 p-2.5 rounded-md mb-3 text-[11px]">
             <div>
               <strong>實際字數：</strong>{meta.actual_word_count} 字（目標：{meta.target_word_count}）
             </div>
@@ -49,39 +60,39 @@ export default function PrintReport({ result, originalContent }) {
 
           {/* 閱卷導師綜合短評 */}
           <div className="mb-3">
-            <h2 className="text-[11px] font-bold bg-slate-200 px-2 py-0.5 rounded-sm mb-1 text-slate-800">
+            <h2 className="text-[12px] font-bold bg-slate-200 px-2.5 py-0.5 rounded-sm mb-1.5 text-slate-800">
               🏆 閱卷導師綜合評語（100~150 字評定）
             </h2>
-            <p className="p-2 border border-slate-200 rounded-sm bg-slate-50 text-[10px] leading-relaxed text-slate-800 font-medium">
+            <p className="p-2.5 border border-slate-200 rounded-sm bg-slate-50 text-[11px] leading-relaxed text-slate-800 font-medium">
               {overall.summary_comment}
             </p>
           </div>
 
           {/* 四向度深度診斷 (2x2 Grid) */}
           <div className="mb-3">
-            <h2 className="text-[11px] font-bold bg-slate-200 px-2 py-0.5 rounded-sm mb-1 text-slate-800">
+            <h2 className="text-[12px] font-bold bg-slate-200 px-2.5 py-0.5 rounded-sm mb-1.5 text-slate-800">
               🔍 四向度深度診斷
             </h2>
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
-              <div className="p-2 border border-slate-200 rounded-sm bg-white">
+            <div className="grid grid-cols-2 gap-2.5 text-[11px]">
+              <div className="p-2.5 border border-slate-200 rounded-sm bg-white">
                 <strong className="text-slate-900 block mb-0.5 font-bold">【一、立意取材】</strong>
                 <p className="mb-1"><span className="font-bold text-emerald-800">亮點：</span>{four_dimensions.theme_and_materials.highlights}</p>
                 <p><span className="font-bold text-indigo-800">建議：</span>{four_dimensions.theme_and_materials.suggestions}</p>
               </div>
 
-              <div className="p-2 border border-slate-200 rounded-sm bg-white">
+              <div className="p-2.5 border border-slate-200 rounded-sm bg-white">
                 <strong className="text-slate-900 block mb-0.5 font-bold">【二、結構組織】</strong>
                 <p className="mb-1"><span className="font-bold text-emerald-800">亮點：</span>{four_dimensions.structure_and_organization.highlights}</p>
                 <p><span className="font-bold text-indigo-800">建議：</span>{four_dimensions.structure_and_organization.suggestions}</p>
               </div>
 
-              <div className="p-2 border border-slate-200 rounded-sm bg-white">
+              <div className="p-2.5 border border-slate-200 rounded-sm bg-white">
                 <strong className="text-slate-900 block mb-0.5 font-bold">【三、遣詞造句】</strong>
                 <p className="mb-1"><span className="font-bold text-emerald-800">亮點：</span>{four_dimensions.vocabulary_and_sentences.highlights}</p>
                 <p><span className="font-bold text-indigo-800">建議：</span>{four_dimensions.vocabulary_and_sentences.suggestions}</p>
               </div>
 
-              <div className="p-2 border border-slate-200 rounded-sm bg-white">
+              <div className="p-2.5 border border-slate-200 rounded-sm bg-white">
                 <strong className="text-slate-900 block mb-0.5 font-bold">【四、錯別字與標點診療】</strong>
                 {four_dimensions.orthography_and_punctuation.typo_corrections?.length > 0 ? (
                   <ul className="list-disc list-inside space-y-0.5">
@@ -100,21 +111,21 @@ export default function PrintReport({ result, originalContent }) {
 
           {/* 指定修辭技巧達成狀況 (2 Column Grid) */}
           <div className="mb-3">
-            <h2 className="text-[11px] font-bold bg-slate-200 px-2 py-0.5 rounded-sm mb-1 text-slate-800">
+            <h2 className="text-[12px] font-bold bg-slate-200 px-2.5 py-0.5 rounded-sm mb-1.5 text-slate-800">
               🎨 指定修辭技巧達成清單
             </h2>
-            <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
               {rhetoric_diagnosis.details?.map((item, idx) => (
-                <div key={idx} className="p-1.5 border border-slate-200 rounded-sm flex items-start justify-between gap-1 bg-white">
+                <div key={idx} className="p-2 border border-slate-200 rounded-sm flex items-start justify-between gap-1.5 bg-white">
                   <div>
                     <strong>{item.name}：</strong>
                     {item.detected ? (
-                      <span>已達成。{item.sample_sentence && `「${item.sample_sentence.slice(0, 32)}...」`}</span>
+                      <span>已達成。{item.sample_sentence && `「${item.sample_sentence.slice(0, 30)}...」`}</span>
                     ) : (
-                      <span className="text-slate-500">未達成。{item.evaluation.slice(0, 35)}...</span>
+                      <span className="text-slate-500">未達成。{item.evaluation.slice(0, 32)}...</span>
                     )}
                   </div>
-                  <span className={`px-1 py-0.2 rounded text-[9px] font-bold shrink-0 ${item.detected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 ${item.detected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>
                     {item.detected ? '達成' : '未達'}
                   </span>
                 </div>
@@ -125,20 +136,20 @@ export default function PrintReport({ result, originalContent }) {
           {/* 句子升級魔法 */}
           {interactive_learning?.sentence_upgrade && (
             <div className="mb-2">
-              <h2 className="text-[11px] font-bold bg-slate-200 px-2 py-0.5 rounded-sm mb-1 text-slate-800">
+              <h2 className="text-[12px] font-bold bg-slate-200 px-2.5 py-0.5 rounded-sm mb-1.5 text-slate-800">
                 ✍️ 實戰修訂：句子升級魔法
               </h2>
-              <div className="p-2 border border-slate-200 rounded-sm bg-white text-[10px]">
+              <div className="p-2.5 border border-slate-200 rounded-sm bg-white text-[11px]">
                 <div className="text-slate-500 mb-0.5">【原句】：{interactive_learning.sentence_upgrade.original}</div>
                 <div className="font-bold text-slate-900 mb-0.5">【升級示範】：{interactive_learning.sentence_upgrade.upgraded}</div>
-                <div className="text-[9px] text-indigo-700">升級要點：{interactive_learning.sentence_upgrade.upgrade_tip}</div>
+                <div className="text-[10px] text-indigo-700">升級要點：{interactive_learning.sentence_upgrade.upgrade_tip}</div>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer for Page 1 */}
-        <div className="border-t border-slate-300 pt-1 text-[9px] text-slate-500 flex justify-between">
+        <div className="border-t border-slate-300 pt-1 text-[10px] text-slate-500 flex justify-between">
           <span>朕的會考六級分作文AI診斷室 · 偉朕老師 研發製作</span>
           <span>第 1 頁，共 2 頁</span>
         </div>
@@ -146,21 +157,32 @@ export default function PrintReport({ result, originalContent }) {
 
       {/* ═══════════ PAGE 2: 六級分原創昇華範文 ═══════════ */}
       {level_6_model_essay && (
-        <div className="print-page print-page-2 min-h-[270mm] flex flex-col justify-between py-2">
+        <div
+          id="print-page-2"
+          className="print-page print-page-2 flex flex-col justify-between"
+          style={{
+            width: '794px',
+            height: '1123px',
+            padding: '38px 44px',
+            boxSizing: 'border-box',
+            backgroundColor: '#ffffff',
+            overflow: 'hidden',
+          }}
+        >
           <div>
             {/* Header */}
-            <div className="border-b-2 border-slate-900 pb-2 mb-3 flex items-center justify-between">
+            <div className="border-b-2 border-slate-900 pb-2.5 mb-3 flex items-center justify-between">
               <div>
-                <div className="text-[10px] text-amber-700 font-bold uppercase tracking-wider flex items-center gap-2">
+                <div className="text-[11px] text-amber-700 font-bold uppercase tracking-wider flex items-center gap-2">
                   <span>原創情節 · 六級分昇華典範</span>
-                  <span className="text-[9px] px-1.5 py-0.2 bg-amber-50 border border-amber-200 rounded text-amber-900">
+                  <span className="text-[10px] px-1.5 py-0.2 bg-amber-50 border border-amber-200 rounded text-amber-900">
                     研發設計：偉朕老師
                   </span>
                 </div>
-                <h2 className="text-base font-black text-slate-900 tracking-tight mt-0.5">
+                <h2 className="text-lg font-black text-slate-900 tracking-tight mt-1">
                   {level_6_model_essay.essay_title || '原創六級分示範升級範文'}
                 </h2>
-                <div className="text-[10px] text-slate-500 mt-0.5">
+                <div className="text-[11px] text-slate-500 mt-0.5">
                   字數約 {level_6_model_essay.word_count} 字 · 嚴格保留學生真實經歷與情節骨架
                 </div>
               </div>
@@ -170,19 +192,19 @@ export default function PrintReport({ result, originalContent }) {
             </div>
 
             {/* 範文主文 (舒朗閱讀排版) */}
-            <div className="p-4 border border-slate-300 rounded-md text-[11px] leading-relaxed whitespace-pre-line bg-slate-50/70 mb-3 font-sans">
+            <div className="p-4 border border-slate-300 rounded-md text-[12px] leading-relaxed whitespace-pre-line bg-slate-50/70 mb-3 font-sans">
               {level_6_model_essay.model_content}
             </div>
 
             {/* 升級解密 */}
             {level_6_model_essay.elevation_highlights?.length > 0 && (
               <div className="mb-3">
-                <h3 className="text-[11px] font-bold bg-slate-200 px-2 py-0.5 rounded-sm mb-1.5 text-slate-800">
+                <h3 className="text-[12px] font-bold bg-slate-200 px-2.5 py-0.5 rounded-sm mb-1.5 text-slate-800">
                   💡 晉級六級分關鍵秘笈（升級解密）
                 </h3>
-                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                <div className="grid grid-cols-3 gap-2.5 text-[11px]">
                   {level_6_model_essay.elevation_highlights.map((h, i) => (
-                    <div key={i} className="p-2 border border-slate-200 rounded-sm bg-white">
+                    <div key={i} className="p-2.5 border border-slate-200 rounded-sm bg-white">
                       <strong className="text-indigo-800 block mb-0.5">{h.aspect}</strong>
                       <p className="text-slate-600 leading-normal">{h.description}</p>
                     </div>
@@ -193,7 +215,7 @@ export default function PrintReport({ result, originalContent }) {
 
             {/* 深度思考題與導師期勉 */}
             {interactive_learning && (
-              <div className="p-2.5 border border-slate-200 rounded-sm bg-white text-[10px] space-y-1.5">
+              <div className="p-3 border border-slate-200 rounded-sm bg-white text-[11px] space-y-2">
                 {interactive_learning.reflection_questions?.length > 0 && (
                   <div>
                     <strong className="text-slate-900 block mb-0.5">🤔 深度思考題（啟發再寫一次）：</strong>
@@ -205,7 +227,7 @@ export default function PrintReport({ result, originalContent }) {
                   </div>
                 )}
                 {interactive_learning.teacher_encouragement && (
-                  <div className="pt-1 border-t border-slate-100 text-slate-800 italic">
+                  <div className="pt-1.5 border-t border-slate-100 text-slate-800 italic">
                     💌 <strong>導師期勉：</strong>{interactive_learning.teacher_encouragement}
                   </div>
                 )}
@@ -214,7 +236,7 @@ export default function PrintReport({ result, originalContent }) {
           </div>
 
           {/* Footer for Page 2 */}
-          <div className="border-t border-slate-300 pt-1 text-[9px] text-slate-500 flex justify-between">
+          <div className="border-t border-slate-300 pt-1 text-[10px] text-slate-500 flex justify-between">
             <span>朕的會考六級分作文AI診斷室 · 偉朕老師 研發製作</span>
             <span>第 2 頁，共 2 頁</span>
           </div>
