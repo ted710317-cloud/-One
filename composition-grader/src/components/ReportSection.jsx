@@ -170,6 +170,11 @@ export default function ReportSection({
                 <span className="bg-slate-100 px-3 py-1 rounded-lg font-medium">
                   目標：{meta.target_word_count}
                 </span>
+                {meta.genre && meta.genre !== '不限文體' && (
+                  <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg font-bold border border-indigo-200/80">
+                    文體：{meta.genre}
+                  </span>
+                )}
                 <span className="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-lg font-bold border border-emerald-200/80">
                   {meta.word_count_status}
                 </span>

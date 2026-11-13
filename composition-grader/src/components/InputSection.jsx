@@ -10,9 +10,10 @@ import {
   Upload,
   X,
   CheckSquare,
-  Square
+  Square,
+  BookOpen
 } from 'lucide-react';
-import { AVAILABLE_RHETORICS, WORD_COUNT_PRESETS } from '../constants/presets';
+import { AVAILABLE_RHETORICS, AVAILABLE_GENRES, WORD_COUNT_PRESETS } from '../constants/presets';
 
 export default function InputSection({
   title,
@@ -23,6 +24,8 @@ export default function InputSection({
   setTargetPreset,
   customWordCount,
   setCustomWordCount,
+  selectedGenre,
+  setSelectedGenre,
   selectedRhetorics,
   setSelectedRhetorics,
   content,
@@ -145,11 +148,51 @@ export default function InputSection({
         </div>
       </div>
 
-      {/* Step 3: 指定修辭要求 */}
+      {/* Step 3: 文體規範限定 */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+            文體規範限定（{selectedGenre ? `已選：${selectedGenre}` : '選填，未選則不限文體'}）
+          </label>
+          {selectedGenre && (
+            <button
+              type="button"
+              onClick={() => setSelectedGenre('')}
+              className="text-xs sm:text-sm text-slate-500 hover:text-slate-700 cursor-pointer font-medium"
+            >
+              不限文體 (清除)
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {AVAILABLE_GENRES.map((g) => {
+            const isSelected = selectedGenre === g.id;
+            return (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => setSelectedGenre(isSelected ? '' : g.id)}
+                className={`px-3.5 py-2 rounded-xl text-sm font-semibold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs scale-102 ring-2 ring-indigo-600/20'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+                title={g.desc}
+              >
+                <span>{g.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 4: 指定修辭要求 */}
+      <div>
+        <div className="flex items-center justify-between mb-2.5">
+          <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
+            <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
             指定必備修辭（{selectedRhetorics.length > 0 ? `已選 ${selectedRhetorics.length} 項` : '選填'}）
           </label>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
@@ -198,11 +241,11 @@ export default function InputSection({
         </div>
       </div>
 
-      {/* Step 4: 作文輸入區 */}
+      {/* Step 5: 作文輸入區 */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
-            <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+            <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
             作文內容輸入
           </label>
           <div className="flex rounded-xl bg-slate-100 p-1 text-xs sm:text-sm font-medium">

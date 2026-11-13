@@ -21,6 +21,7 @@ export default function App() {
   const [promptGuide, setPromptGuide] = useState('');
   const [targetPreset, setTargetPreset] = useState('primary-high');
   const [customWordCount, setCustomWordCount] = useState('400~550字');
+  const [selectedGenre, setSelectedGenre] = useState(''); // 文體限定：預設不勾選（不限文體），老師有需要時再自由點選
   const [selectedRhetorics, setSelectedRhetorics] = useState([]); // 預設清除所有勾選，老師有需要時再自由勾選
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -55,6 +56,7 @@ export default function App() {
     setPromptGuide(SAMPLE_ESSAY_BASKETBALL.promptGuide);
     setTargetPreset(SAMPLE_ESSAY_BASKETBALL.presetId);
     setCustomWordCount(SAMPLE_ESSAY_BASKETBALL.targetWordCount);
+    setSelectedGenre('記敘文');
     setSelectedRhetorics(SAMPLE_ESSAY_BASKETBALL.selectedRhetorics);
     setContent(SAMPLE_ESSAY_BASKETBALL.content);
     setImageFile(null);
@@ -92,6 +94,7 @@ export default function App() {
         title,
         promptGuide,
         targetWordCount: customWordCount,
+        genre: selectedGenre,
         selectedRhetorics,
         content,
         imageBase64,
@@ -182,6 +185,8 @@ export default function App() {
               setTargetPreset={setTargetPreset}
               customWordCount={customWordCount}
               setCustomWordCount={setCustomWordCount}
+              selectedGenre={selectedGenre}
+              setSelectedGenre={setSelectedGenre}
               selectedRhetorics={selectedRhetorics}
               setSelectedRhetorics={setSelectedRhetorics}
               content={content}

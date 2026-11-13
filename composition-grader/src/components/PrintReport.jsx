@@ -80,7 +80,7 @@ export default function PrintReport({ result, originalContent }) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1.2fr',
+              gridTemplateColumns: '1.2fr 1fr 1fr 1.2fr',
               gap: '8px',
               backgroundColor: '#f1f5f9',
               padding: '10px 12px',
@@ -90,6 +90,7 @@ export default function PrintReport({ result, originalContent }) {
             }}
           >
             <div><strong>實際字數：</strong>{meta.actual_word_count} 字（目標：{meta.target_word_count}）</div>
+            <div><strong>文體規範：</strong>{meta.genre || '不限文體'}</div>
             <div><strong>字數判定：</strong>{meta.word_count_status}</div>
             <div><strong>修辭達成率：</strong>{rhetoric_diagnosis.achieved_count}/{rhetoric_diagnosis.total_target_count} 項（{rhetoric_diagnosis.achievement_rate}）</div>
           </div>

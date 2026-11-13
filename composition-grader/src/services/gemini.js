@@ -25,6 +25,7 @@ export async function gradeEssay({
   title,
   promptGuide,
   targetWordCount,
+  genre = '',
   selectedRhetorics = [],
   content = '',
   imageBase64 = null,
@@ -48,6 +49,7 @@ export async function gradeEssay({
         title,
         promptGuide,
         targetWordCount,
+        genre,
         selectedRhetorics,
         content,
         imageBase64,
@@ -84,6 +86,7 @@ export async function gradeEssay({
         title,
         promptGuide,
         targetWordCount,
+        genre,
         selectedRhetorics,
         content,
         imageBase64,
@@ -104,6 +107,7 @@ async function directClientGrade({
   title,
   promptGuide,
   targetWordCount,
+  genre,
   selectedRhetorics,
   content,
   imageBase64,
@@ -157,6 +161,7 @@ async function directClientGrade({
 【寫作題目】：${title || '未指定題目'}
 【題目引導與說明】：${promptGuide || '無特殊引導說明'}
 【目標字數要求】：${targetWordCount || '未限定字數'}
+【文體規範限定】：${genre ? genre + '（學生作答需符合該文體之文體特質與寫作規範，例如書信需具備稱呼/正文/祝詞/署名/日期等格式要件，讀書報告需包含內容大意與個人心得反思，說明文需客觀條理清晰，議論文需具備論點/論據/論證，記敘文需具備人事時地物完整脈絡。請在結構組織向度中專題評核文體規範之達成度）' : '未指定特殊文體（不限文體，請尊重學生自然呈現之寫作體裁）'}
 【指定檢測之修辭輔助參考（僅供教學診斷與課堂回饋，絕不可作為會考總級分之扣分理由！會考評定核心為立意深淺、架構組織與文字張力）】：${selectedRhetorics.length > 0 ? selectedRhetorics.join('、') : '無指定修辭'}
 【學生文章內容】：${imageBase64 ? '（請先對手寫作文圖片進行繁體中文 OCR 逐字辨識再批改）' : content}
 
