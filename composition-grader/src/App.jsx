@@ -190,13 +190,21 @@ export default function App() {
       <PrintReport result={result} originalContent={content} />
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200/80 py-6 text-center text-sm text-slate-500 no-print mt-auto">
-        <div className="max-w-7xl mx-auto px-4">
-          <p className="font-semibold text-slate-700 mb-1">
-            國中教育會考六級分作文 AI 診斷室 · 專為中小學師生打造之語文教學與自學鷹架平台
+      <footer className="bg-white border-t border-slate-200/80 py-7 text-center text-sm text-slate-500 no-print mt-auto">
+        <div className="max-w-7xl mx-auto px-4 space-y-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="font-bold text-slate-800 text-base">
+              國中教育會考六級分作文 AI 診斷室
+            </span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
+              系統設計與研發：偉朕老師
+            </span>
+          </div>
+          <p className="text-sm text-slate-600">
+            專為中小學師生打造之語文教學與自學鷹架平台 · 具備四向度規準評定 · 修辭技巧檢驗 · 錯別字診療 · 原汁原味六級分示範昇華
           </p>
-          <p className="text-xs text-slate-400">
-            具備四向度規準評定 · 修辭技巧檢驗 · 錯別字診療 · 原汁原味六級分示範昇華
+          <p className="text-xs text-slate-400 pt-0.5">
+            © 偉朕老師 研發製作 · 歡迎教學推廣與課堂應用
           </p>
         </div>
       </footer>

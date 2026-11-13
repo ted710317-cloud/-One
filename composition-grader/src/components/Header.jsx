@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck } from 'lucide-react';
+import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function Header({
   onOpenSettings,
@@ -18,21 +18,21 @@ export default function Header({
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">會考六級分作文 AI 診斷室</h1>
-              {hasServerKey ? (
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 flex items-center gap-1">
+                <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                偉朕老師 製作
+              </span>
+              {hasServerKey && (
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1 border border-emerald-200">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  內建 AI 已就緒 · 學生免 Key
-                </span>
-              ) : (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">
-                  教育專用版
+                  內建 AI · 學生免 Key
                 </span>
               )}
             </div>
             <p className="text-sm text-slate-500 hidden sm:block mt-0.5">
-              臺灣會考規準評估 · 四向度深度診斷 · 修辭達成追蹤 · 原創六級分示範昇華
+              臺灣會考規準評估 · 四向度深度診斷 · 修辭達成追蹤 · 偉朕老師研發設計
             </p>
           </div>
         </div>
