@@ -19,7 +19,7 @@ export default function PrintReport({ result, originalContent }) {
       {/* ═══════════ PAGE 1: 寫作診斷報告書 ═══════════ */}
       <div
         id="print-page-1"
-        className="print-page print-page-1 flex flex-col justify-between"
+        className="print-page print-page-1"
         style={{
           width: '794px',
           height: '1123px',
@@ -28,6 +28,9 @@ export default function PrintReport({ result, originalContent }) {
           backgroundColor: '#ffffff',
           color: '#0f172a',
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
         }}
       >
         <div>
@@ -202,7 +205,7 @@ export default function PrintReport({ result, originalContent }) {
       {level_6_model_essay && (
         <div
           id="print-page-2"
-          className="print-page print-page-2 flex flex-col justify-between"
+          className="print-page print-page-2"
           style={{
             width: '794px',
             height: '1123px',
@@ -211,6 +214,9 @@ export default function PrintReport({ result, originalContent }) {
             backgroundColor: '#ffffff',
             color: '#0f172a',
             overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
         >
           <div>

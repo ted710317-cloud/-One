@@ -36,22 +36,39 @@ export async function exportReportToPdf(title = '作文診斷報告書', onProgr
     backgroundColor: '#ffffff',
     windowWidth: 794,
     onclone: (clonedDoc) => {
-      // 確保克隆文件中的目標容器完全顯現且無 oklch 干擾
+      // 1. 移除所有外部樣式表與原本的 style 標籤（徹底根除 Tailwind v4 中的 oklch 顏色變數干擾）
+      clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => link.remove());
+      clonedDoc.querySelectorAll('style').forEach((style) => style.remove());
+
+      // 2. 注入極簡乾淨的基礎 reset 樣式，保證字型與 box-sizing 完美
+      const resetStyle = clonedDoc.createElement('style');
+      resetStyle.textContent = `
+        * {
+          box-sizing: border-box !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #ffffff !important;
+          color: #0f172a !important;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif !important;
+        }
+      `;
+      clonedDoc.head.appendChild(resetStyle);
+
+      // 3. 確保克隆文件中的目標容器完全顯現，位於正常流中
       const container = clonedDoc.getElementById('print-report-container');
       if (container) {
         container.style.position = 'static';
         container.style.left = '0';
+        container.style.top = '0';
         container.style.opacity = '1';
+        container.style.display = 'block';
         container.style.pointerEvents = 'auto';
+        container.style.zIndex = '1';
       }
-      // 移除克隆文件中含有 Tailwind v4 oklch 變數的 style 標籤
-      const styles = clonedDoc.querySelectorAll('style');
-      styles.forEach((s) => {
-        if (s.textContent && s.textContent.includes('oklch')) {
-          // 清除 oklch 樣式，依賴 inline styles
-          s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, '#1e293b');
-        }
-      });
     },
   };
 
