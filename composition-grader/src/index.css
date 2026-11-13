@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+  body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-size: 1rem;
+    line-height: 1.65;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", "微軟正黑體", sans-serif;
+  }
+}
+
+/* Print styles for A4 Report */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+}
