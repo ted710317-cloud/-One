@@ -21,7 +21,7 @@ export default function App() {
   const [promptGuide, setPromptGuide] = useState('');
   const [targetPreset, setTargetPreset] = useState('primary-high');
   const [customWordCount, setCustomWordCount] = useState('400~550字');
-  const [selectedRhetorics, setSelectedRhetorics] = useState(['譬喻', '摹寫', '引用', '設問']);
+  const [selectedRhetorics, setSelectedRhetorics] = useState([]); // 預設清除所有勾選，老師有需要時再自由勾選
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imageBase64, setImageBase64] = useState(null);

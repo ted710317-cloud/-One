@@ -150,7 +150,7 @@ export default function InputSection({
         <div className="flex items-center justify-between mb-2.5">
           <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
-            指定必備修辭（已選 {selectedRhetorics.length} 項）
+            指定必備修辭（{selectedRhetorics.length > 0 ? `已選 ${selectedRhetorics.length} 項` : '選填'}）
           </label>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <button
