@@ -11,22 +11,22 @@ import { gradeEssay, checkServerStatus } from './services/gemini';
 
 export default function App() {
   const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('gemini-2.5-flash');
+  const [model, setModel] = useState('gemini-flash-lite-latest');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasServerKey, setHasServerKey] = useState(false);
 
-  // Input states
-  const [title, setTitle] = useState(SAMPLE_ESSAY_BASKETBALL.title);
-  const [promptGuide, setPromptGuide] = useState(SAMPLE_ESSAY_BASKETBALL.promptGuide);
-  const [targetPreset, setTargetPreset] = useState(SAMPLE_ESSAY_BASKETBALL.presetId);
-  const [customWordCount, setCustomWordCount] = useState(SAMPLE_ESSAY_BASKETBALL.targetWordCount);
-  const [selectedRhetorics, setSelectedRhetorics] = useState(SAMPLE_ESSAY_BASKETBALL.selectedRhetorics);
-  const [content, setContent] = useState(SAMPLE_ESSAY_BASKETBALL.content);
+  // Input states: 預設為乾淨空白，方便使用者直接貼上文章，無須先手動刪除範例文字
+  const [title, setTitle] = useState('');
+  const [promptGuide, setPromptGuide] = useState('');
+  const [targetPreset, setTargetPreset] = useState('primary-high');
+  const [customWordCount, setCustomWordCount] = useState('400~550字');
+  const [selectedRhetorics, setSelectedRhetorics] = useState(['譬喻', '摹寫', '引用', '設問']);
+  const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imageBase64, setImageBase64] = useState(null);
 
-  // Evaluation states
-  const [result, setResult] = useState(SAMPLE_ESSAY_BASKETBALL.mockResult);
+  // Evaluation states: 預設為 null，右側顯示指引狀態
+  const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -44,6 +44,7 @@ export default function App() {
     });
   }, []);
 
+  // 點擊「體驗示範資料」時才載入範例文章
   const handleLoadDemo = () => {
     setTitle(SAMPLE_ESSAY_BASKETBALL.title);
     setPromptGuide(SAMPLE_ESSAY_BASKETBALL.promptGuide);
@@ -185,7 +186,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* Printable Report Component (hidden in web view, rendered when printing) */}
+      {/* Printable Report Component (hidden in web view, rendered when printing / exporting PDF) */}
       <PrintReport result={result} originalContent={content} />
 
       {/* Footer */}

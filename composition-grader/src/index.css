@@ -13,19 +13,39 @@
   }
 }
 
-/* Print styles for A4 Report */
+/* Print styles strictly calibrated for A4 (Exactly 1 or 2 pages) */
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
   }
+
+  html, body {
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .no-print {
     display: none !important;
   }
-  .print-only {
-    display: block !important;
+
+  .print-page {
+    box-sizing: border-box;
+    width: 100%;
   }
-  .page-break {
+
+  .print-page-1 {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-page-2 {
     page-break-before: always;
+    break-before: page;
   }
 }

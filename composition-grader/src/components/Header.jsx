@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Settings, FileText, Printer, BookOpen, ShieldCheck } from 'lucide-react';
+import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck } from 'lucide-react';
 
 export default function Header({
   onOpenSettings,
@@ -52,12 +52,11 @@ export default function Header({
           {hasResult && (
             <button
               onClick={onPrint}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm sm:text-base font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer border border-emerald-200/70"
-              title="列印或另存為 A4 診斷報告書 PDF"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-xs"
+              title="下載評分報告（格式化為標準 A4 兩頁式 PDF 報告書）"
             >
-              <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">列印 / 存為 A4 PDF</span>
-              <span className="sm:hidden">列印</span>
+              <Download className="w-4 h-4" />
+              <span>下載評分報告</span>
             </button>
           )}
 
