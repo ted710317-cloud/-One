@@ -14,7 +14,7 @@ export default function PrintReport({ result, originalContent }) {
           <div className="border-b-2 border-slate-900 pb-2 mb-3 flex items-center justify-between">
             <div>
               <div className="text-[10px] text-indigo-700 font-bold uppercase tracking-wider flex items-center gap-2">
-                <span>國中教育會考六級分規準 · 語文診斷評閱系統</span>
+                <span>朕的會考六級分作文AI診斷室</span>
                 <span className="text-[9px] px-1.5 py-0.2 bg-indigo-50 border border-indigo-200 rounded text-indigo-800">
                   研發設計：偉朕老師
                 </span>
@@ -139,7 +139,7 @@ export default function PrintReport({ result, originalContent }) {
 
         {/* Footer for Page 1 */}
         <div className="border-t border-slate-300 pt-1 text-[9px] text-slate-500 flex justify-between">
-          <span>會考六級分作文 AI 診斷室 · 偉朕老師 研發製作</span>
+          <span>朕的會考六級分作文AI診斷室 · 偉朕老師 研發製作</span>
           <span>第 1 頁，共 2 頁</span>
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function PrintReport({ result, originalContent }) {
 
           {/* Footer for Page 2 */}
           <div className="border-t border-slate-300 pt-1 text-[9px] text-slate-500 flex justify-between">
-            <span>會考六級分作文 AI 診斷室 · 偉朕老師 研發製作</span>
+            <span>朕的會考六級分作文AI診斷室 · 偉朕老師 研發製作</span>
             <span>第 2 頁，共 2 頁</span>
           </div>
         </div>

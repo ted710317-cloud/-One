@@ -18,8 +18,10 @@ export default function Header({
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">會考六級分作文 AI 診斷室</h1>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                朕的會考六級分作文AI診斷室
+              </h1>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 flex items-center gap-1">
                 <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
                 偉朕老師 製作

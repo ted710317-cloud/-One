@@ -194,7 +194,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 space-y-2">
           <div className="flex items-center justify-center gap-2 flex-wrap">
             <span className="font-bold text-slate-800 text-base">
-              國中教育會考六級分作文 AI 診斷室
+              朕的會考六級分作文AI診斷室
             </span>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
               系統設計與研發：偉朕老師
