@@ -20,6 +20,20 @@ export default async function handler(req, res) {
 
   try {
     const result = await handleGradeRequest(req.body);
+
+    // 評閱成功：全域使用人次加 1
+    try {
+      const cResp = await fetch('https://abacus.jasoncameron.dev/hit/weizhen-composition-grader/evaluations', {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      });
+      if (cResp.ok) {
+        const cData = await cResp.json();
+        result.usageCount = cData.value;
+      }
+    } catch (cErr) {
+      console.warn('Counter hit failed:', cErr);
+    }
+
     res.status(200).json(result);
   } catch (err) {
     console.error('Vercel API Grade Error:', err);

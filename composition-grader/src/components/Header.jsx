@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
+import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck, UserCheck, Users } from 'lucide-react';
 
 export default function Header({
   onOpenSettings,
@@ -10,6 +10,7 @@ export default function Header({
   hasResult,
   apiKey,
   hasServerKey,
+  usageCount,
 }) {
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
@@ -34,6 +35,15 @@ export default function Header({
                   <span className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold inline-flex items-center gap-1 border border-emerald-200 shrink-0">
                     <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-600" />
                     免 Key
+                  </span>
+                )}
+                {usageCount !== undefined && (
+                  <span
+                    className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-900 font-bold inline-flex items-center gap-1 border border-amber-200/90 shrink-0"
+                    title="系統累計評閱人次（學生貼上作文評改即加 1）"
+                  >
+                    <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600" />
+                    <span>累計評閱：<strong className="text-amber-800 font-extrabold">{usageCount}</strong> 人次</span>
                   </span>
                 )}
               </div>

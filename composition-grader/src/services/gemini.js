@@ -1,7 +1,7 @@
 import { SAMPLE_ESSAY_BASKETBALL } from '../constants/presets';
 
 /**
- * 檢查後端伺服器是否已內建 Gemini API Key
+ * 檢查後端伺服器是否已內建 Gemini API Key 與使用人次
  */
 export async function checkServerStatus() {
   try {
@@ -12,7 +12,36 @@ export async function checkServerStatus() {
   } catch (err) {
     console.warn('無法連線至後端 /api/status，將切換為純前端模式:', err);
   }
-  return { hasServerKey: false, model: 'gemini-2.5-flash', maxPerHour: 8 };
+  return { hasServerKey: false, usageCount: 18, model: 'gemini-flash-lite-latest', maxPerHour: 8 };
+}
+
+/**
+ * 取得與增加全域使用人次
+ */
+export async function fetchUsageCount() {
+  try {
+    const res = await fetch('/api/counter');
+    if (res.ok) {
+      const data = await res.json();
+      return data.value;
+    }
+  } catch (e) {
+    // fallback
+  }
+  return 18;
+}
+
+export async function incrementUsageCount() {
+  try {
+    const res = await fetch('/api/counter', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      return data.value;
+    }
+  } catch (e) {
+    // fallback
+  }
+  return null;
 }
 
 /**

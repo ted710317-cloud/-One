@@ -36,6 +36,9 @@ export default function App() {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [pdfProgressMsg, setPdfProgressMsg] = useState('');
 
+  // Usage count state: 記錄系統累計評閱人次（學生貼上作文評改即加 1）
+  const [usageCount, setUsageCount] = useState(18);
+
   // Load API key from localStorage and check backend status on mount
   useEffect(() => {
     const savedKey = localStorage.getItem('GEMINI_API_KEY');
@@ -47,6 +50,7 @@ export default function App() {
     checkServerStatus().then((status) => {
       setHasServerKey(Boolean(status?.hasServerKey));
       if (status?.model) setModel(status.model);
+      if (status?.usageCount) setUsageCount(status.usageCount);
     });
   }, []);
 
@@ -103,6 +107,13 @@ export default function App() {
 
       setResult(evaluationResult);
 
+      // 評閱成功：使用人次加 1
+      if (evaluationResult?.usageCount) {
+        setUsageCount(evaluationResult.usageCount);
+      } else {
+        setUsageCount((prev) => prev + 1);
+      }
+
       // Celebrate high scores!
       if (evaluationResult?.overall?.score >= 5) {
         confetti({
@@ -150,6 +161,7 @@ export default function App() {
         hasResult={Boolean(result)}
         apiKey={apiKey}
         hasServerKey={hasServerKey}
+        usageCount={usageCount}
       />
 
       {/* Main Container */}
