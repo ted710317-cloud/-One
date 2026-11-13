@@ -13,7 +13,8 @@ import {
   SplitSquareVertical,
   Maximize2,
   AlertTriangle,
-  Lightbulb
+  Lightbulb,
+  Download
 } from 'lucide-react';
 
 export default function ReportSection({
@@ -21,6 +22,9 @@ export default function ReportSection({
   originalContent,
   isLoading,
   onLoadDemo,
+  onDownloadPdf,
+  isExportingPdf,
+  pdfProgressMsg,
 }) {
   const [activeTab, setActiveTab] = useState('model_essay'); // 'model_essay' | 'four_dimensions' | 'rhetoric' | 'interactive'
   const [copied, setCopied] = useState(false);
@@ -194,6 +198,42 @@ export default function ReportSection({
             {overall.summary_comment}
           </p>
         </div>
+
+        {/* 一鍵下載 PDF 評分報告快捷列 */}
+        {onDownloadPdf && (
+          <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gradient-to-r from-indigo-50/70 via-indigo-50/40 to-emerald-50/70 p-4 rounded-2xl border border-indigo-100">
+            <div className="flex items-center gap-2.5 text-xs sm:text-sm text-indigo-950 font-medium">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Download className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="font-bold text-slate-900">標準 A4 兩頁式寫作診斷報告書</div>
+                <div className="text-slate-500 text-xs">內含規準評定、修辭追蹤、錯字診療與六級分原創昇華範文</div>
+              </div>
+            </div>
+            <button
+              onClick={onDownloadPdf}
+              disabled={isExportingPdf}
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all cursor-pointer shadow-md ${
+                isExportingPdf
+                  ? 'bg-emerald-400 cursor-wait'
+                  : 'bg-emerald-600 hover:bg-emerald-700 active:scale-98 shadow-emerald-200'
+              }`}
+            >
+              {isExportingPdf ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span>{pdfProgressMsg || '正在產出 PDF...'}</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 shrink-0" />
+                  <span>下載評分報告 (PDF)</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 導航分頁 Tabs */}

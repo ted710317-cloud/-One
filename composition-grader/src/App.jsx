@@ -203,6 +203,9 @@ export default function App() {
               originalContent={content}
               isLoading={isLoading}
               onLoadDemo={handleLoadDemo}
+              onDownloadPdf={handleDownloadPdf}
+              isExportingPdf={isExportingPdf}
+              pdfProgressMsg={pdfProgressMsg}
             />
           </div>
         </div>
