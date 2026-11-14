@@ -7,6 +7,12 @@
     <meta name="description" content="依據臺灣國中教育會考六級分規準，提供中小學作文四向度診斷、指定修辭達成追蹤、錯別字診療與原創情節六級分示範範文。偉朕老師設計研發。" />
     <meta name="author" content="偉朕老師" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z'/><path d='M6 6h10'/><path d='M6 10h10'/></svg>" />
+    <script>
+      // 靜態託管（如 GitHub Pages）無 Vite Dev Server 時，自動轉導至 production dist
+      if (location.pathname.endsWith('/composition-grader/') || location.pathname.endsWith('/composition-grader/index.html')) {
+        location.replace('./dist/');
+      }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-800">
     <div id="root"></div>

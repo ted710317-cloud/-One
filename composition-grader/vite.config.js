@@ -72,5 +72,6 @@ function apiDevServerPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [react(), tailwindcss(), apiDevServerPlugin()],
 });

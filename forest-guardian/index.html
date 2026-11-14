@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林守護者：雙關卡互動遊戲 (AI 體感與微型生態復育)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Top HUD -->
+        <div class="hud-bar" id="hudBar">
+            <div class="hud-item">
+                <span id="stageTitle">森林守護者：救援大作戰</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="vitalityBar" style="width: 50%;"></div>
+                <div class="progress-text">森林生機值：<span id="vitalityText">50%</span></div>
+            </div>
+            <div class="hud-item">
+                <span id="timerText">⏱ 倒數：30s</span>
+            </div>
+        </div>
+
+        <!-- Canvas Game World -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Picture-in-picture AI Webcam -->
+        <div class="webcam-container hidden" id="webcamContainer">
+            <div class="webcam-badge">📹 AI 體感偵測中</div>
+            <video id="webcamVideo" autoplay muted playsinline></video>
+            <canvas id="motionCanvas"></canvas>
+        </div>
+
+        <!-- 1. Start Screen -->
+        <div class="overlay-screen" id="startScreen">
+            <h1 class="game-title">🌲 森林守護者：大自然復興之旅</h1>
+            <p class="subtitle">雙關卡冒險體驗：從即時滅火避障，到智慧生態復育！</p>
+            
+            <div class="rule-box">
+                <strong>🎮 任務與評量規格亮點：</strong>
+                <ul>
+                    <li><span class="tag-item tag-green">第一關：反應與體驗</span> 操控精靈收集<span class="tag-item tag-green">水滴(+10)</span>與<span class="tag-item tag-green">樹苗(+20)</span>，躲避<span class="tag-item tag-red">火焰(-15)</span>與<span class="tag-item tag-gold">地動落石(-20)</span>！全面運用<strong>亂數座標與速度</strong>、碰撞音效與<strong>螢幕劇烈震動效果</strong>。</li>
+                    <li><span class="tag-item tag-gold">第二關：選擇與策略</span> 擔任生態指揮官，針對<strong>坡地土石流、外來種入侵、垃圾污染</strong>三大災情，選擇最精準的復育策略，親眼見證森林長出綠林、泉水湧現與動物回歸！</li>
+                    <li><span class="tag-item tag-green">雙模式操作</span> 支援「鍵盤左右鍵 / 滑鼠滑動」，或一鍵開啟「📹 AI 視訊體感（鏡頭揮手辨識）」！</li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btnStartGame">🚀 開始守護任務</button>
+            </div>
+        </div>
+
+        <!-- 2. Stage 1 Clear Screen -->
+        <div class="overlay-screen hidden" id="stage1ClearScreen">
+            <h1 class="game-title" style="color: #6ee7b7;">🎉 第一關突破：烈火暫歇！</h1>
+            <p class="subtitle" id="stage1ScoreSummary">守護精靈成功阻止了火勢蔓延，保全了核心生機！</p>
+            
+            <div class="rule-box">
+                <strong>🌿 緊接著進入第二關【選擇與策略】：</strong>
+                <p>大火雖然撲滅，但林地已千瘡百孔。你必須面對土質鬆動、外來種趁機擴散、以及陳年垃圾帶來的污染危害。</p>
+                <p style="margin-top: 8px;">請觀察現場狀況，<strong>三選一採取正確的復育行動</strong>，將生態值拉滿 100% 達成大圓滿！</p>
+            </div>
+
+            <button class="btn btn-primary" id="btnToStage2">🌿 前往第二關：生態復育指揮官</button>
+        </div>
+
+        <!-- 3. Stage 2 Strategy Interactive Overlay -->
+        <div class="overlay-screen hidden" id="stage2UI" style="background: rgba(15, 23, 42, 0.75);">
+            <div class="forest-status-banner">
+                <span class="status-badge" id="currentProblemTitle">【診斷現況】山坡裸露與水土流失</span>
+                <span id="currentProblemDesc" style="color:#e2e8f0; font-size:0.9rem;">連日暴雨沖刷導致邊坡滑動，缺乏深根植物保護！</span>
+            </div>
+
+            <div class="strategy-cards-container">
+                <div class="strategy-card" data-action="plant">
+                    <span class="card-key-hint">按鍵 1</span>
+                    <div class="card-icon">🌱</div>
+                    <div class="card-title">培育原生深根樹苗</div>
+                    <div class="card-desc">種植台灣肖楠、相思樹，以強韌地下根系固結土壤，防止崩塌。</div>
+                </div>
+
+                <div class="strategy-card" data-action="weeding">
+                    <span class="card-key-hint">按鍵 2</span>
+                    <div class="card-icon">🌿</div>
+                    <div class="card-title">全面根除外來入侵害</div>
+                    <div class="card-desc">拔除遮蔽樹冠的小花蔓澤蘭與銀合歡，讓底層幼苗重獲陽光與養分。</div>
+                </div>
+
+                <div class="strategy-card" data-action="clean">
+                    <span class="card-key-hint">按鍵 3</span>
+                    <div class="card-icon">💧</div>
+                    <div class="card-title">淨山清溪與水土涵養</div>
+                    <div class="card-desc">清除有害塑膠廢棄物，整建自然攔沙沉積池，保護水生野生生物。</div>
+                </div>
+            </div>
+
+            <div id="strategyFeedback" style="margin-top: 14px; font-size: 0.95rem; min-height: 24px; color: #cbd5e1;">
+                請點擊卡片或按下鍵盤數字鍵 [1]、[2]、[3] 採取行動！
+            </div>
+        </div>
+
+        <!-- 4. Victory Screen -->
+        <div class="overlay-screen hidden" id="victoryScreen">
+            <h1 class="game-title">🏆 生態大圓滿！榮獲特級森林守護大師</h1>
+            <p class="subtitle">森林重新煥發生機！清泉流淌，野生梅花鹿與五色鳥已重返家園！</p>
+            
+            <div class="rule-box" style="text-align: left;">
+                <strong>📚 本次冒險獲得的保育知識徽章：</strong>
+                <ul>
+                    <li>🌲 <strong>原生樹種的重要性</strong>：台灣肖楠、紅檜等深根植物具備極佳的水土保持力，是抵禦土石流的最佳天然綠色水庫。</li>
+                    <li>🌿 <strong>認識「植物殺手」</strong>：外來入侵種「小花蔓澤蘭」會如網般覆蓋在樹冠上，導致大樹無法光合作用而枯死，必須及時清除。</li>
+                    <li>💧 <strong>無痕山林 (LNT) 原則</strong>：進入山林應隨手帶走垃圾，避免塑膠微粒溶入水源或被野生動物誤食。</li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btnRestartFromWin">🔄 再玩一次</button>
+            </div>
+        </div>
+
+        <!-- 5. Game Over Screen -->
+        <div class="overlay-screen hidden" id="gameOverScreen">
+            <h1 class="game-title" style="color: #ef4444;">💥 任務受挫！</h1>
+            <p class="subtitle" id="gameOverReason">生機值不足，生態環境遭受破壞。</p>
+            
+            <div class="rule-box">
+                <strong>💡 通關小撇步：</strong>
+                <ul>
+                    <li>第一關落石掉落時有地動特效，看到暗色巨石請提早變換走位躲避！</li>
+                    <li>盡量在雨滴與樹苗掉落路徑守候，連續拾取能快速拉抬生機值！</li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btnRestartFromOver">🔄 重新挑戰</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Control Tips & Settings -->
+    <div class="bottom-bar">
+        <div>
+            <span>🎮 控制方式：方向鍵 [←] [→] / 滑鼠拖曳 / 數字鍵 [1][2][3]</span>
+        </div>
+        <div class="toggle-group">
+            <span class="badge-toggle" id="toggleAiBtn">📹 AI 視訊控制：關</span>
+            <span class="badge-toggle active" id="toggleSoundBtn">🔊 音效：開</span>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

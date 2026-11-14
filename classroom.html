@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>朕的班級經營工具 - 偉朕老師的智慧班級雲端工具庫</title>
+  <meta name="description" content="朕的班級經營工具 - 偉朕老師專為國小班級經營打造的智慧雲端工具庫：羚藝汽泡水電子存摺、羚藝汽泡水點歌坊、會考六級分作文AI診斷室、森林守護者AI體感遊戲！">
+  <style>
+    :root {
+      --bg-dark: #070b18;
+      --card-bg: rgba(13, 22, 45, 0.88);
+      --gold: #ffe600;
+      --gold-glow: rgba(255, 230, 0, 0.4);
+      --royal-gold: #ffc400;
+      --cyan: #00f3ff;
+      --pink: #ff007f;
+      --indigo: #6366f1;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: radial-gradient(circle at 50% 10%, #1a2752 0%, var(--bg-dark) 80%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient animated lighting */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -15%;
+      left: 15%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.09) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -15%;
+      right: 15%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1240px;
+      width: 100%;
+      z-index: 1;
+      text-align: center;
+    }
+
+    /* Top Navigation Breadcrumb Bar */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 230, 0, 0.25);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.25s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 230, 0, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(255, 230, 0, 0.25);
+    }
+
+    .nav-link-primary {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 145, 0, 0.2) 100%);
+      border-color: rgba(255, 215, 0, 0.4);
+      color: var(--gold);
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 36px;
+      position: relative;
+    }
+
+    .crown-icon {
+      font-size: clamp(38px, 6vw, 54px);
+      display: inline-block;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 0 16px rgba(255, 230, 0, 0.6));
+      animation: crownBob 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes crownBob {
+      0% { transform: translateY(0) rotate(-3deg); }
+      100% { transform: translateY(-8px) rotate(3deg); }
+    }
+
+    .hall-title {
+      font-size: clamp(32px, 6vw, 50px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 15%, #ffd166 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      text-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
+    }
+
+    .hall-sub {
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffd166;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .hall-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* 2x2 or 4-Column Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+
+    @media (min-width: 992px) {
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      backdrop-filter: blur(14px);
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      transition: all 0.3s;
+    }
+
+    /* Card 1: Passbook */
+    .card-passbook::before {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+    }
+    .card-passbook:hover {
+      transform: translateY(-8px);
+      border-color: rgba(245, 158, 11, 0.6);
+      box-shadow: 0 16px 40px rgba(245, 158, 11, 0.28);
+    }
+
+    /* Card 2: Jukebox */
+    .card-jukebox::before {
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+    }
+    .card-jukebox:hover {
+      transform: translateY(-8px);
+      border-color: rgba(99, 102, 241, 0.6);
+      box-shadow: 0 16px 40px rgba(99, 102, 241, 0.28);
+    }
+
+    /* Card 3: Grader */
+    .card-grader::before {
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+    }
+    .card-grader:hover {
+      transform: translateY(-8px);
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 16px 40px rgba(16, 185, 129, 0.28);
+    }
+
+    /* Card 4: Forest Guardian */
+    .card-forest::before {
+      background: linear-gradient(90deg, #22c55e, #eab308);
+    }
+    .card-forest:hover {
+      transform: translateY(-8px);
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 16px 40px rgba(34, 197, 94, 0.28);
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .badge-indigo {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .badge-forest {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .tool-name {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-en {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .tool-summary {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      min-height: 60px;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feature-item {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.4;
+    }
+
+    .feature-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 900;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-passbook {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+    }
+    .btn-passbook:hover {
+      box-shadow: 0 6px 25px rgba(245, 158, 11, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .btn-jukebox {
+      background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.4);
+    }
+    .btn-jukebox:hover {
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .btn-grader {
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      color: #031024;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);
+    }
+    .btn-grader:hover {
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .btn-forest {
+      background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(34, 197, 94, 0.4);
+    }
+    .btn-forest:hover {
+      box-shadow: 0 6px 25px rgba(34, 197, 94, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .sub-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-sub {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-sub:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .footer-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px dashed rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: inline-block;
+      max-width: 860px;
+      line-height: 1.6;
+    }
+
+    .footer-note strong {
+      color: #ffd166;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <a href="./index.html" class="nav-link nav-link-primary">
+        <span>🏛️ 返回「朕的教學工坊」總大廳</span>
+      </a>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="./math.html" class="nav-link">
+          <span>👑 前往「朕的數學遊戲」</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="crown-icon">🏫</div>
+      <div class="hall-sub">Imperial Classroom Management Suite</div>
+      <h1 class="hall-title">朕的班級經營工具</h1>
+      <p class="hall-desc">
+        專為國中小教師量身打造的現代化智慧班級經營工具庫！涵蓋班級貨幣點數存摺、下課即時雲端點歌坊、國中會考六級分作文 AI 深度評閱診斷，以及視訊 AI 體感互動體驗，讓課堂管理既高效又充滿師生互動樂趣！
+      </p>
+    </header>
+
+    <!-- Tools Grid (4 Classroom Tools) -->
+    <div class="tools-grid">
+
+      <!-- Tool 1: 羚藝汽泡水電子存摺 -->
+      <div class="tool-card card-passbook">
+        <div>
+          <div class="card-badge badge-amber">💰 班級虛擬貨幣 · 幹部發薪 · 雲端同步</div>
+          <div class="tool-name">
+            <span>💳 羚藝汽泡水電子存摺</span>
+          </div>
+          <div class="tool-en">Sparkling Passbook & Point System</div>
+          <p class="tool-summary">
+            國小班級經濟學的得力助手！全班點數即時加減獎懲、幹部每週/每月發薪制度與收支紀錄，自動串接 Google 試算表（Google Apps Script），免架伺服器！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">💎</span> 學生點數即時加扣、自訂事由與消費扣抵</li>
+            <li class="feature-item"><span class="feature-icon">👑</span> 班級幹部津貼制度（自訂職務、薪水、週期一鍵撥款）</li>
+            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表雲端同步，資料永不遺失</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./sparkling-passbook/" class="btn-action btn-passbook">
+            <span>💳 開啟《羚藝汽泡水電子存摺》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="./sparkling-passbook/setup.html" class="btn-sub">
+              <span>⚙️ 存摺快速設定精靈</span>
+            </a>
+            <a href="./sparkling-passbook/README.md" class="btn-sub" target="_blank">
+              <span>📖 系統部署指引</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 2: 羚藝汽泡水的點歌坊 -->
+      <div class="tool-card card-jukebox">
+        <div>
+          <div class="card-badge badge-indigo">🎵 雲端廣播點歌 · 大螢幕投影 · 防洗版守門員</div>
+          <div class="tool-name">
+            <span>📻 羚藝汽泡水的點歌坊</span>
+          </div>
+          <div class="tool-en">Classroom Jukebox & Radio Station</div>
+          <p class="tool-summary">
+            下課時間、打掃或同樂會最佳利器！學生拿起手機/平板免登入掃碼點歌並寫下點播寄語，大螢幕投影機自動即時播放，搭配老師行動遙控後台與防惡搞守門員！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">🖥️</span> 大螢幕等化器視覺音波 ✕ 自動生成動態點歌 QR Code</li>
+            <li class="feature-item"><span class="feature-icon">🛡️</span> 時長上限自動過濾（阻擋洗腦長片）✕ 個人點歌配額限制</li>
+            <li class="feature-item"><span class="feature-icon">💌</span> 大螢幕專屬點播寄語卡片 ✕ 民主按讚插播排行</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./youtube-jukebox/" class="btn-action btn-jukebox">
+            <span>📻 進入《羚藝汽泡水的點歌坊》入口</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="./youtube-jukebox/player.html" class="btn-sub">
+              <span>🖥️ 大螢幕播放端</span>
+            </a>
+            <a href="./youtube-jukebox/request.html" class="btn-sub">
+              <span>📱 學生掃碼點歌</span>
+            </a>
+            <a href="./youtube-jukebox/admin.html" class="btn-sub">
+              <span>🔐 老師遙控後台</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 3: 朕的會考六級分作文AI診斷室 -->
+      <div class="tool-card card-grader">
+        <div>
+          <div class="card-badge badge-emerald">📝 會考六級分規準 · 四向度深度診斷 · 手寫OCR</div>
+          <div class="tool-name">
+            <span>✍️ 朕的會考六級分作文AI診斷室</span>
+          </div>
+          <div class="tool-en">Taiwan RCPE Level 6 Essay AI Grader</div>
+          <p class="tool-summary">
+            依據臺灣國中教育會考六級分規準量化評閱！提供立意抒情、結構組織、文詞表達與標點錯別字四向度評語，支援指定修辭達成追蹤與原創六級分示範範文！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">🎯</span> 國家級會考六級分四向度深度客製化診斷報告</li>
+            <li class="feature-item"><span class="feature-icon">📸</span> 支援手寫原稿相片上傳、自動 OCR 辨識與上下文錯字診療</li>
+            <li class="feature-item"><span class="feature-icon">📄</span> 支援一鍵匯出 A4 直式正式作文評改報告書 (PDF)</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./composition-grader/dist/" class="btn-action btn-grader">
+            <span>✍️ 進入《會考六級分作文AI診斷室》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="./composition-grader/README.md" class="btn-sub" target="_blank">
+              <span>📖 系統規準說明</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 4: 森林守護者：AI 體感微型生態復育 -->
+      <div class="tool-card card-forest">
+        <div>
+          <div class="card-badge badge-forest">🌲 自然生態教育 · 雙關卡體驗 · AI 視訊體感偵測</div>
+          <div class="tool-name">
+            <span>🌿 森林守護者：大自然復興之旅</span>
+          </div>
+          <div class="tool-en">Forest Guardian AI Motion Lab</div>
+          <p class="tool-summary">
+            結合國小自然領域生態教育與視訊鏡頭 AI 體感互動！從第一關即時滅火避障反應挑戰，到第二關三大災情精準復育決策，在大螢幕上看見綠林湧現！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">📹</span> 支援 WebCam 視訊鏡頭 AI 體感揮手辨識與鍵盤滑鼠雙模式</li>
+            <li class="feature-item"><span class="feature-icon">💧</span> 收集水滴與樹苗、躲避落石與山火的動態生機值挑戰</li>
+            <li class="feature-item"><span class="feature-icon">🦊</span> 坡地土石流、外來種入侵與垃圾污染之生態復育策略評量</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./forest-guardian/" class="btn-action btn-forest">
+            <span>🌿 進入《森林守護者：生態復育》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="./forest-guardian/Scratch_Design_Guide.md" class="btn-sub" target="_blank">
+              <span>📖 教學設計指引</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Note -->
+    <div class="footer-note">
+      🏫 <strong>班級經營雲端工具指引</strong>：所有工具均支援 Chromebook、iPad、手機與教室投影機大螢幕使用。<br>
+      老師可將「點歌坊大螢幕播放端」常駐於教室投影機，點歌端 QR Code 交由值日生或全班自由點歌；電子存摺則可由各排排長或班長協助發放每週薪資！
+    </div>
+  </div>
+</body>
+</html>
