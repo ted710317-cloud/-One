@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>🎯 圓面積大師探究實驗室 - Canva 旗艦版雙法深入對照與實戰演練</title>
+  <meta name="description" content="國小數學六年級圓面積全方位探究實驗室：長方形拼接與金字塔三角形堆疊雙法深入對照、生活情境應用（披薩大對決、旋轉灑水器、圓環花圃步道）與階梯式素養題庫闖關！">
+  <style>
+    :root {
+      --bg-dark: #0b1120;
+      --bg-card: rgba(30, 41, 59, 0.72);
+      --bg-card-hover: rgba(51, 65, 85, 0.85);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --border-glow: rgba(0, 196, 204, 0.4);
+      --canva-cyan: #00c4cc;
+      --canva-purple: #7d2ae8;
+      --canva-pink: #ff5757;
+      --canva-amber: #ffaa00;
+      --canva-green: #00b894;
+      --canva-blue: #2563eb;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+      --shadow-canva: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(0, 196, 204, 0.15);
+      --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-dark) 75%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px 12px 60px;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Header & Navigation */
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--canva-cyan);
+      transform: translateY(-1px);
+    }
+
+    .sound-btn.muted {
+      opacity: 0.6;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .main-title-container {
+      margin-bottom: 6px;
+    }
+
+    .badge-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(90deg, rgba(0, 196, 204, 0.2), rgba(125, 42, 232, 0.2));
+      border: 1px solid rgba(0, 196, 204, 0.4);
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--canva-cyan);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 4.5vw, 36px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 15%, #ffd166 50%, #00c4cc 85%, #ff5757 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: clamp(13px, 2.4vw, 15px);
+      color: var(--text-muted);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Main Tab System */
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0 24px;
+    }
+
+    .tab-pill {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1.5px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+    }
+    .tab-pill:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .tab-pill.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(0, 196, 204, 0.35), rgba(125, 42, 232, 0.35));
+      border-color: var(--canva-cyan);
+      box-shadow: 0 4px 18px rgba(0, 196, 204, 0.35);
+    }
+
+    /* Content Panels */
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card styling */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 22px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-canva);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    .card-title .icon-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: rgba(0, 196, 204, 0.15);
+      border: 1px solid rgba(0, 196, 204, 0.3);
+    }
+
+    /* Module 1: Dual Derivation Styles */
+    .derivation-subnav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .subnav-btn {
+      padding: 8px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-card);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .subnav-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .subnav-btn.active {
+      background: linear-gradient(135deg, #00c4cc, #2563eb);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(0, 196, 204, 0.3);
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 12px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
+    }
+
+    .fullscreen-trigger-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffd166;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+    .fullscreen-trigger-btn:hover {
+      background: rgba(0, 196, 204, 0.25);
+      border-color: var(--canva-cyan);
+      color: #fff;
+    }
+
+    /* Derivation Controls */
+    .controls-panel {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffd166;
+      min-width: 90px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .slice-btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .slice-btn {
+      padding: 7px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-card);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .slice-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--canva-cyan);
+    }
+    .slice-btn.active {
+      background: linear-gradient(135deg, var(--canva-cyan), var(--canva-purple));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 2px 10px rgba(0, 196, 204, 0.3);
+    }
+
+    .slider-container {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .custom-slider {
+      flex: 1;
+      height: 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      position: relative;
+    }
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffd166;
+      border: 3px solid #fff;
+      box-shadow: 0 0 12px rgba(255, 209, 102, 0.8);
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+    .custom-slider::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+    }
+
+    .slider-val-badge {
+      background: rgba(255, 209, 102, 0.15);
+      color: #ffd166;
+      border: 1px solid rgba(255, 209, 102, 0.3);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 90px;
+      text-align: center;
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 7px 16px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .action-btn-primary {
+      background: linear-gradient(135deg, #00c4cc, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 196, 204, 0.3);
+    }
+    .action-btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .action-btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border-card);
+    }
+    .action-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Deduction Accordion / Step-by-Step Card */
+    .discovery-box {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1.5px dashed rgba(0, 196, 204, 0.4);
+      border-radius: 16px;
+      padding: 18px;
+      margin-top: 18px;
+    }
+
+    .discovery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .discovery-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #00c4cc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reveal-toggle-btn {
+      background: rgba(0, 196, 204, 0.15);
+      border: 1px solid var(--canva-cyan);
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .discovery-content {
+      margin-top: 14px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .discovery-content.open {
+      display: block;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 14px;
+      border-radius: 12px;
+      border-left: 4px solid var(--canva-cyan);
+    }
+    .step-item.gold {
+      border-left-color: #ffd166;
+    }
+    .step-item.purple {
+      border-left-color: #a855f7;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 14.5px;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .math-highlight {
+      color: #ffd166;
+      font-weight: 800;
+      padding: 1px 6px;
+      background: rgba(255, 209, 102, 0.12);
+      border-radius: 6px;
+    }
+    .math-highlight-cyan {
+      color: #00c4cc;
+      font-weight: 800;
+      padding: 1px 6px;
+      background: rgba(0, 196, 204, 0.12);
+      border-radius: 6px;
+    }
+
+    /* Comparison Table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .compare-table th, .compare-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+    }
+    .compare-table th {
+      background: rgba(15, 23, 42, 0.8);
+      color: #ffd166;
+      font-weight: 800;
+    }
+    .compare-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .compare-table td:first-child {
+      font-weight: 700;
+      color: var(--canva-cyan);
+      width: 22%;
+    }
+
+    /* Module 2: Real World Simulator */
+    .app-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .app-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .app-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0, 196, 204, 0.4);
+    }
+
+    .app-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .app-icon {
+      font-size: 26px;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .app-title-group h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .app-title-group p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .app-canvas-container {
+      background: #0f172a;
+      border-radius: 12px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-param-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+    }
+
+    .app-result-box {
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: auto;
+      border: 1px solid rgba(0, 196, 204, 0.2);
+    }
+
+    .result-metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 13.5px;
+    }
+
+    .metric-val {
+      font-weight: 800;
+      color: #ffd166;
+    }
+
+    .insight-badge {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(0, 196, 204, 0.12);
+      border-left: 3px solid var(--canva-cyan);
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: #a5f3fc;
+      line-height: 1.5;
+    }
+
+    /* Module 3: Drill Arena */
+    .arena-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .level-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .level-pill {
+      padding: 7px 15px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-card);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .level-pill:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .level-pill.active {
+      background: linear-gradient(135deg, #ffaa00, #ff5757);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(255, 170, 0, 0.35);
+    }
+
+    .score-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-card);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quiz-card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      position: relative;
+    }
+
+    .question-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .question-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .question-text-area {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .q-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 170, 0, 0.15);
+      color: #ffaa00;
+      border: 1px solid rgba(255, 170, 0, 0.3);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 12.5px;
+      font-weight: 800;
+      width: fit-content;
+    }
+
+    .question-stem {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .question-canvas-box {
+      background: #0f172a;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .answer-action-bar {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .math-input {
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 800;
+      padding: 10px 18px;
+      border-radius: 12px;
+      width: 180px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .math-input:focus {
+      border-color: #00c4cc;
+      box-shadow: 0 0 14px rgba(0, 196, 204, 0.4);
+    }
+
+    .input-unit {
+      margin-left: 8px;
+      font-size: 15px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .feedback-banner {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+    .feedback-banner.correct {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1.5px solid #10b981;
+      color: #34d399;
+    }
+    .feedback-banner.wrong {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1.5px solid #ef4444;
+      color: #f87171;
+    }
+
+    .solution-box {
+      margin-top: 16px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px dashed rgba(255, 209, 102, 0.4);
+      border-radius: 14px;
+      padding: 16px;
+      display: none;
+    }
+    .solution-box.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .hint-box {
+      margin-top: 10px;
+      background: rgba(0, 196, 204, 0.08);
+      border-left: 3px solid var(--canva-cyan);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #cffafe;
+      display: none;
+    }
+    .hint-box.show {
+      display: block;
+    }
+
+    /* Fullscreen Modal & Bottom Toolbar */
+    .fullscreen-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #070b18;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .fullscreen-modal.active {
+      display: flex;
+    }
+
+    .fs-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+    .fs-close-btn:hover {
+      background: rgba(239, 68, 68, 0.4);
+      border-color: #ef4444;
+    }
+
+    .fs-canvas-holder {
+      width: 100%;
+      height: calc(100vh - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fs-toolbar-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid rgba(0, 196, 204, 0.5);
+      border-radius: var(--radius-pill);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 196, 204, 0.2);
+      max-width: 90vw;
+      width: 720px;
+      z-index: 1000;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999999;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="top-bar">
+        <a href="../circle-area/" class="nav-btn">
+          <span>⬅️ 回到原本推導版</span>
+        </a>
+        <div style="display: flex; gap: 8px;">
+          <a href="../math.html" class="nav-btn">
+            <span>📚 數學教具大廳</span>
+          </a>
+          <button id="soundToggle" class="nav-btn sound-btn" onclick="toggleSound()">
+            <span id="soundIcon">🔊 音效開啟</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="main-title-container">
+        <div class="badge-hero">✨ Canva Educator 旗艦版視覺教具</div>
+        <h1>🎯 圓面積大師探究實驗室</h1>
+        <p class="subtitle">長方形拼接與金字塔堆疊雙法深入對照 ✕ 生活幾何素養模擬 ✕ 階梯式闖關挑戰演練</p>
+      </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <div class="tab-nav">
+      <button class="tab-pill active" onclick="switchMainTab('derivation')">
+        <span>⚖️ 雙法深入對照</span>
+      </button>
+      <button class="tab-pill" onclick="switchMainTab('realworld')">
+        <span>🍕 生活情境探究</span>
+      </button>
+      <button class="tab-pill" onclick="switchMainTab('drill')">
+        <span>🏆 題目實戰演練</span>
+      </button>
+      <button class="tab-pill" onclick="switchMainTab('history')">
+        <span>📜 割圓術與思維啟程</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: 雙法深入對照 -->
+    <div id="tab-derivation" class="tab-panel active">
+      <div class="glass-card">
+        <div class="derivation-subnav">
+          <button id="modeBtn-rect" class="subnav-btn active" onclick="setDerivationMode('rect')">
+            🟩 方法一：長方形上下交錯法
+          </button>
+          <button id="modeBtn-pyramid" class="subnav-btn" onclick="setDerivationMode('pyramid')">
+            🔺 方法二：金字塔奇數層三角堆疊
+          </button>
+          <button id="modeBtn-dual" class="subnav-btn" onclick="setDerivationMode('dual')">
+            ⚡ 雙法同場聯動對照（同步變形）
+          </button>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="canvas-wrapper">
+          <button class="fullscreen-trigger-btn" onclick="openFullscreen()">
+            <span>⛶ 全螢幕講課模式</span>
+          </button>
+          <canvas id="derivationCanvas" width="1000" height="520"></canvas>
+        </div>
+
+        <!-- Derivation Interactive Controls -->
+        <div class="controls-panel">
+          <!-- Row 1: Slices Selector -->
+          <div class="control-row" id="rectSliceRow">
+            <span class="control-label">🔪 等分數：</span>
+            <div class="slice-btn-group">
+              <button class="slice-btn" onclick="setRectSlices(8)">8 等分</button>
+              <button class="slice-btn active" onclick="setRectSlices(16)">16 等分</button>
+              <button class="slice-btn" onclick="setRectSlices(32)">32 等分</button>
+              <button class="slice-btn" onclick="setRectSlices(64)">64 等分</button>
+            </div>
+            <button id="halfSliceBtn" class="slice-btn active" style="margin-left: 10px;" onclick="toggleHalfCut()">
+              📐 端點切半直角化（已開啟）
+            </button>
+          </div>
+
+          <div class="control-row" id="pyramidSliceRow" style="display: none;">
+            <span class="control-label">🔺 金字塔層數：</span>
+            <div class="slice-btn-group">
+              <button class="slice-btn active" onclick="setPyramidSlices(9)">9 等分（1+3+5，共3層）</button>
+              <button class="slice-btn" onclick="setPyramidSlices(16)">16 等分（1+3+5+7，共4層）</button>
+            </div>
+          </div>
+
+          <!-- Row 2: Deformation Slider -->
+          <div class="control-row">
+            <span class="control-label">🔄 變形進度：</span>
+            <div class="slider-container">
+              <input type="range" id="progressSlider" class="custom-slider" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
+              <span id="sliderValBadge" class="slider-val-badge">0% (圓形)</span>
+            </div>
+            <div class="action-btn-group">
+              <button id="playBtn" class="action-btn action-btn-primary" onclick="togglePlay()">
+                <span id="playIcon">▶ 播放變形</span>
+              </button>
+              <button class="action-btn action-btn-secondary" onclick="resetProgress()">
+                <span>⏮ 圓形 (0%)</span>
+              </button>
+              <button class="action-btn action-btn-secondary" onclick="maxProgress()">
+                <span>⏭ 拼接完成 (100%)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Discovery Accordion -->
+        <div class="discovery-box">
+          <div class="discovery-header" onclick="toggleDiscoveryContent()">
+            <div class="discovery-title">
+              <span>💡 課堂探究引導：讓學生觀察並自行發現長寬／底高關係</span>
+            </div>
+            <button class="reveal-toggle-btn" id="discoveryToggleBtn">點我揭曉推導關係 ▼</button>
+          </div>
+
+          <div class="discovery-content" id="discoveryContent">
+            <!-- Method 1 text -->
+            <div id="disc-rect-block" style="margin-top: 10px;">
+              <h4 style="color: #00c4cc; margin-bottom: 8px;">🟩 方法一：扇形上下交錯為【長方形】之推導</h4>
+              <div class="step-list">
+                <div class="step-item">
+                  <div class="step-num">1</div>
+                  <div class="step-text">
+                    觀察拼成長方形的<strong>「寬」</strong>：正是原本圓形的 <span class="math-highlight-cyan">半徑 \(r\)</span>。
+                  </div>
+                </div>
+                <div class="step-item gold">
+                  <div class="step-num">2</div>
+                  <div class="step-text">
+                    觀察長方形的<strong>「長」</strong>：上下兩排弧長加起來剛好是圓周長，因此長是一半的圓周長：<br>
+                    <span class="math-highlight">長 = 圓周長的一半 = (直徑 × 3.14) ÷ 2 = 半徑 × 3.14</span>
+                  </div>
+                </div>
+                <div class="step-item purple">
+                  <div class="step-num">3</div>
+                  <div class="step-text">
+                    代入長方形面積公式：<br>
+                    <strong>圓面積 = 長方形面積 = 長 × 寬</strong><br>
+                    \(=\) (<span class="math-highlight">半徑 × 3.14</span>) × <span class="math-highlight-cyan">半徑</span><br>
+                    \(=\) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Method 2 text -->
+            <div id="disc-pyramid-block" style="margin-top: 18px;">
+              <h4 style="color: #ffaa00; margin-bottom: 8px;">🔺 方法二：扇形奇數層堆疊為【金字塔三角形】之推導</h4>
+              <div class="step-list">
+                <div class="step-item gold">
+                  <div class="step-num">1</div>
+                  <div class="step-text">
+                    觀察金字塔三角形的<strong>「底」</strong>：由最底層向下的弧長，加上左右兩側的弧長，全部展開剛好是<strong>「完整的圓周長」</strong>！<br>
+                    <span class="math-highlight">底 = 圓周長 = 直徑 × 3.14 = 2 × 半徑 × 3.14</span>
+                  </div>
+                </div>
+                <div class="step-item">
+                  <div class="step-num">2</div>
+                  <div class="step-text">
+                    觀察金字塔三角形的<strong>「高」</strong>：由金字塔頂點垂直往下，每一層剛好貼合扇形腰長，堆疊起來垂直高度剛好是圓的 <span class="math-highlight-cyan">半徑 \(r\)</span>。
+                  </div>
+                </div>
+                <div class="step-item purple">
+                  <div class="step-num">3</div>
+                  <div class="step-text">
+                    代入三角形面積公式：<br>
+                    <strong>圓面積 = 三角形面積 = (底 × 高) ÷ 2</strong><br>
+                    \(=\) (<span class="math-highlight">2 × 半徑 × 3.14</span> × <span class="math-highlight-cyan">半徑</span>) ÷ 2<br>
+                    ⚡ <strong>關鍵驚喜約分</strong>：分子乘 2，分母除以 2，剛好約分抵消！<br>
+                    \(=\) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deep Comparison Table -->
+            <div style="margin-top: 20px;">
+              <h4 style="color: #a855f7; margin-bottom: 8px;">⚖️ 雙法深入對照一覽表（殊途同歸）</h4>
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th>對照項目</th>
+                    <th>方法一：長方形法</th>
+                    <th>方法二：金字塔三角形法</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>拼組形狀</td>
+                    <td>趨近長方形</td>
+                    <td>等腰三角形（金字塔）</td>
+                  </tr>
+                  <tr>
+                    <td>水平邊長</td>
+                    <td>長 = 圓周長的一半（半徑 × 3.14）</td>
+                    <td>底 = 完整圓周長（2 × 半徑 × 3.14）</td>
+                  </tr>
+                  <tr>
+                    <td>垂直高度</td>
+                    <td>寬 = 半徑 \(r\)</td>
+                    <td>高 = 半徑 \(r\)</td>
+                  </tr>
+                  <tr>
+                    <td>圖形面積</td>
+                    <td>長 × 寬</td>
+                    <td>(底 × 高) ÷ 2</td>
+                  </tr>
+                  <tr>
+                    <td>代數展開</td>
+                    <td>(半徑 × 3.14) × 半徑</td>
+                    <td>(2 × 半徑 × 3.14 × 半徑) ÷ 2</td>
+                  </tr>
+                  <tr>
+                    <td>約分與結論</td>
+                    <td>直接得出 \(r \times r \times 3.14\)</td>
+                    <td>係數 2 與分母 2 約分消去，同樣得出 \(r \times r \times 3.14\)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 生活情境探究 -->
+    <div id="tab-realworld" class="tab-panel">
+      <div class="app-cards-grid">
+        <!-- App 1: Pizza Duel -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-icon" style="background: rgba(255, 87, 87, 0.2); color: #ff5757;">🍕</div>
+            <div class="app-title-group">
+              <h3>披薩大對決：買哪個划算？</h3>
+              <p>1 個 12 吋大披薩 vs 2 個 8 吋小披薩？直覺往往騙了你！</p>
+            </div>
+          </div>
+
+          <div class="app-canvas-container">
+            <canvas id="pizzaCanvas" width="360" height="200"></canvas>
+          </div>
+
+          <div class="app-param-row">
+            <span>大披薩直徑：</span>
+            <input type="range" id="pizzaD1" min="10" max="16" value="12" step="1" oninput="updatePizzaSim()" style="width: 140px;">
+            <span id="pizzaD1Label" style="font-weight: 700; color: #ffd166;">12 吋</span>
+          </div>
+          <div class="app-param-row">
+            <span>小披薩直徑（2個）：</span>
+            <input type="range" id="pizzaD2" min="6" max="10" value="8" step="1" oninput="updatePizzaSim()" style="width: 140px;">
+            <span id="pizzaD2Label" style="font-weight: 700; color: #00c4cc;">8 吋</span>
+          </div>
+
+          <div class="app-result-box">
+            <div class="result-metric">
+              <span>1 個大披薩總面積：</span>
+              <span id="pizzaArea1" class="metric-val">113.04 平方吋</span>
+            </div>
+            <div class="result-metric">
+              <span>2 個小披薩總面積：</span>
+              <span id="pizzaArea2" class="metric-val" style="color: #00c4cc;">100.48 平方吋</span>
+            </div>
+            <div class="insight-badge" id="pizzaInsight">
+              💡 <strong>驚人結論：</strong> 1 個 12 吋大披薩比 2 個 8 吋小披薩多了 12.56 平方吋（約多 12.5% 吃更飽）！因為面積是跟<strong>半徑的平方</strong>成正比！
+            </div>
+          </div>
+        </div>
+
+        <!-- App 2: Sprinkler Simulator -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-icon" style="background: rgba(0, 196, 204, 0.2); color: #00c4cc;">💦</div>
+            <div class="app-title-group">
+              <h3>旋轉自動灑水器：灌溉草地</h3>
+              <p>半徑調成 2 倍，灌溉水柱覆蓋的草地面積會暴增幾倍？</p>
+            </div>
+          </div>
+
+          <div class="app-canvas-container">
+            <canvas id="sprinklerCanvas" width="360" height="200"></canvas>
+          </div>
+
+          <div class="app-param-row">
+            <span>噴灑半徑 \(r\)：</span>
+            <input type="range" id="sprinklerR" min="2" max="8" value="3" step="0.5" oninput="updateSprinklerSim()" style="width: 140px;">
+            <span id="sprinklerRLabel" style="font-weight: 700; color: #00c4cc;">3.0 公尺</span>
+          </div>
+
+          <div class="app-result-box">
+            <div class="result-metric">
+              <span>圓周長（邊界總長）：</span>
+              <span id="sprinklerCirc" class="metric-val">18.84 公尺</span>
+            </div>
+            <div class="result-metric">
+              <span>草地灌溉面積：</span>
+              <span id="sprinklerArea" class="metric-val" style="color: #34d399;">28.26 平方公尺</span>
+            </div>
+            <div class="insight-badge">
+              🌱 <strong>數學奧祕：</strong> 若把半徑由 3m 加倍為 6m，灌溉面積會從 28.26 暴增為 113.04 平方公尺，恰好是 <strong>\(2^2 = 4\) 倍</strong>！
+            </div>
+          </div>
+        </div>
+
+        <!-- App 3: Annulus Walkway -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-icon" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">🌺</div>
+            <div class="app-title-group">
+              <h3>花圃與環形步道（圓環面積）</h3>
+              <p>常見段考生活素養題：大圓面積扣除小圓花圃面積</p>
+            </div>
+          </div>
+
+          <div class="app-canvas-container">
+            <canvas id="annulusCanvas" width="360" height="200"></canvas>
+          </div>
+
+          <div class="app-param-row">
+            <span>內圈花圃半徑 \(R_1\)：</span>
+            <input type="range" id="annulusR1" min="2" max="6" value="3" step="1" oninput="updateAnnulusSim()" style="width: 140px;">
+            <span id="annulusR1Label" style="font-weight: 700; color: #ff5757;">3 公尺</span>
+          </div>
+          <div class="app-param-row">
+            <span>外圍步道寬度 \(w\)：</span>
+            <input type="range" id="annulusW" min="1" max="4" value="2" step="1" oninput="updateAnnulusSim()" style="width: 140px;">
+            <span id="annulusWLabel" style="font-weight: 700; color: #ffd166;">2 公尺</span>
+          </div>
+
+          <div class="app-result-box">
+            <div class="result-metric">
+              <span>外大圓半徑 \(R_2\)：</span>
+              <span id="annulusR2Text" class="metric-val">5 公尺</span>
+            </div>
+            <div class="result-metric">
+              <span>步道面積（圓環）：</span>
+              <span id="annulusArea" class="metric-val" style="color: #ffd166;">50.24 平方公尺</span>
+            </div>
+            <div class="insight-badge">
+              🧱 <strong>速算技巧：</strong> 圓環面積 \(=\) 大圓 \(-\) 小圓 \(=\) \((R_2^2 - R_1^2) \times 3.14 = (25 - 9) \times 3.14 = 50.24 \text{ m}^2\)。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 題目實戰演練 -->
+    <div id="tab-drill" class="tab-panel">
+      <div class="glass-card">
+        <div class="arena-header">
+          <div class="level-pills">
+            <button class="level-pill active" onclick="setQuizLevel(1)">關卡 1：半徑求面積</button>
+            <button class="level-pill" onclick="setQuizLevel(2)">關卡 2：直徑防陷阱</button>
+            <button class="level-pill" onclick="setQuizLevel(3)">關卡 3：周長反求面積</button>
+            <button class="level-pill" onclick="setQuizLevel(4)">關卡 4：生活複合圓</button>
+          </div>
+
+          <div class="score-banner">
+            <div class="score-item">
+              <span>🔥 連勝：</span>
+              <span id="streakCount" style="color: #ff5757;">0</span>
+            </div>
+            <div class="score-item">
+              <span>⭐ 得分：</span>
+              <span id="totalScore" style="color: #ffd166;">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quiz-card">
+          <div class="question-layout">
+            <div class="question-text-area">
+              <div class="q-badge" id="qBadge">第 1 關 · 基礎暖身</div>
+              <div class="question-stem" id="questionStem">題目載入中...</div>
+
+              <div class="answer-action-bar">
+                <div class="input-wrapper">
+                  <input type="number" id="quizInput" class="math-input" placeholder="請輸入數值" onkeydown="handleQuizKeyDown(event)">
+                  <span class="input-unit" id="quizUnit">平方公分</span>
+                </div>
+                <button class="action-btn action-btn-primary" onclick="submitAnswer()">
+                  <span>✔️ 送出作答</span>
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="toggleHint()">
+                  <span>💡 思考提示</span>
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="nextQuestion()">
+                  <span>🎲 換一題</span>
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="toggleSolution()">
+                  <span>👁️ 教師示範詳解</span>
+                </button>
+              </div>
+
+              <!-- Hint Box -->
+              <div class="hint-box" id="hintBox"></div>
+
+              <!-- Feedback Banner -->
+              <div class="feedback-banner" id="feedbackBanner"></div>
+
+              <!-- Solution Box -->
+              <div class="solution-box" id="solutionBox"></div>
+            </div>
+
+            <!-- Question Geometry Visual Canvas -->
+            <div class="question-canvas-box">
+              <canvas id="quizCanvas" width="280" height="220"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 割圓術與思維啟程 -->
+    <div id="tab-history" class="tab-panel">
+      <div class="glass-card">
+        <div class="card-title">
+          <div class="icon-badge">📜</div>
+          <span>數學先哲的極限智慧：從「割之彌細」到「化曲為直」</span>
+        </div>
+
+        <div style="font-size: 15px; color: #cbd5e1; line-height: 1.8; display: flex; flex-direction: column; gap: 14px;">
+          <p>
+            小朋友，在還沒有微積分的西元 263 年，魏晉時期的數學家<strong>劉徽</strong>就發明了名揚千古的<strong>「割圓術」</strong>。
+            他說：<span style="color: #ffd166; font-weight: 700;">「割之彌細，所失彌少，割之又割，以至於不可割，則與圓周合體而無所失矣。」</span>
+          </p>
+          <div style="background: rgba(0, 196, 204, 0.08); padding: 14px 18px; border-radius: 12px; border-left: 4px solid var(--canva-cyan);">
+            <strong>✨ 什麼是「化曲為直」的思維？</strong><br>
+            曲線的圓周很難直接用直尺測量面積，但如果我們將圓切成 8 等分、16 等分、32 等分、甚至 64 等分……
+            弧線會越來越平、越來越接近直線！這時候無論是：
+            <ul style="margin: 8px 0 0 20px;">
+              <li><strong>長方形法：</strong>上下咬合成平整長條，長是半圓周，寬是半徑。</li>
+              <li><strong>金字塔三角法：</strong>按奇數層 1+3+5+... 緊密扣合，底是全圓周，高是半徑。</li>
+            </ul>
+            兩者都在無窮細分下，把<strong>「彎曲的圓」</strong>化為<strong>「直邊的多邊形」</strong>，這就是人類數學史上最浪漫也最強大的思維躍遷！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>🎯 圓面積大師探究實驗室 · 國小六年級數學資優教具 ✕ Canva 現代教學視覺</p>
+    </footer>
+  </div>
+
+  <!-- Fullscreen Modal -->
+  <div id="fullscreenModal" class="fullscreen-modal">
+    <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
+    <div class="fs-canvas-holder">
+      <canvas id="fsCanvas" width="1280" height="720"></canvas>
+    </div>
+
+    <!-- Floating bottom slider toolbar for presentation -->
+    <div class="fs-toolbar-bottom">
+      <button class="action-btn action-btn-primary" onclick="togglePlay()" style="padding: 6px 14px;">
+        <span id="fsPlayIcon">▶ 播放</span>
+      </button>
+      <input type="range" id="fsProgressSlider" class="custom-slider" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
+      <span id="fsSliderValBadge" class="slider-val-badge">0%</span>
+      <button class="action-btn action-btn-secondary" onclick="resetProgress()" style="padding: 6px 12px;">⏮ 0%</button>
+      <button class="action-btn action-btn-secondary" onclick="maxProgress()" style="padding: 6px 12px;">⏭ 100%</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       Sound Effects Engine (Web Audio API)
+       ========================================================================== */
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggle');
+      const icon = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        btn.classList.remove('muted');
+        icon.textContent = '🔊 音效開啟';
+        playTone(523.25, 0.08, 'sine');
+      } else {
+        btn.classList.add('muted');
+        icon.textContent = '🔇 音效靜音';
+      }
+    }
+
+    function playTone(freq, dur = 0.1, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function playSuccessSound() {
+      if (!soundEnabled) return;
+      playTone(523.25, 0.08, 'triangle');
+      setTimeout(() => playTone(659.25, 0.08, 'triangle'), 80);
+      setTimeout(() => playTone(783.99, 0.12, 'triangle'), 160);
+      setTimeout(() => playTone(1046.50, 0.22, 'triangle'), 240);
+    }
+
+    function playErrorSound() {
+      if (!soundEnabled) return;
+      playTone(280, 0.12, 'sawtooth');
+      setTimeout(() => playTone(220, 0.18, 'sawtooth'), 100);
+    }
+
+    /* ==========================================================================
+       Tab Switching & Subnav
+       ========================================================================== */
+    let currentMainTab = 'derivation';
+    let derivationMode = 'rect'; // 'rect' | 'pyramid' | 'dual'
+
+    function switchMainTab(tabId) {
+      currentMainTab = tabId;
+      document.querySelectorAll('.tab-pill').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      const activeBtn = Array.from(document.querySelectorAll('.tab-pill')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      const panel = document.getElementById('tab-' + tabId);
+      if (panel) panel.classList.add('active');
+
+      playTone(440, 0.05);
+
+      if (tabId === 'derivation') {
+        drawDerivation();
+      } else if (tabId === 'realworld') {
+        updatePizzaSim();
+        updateSprinklerSim();
+        updateAnnulusSim();
+      } else if (tabId === 'drill') {
+        drawQuizGeometry();
+      }
+    }
+
+    function setDerivationMode(mode) {
+      derivationMode = mode;
+      document.getElementById('modeBtn-rect').classList.toggle('active', mode === 'rect');
+      document.getElementById('modeBtn-pyramid').classList.toggle('active', mode === 'pyramid');
+      document.getElementById('modeBtn-dual').classList.toggle('active', mode === 'dual');
+
+      document.getElementById('rectSliceRow').style.display = (mode === 'rect' || mode === 'dual') ? 'flex' : 'none';
+      document.getElementById('pyramidSliceRow').style.display = (mode === 'pyramid' || mode === 'dual') ? 'flex' : 'none';
+
+      playTone(520, 0.05);
+      drawDerivation();
+    }
+
+    function toggleDiscoveryContent() {
+      const content = document.getElementById('discoveryContent');
+      const btn = document.getElementById('discoveryToggleBtn');
+      content.classList.toggle('open');
+      if (content.classList.contains('open')) {
+        btn.textContent = '收合推導說明 ▲';
+        playTone(587.33, 0.06);
+      } else {
+        btn.textContent = '點我揭曉推導關係 ▼';
+        playTone(392.00, 0.06);
+      }
+    }
+
+    /* ==========================================================================
+       Derivation Engine: Rect & Pyramid
+       ========================================================================== */
+    let animProgress = 0; // 0 to 1
+    let isPlaying = false;
+    let animId = null;
+
+    let rectSlices = 16;
+    let halfCutEnabled = true;
+    let pyramidSlices = 9; // 9 or 16
+
+    function setRectSlices(n) {
+      rectSlices = n;
+      document.querySelectorAll('#rectSliceRow .slice-btn-group .slice-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(n + ' 等分'));
+      });
+      playTone(500 + n * 5, 0.05);
+      drawDerivation();
+    }
+
+    function toggleHalfCut() {
+      halfCutEnabled = !halfCutEnabled;
+      const btn = document.getElementById('halfSliceBtn');
+      if (halfCutEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '📐 端點切半直角化（已開啟）';
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '📐 端點切半直角化（關閉）';
+      }
+      playTone(600, 0.05);
+      drawDerivation();
+    }
+
+    function setPyramidSlices(n) {
+      pyramidSlices = n;
+      document.querySelectorAll('#pyramidSliceRow .slice-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(n + ' 等分'));
+      });
+      playTone(450 + n * 10, 0.05);
+      drawDerivation();
+    }
+
+    function onProgressChange(val) {
+      animProgress = parseFloat(val) / 100;
+      updateSliderBadges(val);
+      drawDerivation();
+    }
+
+    function updateSliderBadges(val) {
+      const text = val == 0 ? '0% (圓形)' : (val == 100 ? '100% (拼接完成)' : val + '%');
+      document.getElementById('sliderValBadge').textContent = text;
+      document.getElementById('fsSliderValBadge').textContent = val + '%';
+      document.getElementById('progressSlider').value = val;
+      document.getElementById('fsProgressSlider').value = val;
+    }
+
+    function resetProgress() {
+      animProgress = 0;
+      updateSliderBadges(0);
+      if (isPlaying) togglePlay();
+      playTone(400, 0.08);
+      drawDerivation();
+    }
+
+    function maxProgress() {
+      animProgress = 1;
+      updateSliderBadges(100);
+      if (isPlaying) togglePlay();
+      playTone(800, 0.08);
+      drawDerivation();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const playIcon = document.getElementById('playIcon');
+      const fsPlayIcon = document.getElementById('fsPlayIcon');
+      if (isPlaying) {
+        playIcon.textContent = '⏸ 暫停';
+        fsPlayIcon.textContent = '⏸ 暫停';
+        if (animProgress >= 1) animProgress = 0;
+        animLoop();
+      } else {
+        playIcon.textContent = '▶ 播放變形';
+        fsPlayIcon.textContent = '▶ 播放';
+        if (animId) cancelAnimationFrame(animId);
+      }
+    }
+
+    function animLoop() {
+      if (!isPlaying) return;
+      animProgress += 0.0075;
+      if (animProgress >= 1) {
+        animProgress = 1;
+        isPlaying = false;
+        document.getElementById('playIcon').textContent = '▶ 播放變形';
+        document.getElementById('fsPlayIcon').textContent = '▶ 播放';
+        playSuccessSound();
+      }
+      const val = Math.round(animProgress * 100);
+      updateSliderBadges(val);
+      drawDerivation();
+      if (isPlaying) {
+        animId = requestAnimationFrame(animLoop);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       Canvas Drawing: Rectangle & Pyramid
+       -------------------------------------------------------------------------- */
+    function drawDerivation() {
+      const canvas = document.getElementById('derivationCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (derivationMode === 'rect') {
+        drawRectangleDerivation(ctx, canvas.width / 2, canvas.height / 2, canvas.width, canvas.height, animProgress);
+      } else if (derivationMode === 'pyramid') {
+        drawPyramidDerivation(ctx, canvas.width / 2, canvas.height / 2, canvas.width, canvas.height, animProgress);
+      } else if (derivationMode === 'dual') {
+        drawDualDerivation(ctx, canvas.width, canvas.height, animProgress);
+      }
+
+      // If fullscreen modal is open, also update fsCanvas
+      const fsModal = document.getElementById('fullscreenModal');
+      if (fsModal && fsModal.classList.contains('active')) {
+        const fsCanvas = document.getElementById('fsCanvas');
+        const fsCtx = fsCanvas.getContext('2d');
+        fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
+        if (derivationMode === 'rect') {
+          drawRectangleDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+        } else if (derivationMode === 'pyramid') {
+          drawPyramidDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+        } else if (derivationMode === 'dual') {
+          drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
+        }
+      }
+    }
+
+    /* Draw Single Sector */
+    function drawSector(ctx, cx, cy, r, startAngle, endAngle, fillColor, strokeColor = 'rgba(255,255,255,0.6)') {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = strokeColor;
+      ctx.stroke();
+    }
+
+    /* Mode 1: Rectangle Reassembly */
+    function drawRectangleDerivation(ctx, cx, cy, w, h, t) {
+      const r = Math.min(w, h) * 0.28;
+      const n = rectSlices;
+      const sliceAngle = (2 * Math.PI) / n;
+      const arcWidth = r * sliceAngle;
+      const halfN = n / 2;
+      const rectWidth = halfN * arcWidth;
+
+      // Circle Center when t=0 vs t=1 transition
+      const circleCenterX = cx - (1 - t) * 0 - t * (rectWidth / 2 - 20);
+      const circleCenterY = cy;
+
+      const topColor1 = '#06b6d4';
+      const topColor2 = '#0284c7';
+      const botColor1 = '#f97316';
+      const botColor2 = '#ea580c';
+
+      ctx.save();
+
+      if (t === 0) {
+        // Complete 360 circle
+        for (let i = 0; i < n; i++) {
+          const startA = i * sliceAngle - Math.PI / 2;
+          const endA = (i + 1) * sliceAngle - Math.PI / 2;
+          const isTop = i < halfN;
+          const fill = isTop ? (i % 2 === 0 ? topColor1 : topColor2) : (i % 2 === 0 ? botColor1 : botColor2);
+          drawSector(ctx, cx, cy, r, startA, endA, fill);
+        }
+        // Label radius
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + r, cy);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText('半徑 r', cx + r / 2 - 20, cy - 10);
+      } else {
+        // Morphing animation to interlocking rectangle
+        // Destination rectangle bounds
+        const targetRectX = cx - rectWidth / 2;
+        const targetRectY = cy - r / 2;
+
+        for (let i = 0; i < n; i++) {
+          const isTop = i < halfN;
+          const fill = isTop ? (i % 2 === 0 ? topColor1 : topColor2) : (i % 2 === 0 ? botColor1 : botColor2);
+
+          // Original circle angle
+          const origAngle = i * sliceAngle - Math.PI / 2 + sliceAngle / 2;
+          const origX = cx;
+          const origY = cy;
+
+          // Target slot in rectangle
+          let targetX, targetY, targetRot;
+          if (isTop) {
+            // Pointing Down
+            targetX = targetRectX + (i + 0.5) * arcWidth;
+            targetY = targetRectY;
+            targetRot = Math.PI / 2;
+          } else {
+            // Pointing Up
+            const botIdx = i - halfN;
+            targetX = targetRectX + (botIdx + 1.0) * arcWidth;
+            targetY = targetRectY + r;
+            targetRot = -Math.PI / 2;
+          }
+
+          // Interpolation
+          const curX = origX + (targetX - origX) * t;
+          const curY = origY + (targetY - origY) * t;
+          const curRot = origAngle + (targetRot - origAngle) * t;
+
+          ctx.save();
+          ctx.translate(curX, curY);
+          ctx.rotate(curRot);
+
+          // Draw individual slice centered at vertex
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.arc(0, 0, r, -sliceAngle / 2, sliceAngle / 2);
+          ctx.closePath();
+          ctx.fillStyle = fill;
+          ctx.fill();
+          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.stroke();
+
+          ctx.restore();
+        }
+
+        // Dimension brackets (Clean labels: "長" and "寬" ONLY!)
+        if (t > 0.4) {
+          const alpha = (t - 0.4) / 0.6;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+
+          // Horizontal Dimension: 長
+          const bx1 = targetRectX;
+          const bx2 = targetRectX + rectWidth;
+          const by = targetRectY - 26;
+
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(bx1, by + 8);
+          ctx.lineTo(bx1, by);
+          ctx.lineTo(bx2, by);
+          ctx.lineTo(bx2, by + 8);
+          ctx.stroke();
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('長', (bx1 + bx2) / 2, by - 8);
+
+          // Vertical Dimension: 寬
+          const ry1 = targetRectY;
+          const ry2 = targetRectY + r;
+          const rx = targetRectX + rectWidth + 26;
+
+          ctx.strokeStyle = '#ffd166';
+          ctx.beginPath();
+          ctx.moveTo(rx - 8, ry1);
+          ctx.lineTo(rx, ry1);
+          ctx.lineTo(rx, ry2);
+          ctx.lineTo(rx - 8, ry2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd166';
+          ctx.textAlign = 'left';
+          ctx.fillText('寬', rx + 10, (ry1 + ry2) / 2 + 8);
+
+          ctx.restore();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    /* Mode 2: Pyramid Triangle Derivation (9 & 16 slices) */
+    function drawPyramidDerivation(ctx, cx, cy, w, h, t) {
+      const r = Math.min(w, h) * 0.32;
+      const totalSlices = pyramidSlices; // 9 or 16
+      const numLayers = pyramidSlices === 9 ? 3 : 4;
+      const sliceAngle = (2 * Math.PI) / totalSlices;
+
+      // Layer colors
+      const layerColors = [
+        '#facc15', // Layer 1 (gold)
+        '#06b6d4', // Layer 2 (cyan)
+        '#a855f7', // Layer 3 (purple)
+        '#f97316'  // Layer 4 (coral/orange)
+      ];
+
+      // Calculate slices per layer
+      // Layer 1: 1
+      // Layer 2: 3 (2 up, 1 down)
+      // Layer 3: 5 (3 up, 2 down)
+      // Layer 4: 7 (4 up, 3 down)
+      const slicesConfig = [];
+      let globalIdx = 0;
+      for (let L = 1; L <= numLayers; L++) {
+        const countInLayer = 2 * L - 1;
+        const color = layerColors[L - 1];
+        for (let j = 0; j < countInLayer; j++) {
+          const isUp = (j % 2 === 0);
+          slicesConfig.push({
+            layer: L,
+            indexInLayer: j,
+            globalIndex: globalIdx++,
+            isUp: isUp,
+            color: color
+          });
+        }
+      }
+
+      ctx.save();
+
+      if (t === 0) {
+        // Complete 360 circle with layer colors
+        for (let i = 0; i < totalSlices; i++) {
+          const cfg = slicesConfig[i];
+          const startA = i * sliceAngle - Math.PI / 2;
+          const endA = (i + 1) * sliceAngle - Math.PI / 2;
+          drawSector(ctx, cx, cy, r, startA, endA, cfg.color);
+        }
+
+        // Center badge & radius
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + r, cy);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText('半徑 r', cx + r / 2 - 20, cy - 10);
+      } else {
+        // Transform into Pyramid Triangle
+        const arcW = r * sliceAngle;
+        const layerHeight = r / numLayers;
+        const pyramidTopY = cy - r / 2 - 10;
+
+        slicesConfig.forEach(cfg => {
+          const L = cfg.layer;
+          const j = cfg.indexInLayer;
+          const isUp = cfg.isUp;
+
+          // Target Position in Triangle
+          const countInLayer = 2 * L - 1;
+          const layerWidth = countInLayer * (arcW * 0.75);
+          const startX = cx - layerWidth / 2;
+
+          const targetX = startX + (j + 0.5) * (arcW * 0.75);
+          const targetY = pyramidTopY + (L - (isUp ? 0.3 : 0.7)) * layerHeight;
+          const targetRot = isUp ? -Math.PI / 2 : Math.PI / 2;
+
+          // Circle Position
+          const origAngle = cfg.globalIndex * sliceAngle - Math.PI / 2 + sliceAngle / 2;
+          const curX = cx + (targetX - cx) * t;
+          const curY = cy + (targetY - cy) * t;
+          const curRot = origAngle + (targetRot - origAngle) * t;
+
+          ctx.save();
+          ctx.translate(curX, curY);
+          ctx.rotate(curRot);
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.arc(0, 0, r, -sliceAngle / 2, sliceAngle / 2);
+          ctx.closePath();
+          ctx.fillStyle = cfg.color;
+          ctx.fill();
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.stroke();
+
+          ctx.restore();
+        });
+
+        // Layer labels & Clean Dimension Labels: "底" and "高"
+        if (t > 0.45) {
+          const alpha = (t - 0.45) / 0.55;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+
+          // Base Bracket: 底
+          const bottomL = numLayers;
+          const baseCount = 2 * bottomL - 1;
+          const totalBaseW = baseCount * (arcW * 0.75) + 30;
+          const bx1 = cx - totalBaseW / 2;
+          const bx2 = cx + totalBaseW / 2;
+          const by = pyramidTopY + numLayers * layerHeight + 32;
+
+          ctx.strokeStyle = '#ffd166';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(bx1, by - 8);
+          ctx.lineTo(bx1, by);
+          ctx.lineTo(bx2, by);
+          ctx.lineTo(bx2, by - 8);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd166';
+          ctx.font = 'bold 26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('底', cx, by + 28);
+
+          // Height Bracket: 高
+          const hx = bx2 + 30;
+          const hy1 = pyramidTopY;
+          const hy2 = pyramidTopY + numLayers * layerHeight;
+
+          ctx.strokeStyle = '#00c4cc';
+          ctx.beginPath();
+          ctx.moveTo(hx - 8, hy1);
+          ctx.lineTo(hx, hy1);
+          ctx.lineTo(hx, hy2);
+          ctx.lineTo(hx - 8, hy2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#00c4cc';
+          ctx.textAlign = 'left';
+          ctx.fillText('高', hx + 10, (hy1 + hy2) / 2 + 10);
+
+          // Layer info badges on the left
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'right';
+          for (let l = 1; l <= numLayers; l++) {
+            const ly = pyramidTopY + (l - 0.4) * layerHeight;
+            ctx.fillStyle = layerColors[l - 1];
+            ctx.fillText(`第 ${l} 層 (${2 * l - 1} 片)`, bx1 - 20, ly);
+          }
+
+          ctx.restore();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    /* Mode 3: Dual Derivation Side-by-Side */
+    function drawDualDerivation(ctx, w, h, t) {
+      // Split canvas into Left (Rect) and Right (Pyramid)
+      const halfW = w / 2;
+
+      // Divider line
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(halfW, 20);
+      ctx.lineTo(halfW, h - 20);
+      ctx.stroke();
+      ctx.restore();
+
+      // Titles
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillStyle = '#00c4cc';
+      ctx.textAlign = 'center';
+      ctx.fillText('🟩 方法一：長方形法', halfW / 2, 34);
+
+      ctx.fillStyle = '#ffaa00';
+      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, 34);
+
+      // Draw Left Side
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 40, halfW, h - 40);
+      ctx.clip();
+      drawRectangleDerivation(ctx, halfW / 2, h / 2 + 10, halfW, h, t);
+      ctx.restore();
+
+      // Draw Right Side
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(halfW, 40, halfW, h - 40);
+      ctx.clip();
+      drawPyramidDerivation(ctx, halfW + halfW / 2, h / 2 + 10, halfW, h, t);
+      ctx.restore();
+    }
+
+    /* ==========================================================================
+       Fullscreen Presentation Mode
+       ========================================================================== */
+    function openFullscreen() {
+      const modal = document.getElementById('fullscreenModal');
+      modal.classList.add('active');
+      drawDerivation();
+      playTone(523, 0.08);
+    }
+
+    function closeFullscreen() {
+      const modal = document.getElementById('fullscreenModal');
+      modal.classList.remove('active');
+      playTone(392, 0.08);
+    }
+
+    /* ==========================================================================
+       Module 2: Real-World Simulators (Pizza, Sprinkler, Annulus)
+       ========================================================================== */
+    function updatePizzaSim() {
+      const d1 = parseInt(document.getElementById('pizzaD1').value);
+      const d2 = parseInt(document.getElementById('pizzaD2').value);
+
+      document.getElementById('pizzaD1Label').textContent = d1 + ' 吋';
+      document.getElementById('pizzaD2Label').textContent = d2 + ' 吋';
+
+      const r1 = d1 / 2;
+      const r2 = d2 / 2;
+      const area1 = (r1 * r1 * 3.14).toFixed(2);
+      const area2 = (2 * (r2 * r2 * 3.14)).toFixed(2);
+
+      document.getElementById('pizzaArea1').textContent = area1 + ' 平方吋';
+      document.getElementById('pizzaArea2').textContent = area2 + ' 平方吋';
+
+      const diff = (parseFloat(area1) - parseFloat(area2)).toFixed(2);
+      const insight = document.getElementById('pizzaInsight');
+      if (diff > 0) {
+        insight.innerHTML = `💡 <strong>計算結果：</strong> 1 個 ${d1} 吋大披薩面積為 <strong>${area1}</strong> 平方吋，比 2 個 ${d2} 吋小披薩（共 <strong>${area2}</strong> 平方吋）<strong>多了 ${diff} 平方吋</strong>！買大披薩更划算！`;
+      } else if (diff < 0) {
+        insight.innerHTML = `💡 <strong>計算結果：</strong> 2 個 ${d2} 吋小披薩面積為 <strong>${area2}</strong> 平方吋，比 1 個 ${d1} 吋大披薩（<strong>${area1}</strong> 平方吋）<strong>多了 ${Math.abs(diff)} 平方吋</strong>！`;
+      } else {
+        insight.innerHTML = `💡 <strong>計算結果：</strong> 兩者面積剛好完全相同！都是 <strong>${area1}</strong> 平方吋！`;
+      }
+
+      // Draw Pizza Canvas
+      const canvas = document.getElementById('pizzaCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Scale factor
+      const maxD = 18;
+      const pixR1 = (d1 / maxD) * 75;
+      const pixR2 = (d2 / maxD) * 75;
+
+      // Draw 1 Big Pizza on Left
+      drawSinglePizza(ctx, 100, 100, pixR1, d1 + ' 吋大披薩', '#f59e0b');
+
+      // Draw 2 Small Pizzas on Right
+      drawSinglePizza(ctx, 230, 60, pixR2 * 0.85, '', '#06b6d4');
+      drawSinglePizza(ctx, 290, 130, pixR2 * 0.85, '2 個 ' + d2 + ' 吋', '#06b6d4');
+    }
+
+    function drawSinglePizza(ctx, cx, cy, r, label, crustColor) {
+      ctx.save();
+      // Crust
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = crustColor;
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+
+      // Cheese
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.86, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd166';
+      ctx.fill();
+
+      // Pepperoni slices
+      const pCount = 5;
+      for (let i = 0; i < pCount; i++) {
+        const ang = (i * 2 * Math.PI) / pCount;
+        const px = cx + Math.cos(ang) * (r * 0.5);
+        const py = cy + Math.sin(ang) * (r * 0.5);
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.16, 0, Math.PI * 2);
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+      }
+
+      if (label) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, cx, cy + r + 18);
+      }
+      ctx.restore();
+    }
+
+    /* Sprinkler Simulator */
+    let sprinklerAngle = 0;
+    let sprinklerAnimId = null;
+
+    function updateSprinklerSim() {
+      const r = parseFloat(document.getElementById('sprinklerR').value);
+      document.getElementById('sprinklerRLabel').textContent = r.toFixed(1) + ' 公尺';
+
+      const circ = (2 * r * 3.14).toFixed(2);
+      const area = (r * r * 3.14).toFixed(2);
+
+      document.getElementById('sprinklerCirc').textContent = circ + ' 公尺';
+      document.getElementById('sprinklerArea').textContent = area + ' 平方公尺';
+
+      drawSprinkler();
+    }
+
+    function drawSprinkler() {
+      const canvas = document.getElementById('sprinklerCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const rVal = parseFloat(document.getElementById('sprinklerR').value);
+      const pixR = (rVal / 8) * 85;
+
+      // Lawn background grid
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Sprinkled Area Water Circle
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, pixR, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.restore();
+
+      // Rotating Water Jet
+      sprinklerAngle += 0.05;
+      const jetX = cx + Math.cos(sprinklerAngle) * pixR;
+      const jetY = cy + Math.sin(sprinklerAngle) * pixR;
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(jetX, jetY);
+      ctx.stroke();
+
+      // Water spray droplets
+      for (let i = 0; i < 6; i++) {
+        const dropDist = (pixR / 6) * i;
+        const dx = cx + Math.cos(sprinklerAngle + 0.1 * i) * dropDist;
+        const dy = cy + Math.sin(sprinklerAngle + 0.1 * i) * dropDist;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#67e8f9';
+        ctx.fill();
+      }
+
+      // Sprinkler Head Center
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd166';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Radius line & text
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + pixR, cy);
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffd166';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText(`r=${rVal}m`, cx + pixR / 2 - 12, cy - 8);
+
+      ctx.restore();
+
+      if (!sprinklerAnimId) {
+        sprinklerAnimId = requestAnimationFrame(drawSprinkler);
+      }
+    }
+
+    /* Annulus Simulator */
+    function updateAnnulusSim() {
+      const r1 = parseInt(document.getElementById('annulusR1').value);
+      const w = parseInt(document.getElementById('annulusW').value);
+      const r2 = r1 + w;
+
+      document.getElementById('annulusR1Label').textContent = r1 + ' 公尺';
+      document.getElementById('annulusWLabel').textContent = w + ' 公尺';
+      document.getElementById('annulusR2Text').textContent = r2 + ' 公尺';
+
+      const a1 = r1 * r1 * 3.14;
+      const a2 = r2 * r2 * 3.14;
+      const annulusArea = (a2 - a1).toFixed(2);
+
+      document.getElementById('annulusArea').textContent = annulusArea + ' 平方公尺';
+
+      const canvas = document.getElementById('annulusCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const maxR = 10;
+      const pixR1 = (r1 / maxR) * 80;
+      const pixR2 = (r2 / maxR) * 80;
+
+      // Outer Walkway Circle
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, pixR2, 0, Math.PI * 2);
+      ctx.fillStyle = '#64748b'; // stone walk
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.stroke();
+
+      // Inner Flowerbed Circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, pixR1, 0, Math.PI * 2);
+      ctx.fillStyle = '#10b981'; // green flowerbed
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffd166';
+      ctx.stroke();
+
+      // Flower dots
+      for (let i = 0; i < 7; i++) {
+        const ang = (i * 2 * Math.PI) / 7;
+        const fx = cx + Math.cos(ang) * (pixR1 * 0.55);
+        const fy = cy + Math.sin(ang) * (pixR1 * 0.55);
+        ctx.beginPath();
+        ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fill();
+      }
+
+      // Radius Labels
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText(`花圃 r₁=${r1}m`, cx - 30, cy + 4);
+
+      ctx.fillStyle = '#ffd166';
+      ctx.fillText(`步道寬度 w=${w}m`, cx + pixR1 + 6, cy - 6);
+
+      ctx.restore();
+    }
+
+    /* ==========================================================================
+       Module 3: Drill Arena (Interactive Questions & Gamification)
+       ========================================================================== */
+    let currentQuizLevel = 1;
+    let streakCount = 0;
+    let totalScore = 0;
+    let currentQ = null;
+
+    function setQuizLevel(lvl) {
+      currentQuizLevel = lvl;
+      document.querySelectorAll('.level-pill').forEach((p, idx) => {
+        p.classList.toggle('active', idx + 1 === lvl);
+      });
+      playTone(500 + lvl * 60, 0.06);
+      generateQuestion();
+    }
+
+    function generateQuestion() {
+      // Clear previous inputs & hints
+      document.getElementById('quizInput').value = '';
+      document.getElementById('feedbackBanner').style.display = 'none';
+      document.getElementById('feedbackBanner').className = 'feedback-banner';
+      document.getElementById('solutionBox').classList.remove('show');
+      document.getElementById('hintBox').classList.remove('show');
+
+      const lvl = currentQuizLevel;
+      const badge = document.getElementById('qBadge');
+      const stem = document.getElementById('questionStem');
+      const unit = document.getElementById('quizUnit');
+
+      if (lvl === 1) {
+        // Level 1: Known radius r -> Area = r * r * 3.14
+        badge.textContent = '第 1 關 · 基礎暖身（已知半徑）';
+        unit.textContent = '平方公分';
+        const radii = [2, 3, 4, 5, 6, 8, 10];
+        const r = radii[Math.floor(Math.random() * radii.length)];
+        const ans = Math.round(r * r * 3.14 * 100) / 100;
+        currentQ = {
+          type: 'radius',
+          r: r,
+          answer: ans,
+          hint: `💡 複習圓面積公式：圓面積 = 半徑 × 半徑 × 3.14。這題半徑是 ${r} 公分，直接代入公式計算即可！`,
+          solution: `
+            <strong>【詳解步驟】</strong><br>
+            1. 圓面積公式 = 半徑 × 半徑 × 3.14<br>
+            2. 代入數值：${r} × ${r} × 3.14 = ${r * r} × 3.14 = <strong>${ans}</strong> 平方公分。
+          `
+        };
+        stem.innerHTML = `有一個圓形杯墊，量得它的<strong>半徑是 ${r} 公分</strong>，請問這個杯墊的面積是多少平方公分？（圓周率以 3.14 計算）`;
+      } else if (lvl === 2) {
+        // Level 2: Known diameter d -> Trap! Must divide by 2!
+        badge.textContent = '第 2 關 · 直徑防陷阱（需先求半徑）';
+        unit.textContent = '平方公尺';
+        const diameters = [4, 6, 8, 10, 12, 16, 20];
+        const d = diameters[Math.floor(Math.random() * diameters.length)];
+        const r = d / 2;
+        const ans = Math.round(r * r * 3.14 * 100) / 100;
+        currentQ = {
+          type: 'diameter',
+          d: d,
+          r: r,
+          answer: ans,
+          hint: `⚠️ <strong>小心直徑陷阱！</strong> 題目給的是「直徑 ${d} 公尺」，請先除以 2 算出「半徑」，再用半徑算面積喔！`,
+          solution: `
+            <strong>【詳解步驟】</strong><br>
+            1. 先求半徑：半徑 = 直徑 ÷ 2 = ${d} ÷ 2 = <strong>${r}</strong> 公尺。<br>
+            2. 再求圓面積：${r} × ${r} × 3.14 = ${r * r} × 3.14 = <strong>${ans}</strong> 平方公尺。
+          `
+        };
+        stem.innerHTML = `學校中庭有一個圓形噴水池，測量得知<strong>直徑是 ${d} 公尺</strong>，請問這個噴水池的面積是多少平方公尺？（圓周率以 3.14 計算）`;
+      } else if (lvl === 3) {
+        // Level 3: Known Circumference C -> 2 steps! C / 3.14 / 2 = r -> Area
+        badge.textContent = '第 3 關 · 逆向挑戰（已知周長反求面積）';
+        unit.textContent = '平方公分';
+        const pairs = [
+          { r: 2, c: 12.56 },
+          { r: 3, c: 18.84 },
+          { r: 4, c: 25.12 },
+          { r: 5, c: 31.4 },
+          { r: 10, c: 62.8 }
+        ];
+        const p = pairs[Math.floor(Math.random() * pairs.length)];
+        const ans = Math.round(p.r * p.r * 3.14 * 100) / 100;
+        currentQ = {
+          type: 'circumference',
+          c: p.c,
+          r: p.r,
+          answer: ans,
+          hint: `💡 <strong>兩步驟思維：</strong><br>第一步：圓周長 = 直徑 × 3.14，所以直徑 = 周長 ÷ 3.14，半徑 = 直徑 ÷ 2。<br>第二步：算出半徑後，再算半徑 × 半徑 × 3.14！`,
+          solution: `
+            <strong>【詳解步驟】</strong><br>
+            1. 圓周長 = 直徑 × 3.14 → 直徑 = ${p.c} ÷ 3.14 = ${p.r * 2} 公分。<br>
+            2. 半徑 = ${p.r * 2} ÷ 2 = <strong>${p.r}</strong> 公分。<br>
+            3. 面積 = ${p.r} × ${p.r} × 3.14 = <strong>${ans}</strong> 平方公分。
+          `
+        };
+        stem.innerHTML = `用一條繩子剛好可以圍住一個圓形披薩一圈，量出繩長（圓周長）是 <strong>${p.c} 公分</strong>，請問這個披薩的面積是多少平方公分？（圓周率以 3.14 計算）`;
+      } else if (lvl === 4) {
+        // Level 4: Composite Shape (Semicircle or Annulus)
+        badge.textContent = '第 4 關 · 生活複合幾何題（半圓與圓環）';
+        unit.textContent = '平方公分';
+        const isSemi = Math.random() > 0.5;
+        if (isSemi) {
+          const r = [4, 6, 8, 10][Math.floor(Math.random() * 4)];
+          const fullA = r * r * 3.14;
+          const ans = Math.round((fullA / 2) * 100) / 100;
+          currentQ = {
+            type: 'semicircle',
+            r: r,
+            answer: ans,
+            hint: `💡 <strong>半圓面積：</strong> 先求出整個完整圓的面積，再除以 2（也就是乘以 1/2）！`,
+            solution: `
+              <strong>【詳解步驟】</strong><br>
+              1. 完整圓面積 = ${r} × ${r} × 3.14 = ${fullA} 平方公分。<br>
+              2. 半圓面積 = ${fullA} ÷ 2 = <strong>${ans}</strong> 平方公分。
+            `
+          };
+          stem.innerHTML = `公園有一面<strong>半圓形</strong>的花壁，測得半徑為 <strong>${r} 公分</strong>，請問這面半圓形花壁的面積是多少平方公分？（圓周率以 3.14 計算）`;
+        } else {
+          const r1 = 3;
+          const r2 = 5;
+          const ans = Math.round((r2 * r2 * 3.14 - r1 * r1 * 3.14) * 100) / 100;
+          currentQ = {
+            type: 'annulus',
+            r1: r1,
+            r2: r2,
+            answer: ans,
+            hint: `💡 <strong>圓環面積：</strong> 圓環面積 = 外面大圓面積 - 裡面小圓面積！`,
+            solution: `
+              <strong>【詳解步驟】</strong><br>
+              1. 外大圓面積 = 5 × 5 × 3.14 = 78.5 平方公分。<br>
+              2. 內小圓面積 = 3 × 3 × 3.14 = 28.26 平方公分。<br>
+              3. 圓環面積 = 78.5 - 28.26 = <strong>${ans}</strong> 平方公分。
+            `
+          };
+          stem.innerHTML = `光碟片的形狀是一個圓環，外圓半徑是 <strong>5 公分</strong>，內圓小孔半徑是 <strong>3 公分</strong>，請問光碟片可讀取區域（圓環）的面積是多少平方公分？（圓周率以 3.14 計算）`;
+        }
+      }
+
+      drawQuizGeometry();
+    }
+
+    function drawQuizGeometry() {
+      const canvas = document.getElementById('quizCanvas');
+      if (!canvas || !currentQ) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      ctx.save();
+      if (currentQ.type === 'radius' || currentQ.type === 'diameter' || currentQ.type === 'circumference') {
+        const r = 65;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 196, 204, 0.2)';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#00c4cc';
+        ctx.stroke();
+
+        if (currentQ.type === 'radius') {
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + r, cy);
+          ctx.strokeStyle = '#ffd166';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd166';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText(`r = ${currentQ.r}`, cx + 15, cy - 8);
+        } else if (currentQ.type === 'diameter') {
+          ctx.beginPath();
+          ctx.moveTo(cx - r, cy);
+          ctx.lineTo(cx + r, cy);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          ctx.fillStyle = '#f43f5e';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText(`d = ${currentQ.d}`, cx - 20, cy - 8);
+        } else if (currentQ.type === 'circumference') {
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.fillText(`圓周長 = ${currentQ.c}`, cx - 45, cy + 5);
+        }
+      } else if (currentQ.type === 'semicircle') {
+        const r = 70;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 20, r, Math.PI, 0);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#c084fc';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 20);
+        ctx.lineTo(cx + r, cy + 20);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(`r = ${currentQ.r}`, cx + 20, cy + 12);
+      } else if (currentQ.type === 'annulus') {
+        const r1 = 35;
+        const r2 = 70;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r1, 0, Math.PI * 2);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.strokeStyle = '#64748b';
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(`R=5, r=3`, cx - 25, cy + 5);
+      }
+      ctx.restore();
+    }
+
+    function handleQuizKeyDown(e) {
+      if (e.key === 'Enter') {
+        submitAnswer();
+      }
+    }
+
+    function submitAnswer() {
+      const input = document.getElementById('quizInput').value.trim();
+      const feedback = document.getElementById('feedbackBanner');
+      if (!input) {
+        feedback.style.display = 'flex';
+        feedback.className = 'feedback-banner wrong';
+        feedback.innerHTML = '⚠️ 請先輸入計算後的答案數值喔！';
+        playErrorSound();
+        return;
+      }
+
+      const userVal = parseFloat(input);
+      const diff = Math.abs(userVal - currentQ.answer);
+
+      if (diff < 0.05) {
+        // Correct!
+        feedback.style.display = 'flex';
+        feedback.className = 'feedback-banner correct';
+        feedback.innerHTML = `🎉 太棒了！回答完全正確！答案就是 <strong>${currentQ.answer}</strong>！`;
+        streakCount++;
+        totalScore += 20 * currentQuizLevel;
+        document.getElementById('streakCount').textContent = streakCount;
+        document.getElementById('totalScore').textContent = totalScore;
+        playSuccessSound();
+        triggerConfetti();
+      } else {
+        // Wrong
+        feedback.style.display = 'flex';
+        feedback.className = 'feedback-banner wrong';
+        feedback.innerHTML = `🤔 答案差了一點點喔（你的答案：${userVal}）！可以點擊「💡 思考提示」或「👁️ 教師示範詳解」看看哪裡疏忽了！`;
+        streakCount = 0;
+        document.getElementById('streakCount').textContent = streakCount;
+        playErrorSound();
+      }
+    }
+
+    function toggleHint() {
+      const hint = document.getElementById('hintBox');
+      hint.innerHTML = currentQ.hint;
+      hint.classList.toggle('show');
+      playTone(480, 0.05);
+    }
+
+    function toggleSolution() {
+      const sol = document.getElementById('solutionBox');
+      sol.innerHTML = currentQ.solution;
+      sol.classList.toggle('show');
+      playTone(550, 0.05);
+    }
+
+    function nextQuestion() {
+      playTone(600, 0.05);
+      generateQuestion();
+    }
+
+    /* ==========================================================================
+       Confetti Celebration Effect
+       ========================================================================== */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#00c4cc', '#ffd166', '#ff5757', '#a855f7', '#10b981', '#38bdf8'];
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.7) * 14,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.2,
+          alpha: 1
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.25; // gravity
+          p.rot += p.vRot;
+          p.alpha -= 0.012;
+          if (p.alpha > 0) {
+            alive = true;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          }
+        });
+        if (alive) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+
+    /* ==========================================================================
+       Window Resize & Initialization
+       ========================================================================== */
+    window.addEventListener('resize', () => {
+      drawDerivation();
+      if (currentMainTab === 'realworld') {
+        updatePizzaSim();
+        updateSprinklerSim();
+        updateAnnulusSim();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      drawDerivation();
+      updatePizzaSim();
+      updateSprinklerSim();
+      updateAnnulusSim();
+      generateQuestion();
+    });
+  </script>
+</body>
+</html>
