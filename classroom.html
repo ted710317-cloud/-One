@@ -173,7 +173,7 @@
 
     @media (min-width: 992px) {
       .tools-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -233,15 +233,17 @@
       box-shadow: 0 16px 40px rgba(16, 185, 129, 0.28);
     }
 
-    /* Card 4: Forest Guardian */
-    .card-forest::before {
-      background: linear-gradient(90deg, #22c55e, #eab308);
+    /* Card 3: Homework Board */
+    .card-homework::before {
+      background: linear-gradient(90deg, #06b6d4, #10b981);
     }
-    .card-forest:hover {
+    .card-homework:hover {
       transform: translateY(-8px);
-      border-color: rgba(34, 197, 94, 0.6);
-      box-shadow: 0 16px 40px rgba(34, 197, 94, 0.28);
+      border-color: rgba(6, 182, 212, 0.6);
+      box-shadow: 0 16px 40px rgba(6, 182, 212, 0.28);
     }
+
+    /* Card 4: Forest Guardian (retired) */
 
     .card-badge {
       display: inline-flex;
@@ -380,14 +382,19 @@
       filter: brightness(1.1);
     }
 
-    .btn-forest {
-      background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+    .btn-homework {
+      background: linear-gradient(135deg, #06b6d4 0%, #0d9488 100%);
       color: #ffffff;
-      box-shadow: 0 4px 18px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 4px 18px rgba(6, 182, 212, 0.4);
     }
-    .btn-forest:hover {
-      box-shadow: 0 6px 25px rgba(34, 197, 94, 0.7);
+    .btn-homework:hover {
+      box-shadow: 0 6px 25px rgba(6, 182, 212, 0.7);
       filter: brightness(1.1);
+    }
+    .badge-teal {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.35);
     }
 
     .sub-buttons {
@@ -458,11 +465,11 @@
       <div class="hall-sub">Imperial Teaching & Classroom Tools</div>
       <h1 class="hall-title">朕的教學工具</h1>
       <p class="hall-desc">
-        專為國中小教師量身打造的現代化智慧班級經營工具庫！涵蓋班級貨幣點數存摺、下課即時雲端點歌坊，以及國中教育會考六級分作文 AI 深度評閱診斷，讓課堂管理既高效又充滿師生互動樂趣！
+        專為國中小教師量身打造的現代化智慧班級經營與教學工具庫！涵蓋班級貨幣點數存摺、下課即時雲端點歌坊、講台電腦作業收繳清點佈告欄，以及國中教育會考六級分作文 AI 深度評閱診斷，打造井然有序又充滿互動樂趣的現代化教室！
       </p>
     </header>
 
-    <!-- Tools Grid (3 Classroom Tools) -->
+    <!-- Tools Grid (4 Classroom Tools) -->
     <div class="tools-grid">
 
       <!-- Tool 1: 羚藝汽泡水電子存摺 -->
@@ -532,7 +539,39 @@
         </div>
       </div>
 
-      <!-- Tool 3: 朕的會考六級分作文AI診斷室 -->
+      <!-- Tool 3: 羚藝汽泡水作業佈告欄 -->
+      <div class="tool-card card-homework">
+        <div>
+          <div class="card-badge badge-teal">📋 講台大螢幕 · 組長極速收繳 · 一鍵LINE催繳</div>
+          <div class="tool-name">
+            <span>🫧 羚藝汽泡水作業佈告欄</span>
+          </div>
+          <div class="tool-en">Sparkling Homework Board & Tracker</div>
+          <p class="tool-summary">
+            專為 607 教室講台電腦與組長設計的作業收繳清點系統！連動 Padlet 班級聯絡簿，組長反向點選 3 秒登記完畢，大螢幕全螢幕投影未交座號，全數繳齊觸發彩帶慶祝並支援一鍵複製 LINE 催繳訊息！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">⚡</span> 組長極速反向點選：預設全班皆交（綠燈），僅點 1~2 位未交同學（紅燈 ❌），3 秒登記回座</li>
+            <li class="feature-item"><span class="feature-icon">📢</span> 黑板大看板模式：投影機大螢幕超大字體並列顯示各科未交座號，100% 繳齊觸發煙火彩帶動畫 🎉</li>
+            <li class="feature-item"><span class="feature-icon">📋</span> Padlet 自動同步 ✕ 一鍵 LINE 催繳：連動雲端聯絡簿作業項目，一鍵產生工整文字直接貼至班級群組</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./homework-board/" class="btn-action btn-homework">
+            <span>📋 開啟《羚藝汽泡水作業佈告欄》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="https://ted710317-cloud.github.io/607-homework-board/" class="btn-sub" target="_blank">
+              <span>🌐 雲端線上版</span>
+            </a>
+            <a href="./homework-board/README.md" class="btn-sub" target="_blank">
+              <span>📖 系統部署指引</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 4: 朕的會考六級分作文AI診斷室 -->
       <div class="tool-card card-grader">
         <div>
           <div class="card-badge badge-emerald">📝 會考六級分規準 · 四向度深度診斷 · 手寫OCR</div>
