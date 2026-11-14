@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-  const maxPerHour = parseInt(process.env.RATE_LIMIT_PER_HOUR || '8', 10);
+  const maxPerHour = parseInt(process.env.RATE_LIMIT_PER_HOUR || '60', 10);
   const rateLimit = checkRateLimit(clientIp, maxPerHour);
 
   res.setHeader('X-RateLimit-Limit', maxPerHour);
@@ -21,17 +21,21 @@ export default async function handler(req, res) {
   try {
     const result = await handleGradeRequest(req.body);
 
-    // 評閱成功：全域使用人次加 1
+    // 評閱成功：全域使用人次加 1（設置 3 秒超時保護，絕不拖慢或阻塞評閱結果回傳）
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       const cResp = await fetch('https://abacus.jasoncameron.dev/hit/weizhen-composition-grader/evaluations', {
         headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       if (cResp.ok) {
         const cData = await cResp.json();
         result.usageCount = cData.value;
       }
     } catch (cErr) {
-      console.warn('Counter hit failed:', cErr);
+      console.warn('Counter hit failed or timed out:', cErr.message);
     }
 
     res.status(200).json(result);

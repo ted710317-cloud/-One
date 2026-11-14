@@ -37,7 +37,14 @@ export default function App() {
   const [pdfProgressMsg, setPdfProgressMsg] = useState('');
 
   // Usage count state: 記錄系統累計評閱人次（學生貼上作文評改即加 1）
-  const [usageCount, setUsageCount] = useState(18);
+  const [usageCount, setUsageCount] = useState(() => {
+    try {
+      const saved = localStorage.getItem('WEIZHEN_USAGE_COUNT');
+      return saved ? parseInt(saved, 10) : 11;
+    } catch {
+      return 11;
+    }
+  });
 
   // Load API key from localStorage and check backend status on mount
   useEffect(() => {
@@ -50,7 +57,15 @@ export default function App() {
     checkServerStatus().then((status) => {
       setHasServerKey(Boolean(status?.hasServerKey));
       if (status?.model) setModel(status.model);
-      if (status?.usageCount) setUsageCount(status.usageCount);
+      if (typeof status?.usageCount === 'number' && status.usageCount > 0) {
+        setUsageCount((prev) => {
+          const next = Math.max(prev || 0, status.usageCount);
+          try {
+            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
+          } catch {}
+          return next;
+        });
+      }
     });
   }, []);
 
@@ -107,11 +122,25 @@ export default function App() {
 
       setResult(evaluationResult);
 
-      // 評閱成功：使用人次加 1
-      if (evaluationResult?.usageCount) {
-        setUsageCount(evaluationResult.usageCount);
+      // 評閱成功：使用人次加 1，保證數值只增不減並同步保存至 localStorage
+      if (typeof evaluationResult?.usageCount === 'number' && evaluationResult.usageCount > 0) {
+        setUsageCount((prev) => {
+          const next = Math.max((prev || 0) + 1, evaluationResult.usageCount);
+          try {
+            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
+          } catch {}
+          return next;
+        });
       } else {
-        setUsageCount((prev) => prev + 1);
+        setUsageCount((prev) => {
+          const next = (prev || 0) + 1;
+          try {
+            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
+          } catch {}
+          return next;
+        });
+        // 背景非同步通知後端計數器
+        incrementUsageCount().catch(() => {});
       }
 
       // Celebrate high scores!

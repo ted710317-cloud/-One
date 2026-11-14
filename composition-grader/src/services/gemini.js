@@ -5,14 +5,14 @@ import { SAMPLE_ESSAY_BASKETBALL } from '../constants/presets';
  */
 export async function checkServerStatus() {
   try {
-    const res = await fetch('/api/status');
+    const res = await fetch(`/api/status?_t=${Date.now()}`);
     if (res.ok) {
       return await res.json();
     }
   } catch (err) {
     console.warn('無法連線至後端 /api/status，將切換為純前端模式:', err);
   }
-  return { hasServerKey: false, usageCount: 18, model: 'gemini-flash-lite-latest', maxPerHour: 8 };
+  return { hasServerKey: false, usageCount: null, model: 'gemini-flash-lite-latest', maxPerHour: 60 };
 }
 
 /**
@@ -20,7 +20,7 @@ export async function checkServerStatus() {
  */
 export async function fetchUsageCount() {
   try {
-    const res = await fetch('/api/counter');
+    const res = await fetch(`/api/counter?_t=${Date.now()}`);
     if (res.ok) {
       const data = await res.json();
       return data.value;
@@ -28,12 +28,12 @@ export async function fetchUsageCount() {
   } catch (e) {
     // fallback
   }
-  return 18;
+  return null;
 }
 
 export async function incrementUsageCount() {
   try {
-    const res = await fetch('/api/counter', { method: 'POST' });
+    const res = await fetch(`/api/counter?_t=${Date.now()}`, { method: 'POST' });
     if (res.ok) {
       const data = await res.json();
       return data.value;
@@ -238,5 +238,13 @@ async function directClientGrade({
   const result = await response.json();
   const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
   const cleanedJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  return JSON.parse(cleanedJson);
+  const parsed = JSON.parse(cleanedJson);
+
+  // 純前端評閱成功：背景非同步通知計數器加 1
+  try {
+    const newCount = await incrementUsageCount();
+    if (newCount) parsed.usageCount = newCount;
+  } catch {}
+
+  return parsed;
 }

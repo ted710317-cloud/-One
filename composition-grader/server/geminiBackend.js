@@ -61,7 +61,7 @@ const SYSTEM_INSTRUCTION = `
 const rateLimitMap = new Map();
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-export function checkRateLimit(ip, maxPerHour = 8) {
+export function checkRateLimit(ip, maxPerHour = 60) {
   const now = Date.now();
   let record = rateLimitMap.get(ip);
 
