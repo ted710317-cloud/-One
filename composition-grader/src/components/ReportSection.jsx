@@ -14,7 +14,10 @@ import {
   Maximize2,
   AlertTriangle,
   Lightbulb,
-  Download
+  Download,
+  FileText,
+  Eye,
+  Camera
 } from 'lucide-react';
 
 export default function ReportSection({
@@ -29,6 +32,7 @@ export default function ReportSection({
   const [activeTab, setActiveTab] = useState('model_essay'); // 'model_essay' | 'four_dimensions' | 'rhetoric' | 'interactive'
   const [copied, setCopied] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const [showOcrText, setShowOcrText] = useState(false);
 
   // If loading
   if (isLoading) {
@@ -163,7 +167,7 @@ export default function ReportSection({
                 </span>
               </div>
               {/* Meta statistics */}
-              <div className="flex items-center gap-3 mt-2.5 text-xs sm:text-sm text-slate-600 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-3 mt-2.5 text-xs sm:text-sm text-slate-600 flex-wrap">
                 <span className="bg-slate-100 px-3 py-1 rounded-lg font-semibold">
                   實際字數：<strong className="text-slate-900">{meta.actual_word_count}</strong> 字
                 </span>
@@ -178,6 +182,12 @@ export default function ReportSection({
                 <span className="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-lg font-bold border border-emerald-200/80">
                   {meta.word_count_status}
                 </span>
+                {meta.ocr_transcript && (
+                  <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-lg font-bold border border-purple-200 inline-flex items-center gap-1.5" title="採用 Gemini 3.8 Flash 高精度多模態手寫字形辨識">
+                    <Camera className="w-3.5 h-3.5 text-purple-600" />
+                    手寫稿紙辨識
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -342,11 +352,18 @@ export default function ReportSection({
               {/* 原稿 */}
               <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/80">
                 <div className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                  <span>學生原始作文稿件</span>
+                  <span className="flex items-center gap-1.5">
+                    <span>學生原始作文稿件</span>
+                    {meta.ocr_transcript && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                        手寫照片 AI 辨識轉譯
+                      </span>
+                    )}
+                  </span>
                   <span className="text-xs font-semibold text-slate-400">{meta.actual_word_count} 字</span>
                 </div>
                 <div className="text-base text-slate-700 leading-relaxed font-sans whitespace-pre-line max-h-[500px] overflow-y-auto pr-2">
-                  {originalContent}
+                  {originalContent || meta.ocr_transcript || '（手寫稿紙照片）'}
                 </div>
               </div>
 
@@ -499,36 +516,101 @@ export default function ReportSection({
               <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center font-bold text-sm">
                 四
               </div>
-              <div>
-                <h4 className="font-bold text-base text-slate-900">錯別字與標點診療室</h4>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h4 className="font-bold text-base text-slate-900">錯別字與標點診療室</h4>
+                  {meta.ocr_transcript && (
+                    <button
+                      type="button"
+                      onClick={() => setShowOcrText(!showOcrText)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-purple-600" />
+                      <span>{showOcrText ? '隱藏手寫辨識全文' : '查看手寫稿辨識全文'}</span>
+                    </button>
+                  )}
+                </div>
                 <p className="text-sm text-slate-500 mt-0.5">
                   {four_dimensions.orthography_and_punctuation.punctuation_comment}
                 </p>
               </div>
             </div>
 
+            {/* 可收合的手寫照片 AI 辨識文字全文 */}
+            {meta.ocr_transcript && showOcrText && (
+              <div className="mb-5 p-4 rounded-xl bg-purple-50/50 border border-purple-200/80 animate-in fade-in">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-purple-600" />
+                    手寫稿紙 AI 逐字轉譯全文（供師生比對手寫筆畫與語境）：
+                  </span>
+                  <span className="text-[11px] text-purple-600 font-medium">
+                    共 {meta.actual_word_count} 字
+                  </span>
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-sans whitespace-pre-line bg-white p-3 rounded-lg border border-purple-100 max-h-56 overflow-y-auto">
+                  {meta.ocr_transcript}
+                </div>
+              </div>
+            )}
+
             {four_dimensions.orthography_and_punctuation.typo_corrections?.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {four_dimensions.orthography_and_punctuation.typo_corrections.map((typo, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 flex items-start gap-3.5"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                      !
-                    </div>
-                    <div className="text-sm">
-                      <div className="flex items-center gap-2.5 font-bold mb-1">
-                        <span className="line-through text-rose-600">{typo.original}</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                          {typo.correction}
+                {four_dimensions.orthography_and_punctuation.typo_corrections.map((typo, idx) => {
+                  // 若有提供語境上下文，自動標亮其中的錯別字
+                  let contextNode = null;
+                  if (typo.context) {
+                    const orig = typo.original;
+                    if (orig && typo.context.includes(orig)) {
+                      const parts = typo.context.split(orig);
+                      contextNode = (
+                        <span>
+                          {parts.map((part, pIdx) => (
+                            <React.Fragment key={pIdx}>
+                              {part}
+                              {pIdx < parts.length - 1 && (
+                                <mark className="bg-rose-100 text-rose-800 font-bold px-1 py-0.5 rounded border border-rose-300">
+                                  {orig}
+                                </mark>
+                              )}
+                            </React.Fragment>
+                          ))}
                         </span>
+                      );
+                    } else {
+                      contextNode = <span>{typo.context}</span>;
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3.5 hover:border-slate-300 transition-colors"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-2xs">
+                        !
                       </div>
-                      <p className="text-slate-600 leading-relaxed">{typo.explanation}</p>
+                      <div className="text-sm flex-1 min-w-0">
+                        {contextNode && (
+                          <div className="text-xs bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 mb-2 leading-relaxed">
+                            <span className="font-semibold text-slate-400 mr-1 text-[11px]">位置上下文：</span>
+                            {contextNode}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2.5 font-bold mb-1 flex-wrap">
+                          <span className="line-through text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                            {typo.original}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-300 font-extrabold">
+                            {typo.correction}
+                          </span>
+                        </div>
+                        <p className="text-slate-600 leading-relaxed text-xs sm:text-sm mt-1">{typo.explanation}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="p-4.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-sm flex items-center gap-2.5">

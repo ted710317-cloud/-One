@@ -170,6 +170,19 @@ async function directClientGrade({
 ★【二級分與一級分】：
 審題不清或偏離題旨，內容貧乏；語病嚴重；僅寫零星文句。
 
+【手寫稿紙照片檔專屬辨析與錯別字診療高精度規範（極重要）】
+當評閱對象為「學生手寫稿紙照片」時，請務必遵循以下高精度原則：
+1. 忠實逐字 OCR 辨識（絕不自動語意校正）：
+   - 逐字忠實謄錄學生稿紙上的實際字形，絕不可在 OCR 辨識時憑藉前後文語意順暢度，將學生的「錯別字」自動腦補修正成正確字（例如學生手寫「玩的很高興」，不得自動轉錄成「得」；手寫「決的」不得自動轉錄成「覺得」）！
+2. 杜絕連筆與拍照模糊假錯字（防範 OCR 幻覺）：
+   - 手寫稿常見行書筆勢、牽絲連筆、墨水滲透或拍照反光。閱卷時必須嚴謹區分「真錯字」與「正常連筆草字」：
+   - 若該字在文脈中完全通順，且筆畫僅是一般手寫行書連筆（如點挑連寫、折筆圓弧化、橫劃牽絲），【嚴禁草率判為錯字】！
+   - 唯有在學生確實寫錯筆畫結構（如部首誤寫、多一筆少一畫、自造錯字）或詞意混淆（如同音別字「在/再」、「的/得/地」、「決/絕」、「倒/到」、「以/已」、「成究/成就」）時，才可列入錯別字清單。
+3. 每個錯字提供前後文語境（context）：
+   - 在 typo_corrections 中，必須提供包含該字的 6~12 字前後文語境（context），讓師生能精準在手寫稿紙上對照定位。
+4. 回傳手寫逐字謄錄（ocr_transcript）：
+   - 在 meta 中務必回傳 ocr_transcript 欄位，完整附上自照片辨識出的繁體中文學生作文全文，以供核對。
+
 【執行守則與輸出要求】
 1. 閱卷導師綜合短評：文字長度嚴格要求在「100字到150字之間」，需涵蓋立意取材、修辭與文字張力、情感體悟之全面診斷，兼具專業深度與教育溫暖。若達六級分，應明確指出其立意昇華或文學感染力何以達到會考滿級分標準。
 2. 純文字字數統計：統計純文字字數，評估是否達到設定之目標字數範圍。
@@ -203,7 +216,9 @@ async function directClientGrade({
   }
   contentsParts.push({ text: promptUser });
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // 若為手寫照片，優先使用視覺能力最強的 gemini-3.8-flash 確保繁中筆畫 OCR 極致精準
+  const activeModel = imageBase64 ? 'gemini-3.8-flash' : (model || 'gemini-flash-lite-latest');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
     method: 'POST',

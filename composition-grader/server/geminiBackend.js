@@ -29,6 +29,19 @@ const SYSTEM_INSTRUCTION = `
 ★【二級分與一級分】：
 審題不清或偏離題旨，內容貧乏；語病嚴重；僅寫零星文句。
 
+【手寫稿紙照片檔專屬辨析與錯別字診療高精度規範（極重要）】
+當評閱對象為「學生手寫稿紙照片」時，請務必遵循以下高精度原則：
+1. 忠實逐字 OCR 辨識（絕不自動語意校正）：
+   - 逐字忠實謄錄學生稿紙上的實際字形，絕不可在 OCR 辨識時憑藉前後文語意順暢度，將學生的「錯別字」自動腦補修正成正確字（例如學生手寫「玩的很高興」，不得自動轉錄成「得」；手寫「決的」不得自動轉錄成「覺得」）！
+2. 杜絕連筆與拍照模糊假錯字（防範 OCR 幻覺）：
+   - 手寫稿常見行書筆勢、牽絲連筆、墨水滲透或拍照反光。閱卷時必須嚴謹區分「真錯字」與「正常連筆草字」：
+   - 若該字在文脈中完全通順，且筆畫僅是一般手寫行書連筆（如點挑連寫、折筆圓弧化、橫劃牽絲），【嚴禁草率判為錯字】！
+   - 唯有在學生確實寫錯筆畫結構（如部首誤寫、多一筆少一畫、自造錯字）或詞意混淆（如同音別字「在/再」、「的/得/地」、「決/絕」、「倒/到」、「以/已」、「成究/成就」）時，才可列入錯別字清單。
+3. 每個錯字提供前後文語境（context）：
+   - 在 typo_corrections 中，必須提供包含該字的 6~12 字前後文語境（context），讓師生能精準在手寫稿紙上對照定位。
+4. 回傳手寫逐字謄錄（ocr_transcript）：
+   - 在 meta 中務必回傳 ocr_transcript 欄位，完整附上自照片辨識出的繁體中文學生作文全文，以供核對。
+
 【執行守則與輸出要求】
 1. 閱卷導師綜合短評：文字長度嚴格要求在「100字到150字之間」，需涵蓋立意取材、修辭與文字張力、情感體悟之全面診斷，兼具專業深度與教育溫暖。若達六級分，應明確指出其立意昇華或文學感染力何以達到會考滿級分標準。
 2. 純文字字數統計：統計純文字字數，評估是否達到設定之目標字數範圍。
@@ -122,7 +135,9 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
     "genre": "${genre || '不限文體'}",
     "actual_word_count": 數字,
     "target_word_count": "目標字數說明",
-    "word_count_status": "字數狀況評定短語"
+    "word_count_status": "字數狀況評定短語",
+    "is_handwritten_photo": ${imageBase64 ? 'true' : 'false'},
+    "ocr_transcript": "若為手寫照片，請填寫從照片中高精度逐字辨識出之學生完整繁體中文作文內容全文；若為純文字輸入則留空字串"
   },
   "overall": {
     "score": 數字(1-6),
@@ -148,7 +163,12 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
     "orthography_and_punctuation": {
       "dimension_name": "錯別字與標點",
       "typo_corrections": [
-        { "original": "原錯字詞", "correction": "正確字詞", "explanation": "辨析說明" }
+        {
+          "context": "包含該錯別字的前後文語境（約6~12字，方便師生在稿紙精確定位）",
+          "original": "原錯字詞",
+          "correction": "正確字詞",
+          "explanation": "辨析說明（指明錯誤原因，避免把正常連筆誤判為錯字）"
+        }
       ],
       "punctuation_comment": "標點與格式評語"
     }
@@ -207,7 +227,10 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
   contentsParts.push({ text: promptUser });
 
   // List of models to try in sequence for high resilience
-  const candidateModels = Array.from(new Set([model, 'gemini-flash-lite-latest', 'gemini-3.8-flash']));
+  // 若為照片檔上傳，優先使用多模態視覺 OCR 最強大的 gemini-3.8-flash，確保中文字筆畫精準辨識
+  const candidateModels = imageBase64
+    ? ['gemini-3.8-flash', 'gemini-flash-lite-latest']
+    : Array.from(new Set([model, 'gemini-flash-lite-latest', 'gemini-3.8-flash']));
 
   let lastError = null;
 

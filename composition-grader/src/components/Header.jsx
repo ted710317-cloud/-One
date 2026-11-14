@@ -13,8 +13,8 @@ export default function Header({
   usageCount,
 }) {
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+    <header className="bg-white/98 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print pt-[max(env(safe-area-inset-top),0.5rem)]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
         {/* Brand Group */}
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-amber-500 flex items-center justify-center text-white shadow-md shadow-indigo-100 shrink-0">
@@ -22,8 +22,8 @@ export default function Header({
           </div>
           <div className="min-w-0">
             {/* Title & Badges */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-              <h1 className="text-[14px] sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <h1 className="text-[15px] sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-normal sm:leading-tight">
                 朕的會考六級分作文AI診斷室
               </h1>
               <div className="flex items-center gap-1 flex-wrap">

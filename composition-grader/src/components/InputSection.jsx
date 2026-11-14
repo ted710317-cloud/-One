@@ -11,9 +11,11 @@ import {
   X,
   CheckSquare,
   Square,
-  BookOpen
+  BookOpen,
+  CheckCircle2
 } from 'lucide-react';
 import { AVAILABLE_RHETORICS, AVAILABLE_GENRES, WORD_COUNT_PRESETS } from '../constants/presets';
+import { optimizeManuscriptImage } from '../utils/imageOptimizer';
 
 export default function InputSection({
   title,
@@ -40,6 +42,8 @@ export default function InputSection({
 }) {
   const [inputMode, setInputMode] = useState('text'); // 'text' | 'image'
   const [showGuideInput, setShowGuideInput] = useState(false);
+  const [isOptimizingImage, setIsOptimizingImage] = useState(false);
+  const [imageMeta, setImageMeta] = useState(null);
 
   // Calculate live word count (excluding whitespace)
   const currentWordCount = content.replace(/\s+/g, '').length;
@@ -60,23 +64,39 @@ export default function InputSection({
     setSelectedRhetorics([]);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      // Get base64 string without data prefix
-      const base64 = reader.result.split(',')[1];
-      setImageBase64(base64);
-    };
-    reader.readAsDataURL(file);
+    setIsOptimizingImage(true);
+    try {
+      const optimized = await optimizeManuscriptImage(file, 2048, 0.92);
+      setImageFile(file);
+      setImageBase64(optimized.base64);
+      setImageMeta({
+        width: optimized.width,
+        height: optimized.height,
+        sizeKb: optimized.optimizedSizeKb,
+        originalSizeKb: optimized.originalSizeKb,
+      });
+    } catch (err) {
+      console.warn('圖片優化失敗，採用原始讀取方式:', err);
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1];
+        setImageBase64(base64);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsOptimizingImage(false);
+    }
   };
 
   const removeImage = () => {
     setImageFile(null);
     setImageBase64(null);
+    setImageMeta(null);
   };
 
   return (
@@ -303,13 +323,19 @@ export default function InputSection({
           </div>
         ) : (
           <div className="space-y-3">
-            {!imageBase64 ? (
+            {isOptimizingImage ? (
+              <div className="border-2 border-dashed border-indigo-300 bg-indigo-50/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center animate-pulse">
+                <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
+                <p className="text-base font-bold text-indigo-950 mb-1">正在校正手寫照片解析度與方向...</p>
+                <p className="text-xs text-indigo-700">自動修正手機 EXIF 旋轉並進行筆畫清晰化，確保錯別字檢測極致精確</p>
+              </div>
+            ) : !imageBase64 ? (
               <label className="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/40 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-indigo-50/70 group">
                 <div className="w-14 h-14 rounded-full bg-white shadow-xs flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform mb-3">
                   <Upload className="w-7 h-7" />
                 </div>
                 <p className="text-base font-bold text-slate-800 mb-1">點擊上傳或將學生作文照片拖曳至此</p>
-                <p className="text-sm text-slate-500">支援 JPG、PNG 格式之手寫稿紙清晰照片</p>
+                <p className="text-sm text-slate-500">支援手機拍照、JPG、PNG 稿紙照片（自動優化解析度與筆畫辨識）</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -318,23 +344,35 @@ export default function InputSection({
                 />
               </label>
             ) : (
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 group bg-slate-900">
-                <img
-                  src={`data:image/jpeg;base64,${imageBase64}`}
-                  alt="學生作文原稿照片"
-                  className="w-full max-h-80 object-contain bg-slate-950"
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-3 right-3 p-2 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer shadow-md"
-                  title="移除照片"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="absolute bottom-2 left-3 text-sm bg-slate-900/80 text-white px-3 py-1 rounded-md backdrop-blur-xs font-medium">
-                  已載入手寫照片（將透過 Gemini 多模態進行繁中 OCR 與診斷）
+              <div>
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200 group bg-slate-900">
+                  <img
+                    src={`data:image/jpeg;base64,${imageBase64}`}
+                    alt="學生作文原稿照片"
+                    className="w-full max-h-80 object-contain bg-slate-950"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-3 right-3 p-2 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer shadow-md"
+                    title="移除照片"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="absolute bottom-2 left-3 text-xs sm:text-sm bg-slate-900/80 text-white px-3 py-1 rounded-md backdrop-blur-xs font-medium flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>已載入手寫照片（將以 Gemini 3.8 視覺多模態進行繁中 OCR 與錯字診療）</span>
+                  </div>
                 </div>
+                {imageMeta && (
+                  <div className="flex items-center justify-between text-xs text-slate-500 mt-2 px-1">
+                    <span className="flex items-center gap-1 text-emerald-700 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      已校正手機方向與稿紙解析度（有效杜絕連筆假錯字）
+                    </span>
+                    <span className="font-mono text-slate-400">{imageMeta.width}×{imageMeta.height} px · {imageMeta.sizeKb} KB</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

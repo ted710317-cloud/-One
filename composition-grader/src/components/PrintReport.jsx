@@ -131,16 +131,27 @@ export default function PrintReport({ result, originalContent }) {
 
               <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                 <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>【四、錯別字與標點診療】</strong>
+                {four_dimensions.orthography_and_punctuation.punctuation_comment && (
+                  <div style={{ color: '#64748b', fontSize: '9.5px', marginBottom: '4px', lineHeight: '1.3' }}>
+                    標點指引：{four_dimensions.orthography_and_punctuation.punctuation_comment}
+                  </div>
+                )}
                 {four_dimensions.orthography_and_punctuation.typo_corrections?.length > 0 ? (
-                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                  <ul style={{ margin: 0, paddingLeft: '14px' }}>
                     {four_dimensions.orthography_and_punctuation.typo_corrections.slice(0, 4).map((t, idx) => (
-                      <li key={idx} style={{ marginBottom: '2px' }}>
-                        <span style={{ textDecoration: 'line-through', color: '#dc2626' }}>{t.original}</span> ➔ <strong style={{ color: '#065f46' }}>{t.correction}</strong>（{t.explanation}）
+                      <li key={idx} style={{ marginBottom: '3px', fontSize: '10px', lineHeight: '1.35' }}>
+                        {t.context && (
+                          <span style={{ color: '#475569', fontSize: '9px', display: 'block' }}>
+                            位置：「{t.context}」
+                          </span>
+                        )}
+                        <span style={{ textDecoration: 'line-through', color: '#dc2626' }}>{t.original}</span> ➔ <strong style={{ color: '#065f46' }}>{t.correction}</strong>
+                        {t.explanation ? <span style={{ color: '#64748b', fontSize: '9px' }}>（{t.explanation}）</span> : null}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p style={{ color: '#065f46', margin: 0 }}>未發現明顯錯字，書寫精確。</p>
+                  <p style={{ color: '#065f46', margin: 0, fontSize: '10.5px' }}>未發現明顯錯字，字形書寫精確。</p>
                 )}
               </div>
             </div>

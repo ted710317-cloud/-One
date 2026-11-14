@@ -217,7 +217,7 @@ export default function App() {
           <div className="lg:col-span-7">
             <ReportSection
               result={result}
-              originalContent={content}
+              originalContent={content || result?.meta?.ocr_transcript || ''}
               isLoading={isLoading}
               onLoadDemo={handleLoadDemo}
               onDownloadPdf={handleDownloadPdf}
@@ -229,7 +229,7 @@ export default function App() {
       </main>
 
       {/* Printable Report Component (hidden in web view, rendered when exporting PDF) */}
-      <PrintReport result={result} originalContent={content} />
+      <PrintReport result={result} originalContent={content || result?.meta?.ocr_transcript || ''} />
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-7 text-center text-sm text-slate-500 no-print mt-auto">
