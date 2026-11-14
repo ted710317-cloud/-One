@@ -243,7 +243,15 @@
       box-shadow: 0 16px 40px rgba(6, 182, 212, 0.28);
     }
 
-    /* Card 4: Forest Guardian (retired) */
+    /* Card: Setup Wizard */
+    .card-setup::before {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    }
+    .card-setup:hover {
+      transform: translateY(-8px);
+      border-color: rgba(59, 130, 246, 0.7);
+      box-shadow: 0 16px 40px rgba(59, 130, 246, 0.32);
+    }
 
     .card-badge {
       display: inline-flex;
@@ -273,6 +281,12 @@
       background: rgba(16, 185, 129, 0.15);
       color: #34d399;
       border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
     }
 
     .badge-forest {
@@ -396,6 +410,15 @@
       color: #22d3ee;
       border: 1px solid rgba(6, 182, 212, 0.35);
     }
+    .btn-setup {
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(59, 130, 246, 0.45);
+    }
+    .btn-setup:hover {
+      box-shadow: 0 6px 25px rgba(59, 130, 246, 0.75);
+      filter: brightness(1.1);
+    }
 
     .sub-buttons {
       display: grid;
@@ -465,11 +488,11 @@
       <div class="hall-sub">Imperial Teaching & Classroom Tools</div>
       <h1 class="hall-title">朕的教學工具</h1>
       <p class="hall-desc">
-        專為國中小教師量身打造的現代化智慧班級經營與教學工具庫！涵蓋班級貨幣點數存摺、下課即時雲端點歌坊、講台電腦作業收繳清點佈告欄，以及國中教育會考六級分作文 AI 深度評閱診斷，打造井然有序又充滿互動樂趣的現代化教室！
+        專為國中小教師量身打造的現代化智慧班級經營與教學工具庫！涵蓋班級貨幣點數存摺、教師一鍵建置精靈、下課即時雲端點歌坊、講台電腦作業收繳清點佈告欄，以及國中教育會考六級分作文 AI 深度評閱診斷，打造井然有序又充滿互動樂趣的現代化教室！
       </p>
     </header>
 
-    <!-- Tools Grid (4 Classroom Tools) -->
+    <!-- Tools Grid (5 Classroom Tools) -->
     <div class="tools-grid">
 
       <!-- Tool 1: 羚藝汽泡水電子存摺 -->
@@ -504,7 +527,39 @@
         </div>
       </div>
 
-      <!-- Tool 2: 羚藝汽泡水的點歌坊 -->
+      <!-- Tool 2: 班級電子存摺一鍵建置精靈 -->
+      <div class="tool-card card-setup">
+        <div>
+          <div class="card-badge badge-blue">⚙️ 教師專用 · 3分鐘建立 · 試算表一鍵開戶</div>
+          <div class="tool-name">
+            <span>🛠️ 班級電子存摺建置精靈</span>
+          </div>
+          <div class="tool-en">Teacher Setup & Share Wizard</div>
+          <p class="tool-summary">
+            專為教師設計的免寫網頁、免架伺服器班級存摺開戶精靈！只要複製一份 Google 試算表範本，3 分鐘即可自動生成全班獨立專屬存摺網址與大螢幕 QR Code，並支援群組分享文案！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">📋</span> 3 步驟無痛開戶：複製 Google 試算表 ➔ 部署 Apps Script ➔ 貼上網址立即開工</li>
+            <li class="feature-item"><span class="feature-icon">🔗</span> 專屬網址與 QR Code 自動生成：自動產出各班獨立存摺連結與大螢幕投影片 QR 碼</li>
+            <li class="feature-item"><span class="feature-icon">💌</span> 一鍵複製分享文案：附帶完整教師設定指引，方便科任或學年夥伴直接套用</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="https://ted710317-cloud.github.io/-One/sparkling-passbook/setup.html" class="btn-action btn-setup">
+            <span>⚙️ 前往《電子存摺一鍵建置精靈》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="./sparkling-passbook/" class="btn-sub">
+              <span>💳 前往電子存摺主頁</span>
+            </a>
+            <a href="./sparkling-passbook/README.md" class="btn-sub" target="_blank">
+              <span>📖 完整建置指引</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 3: 羚藝汽泡水的點歌坊 -->
       <div class="tool-card card-jukebox">
         <div>
           <div class="card-badge badge-indigo">🎵 雲端廣播點歌 · 大螢幕投影 · 防洗版守門員</div>
