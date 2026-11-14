@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>朕的教學工坊 - 偉朕老師的數位互動教具與智慧班級經營工坊</title>
-  <meta name="description" content="朕的教學工坊 - 偉朕老師打造的國小互動數位教具與班級經營雲端工具大廳：收錄「朕的數學遊戲」7大數學遊戲與「朕的班級經營工具」4大智慧班級神器！">
+  <title>朕的教學工坊 - 偉朕老師的數位互動教具與智慧教學工具</title>
+  <meta name="description" content="朕的教學工坊 - 偉朕老師專為國小教學現場打造的智慧雲端樞紐：包含「數學遊戲吧」與「教學工具」兩大核心大廳！">
   <style>
     :root {
       --bg-dark: #070b18;
-      --card-bg: rgba(13, 22, 45, 0.90);
+      --card-bg: rgba(13, 22, 45, 0.92);
       --gold: #ffe600;
       --gold-glow: rgba(255, 230, 0, 0.45);
       --royal-gold: #ffc400;
       --cyan: #00f3ff;
       --pink: #ff007f;
-      --candy-purple: #c084fc;
       --indigo: #6366f1;
       --emerald: #10b981;
       --amber: #f59e0b;
@@ -30,13 +29,14 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      background: radial-gradient(circle at 50% 8%, #1a2752 0%, var(--bg-dark) 80%);
+      background: radial-gradient(circle at 50% 12%, #1a2752 0%, var(--bg-dark) 85%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 50px;
+      justify-content: center;
+      padding: 30px 20px 50px;
       overflow-x: hidden;
       position: relative;
     }
@@ -49,7 +49,7 @@
       left: 10%;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.12) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -61,29 +61,30 @@
       right: 10%;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(0, 243, 255, 0.09) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
     .container {
-      max-width: 1260px;
+      max-width: 1000px;
       width: 100%;
       z-index: 1;
       text-align: center;
+      margin: auto 0;
     }
 
     /* Grand Header */
     .header {
-      margin-bottom: 34px;
+      margin-bottom: 46px;
       position: relative;
     }
 
     .crown-icon {
-      font-size: clamp(42px, 6vw, 58px);
+      font-size: clamp(46px, 7vw, 64px);
       display: inline-block;
-      margin-bottom: 6px;
-      filter: drop-shadow(0 0 20px rgba(255, 230, 0, 0.7));
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 22px rgba(255, 230, 0, 0.75));
       animation: crownBob 2.5s ease-in-out infinite alternate;
     }
 
@@ -93,54 +94,54 @@
     }
 
     .hall-sub {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       color: var(--gold);
       letter-spacing: 4px;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .hall-title {
-      font-size: clamp(34px, 6.5vw, 56px);
+      font-size: clamp(36px, 7vw, 60px);
       font-weight: 900;
       letter-spacing: 3px;
       background: linear-gradient(135deg, #ffffff 10%, #ffe600 55%, #ff9100 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 12px;
-      text-shadow: 0 0 40px rgba(255, 230, 0, 0.4);
+      margin-bottom: 14px;
+      text-shadow: 0 0 45px rgba(255, 230, 0, 0.45);
     }
 
     .hall-desc {
-      font-size: 15.5px;
+      font-size: 16px;
       color: var(--text-muted);
-      max-width: 780px;
+      max-width: 700px;
       margin: 0 auto;
       line-height: 1.65;
     }
 
     /* ==========================================================================
-       Two Grand Gateway Cards (雙核心旗艦傳送門)
+       Two Grand Entrance Cards (雙核心旗艦傳送門)
        ========================================================================== */
     .gateways-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
+      gap: 30px;
+      margin-bottom: 46px;
       text-align: left;
     }
 
     .gateway-card {
-      background: rgba(15, 26, 56, 0.92);
+      background: var(--card-bg);
       border: 2px solid rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      padding: 32px 28px;
+      border-radius: 26px;
+      padding: 38px 32px;
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
       transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -156,43 +157,44 @@
       transition: all 0.3s;
     }
 
-    /* Gateway 1: 朕的數學遊戲 */
+    /* Gateway 1: 數學遊戲吧 */
     .gateway-math::before {
       background: linear-gradient(90deg, #ffe600, #00f3ff, #0066ff);
     }
     .gateway-math:hover {
-      transform: translateY(-8px);
-      border-color: rgba(255, 230, 0, 0.7);
-      box-shadow: 0 20px 50px rgba(255, 230, 0, 0.3);
+      transform: translateY(-10px);
+      border-color: rgba(255, 230, 0, 0.75);
+      box-shadow: 0 24px 60px rgba(255, 230, 0, 0.32);
     }
 
-    /* Gateway 2: 朕的班級經營工具 */
+    /* Gateway 2: 教學工具 (班級經營工具) */
     .gateway-class::before {
       background: linear-gradient(90deg, #f59e0b, #ec4899, #6366f1);
     }
     .gateway-class:hover {
-      transform: translateY(-8px);
-      border-color: rgba(245, 158, 11, 0.7);
-      box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3);
+      transform: translateY(-10px);
+      border-color: rgba(99, 102, 241, 0.75);
+      box-shadow: 0 24px 60px rgba(99, 102, 241, 0.32);
     }
 
     .gateway-header {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
+      gap: 16px;
+      margin-bottom: 14px;
     }
 
     .gateway-icon {
-      font-size: 38px;
-      filter: drop-shadow(0 0 12px rgba(255, 230, 0, 0.5));
+      font-size: 44px;
+      filter: drop-shadow(0 0 14px rgba(255, 230, 0, 0.5));
     }
 
     .gateway-title {
-      font-size: clamp(24px, 4vw, 30px);
+      font-size: clamp(22px, 3.8vw, 32px);
       font-weight: 900;
       color: #ffffff;
       letter-spacing: 1px;
+      white-space: nowrap;
     }
 
     .gateway-tagline {
@@ -200,50 +202,45 @@
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .tag-math { color: var(--gold); }
     .tag-class { color: #fbbf24; }
 
     .gateway-desc {
-      font-size: 14.5px;
+      font-size: 15px;
       color: #cbd5e1;
-      line-height: 1.6;
-      margin-bottom: 18px;
+      line-height: 1.65;
+      margin-bottom: 22px;
     }
 
     .gateway-badges {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 22px;
+      margin-bottom: 30px;
     }
 
     .g-badge {
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 800;
-      padding: 5px 12px;
-      border-radius: 16px;
+      padding: 6px 14px;
+      border-radius: 18px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #e2e8f0;
-    }
-
-    .gateway-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
     }
 
     .btn-gateway {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 15px 22px;
-      border-radius: 14px;
-      font-size: 16px;
+      gap: 12px;
+      width: 100%;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 17px;
       font-weight: 900;
       text-decoration: none;
       transition: all 0.25s;
@@ -254,10 +251,10 @@
     .btn-gateway-math {
       background: linear-gradient(135deg, #ffe600 0%, #ff9100 100%);
       color: #050b1a;
-      box-shadow: 0 6px 20px rgba(255, 230, 0, 0.45);
+      box-shadow: 0 6px 24px rgba(255, 230, 0, 0.45);
     }
     .btn-gateway-math:hover {
-      box-shadow: 0 8px 30px rgba(255, 230, 0, 0.7);
+      box-shadow: 0 10px 35px rgba(255, 230, 0, 0.7);
       filter: brightness(1.1);
       transform: scale(1.02);
     }
@@ -265,275 +262,12 @@
     .btn-gateway-class {
       background: linear-gradient(135deg, #f59e0b 0%, #d946ef 50%, #6366f1 100%);
       color: #ffffff;
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
     }
     .btn-gateway-class:hover {
-      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.7);
+      box-shadow: 0 10px 35px rgba(99, 102, 241, 0.7);
       filter: brightness(1.1);
       transform: scale(1.02);
-    }
-
-    .btn-quick-view {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-quick-view:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    /* ==========================================================================
-       Interactive Filter Tabs
-       ========================================================================== */
-    .filter-tabs-wrapper {
-      margin-bottom: 28px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .filter-tabs {
-      display: inline-flex;
-      background: rgba(13, 22, 45, 0.8);
-      padding: 6px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 14.5px;
-      font-weight: 800;
-      padding: 10px 22px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tab-btn:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, rgba(255, 230, 0, 0.25) 0%, rgba(255, 145, 0, 0.25) 100%);
-      color: var(--gold);
-      border: 1px solid rgba(255, 230, 0, 0.5);
-      box-shadow: 0 4px 16px rgba(255, 230, 0, 0.25);
-    }
-
-    /* Section Header */
-    .section-title {
-      font-size: 24px;
-      font-weight: 900;
-      text-align: left;
-      margin: 36px 0 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #ffffff;
-      border-left: 4px solid var(--gold);
-      padding-left: 12px;
-    }
-
-    /* Grid for Showcase */
-    .showcase-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    @media (min-width: 1100px) {
-      .showcase-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    .item-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 26px 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      text-align: left;
-      backdrop-filter: blur(14px);
-      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .item-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      transition: all 0.3s;
-    }
-
-    /* Card styling hooks */
-    .card-factor::before { background: linear-gradient(90deg, var(--cyan), #0066ff); }
-    .card-factor:hover { transform: translateY(-8px); border-color: rgba(0, 243, 255, 0.6); box-shadow: 0 16px 40px rgba(0, 243, 255, 0.28); }
-
-    .card-dragon::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
-    .card-dragon:hover { transform: translateY(-8px); border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 16px 40px rgba(16, 185, 129, 0.28); }
-
-    .card-multi::before { background: linear-gradient(90deg, var(--pink), #ff5500); }
-    .card-multi:hover { transform: translateY(-8px); border-color: rgba(255, 0, 127, 0.6); box-shadow: 0 16px 40px rgba(255, 0, 127, 0.28); }
-
-    .card-candy::before { background: linear-gradient(90deg, #ec4899, #8b5cf6); }
-    .card-candy:hover { transform: translateY(-8px); border-color: rgba(192, 132, 252, 0.6); box-shadow: 0 16px 40px rgba(192, 132, 252, 0.28); }
-
-    .card-pi::before { background: linear-gradient(90deg, #facc15, #f97316); }
-    .card-pi:hover { transform: translateY(-8px); border-color: rgba(250, 204, 21, 0.6); box-shadow: 0 16px 40px rgba(250, 204, 21, 0.28); }
-
-    .card-area::before { background: linear-gradient(90deg, #06b6d4, #10b981); }
-    .card-area:hover { transform: translateY(-8px); border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 16px 40px rgba(6, 182, 212, 0.28); }
-
-    .card-speed::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
-    .card-speed:hover { transform: translateY(-8px); border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 16px 40px rgba(245, 158, 11, 0.28); }
-
-    .card-passbook::before { background: linear-gradient(90deg, #f59e0b, #ea580c); }
-    .card-passbook:hover { transform: translateY(-8px); border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 16px 40px rgba(245, 158, 11, 0.28); }
-
-    .card-jukebox::before { background: linear-gradient(90deg, #6366f1, #ec4899); }
-    .card-jukebox:hover { transform: translateY(-8px); border-color: rgba(99, 102, 241, 0.6); box-shadow: 0 16px 40px rgba(99, 102, 241, 0.28); }
-
-    .card-grader::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
-    .card-grader:hover { transform: translateY(-8px); border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 16px 40px rgba(16, 185, 129, 0.28); }
-
-    .card-forest::before { background: linear-gradient(90deg, #22c55e, #eab308); }
-    .card-forest:hover { transform: translateY(-8px); border-color: rgba(34, 197, 94, 0.6); box-shadow: 0 16px 40px rgba(34, 197, 94, 0.28); }
-
-    .card-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11.5px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      width: fit-content;
-    }
-
-    .badge-cyan { background: rgba(0, 243, 255, 0.12); color: var(--cyan); border: 1px solid rgba(0, 243, 255, 0.3); }
-    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
-    .badge-pink { background: rgba(255, 0, 127, 0.12); color: #ff66b2; border: 1px solid rgba(255, 0, 127, 0.3); }
-    .badge-purple { background: rgba(192, 132, 252, 0.15); color: #e9d5ff; border: 1px solid rgba(192, 132, 252, 0.35); }
-    .badge-gold { background: rgba(250, 204, 21, 0.15); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.35); }
-    .badge-orange { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
-    .badge-indigo { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); }
-
-    .item-name {
-      font-size: 21px;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .item-en {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-    }
-
-    .item-summary {
-      font-size: 13.5px;
-      color: #cbd5e1;
-      line-height: 1.55;
-      margin-bottom: 16px;
-      min-height: 60px;
-    }
-
-    .feature-list {
-      list-style: none;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .feature-item {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      line-height: 1.4;
-    }
-
-    .feature-icon {
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    .btn-enter {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14.5px;
-      font-weight: 900;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-factor { background: linear-gradient(135deg, var(--cyan) 0%, #0066ff 100%); color: #031024; box-shadow: 0 4px 18px rgba(0, 243, 255, 0.4); }
-    .btn-dragon { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4); }
-    .btn-multi { background: linear-gradient(135deg, var(--pink) 0%, #ff5500 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(255, 0, 127, 0.4); }
-    .btn-candy { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(192, 132, 252, 0.4); }
-    .btn-pi { background: linear-gradient(135deg, #facc15 0%, #ea580c 100%); color: #000000; font-weight: 800; box-shadow: 0 4px 18px rgba(250, 204, 21, 0.4); }
-    .btn-area { background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%); color: #031024; font-weight: 800; box-shadow: 0 4px 18px rgba(6, 182, 212, 0.4); }
-    .btn-speed { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #ffffff; font-weight: 800; box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4); }
-    .btn-passbook { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4); }
-    .btn-jukebox { background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(99, 102, 241, 0.4); }
-    .btn-grader { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); color: #031024; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4); }
-    .btn-forest { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); color: #ffffff; box-shadow: 0 4px 18px rgba(34, 197, 94, 0.4); }
-
-    .btn-enter:hover {
-      filter: brightness(1.1);
-      transform: translateY(-2px);
-    }
-
-    /* Filter animations */
-    .item-card.hidden-item {
-      display: none !important;
     }
 
     .footer-note {
@@ -544,9 +278,8 @@
       border-radius: 14px;
       padding: 16px 24px;
       display: inline-block;
-      max-width: 860px;
+      max-width: 760px;
       line-height: 1.65;
-      margin-top: 10px;
     }
 
     .footer-note strong {
@@ -563,57 +296,52 @@
       <div class="hall-sub">Imperial Teaching Workshop · 偉朕老師數位教學工坊</div>
       <h1 class="hall-title">朕的教學工坊</h1>
       <p class="hall-desc">
-        歡迎蒞臨「朕的教學工坊」！此處為國小互動數位教具與智慧班級經營工具的御用總部，彙整廣受師生喜愛的「朕的數學遊戲」殿堂與現代化「朕的班級經營工具」庫，打造生動、高效、充滿探索樂趣的智慧課堂！
+        歡迎蒞臨「朕的教學工坊」！請選擇欲進入的御用教學殿堂：精選國小 7 大互動數學教具的「數學遊戲吧」，或是輔助班級經營管理與作文評閱的「教學工具」庫。
       </p>
     </header>
 
     <!-- ========================================================================
-         Two Grand Master Gateways (雙核心旗艦傳送門)
+         Two Grand Master Gateways (僅呈現兩大核心入口)
          ======================================================================== -->
     <section class="gateways-grid">
 
-      <!-- Gateway 1: 朕的數學遊戲 -->
+      <!-- Gateway 1: 數學遊戲吧 -->
       <div class="gateway-card gateway-math">
         <div>
           <div class="gateway-header">
             <span class="gateway-icon">👑</span>
             <div>
-              <h2 class="gateway-title">朕的數學遊戲</h2>
+              <h2 class="gateway-title">朕的數學遊戲吧</h2>
               <div class="gateway-tagline tag-math">Imperial Math Game Arcade</div>
             </div>
           </div>
           <p class="gateway-desc">
-            精選國小低、中、高年級 7 大互動數學教具遊戲！從質因數短除法連線對戰、貪吃神龍進化、九九乘法保衛戰，到圓周率、圓面積與康軒速率探究實驗室，啟發深度數學思維！
+            收錄國小低、中、高年級 7 款精選互動數學教具遊戲：因數保衛戰（支援連線對戰反彈）、貪吃因數龍、九九乘法表保衛戰、糖果雨消消樂、圓周率密碼、圓面積推導與認識速率實驗室。
           </p>
           <div class="gateway-badges">
-            <span class="g-badge">🎯 7 大國小數學遊戲</span>
+            <span class="g-badge">🎯 7 大國小數學教具</span>
             <span class="g-badge">⚔️ 質因數即時連線對戰</span>
-            <span class="g-badge">☁️ Google 試算表英雄榜</span>
+            <span class="g-badge">☁️ 全班即時雲端榜</span>
           </div>
         </div>
-        <div class="gateway-actions">
-          <a href="./math.html" class="btn-gateway btn-gateway-math">
-            <span>🚀 進入「朕的數學遊戲」專屬大廳</span>
-            <span>➔</span>
-          </a>
-          <a href="#math-section" class="btn-quick-view" onclick="filterCategory('math');">
-            <span>⚡ 快速瀏覽 7 款數學遊戲清單</span>
-          </a>
-        </div>
+        <a href="./math.html" class="btn-gateway btn-gateway-math">
+          <span>🚀 進入《數學遊戲吧》</span>
+          <span>➔</span>
+        </a>
       </div>
 
-      <!-- Gateway 2: 朕的班級經營工具 -->
+      <!-- Gateway 2: 教學工具 -->
       <div class="gateway-card gateway-class">
         <div>
           <div class="gateway-header">
             <span class="gateway-icon">🏫</span>
             <div>
-              <h2 class="gateway-title">朕的班級經營工具</h2>
-              <div class="gateway-tagline tag-class">Imperial Classroom Management Suite</div>
+              <h2 class="gateway-title">朕的教學工具</h2>
+              <div class="gateway-tagline tag-class">Teaching & Classroom Tools</div>
             </div>
           </div>
           <p class="gateway-desc">
-            現代化智慧課堂與班級經營雲端工具庫！涵蓋班級貨幣點數電子存摺、下課即時 YouTube 雲端點歌坊、國中教育會考六級分作文 AI 診斷室，提供全方位班級經營數位利器！
+            現代化智慧課堂與班級經營實用工具庫：羚藝汽泡水電子存摺（班級貨幣點數與幹部發薪）、羚藝汽泡水點歌坊（下課即時大螢幕投影廣播），以及國中會考六級分作文 AI 深度診斷室。
           </p>
           <div class="gateway-badges">
             <span class="g-badge">💰 班級存摺與幹部發薪</span>
@@ -621,325 +349,19 @@
             <span class="g-badge">✍️ 會考作文四向度 AI 診斷</span>
           </div>
         </div>
-        <div class="gateway-actions">
-          <a href="./classroom.html" class="btn-gateway btn-gateway-class">
-            <span>🏫 進入「朕的班級經營工具」專屬大廳</span>
-            <span>➔</span>
-          </a>
-          <a href="#classroom-section" class="btn-quick-view" onclick="filterCategory('classroom');">
-            <span>⚡ 快速瀏覽 3 款班級經營工具清單</span>
-          </a>
-        </div>
+        <a href="./classroom.html" class="btn-gateway btn-gateway-class">
+          <span>🏫 進入《教學工具》</span>
+          <span>➔</span>
+        </a>
       </div>
 
     </section>
 
-    <!-- ========================================================================
-         Interactive Filter Tabs
-         ======================================================================== -->
-    <div class="filter-tabs-wrapper">
-      <div class="filter-tabs" role="tablist">
-        <button class="tab-btn active" id="tab-all" onclick="filterCategory('all');" role="tab">
-          <span>✨ 全部教具與工具一覽 (10)</span>
-        </button>
-        <button class="tab-btn" id="tab-math" onclick="filterCategory('math');" role="tab">
-          <span>👑 朕的數學遊戲 (7)</span>
-        </button>
-        <button class="tab-btn" id="tab-classroom" onclick="filterCategory('classroom');" role="tab">
-          <span>🏫 朕的班級經營工具 (3)</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- ========================================================================
-         All Showcase Grid (11 Items)
-         ======================================================================== -->
-    <div class="showcase-grid" id="showcase-container">
-
-      <!-- ==================== 數學遊戲 (7款) ==================== -->
-      
-      <!-- Math 1: 因數保衛戰 -->
-      <div class="item-card card-factor" data-category="math" id="math-section">
-        <div>
-          <div class="card-badge badge-cyan">🎓 國小高年級 · 支援連線對戰</div>
-          <div class="item-name">
-            <span>🚀 因數保衛戰</span>
-          </div>
-          <div class="item-en">Prime Factor Defender</div>
-          <p class="item-summary">
-            外星複合數母艦侵襲！發射質數砲彈（2、3、5、7...）短除法分解，支援單人無盡狂熱與雙人即時對戰完美反彈！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">⚡</span> 30 秒短除法分解 ✕ 雙人對戰威脅鎖定反彈</li>
-            <li class="feature-item"><span class="feature-icon">📚</span> 自動產出標準分解式學習歷程複習清單</li>
-            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄榜即時同步</li>
-          </ul>
-        </div>
-        <a href="./factor/" class="btn-enter btn-factor">
-          <span>🚀 進入《因數保衛戰》</span>
-        </a>
-      </div>
-
-      <!-- Math 2: 貪吃因數龍 -->
-      <div class="item-card card-dragon" data-category="math">
-        <div>
-          <div class="card-badge badge-green">🐲 國小中高年級適用</div>
-          <div class="item-name">
-            <span>🐉 貪吃因數龍</span>
-          </div>
-          <div class="item-en">Factor Dragon Adventure</div>
-          <p class="item-summary">
-            操控貪吃神龍吞食地圖上的正確因數！結合因數圖鑑展示櫃、質數暴擊與整除反饋，集齊因數解鎖神龍進化！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">💎</span> 因數圖鑑全搜集展示櫃（一個都不漏找）</li>
-            <li class="feature-item"><span class="feature-icon">🌟</span> 4 大世界 16 關卡 ✕ 四階神龍進化</li>
-            <li class="feature-item"><span class="feature-icon">📱</span> 平板手勢滑動 ✕ 螢幕虛擬十字鍵</li>
-          </ul>
-        </div>
-        <a href="./factor-dragon/" class="btn-enter btn-dragon">
-          <span>🐉 進入《貪吃因數龍》</span>
-        </a>
-      </div>
-
-      <!-- Math 3: 九九乘法表保衛戰 -->
-      <div class="item-card card-multi" data-category="math">
-        <div>
-          <div class="card-badge badge-pink">🎒 國小中年級適用</div>
-          <div class="item-name">
-            <span>💥 九九乘法表保衛戰</span>
-          </div>
-          <div class="item-en">Multiplication Defender</div>
-          <p class="item-summary">
-            怪獸群帶著乘法謎題降臨！支援「填空求乘數」與「乘積直覺運算」，雙位數自動裝填發射，熟練九九乘法口訣！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🎯</span> 雙重題型：填空求乘數 / 乘積直覺運算</li>
-            <li class="feature-item"><span class="feature-icon">🛡️</span> 1~9 自選乘數特訓（魔王段 7, 8, 9 專攻）</li>
-            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表全班線上英雄榜即時同步</li>
-          </ul>
-        </div>
-        <a href="./multiplication/" class="btn-enter btn-multi">
-          <span>💥 進入《九九乘法保衛戰》</span>
-        </a>
-      </div>
-
-      <!-- Math 4: 糖果雨消消樂 -->
-      <div class="item-card card-candy" data-category="math">
-        <div>
-          <div class="card-badge badge-purple">🍬 國小低年級適用</div>
-          <div class="item-name">
-            <span>🍭 糖果雨消消樂</span>
-          </div>
-          <div class="item-en">Candy Multiplier</div>
-          <p class="item-summary">
-            下起甜蜜糖果雨！融合九九乘法速算與人氣三消掉落連鎖機制，搭配幾何點子陣列提示，邊消邊練、愈玩愈上癮！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🍬</span> 刺激連鎖消除機制與掉落連續得分</li>
-            <li class="feature-item"><span class="feature-icon">💡</span> 視覺化點子陣列提示，建立幾何乘法直覺</li>
-            <li class="feature-item"><span class="feature-icon">📖</span> 內建九九乘法表隨時對照複習</li>
-          </ul>
-        </div>
-        <a href="./candy-multiplier/" class="btn-enter btn-candy">
-          <span>🍬 進入《糖果雨消消樂》</span>
-        </a>
-      </div>
-
-      <!-- Math 5: 圓周率密碼實驗室 -->
-      <div class="item-card card-pi" data-category="math">
-        <div>
-          <div class="card-badge badge-gold">🌟 國小高年級適用</div>
-          <div class="item-name">
-            <span>⭕ 圓周率密碼實驗室</span>
-          </div>
-          <div class="item-en">Pi Discovery Lab</div>
-          <p class="item-summary">
-            六組生活實物探究！用「雙擋板夾圓」量直徑，滾動圓輪展開圓周長，直徑尺排排看並除出神秘常數 3.14！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">📏</span> 雙擋板夾圓實物測量（教科書標準教法）</li>
-            <li class="feature-item"><span class="feature-icon">🌀</span> 圓周滾動攤平 ✕ 直徑尺 3 倍多一點頓悟</li>
-            <li class="feature-item"><span class="feature-icon">🏆</span> 六組分組實驗與全班大會師數據看板</li>
-          </ul>
-        </div>
-        <a href="./pi-discovery/" class="btn-enter btn-pi">
-          <span>⭕ 進入《圓周率實驗室》</span>
-        </a>
-      </div>
-
-      <!-- Math 6: 圓面積公式推導實驗室 -->
-      <div class="item-card card-area" data-category="math">
-        <div>
-          <div class="card-badge badge-cyan">🌟 國小高年級適用</div>
-          <div class="item-name">
-            <span>📐 圓面積公式推導</span>
-          </div>
-          <div class="item-en">Circle Area Discovery</div>
-          <p class="item-summary">
-            將圓等分切成細小扇形，重組為長方形或展開成等腰三角形！透過幾何化曲為直與約分消去，徹底證明半徑×半徑×3.14！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🟩</span> 扇形重組長方形（長＝半周長，寬＝半徑）</li>
-            <li class="feature-item"><span class="feature-icon">🔺</span> 展開為等腰三角形（底＝圓周長，約分消去 2）</li>
-            <li class="feature-item"><span class="feature-icon">⚖️</span> 雙法同場對照 ✕ 自訂半徑算術驗證沙盒</li>
-          </ul>
-        </div>
-        <a href="./circle-area/" class="btn-enter btn-area">
-          <span>📐 進入《圓面積推導》</span>
-        </a>
-      </div>
-
-      <!-- Math 7: 認識速率互動實驗室 -->
-      <div class="item-card card-speed" data-category="math">
-        <div>
-          <div class="card-badge badge-orange">🌟 六上康軒專用</div>
-          <div class="item-name">
-            <span>🏃 認識速率互動實驗室</span>
-          </div>
-          <div class="item-en">Speed Discovery Lab</div>
-          <p class="item-summary">
-            依據康軒六上第8單元編排：短跑快慢比較、四車競速每小時平分刀、火車正比倍數表格與大換小單位換算階梯！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">📑</span> 活動 8-1：短跑單變量 ✕ 四車平分刀引導</li>
-            <li class="feature-item"><span class="feature-icon">🚂</span> 活動 8-2：火車倍數表格 ✕ 正比知二求一</li>
-            <li class="feature-item"><span class="feature-icon">⚙️</span> 活動 8-3：大換小階梯 ✕ 汽車時速儀表板</li>
-          </ul>
-        </div>
-        <a href="./speed-lab/" class="btn-enter btn-speed">
-          <span>🏃 進入《認識速率實驗室》</span>
-        </a>
-      </div>
-
-      <!-- ==================== 班級經營工具 (4款) ==================== -->
-
-      <!-- Class 1: 羚藝汽泡水電子存摺 -->
-      <div class="item-card card-passbook" data-category="classroom" id="classroom-section">
-        <div>
-          <div class="card-badge badge-orange">💰 班級虛擬幣 · 幹部發薪 · 雲端同步</div>
-          <div class="item-name">
-            <span>💳 羚藝汽泡水電子存摺</span>
-          </div>
-          <div class="item-en">Sparkling Passbook</div>
-          <p class="item-summary">
-            國小班級經濟學最佳工具！全班點數即時加減獎懲、幹部每週/每月發薪與收支紀錄，自動串接 Google 試算表！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">💎</span> 學生點數即時加扣、自訂事由與消費扣抵</li>
-            <li class="feature-item"><span class="feature-icon">👑</span> 班級幹部津貼（自訂職務、薪資週期一鍵撥款）</li>
-            <li class="feature-item"><span class="feature-icon">☁️</span> Google 試算表雲端同步，資料永不遺失</li>
-          </ul>
-        </div>
-        <a href="./sparkling-passbook/" class="btn-enter btn-passbook">
-          <span>💳 進入《電子存摺》</span>
-        </a>
-      </div>
-
-      <!-- Class 2: 羚藝汽泡水的點歌坊 -->
-      <div class="item-card card-jukebox" data-category="classroom">
-        <div>
-          <div class="card-badge badge-indigo">🎵 雲端點歌 · 投影大螢幕 · 學生掃碼</div>
-          <div class="item-name">
-            <span>📻 羚藝汽泡水的點歌坊</span>
-          </div>
-          <div class="item-en">Classroom Jukebox</div>
-          <p class="item-summary">
-            下課、打掃或同樂會利器！學生手機/平板免登入掃碼點歌並留言，大螢幕自動輪播，附帶老師遙控後台與防洗版守門員！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🖥️</span> 大螢幕等化器音波 ✕ 動態點歌 QR Code</li>
-            <li class="feature-item"><span class="feature-icon">🛡️</span> 時長上限過濾（防洗腦長片）✕ 個人配額限制</li>
-            <li class="feature-item"><span class="feature-icon">💌</span> 大螢幕點播寄語卡片 ✕ 民主按讚插播</li>
-          </ul>
-        </div>
-        <a href="./youtube-jukebox/" class="btn-enter btn-jukebox">
-          <span>📻 進入《點歌坊》</span>
-        </a>
-      </div>
-
-      <!-- Class 3: 朕的會考六級分作文AI診斷室 -->
-      <div class="item-card card-grader" data-category="classroom">
-        <div>
-          <div class="card-badge badge-green">📝 會考六級分 · 四向度診斷 · 手寫OCR</div>
-          <div class="item-name">
-            <span>✍️ 會考六級分作文AI診斷室</span>
-          </div>
-          <div class="item-en">RCPE Level 6 Essay Grader</div>
-          <p class="item-summary">
-            依據臺灣國中教育會考六級分規準評閱！提供四向度評語、指定修辭達成追蹤、錯別字診療與原創情節六級分示範範文！
-          </p>
-          <ul class="feature-list">
-            <li class="feature-item"><span class="feature-icon">🎯</span> 會考六級分四向度（立意、結構、文詞、標點）</li>
-            <li class="feature-item"><span class="feature-icon">📸</span> 手寫原稿拍照 OCR 辨識與原位錯字診療</li>
-            <li class="feature-item"><span class="feature-icon">📄</span> 支援一鍵匯出正式作文評改報告書 (PDF)</li>
-          </ul>
-        </div>
-        <a href="./composition-grader/dist/" class="btn-enter btn-grader">
-          <span>✍️ 進入《作文AI診斷室》</span>
-        </a>
-      </div>
-
-    </div>
-
     <!-- Footer Note -->
     <div class="footer-note">
-      👑 <strong>教師課堂指引提示</strong>：本工坊所有教具遊戲與班級工具皆具備各自獨立運作能力。<br>
-      老師可以直接將個別專屬網址分發給孩子，也可以分享「朕的教學工坊」總大廳網址讓孩子或班級幹部自由選擇挑戰！
+      👑 <strong>教師課堂指引提示</strong>：點選上方任一殿堂即可進入完整教具清單；老師亦可將各教具或工具專屬網址直接分發給學生使用。
     </div>
 
   </div>
-
-  <!-- Filter & Hash Routing Script -->
-  <script>
-    function filterCategory(cat) {
-      const cards = document.querySelectorAll('.item-card');
-      const tabAll = document.getElementById('tab-all');
-      const tabMath = document.getElementById('tab-math');
-      const tabClass = document.getElementById('tab-classroom');
-
-      [tabAll, tabMath, tabClass].forEach(btn => btn && btn.classList.remove('active'));
-
-      if (cat === 'math') {
-        tabMath && tabMath.classList.add('active');
-      } else if (cat === 'classroom') {
-        tabClass && tabClass.classList.add('active');
-      } else {
-        tabAll && tabAll.classList.add('active');
-      }
-
-      cards.forEach(card => {
-        const itemCat = card.getAttribute('data-category');
-        if (cat === 'all' || itemCat === cat) {
-          card.classList.remove('hidden-item');
-        } else {
-          card.classList.add('hidden-item');
-        }
-      });
-    }
-
-    // Auto-check URL Hash on Load
-    window.addEventListener('DOMContentLoaded', () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash.includes('math')) {
-        filterCategory('math');
-      } else if (hash.includes('class')) {
-        filterCategory('classroom');
-      } else {
-        filterCategory('all');
-      }
-    });
-
-    window.addEventListener('hashchange', () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash.includes('math')) {
-        filterCategory('math');
-      } else if (hash.includes('class')) {
-        filterCategory('classroom');
-      } else {
-        filterCategory('all');
-      }
-    });
-  </script>
 </body>
 </html>
