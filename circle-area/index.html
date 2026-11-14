@@ -870,13 +870,13 @@
       </div>
     </div>
 
-    <!-- TAB 2: 分層拼成三角形 (4等分手稿 ＆ 16等分金字塔) -->
+    <!-- TAB 2: 分層拼成三角形 (9等分 ＆ 16等分金字塔) -->
     <div class="lab-card" id="tabContent2" style="display: none;">
       <div class="card-header-bar">
         <div class="card-title-group">
-          <h2><span id="tab2Title">🔺 方法二：扇形由下到上分層堆疊成大三角形</span></h2>
+          <h2><span id="tab2Title">🔺 方法二：9 等分扇形 3 層金字塔堆疊 (1+3+5 ＝ 9)</span></h2>
           <div class="card-hint" id="tab2Hint">
-            💡 經典手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），拼成大三角形！
+            💡 9 等分金字塔堆疊：第1層 1 個、第2層 3 個、第3層 5 個！高為 3r，底為 C÷3，3 與 3 完美約分消去！
           </div>
         </div>
       </div>
@@ -888,15 +888,14 @@
             <span style="font-size: 13px; font-weight: 700; color: var(--gold);">🔄 視角切換：</span>
             <div class="pill-group" id="triViewPills">
               <button class="pill-btn gold active" onclick="setTriView('upright')">直立視角（底在下、高由下到上）</button>
-              <button class="pill-btn gold" onclick="setTriView('horizontal')">手稿視角（底在左、尖端朝右）</button>
+              <button class="pill-btn gold" onclick="setTriView('horizontal')">橫向視角（底在左、尖端朝右）</button>
             </div>
           </div>
 
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 13px; font-weight: 700; color: var(--gold);">🔪 分割模式：</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--gold);">🔪 金字塔等分：</span>
             <div class="pill-group" id="triSlicePills">
-              <button class="pill-btn gold active" id="btnTri4" onclick="setTriSlices(4)">4 等分 (老師手稿 1+3)</button>
-              <button class="pill-btn gold" id="btnTri9" onclick="setTriSlices(9)">9 等分 (3層金字塔 1+3+5)</button>
+              <button class="pill-btn gold active" id="btnTri9" onclick="setTriSlices(9)">9 等分 (3層金字塔 1+3+5)</button>
               <button class="pill-btn gold" id="btnTri16" onclick="setTriSlices(16)">16 等分 (4層金字塔 1+3+5+7)</button>
             </div>
           </div>
@@ -1026,12 +1025,12 @@
           <tr>
             <td><b>底邊長度對應</b></td>
             <td>長 ＝ 圓周長的一半 ＝ <span style="color: var(--cyan);">半徑 × 3.14</span></td>
-            <td>底 ＝ 最下層底弧總和（4等分為 <span style="color: var(--cyan);">C ÷ 2</span>；16等分為 <span style="color: var(--cyan);">C ÷ 4</span>）</td>
+            <td>底 ＝ 最下層底弧總和（9等分為 <span style="color: var(--cyan);">C ÷ 3</span>；16等分為 <span style="color: var(--cyan);">C ÷ 4</span>）</td>
           </tr>
           <tr>
             <td><b>高度/寬度對應</b></td>
             <td>寬 ＝ <span style="color: var(--gold);">1 個半徑 (r)</span></td>
-            <td>高 ＝ 層數 × 半徑（4等分為 <span style="color: var(--gold);">2r</span>；16等分為 <span style="color: var(--gold);">4r</span>）</td>
+            <td>高 ＝ 層數 × 半徑（9等分為 <span style="color: var(--gold);">3r</span>；16等分為 <span style="color: var(--gold);">4r</span>）</td>
           </tr>
           <tr>
             <td><b>公式中的「約分消去」</b></td>
@@ -1154,7 +1153,7 @@
     let sliceCount = 16;
     let halfWedgeEnabled = true;
     let triView = 'upright'; // 'upright' or 'horizontal'
-    let triSlices = 4; // 4, 9, or 16
+    let triSlices = 9; // 9 or 16
     let progress = 0; // 0 to 100
     let isPlaying = false;
     let animId = null;
@@ -1286,18 +1285,14 @@
     function setTriSlices(n) {
       triSlices = n;
       playTone(580);
-      document.getElementById('btnTri4').classList.toggle('active', n === 4);
-      document.getElementById('btnTri9').classList.toggle('active', n === 9);
-      document.getElementById('btnTri16').classList.toggle('active', n === 16);
+      if (document.getElementById('btnTri9')) document.getElementById('btnTri9').classList.toggle('active', n === 9);
+      if (document.getElementById('btnTri16')) document.getElementById('btnTri16').classList.toggle('active', n === 16);
       updateTriFormulaUI();
       renderAll();
     }
 
     function updateTriFormulaUI() {
-      if (triSlices === 4) {
-        document.getElementById('tab2Title').innerHTML = `<span>🔺 方法二：4 等分扇形由下到上堆疊成大三角形 (老師手稿 1+3)</span>`;
-        document.getElementById('tab2Hint').innerHTML = `💡 老師手稿分層堆疊：頂層 1 個、底層 3 個（左右正立、中間倒扣插孔咬合），高為 2r，與公式 ÷2 完美約分！`;
-      } else if (triSlices === 9) {
+      if (triSlices === 9) {
         document.getElementById('tab2Title').innerHTML = `<span>🔺 方法二：9 等分扇形 3 層金字塔堆疊 (1+3+5 ＝ 9)</span>`;
         document.getElementById('tab2Hint').innerHTML = `💡 9 等分金字塔堆疊：第1層 1 個、第2層 3 個、第3層 5 個！高為 3r，底為 C÷3，3 與 3 完美約分消去！`;
       } else {
@@ -1309,50 +1304,7 @@
       const banner = document.getElementById('triConclusionBanner');
       const tip = document.getElementById('triTeacherTip');
 
-      if (triSlices === 4) {
-        grid.innerHTML = `
-          <div class="step-box">
-            <span class="step-tag">Step 1 • 幾何形狀對應</span>
-            <span class="step-content">三角形面積 ＝ (底 × 高) ÷ 2</span>
-            <span class="step-desc">扇形由下到上分層堆疊：頂層 1 個，底層 3 個（左右正立、中間倒扣）。</span>
-          </div>
-
-          <div class="step-box highlight">
-            <span class="step-tag">Step 2 • 底邊對應</span>
-            <span class="step-content">底 ＝ 圓周長的一半</span>
-            <span class="step-desc">
-              大三角形底邊由 ② 與 ③ 兩個底弧組成：<br>
-              <b style="color: var(--cyan);">底 ＝ C ÷ 4 ＋ C ÷ 4 ＝ 半徑 × 3.14</b>
-            </span>
-          </div>
-
-          <div class="step-box highlight">
-            <span class="step-tag">Step 3 • 高度對應</span>
-            <span class="step-content">高 ＝ 2 倍半徑 (2r)</span>
-            <span class="step-desc">
-              從金字塔頂點到底部，跨越 3 層扇形：<br>
-              <b style="color: var(--gold);">高 ＝ 3 × 半徑 (3r)</b>
-            </span>
-          </div>
-
-          <div class="step-box">
-            <span class="step-tag">Step 4 • 約分神奇消去！</span>
-            <span class="step-content">高裡的 2 與公式 ÷2 抵銷</span>
-            <span class="step-desc">
-              ＝ (半徑 × 3.14) × (<span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span> × 半徑) ÷ <span style="color:#f43f5e; text-decoration:line-through; font-weight:900;">2</span><br>
-              ＝ <b style="color: #4ade80;">半徑 × 半徑 × 3.14</b>
-            </span>
-          </div>
-        `;
-        banner.innerHTML = `
-          <div class="math-title">🌟 4 等分三角形分層堆疊法 數學結論證明</div>
-          <div class="math-equation">三角形面積 ＝ (底 × 高) ÷ 2 ＝ [(C ÷ 3) × 3r] ÷ 2 ＝ (C × r) ÷ 2 ＝ 半徑 × 半徑 × 3.14</div>
-        `;
-        tip.innerHTML = `
-          💡 <strong>震撼頓悟點</strong>：<br>
-          大三角形跨越了上下兩層扇形，所以它的**高剛好是直徑（2 × 半徑）**！代入三角形公式時，高裡面的「2」與公式中的「除以 2」<strong>剛好約分消去</strong>，得出完美的 r × r × 3.14！
-        `;
-      } else if (triSlices === 9) {
+      if (triSlices === 9) {
         grid.innerHTML = `
           <div class="step-box">
             <span class="step-tag">Step 1 • 幾何金字塔結構</span>
@@ -1816,7 +1768,7 @@
     }
 
     /* ==========================================================================
-       RENDER METHOD 2: 4-SLICE STACKING OR 16-SLICE PYRAMID (MAGNIFIED)
+       RENDER METHOD 2: 9-SLICE OR 16-SLICE PYRAMID (ENLARGED FOR CLASSROOM)
        ========================================================================== */
     function renderTab2() {
       const canvas = document.getElementById('canvas2');
@@ -1835,18 +1787,14 @@
         ctx.translate(width * 0.5, height * 0.5);
         ctx.rotate(Math.PI / 2);
         ctx.translate(-width * 0.5, -height * 0.5);
-        if (triSlices === 4) {
-          render4SectorTriangle(ctx, width, height, t, cx0, cy0);
-        } else if (triSlices === 9) {
+        if (triSlices === 9) {
           render9SectorPyramid(ctx, width, height, t, cx0, cy0);
         } else {
           render16SectorPyramid(ctx, width, height, t, cx0, cy0);
         }
         ctx.restore();
       } else {
-        if (triSlices === 4) {
-          render4SectorTriangle(ctx, width, height, t, cx0, cy0);
-        } else if (triSlices === 9) {
+        if (triSlices === 9) {
           render9SectorPyramid(ctx, width, height, t, cx0, cy0);
         } else {
           render16SectorPyramid(ctx, width, height, t, cx0, cy0);
@@ -1854,138 +1802,27 @@
       }
     }
 
-    /* --- 4-SECTOR TRIANGLE STACKING (ENLARGED FOR CLASSROOM) --- */
-    function render4SectorTriangle(ctx, width, height, t, cx0, cy0) {
-      // Adjusted R and apexY to fit comfortably with no overlap between Sector 1 and Sector 4
-      const R = Math.min(width * 0.18, height * 0.32, 150);
-      const sin45 = Math.SQRT1_2;
-      const delta = R * sin45;
-
-      const apexX = width * 0.5;
-      const apexY = height * 0.12;
-
-      // NON-OVERLAPPING GEOMETRY:
-      // Sector 1: Apex at (apexX, apexY), pointing down. Arc bottom at apexY + R.
-      // Sector 4: Apex at (apexX, apexY + 2*R), pointing UP. Arc top at apexY + 2*R - R = apexY + R!
-      // They touch tangentially at (apexX, apexY + R) with ZERO overlap!
-      // Sector 2 & 3: Straight edges flush with Sector 4, bottom arcs form base.
-      const targetPos = [
-        { x: apexX, y: apexY, angle: Math.PI / 2, color: '#0284c7', label: '①' },
-        { x: apexX - delta, y: apexY + 2 * R - delta, angle: Math.PI / 2, color: '#059669', label: '②' },
-        { x: apexX + delta, y: apexY + 2 * R - delta, angle: Math.PI / 2, color: '#ea580c', label: '③' },
-        { x: apexX, y: apexY + 2 * R, angle: -Math.PI / 2, color: '#7c3aed', label: '④' }
-      ];
-
-      const circleAngles = [-Math.PI / 4, -3 * Math.PI / 4, 3 * Math.PI / 4, Math.PI / 4];
-
-      for (let i = 0; i < 4; i++) {
-        const curX = (1 - t) * cx0 + t * targetPos[i].x;
-        const curY = (1 - t) * cy0 + t * targetPos[i].y;
-
-        let angleDiff = targetPos[i].angle - circleAngles[i];
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        const curAngle = circleAngles[i] + t * angleDiff;
-
-        ctx.save();
-        ctx.translate(curX, curY);
-        ctx.rotate(curAngle);
-        drawWedge(ctx, R, Math.PI / 2, targetPos[i].color, 'rgba(255, 255, 255, 0.45)');
-        ctx.restore();
-
-        // Clear upright badges for classroom viewing
-        ctx.save();
-        const labelDist = R * 0.48;
-        const lx = curX + labelDist * Math.cos(curAngle);
-        const ly = curY + labelDist * Math.sin(curAngle);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(targetPos[i].label, lx, ly);
-        ctx.restore();
-      }
-
-      if (t > 0.4) {
-        const alpha = Math.min(1, (t - 0.4) * 2);
-        draw4TriangleAnnotations(ctx, apexX, apexY, R, delta, alpha);
-      } else {
-        const circleAlpha = Math.max(0, 1 - t * 2.5);
-        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
-      }
-    }
-
-    function draw4TriangleAnnotations(ctx, apexX, apexY, R, delta, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-
-      const baseCenterY = apexY + 2 * R;
-      const maxBottomY = baseCenterY + (R - delta);
-      const baseLeftX = apexX - 2 * delta;
-      const baseRightX = apexX + 2 * delta;
-
-      // Height Dimension (Left side) spanning exactly 2r
-      const hLineX = baseLeftX - 45;
-      ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(hLineX + 10, apexY);
-      ctx.lineTo(hLineX, apexY);
-      ctx.lineTo(hLineX, baseCenterY);
-      ctx.lineTo(hLineX + 10, baseCenterY);
-      ctx.stroke();
-
-      ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('高', hLineX - 12, (apexY + baseCenterY) * 0.5);
-
-      // Height dashed line through center
-      ctx.strokeStyle = '#facc15';
-      ctx.setLineDash([5, 5]);
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(apexX, apexY);
-      ctx.lineTo(apexX, baseCenterY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Base Dimension (Bottom side) below bottom arcs
-      const bracketY = maxBottomY + 20;
-      ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(baseLeftX, bracketY - 10);
-      ctx.lineTo(baseLeftX, bracketY);
-      ctx.lineTo(baseRightX, bracketY);
-      ctx.lineTo(baseRightX, bracketY - 10);
-      ctx.stroke();
-
-      ctx.fillStyle = '#67e8f9';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('底', apexX, bracketY + 8);
-
-      ctx.restore();
-    }
-
-
-    /* --- 9-SECTOR 3-LAYER PYRAMID (1+3+5 = 9) --- */
+    /* --- 9-SECTOR 3-LAYER PYRAMID (1+3+5 = 9) - ENLARGED FOR CLASSROOM --- */
     function render9SectorPyramid(ctx, width, height, t, cx0, cy0) {
       const N = 9;
       const theta = (2 * Math.PI) / N; // 40 deg
-      const R = Math.min(width * 0.14, height * 0.26, 120);
-
       const sinHalf = Math.sin(theta / 2);
       const cosHalf = Math.cos(theta / 2);
+
+      // Enlarged dynamic R for classroom large screen / whiteboard
+      const effW = (triView === 'horizontal') ? Math.min(width, height * 1.1) : width;
+      const effH = (triView === 'horizontal') ? Math.min(height, width * 0.7) : height;
+      const maxRByWidth = (effW - 160) / (2 * 3 * sinHalf);
+      const maxRByHeight = (effH - 95) / (2 * cosHalf + 1);
+      const R = Math.max(70, Math.min(maxRByWidth, maxRByHeight, 205));
+
       const uLeft = { x: -sinHalf, y: cosHalf };
       const uRight = { x: sinHalf, y: cosHalf };
 
       const totalH = 3 * R * cosHalf;
+      const maxBottomY = (2 * cosHalf + 1) * R;
       const apexX = width * 0.5;
-      const apexY = Math.max(30, (height - totalH - 80) * 0.35);
+      const apexY = Math.max(25, (effH - maxBottomY - 50) * 0.45);
 
       const colors = [
         '#0284c7',
@@ -2041,15 +1878,18 @@
         drawWedge(ctx, R, theta, targets[i].color, 'rgba(255, 255, 255, 0.4)');
         ctx.restore();
 
+        // Upright, bold, high-contrast sector index badge
         ctx.save();
-        const labelDist = R * 0.50;
+        const labelDist = R * 0.48;
         const lx = curX + labelDist * Math.cos(curAngle);
         const ly = curY + labelDist * Math.sin(curAngle);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 20px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${i + 1}`, lx, ly);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(String(i + 1), lx, ly);
         ctx.restore();
       }
 
@@ -2058,7 +1898,7 @@
         draw9PyramidAnnotations(ctx, apexX, apexY, R, theta, totalH, alpha);
       } else {
         const circleAlpha = Math.max(0, 1 - t * 2.5);
-        drawCircleAnnotations(ctx, cx0, cy0, R * 1.3, circleAlpha);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
       }
     }
 
@@ -2072,25 +1912,25 @@
       const baseLeftX = apexX - baseSpan;
       const baseRightX = apexX + baseSpan;
 
-      const hLineX = baseLeftX - 45;
+      const hLineX = baseLeftX - 50;
       ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(hLineX + 10, apexY);
+      ctx.moveTo(hLineX + 12, apexY);
       ctx.lineTo(hLineX, apexY);
       ctx.lineTo(hLineX, baseBottomY);
-      ctx.lineTo(hLineX + 10, baseBottomY);
+      ctx.lineTo(hLineX + 12, baseBottomY);
       ctx.stroke();
 
       ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 22px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText('高', hLineX - 12, (apexY + baseBottomY) * 0.5);
+      ctx.fillText('高', hLineX - 14, (apexY + baseBottomY) * 0.5);
 
       ctx.strokeStyle = '#facc15';
-      ctx.setLineDash([5, 5]);
-      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(apexX, apexY);
       ctx.lineTo(apexX, baseBottomY);
@@ -2099,16 +1939,16 @@
 
       const bracketY = maxBottomY + 20;
       ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(baseLeftX, bracketY - 10);
+      ctx.moveTo(baseLeftX, bracketY - 12);
       ctx.lineTo(baseLeftX, bracketY);
       ctx.lineTo(baseRightX, bracketY);
-      ctx.lineTo(baseRightX, bracketY - 10);
+      ctx.lineTo(baseRightX, bracketY - 12);
       ctx.stroke();
 
       ctx.fillStyle = '#67e8f9';
-      ctx.font = 'bold 22px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText('底', apexX, bracketY + 8);
@@ -2120,17 +1960,23 @@
     function render16SectorPyramid(ctx, width, height, t, cx0, cy0) {
       const N = 16;
       const theta = (2 * Math.PI) / N; // 22.5 deg
-      // Enlarged R for 16 slices
-      const R = Math.min(width * 0.12, height * 0.22, 98);
-
       const sinHalf = Math.sin(theta / 2);
       const cosHalf = Math.cos(theta / 2);
+
+      // Enlarged dynamic R for classroom large screen / whiteboard
+      const effW = (triView === 'horizontal') ? Math.min(width, height * 1.1) : width;
+      const effH = (triView === 'horizontal') ? Math.min(height, width * 0.7) : height;
+      const maxRByWidth = (effW - 160) / (2 * 4 * sinHalf);
+      const maxRByHeight = (effH - 95) / (3 * cosHalf + 1);
+      const R = Math.max(65, Math.min(maxRByWidth, maxRByHeight, 175));
+
       const uLeft = { x: -sinHalf, y: cosHalf };
       const uRight = { x: sinHalf, y: cosHalf };
 
       const totalH = 4 * R * cosHalf;
+      const maxBottomY = (3 * cosHalf + 1) * R;
       const apexX = width * 0.5;
-      const apexY = Math.max(30, (height - totalH - 80) * 0.35);
+      const apexY = Math.max(25, (effH - maxBottomY - 50) * 0.45);
 
       const colors = [
         '#0284c7',
@@ -2187,14 +2033,20 @@
         ctx.translate(curX, curY);
         ctx.rotate(curAngle);
         drawWedge(ctx, R, theta, targets[i].color, 'rgba(255, 255, 255, 0.4)');
+        ctx.restore();
 
-        // Clear sector index badge
+        // Upright, bold, high-contrast sector index badge (always right-side up)
+        ctx.save();
+        const labelDist = R * 0.48;
+        const lx = curX + labelDist * Math.cos(curAngle);
+        const ly = curY + labelDist * Math.sin(curAngle);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 13px sans-serif';
+        ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${i + 1}`, R * 0.45, 0);
-
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(String(i + 1), lx, ly);
         ctx.restore();
       }
 
@@ -2203,7 +2055,7 @@
         draw16PyramidAnnotations(ctx, apexX, apexY, R, theta, totalH, alpha);
       } else {
         const circleAlpha = Math.max(0, 1 - t * 2.5);
-        drawCircleAnnotations(ctx, cx0, cy0, R * 1.5, circleAlpha);
+        drawCircleAnnotations(ctx, cx0, cy0, R, circleAlpha);
       }
     }
 
@@ -2218,26 +2070,26 @@
       const baseRightX = apexX + baseSpan;
 
       // Height dimension (Left)
-      const hLineX = baseLeftX - 45;
+      const hLineX = baseLeftX - 50;
       ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(hLineX + 10, apexY);
+      ctx.moveTo(hLineX + 12, apexY);
       ctx.lineTo(hLineX, apexY);
       ctx.lineTo(hLineX, baseBottomY);
-      ctx.lineTo(hLineX + 10, baseBottomY);
+      ctx.lineTo(hLineX + 12, baseBottomY);
       ctx.stroke();
 
       ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 22px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText('高', hLineX - 12, (apexY + baseBottomY) * 0.5);
+      ctx.fillText('高', hLineX - 14, (apexY + baseBottomY) * 0.5);
 
       // Height dashed line
       ctx.strokeStyle = '#facc15';
-      ctx.setLineDash([5, 5]);
-      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(apexX, apexY);
       ctx.lineTo(apexX, baseBottomY);
@@ -2247,16 +2099,16 @@
       // Base dimension (Bottom)
       const bracketY = maxBottomY + 20;
       ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(baseLeftX, bracketY - 10);
+      ctx.moveTo(baseLeftX, bracketY - 12);
       ctx.lineTo(baseLeftX, bracketY);
       ctx.lineTo(baseRightX, bracketY);
-      ctx.lineTo(baseRightX, bracketY - 10);
+      ctx.lineTo(baseRightX, bracketY - 12);
       ctx.stroke();
 
       ctx.fillStyle = '#67e8f9';
-      ctx.font = 'bold 22px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText('底', apexX, bracketY + 8);
@@ -2294,13 +2146,9 @@
         drawRectAnnotations(resL.ctx, rectLeftL, rectTopL, rectWL, rectHL, RL, (t - 0.4) * 2);
       }
 
-      // Right: Triangle (either 4-slice or 16-slice according to triSlices)
+      // Right: Triangle (9-slice or 16-slice pyramid according to triSlices)
       resR.ctx.clearRect(0, 0, resR.width, resR.height);
-      if (triSlices === 4) {
-        render4SectorTriangle(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.46);
-        document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：4 等分三角形 (老師手稿 1+3)';
-        document.getElementById('dualCardRightSub').textContent = '觀察「底」與「高」';
-      } else if (triSlices === 9) {
+      if (triSlices === 9) {
         render9SectorPyramid(resR.ctx, resR.width, resR.height, t, resR.width * 0.5, resR.height * 0.46);
         document.getElementById('dualCardRightTitle').textContent = '🔺 方案二：9 等分金字塔 (1+3+5)';
         document.getElementById('dualCardRightSub').textContent = '觀察「底」與「高」';
