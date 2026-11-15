@@ -21,8 +21,8 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
-      --radius-xl: 20px;
-      --radius-lg: 14px;
+      --radius-xl: 18px;
+      --radius-lg: 12px;
       --radius-pill: 9999px;
       --shadow-canva: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(0, 196, 204, 0.15);
       --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
@@ -35,145 +35,173 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden !important;
+    }
+
     body {
       font-family: var(--font-display);
       background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-dark) 75%);
       color: var(--text-main);
-      min-height: 100vh;
-      padding: 16px 12px 60px;
-      overflow-x: hidden;
-      line-height: 1.5;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 1240px;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 1400px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      padding: 4px 8px 3px;
+      box-sizing: border-box;
+      overflow: hidden;
+      gap: 4px;
     }
 
-    /* Header & Navigation */
-    header {
-      text-align: center;
-      margin-bottom: 18px;
-      position: relative;
-    }
-
-    .top-bar {
+    /* Single-Screen Unified Topbar */
+    .app-topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.08);
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.78);
       border: 1px solid var(--border-card);
-      color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: var(--radius-pill);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      display: inline-flex;
+      border-radius: var(--radius-lg);
+      padding: 4px 10px;
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .topbar-brand {
+      display: flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: all 0.2s ease;
-    }
-    .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: var(--canva-cyan);
-      transform: translateY(-1px);
     }
 
-    .sound-btn.muted {
-      opacity: 0.6;
-      border-color: rgba(239, 68, 68, 0.4);
-    }
-
-    .main-title-container {
-      margin-bottom: 6px;
-    }
-
-    .badge-hero {
-      display: inline-flex;
+    .title-cluster {
+      display: flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(90deg, rgba(0, 196, 204, 0.2), rgba(125, 42, 232, 0.2));
-      border: 1px solid rgba(0, 196, 204, 0.4);
-      padding: 4px 14px;
-      border-radius: var(--radius-pill);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--canva-cyan);
-      margin-bottom: 8px;
     }
 
-    h1 {
-      font-size: clamp(24px, 4.5vw, 36px);
+    .topbar-title {
+      font-size: 16px;
       font-weight: 900;
       background: linear-gradient(135deg, #ffffff 15%, #ffd166 50%, #00c4cc 85%, #ff5757 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
+      margin: 0;
+      white-space: nowrap;
+      letter-spacing: -0.3px;
     }
 
-    .subtitle {
-      font-size: clamp(13px, 2.4vw, 15px);
-      color: var(--text-muted);
-      max-width: 860px;
-      margin: 0 auto;
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(90deg, rgba(0, 196, 204, 0.2), rgba(125, 42, 232, 0.2));
+      border: 1px solid rgba(0, 196, 204, 0.4);
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--canva-cyan);
+      white-space: nowrap;
     }
 
-    /* Main Tab System */
+    .nav-btn-mini {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .nav-btn-mini:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--canva-cyan);
+    }
+    .nav-btn-mini.secret-btn {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.2), rgba(255, 87, 87, 0.2));
+      border-color: rgba(255, 209, 102, 0.4);
+      color: #ffd166;
+    }
+    .nav-btn-mini.secret-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(255, 87, 87, 0.35));
+    }
+    .nav-btn-mini.sound-btn.muted {
+      opacity: 0.6;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Main Tab Navigation */
     .tab-nav {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 20px 0 24px;
+      gap: 6px;
+      margin: 0;
+      overflow-x: auto;
     }
 
     .tab-pill {
-      background: rgba(30, 41, 59, 0.85);
-      border: 1.5px solid var(--border-card);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
       color: var(--text-muted);
-      padding: 10px 20px;
+      padding: 4px 12px;
       border-radius: var(--radius-pill);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      transition: all 0.25s ease;
-      backdrop-filter: blur(8px);
+      gap: 4px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
     }
     .tab-pill:hover {
       color: #fff;
+      background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
     }
     .tab-pill.active {
       color: #ffffff;
       background: linear-gradient(135deg, rgba(0, 196, 204, 0.35), rgba(125, 42, 232, 0.35));
       border-color: var(--canva-cyan);
-      box-shadow: 0 4px 18px rgba(0, 196, 204, 0.35);
+      box-shadow: 0 2px 10px rgba(0, 196, 204, 0.35);
     }
 
-    /* Content Panels */
+    /* Tab Panels */
     .tab-panel {
       display: none;
-      animation: fadeIn 0.3s ease forwards;
+      flex: 1;
+      min-height: 0;
     }
     .tab-panel.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      display: flex;
+      flex-direction: column;
     }
 
     /* Card styling */
@@ -181,52 +209,89 @@
       background: var(--bg-card);
       border: 1px solid var(--border-card);
       border-radius: var(--radius-xl);
-      padding: 22px;
+      padding: 16px 20px;
       backdrop-filter: blur(12px);
       box-shadow: var(--shadow-canva);
-      margin-bottom: 20px;
       position: relative;
     }
 
     .card-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
       color: #fff;
     }
 
     .card-title .icon-badge {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 16px;
       background: rgba(0, 196, 204, 0.15);
       border: 1px solid rgba(0, 196, 204, 0.3);
     }
 
-    /* Module 1: Dual Derivation Styles */
+    
+    .btn-text-short {
+      display: none;
+    }
+    @media (max-width: 680px) {
+      .btn-text-full {
+        display: none !important;
+      }
+      .btn-text-short {
+        display: inline !important;
+      }
+    }
+
+    /* TAB 1: Zero-Scroll Single-Screen Derivation Lab */
+    #tab-derivation {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .main-screen-card {
+      flex: 1;
+      min-height: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 5px 10px 5px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-canva);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+
     .derivation-subnav {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      margin: 0;
+      overflow-x: auto;
     }
 
     .subnav-btn {
-      padding: 8px 18px;
-      border-radius: 12px;
+      padding: 3px 12px;
+      border-radius: var(--radius-pill);
       border: 1px solid var(--border-card);
       background: rgba(15, 23, 42, 0.7);
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 12.5px;
       font-weight: 700;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.2s;
     }
     .subnav-btn:hover {
@@ -237,45 +302,49 @@
       background: linear-gradient(135deg, #00c4cc, #2563eb);
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 4px 14px rgba(0, 196, 204, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 196, 204, 0.3);
     }
 
     .canvas-wrapper {
+      flex: 1;
+      min-height: 0;
       position: relative;
       background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
+      border-radius: 12px;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 16px 12px;
+      padding: 2px 4px;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
     }
 
-    canvas {
-      display: block;
+    #derivationCanvas {
       max-width: 100%;
+      max-height: 100%;
+      width: auto;
       height: auto;
-      touch-action: none;
+      aspect-ratio: 1000 / 520;
+      object-fit: contain;
+      display: block;
     }
 
     .fullscreen-trigger-btn {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(15, 23, 42, 0.85);
+      top: 6px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #ffd166;
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 13px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       z-index: 10;
       backdrop-filter: blur(8px);
       transition: all 0.2s;
@@ -286,87 +355,104 @@
       color: #fff;
     }
 
-    /* Derivation Controls */
+    /* Derivation Controls Panel */
     .controls-panel {
-      margin-top: 16px;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 4px 8px;
     }
 
-    .control-row {
+    .controls-config-bar {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
-    .control-label {
-      font-size: 14px;
-      font-weight: 700;
-      color: #ffd166;
-      min-width: 90px;
+    .control-row.inline-row {
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .control-label {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #ffd166;
+      white-space: nowrap;
     }
 
     .slice-btn-group {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
     }
 
     .slice-btn {
-      padding: 7px 16px;
-      border-radius: 10px;
+      padding: 3px 9px;
+      border-radius: 7px;
       border: 1px solid var(--border-card);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--text-main);
-      font-size: 13.5px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
+      white-space: nowrap;
+      transition: all 0.18s;
     }
     .slice-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.16);
       border-color: var(--canva-cyan);
     }
     .slice-btn.active {
       background: linear-gradient(135deg, var(--canva-cyan), var(--canva-purple));
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 2px 10px rgba(0, 196, 204, 0.3);
+      box-shadow: 0 2px 6px rgba(0, 196, 204, 0.3);
+    }
+    .slice-btn.half-cut-pill {
+      border-color: rgba(0, 196, 204, 0.4);
+    }
+
+    .controls-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .slider-container {
       flex: 1;
-      min-width: 240px;
+      min-width: 130px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
     }
 
     .custom-slider {
       flex: 1;
-      height: 10px;
+      height: 7px;
       border-radius: var(--radius-pill);
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.15);
       outline: none;
       -webkit-appearance: none;
       cursor: pointer;
-      position: relative;
     }
     .custom-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #ffd166;
-      border: 3px solid #fff;
-      box-shadow: 0 0 12px rgba(255, 209, 102, 0.8);
+      border: 2px solid #fff;
+      box-shadow: 0 0 8px rgba(255, 209, 102, 0.8);
       cursor: grab;
-      transition: transform 0.1s;
     }
     .custom-slider::-webkit-slider-thumb:active {
       cursor: grabbing;
@@ -377,35 +463,38 @@
       background: rgba(255, 209, 102, 0.15);
       color: #ffd166;
       border: 1px solid rgba(255, 209, 102, 0.3);
-      padding: 4px 10px;
+      padding: 2px 7px;
       border-radius: var(--radius-pill);
-      font-size: 13px;
-      font-weight: 700;
-      min-width: 90px;
+      font-size: 11.5px;
+      font-weight: 800;
+      min-width: 76px;
       text-align: center;
+      white-space: nowrap;
     }
 
     .action-btn-group {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 5px;
     }
 
     .action-btn {
-      padding: 7px 16px;
-      border-radius: 10px;
-      font-size: 13.5px;
+      padding: 3px 10px;
+      border-radius: 7px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       border: none;
-      transition: all 0.2s;
+      white-space: nowrap;
+      transition: all 0.18s;
     }
     .action-btn-primary {
       background: linear-gradient(135deg, #00c4cc, #2563eb);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 196, 204, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 196, 204, 0.3);
     }
     .action-btn-primary:hover {
       filter: brightness(1.1);
@@ -419,50 +508,84 @@
     .action-btn-secondary:hover {
       background: rgba(255, 255, 255, 0.16);
     }
-
-    /* Deduction Accordion / Step-by-Step Card */
-    .discovery-box {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-      border: 1.5px dashed rgba(0, 196, 204, 0.4);
-      border-radius: 16px;
-      padding: 18px;
-      margin-top: 18px;
+    .action-btn-guide {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.25), rgba(125, 42, 232, 0.25));
+      color: #ffd166;
+      border: 1px solid rgba(255, 209, 102, 0.4);
+    }
+    .action-btn-guide:hover {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.4), rgba(125, 42, 232, 0.4));
+      color: #fff;
     }
 
-    .discovery-header {
+    /* Modal for Discovery Guide */
+    .discovery-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99990;
+      background: rgba(7, 11, 24, 0.85);
+      backdrop-filter: blur(10px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .discovery-modal.active {
+      display: flex;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .discovery-modal-dialog {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+      border: 1.5px solid rgba(0, 196, 204, 0.5);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 196, 204, 0.2);
+      max-width: 960px;
+      width: 100%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .discovery-modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
-      user-select: none;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.7);
     }
 
-    .discovery-title {
+    .discovery-modal-title {
       font-size: 16px;
       font-weight: 800;
-      color: #00c4cc;
+      color: #ffd166;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .reveal-toggle-btn {
-      background: rgba(0, 196, 204, 0.15);
-      border: 1px solid var(--canva-cyan);
+    .discovery-modal-close {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       padding: 5px 12px;
       border-radius: var(--radius-pill);
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .discovery-modal-close:hover {
+      background: rgba(239, 68, 68, 0.4);
+      border-color: #ef4444;
     }
 
-    .discovery-content {
-      margin-top: 14px;
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-    .discovery-content.open {
-      display: block;
+    .discovery-modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
     }
 
     .step-list {
@@ -502,7 +625,7 @@
     }
 
     .step-text {
-      font-size: 14.5px;
+      font-size: 14px;
       color: #e2e8f0;
       line-height: 1.6;
     }
@@ -522,7 +645,6 @@
       border-radius: 6px;
     }
 
-    /* Comparison Table */
     .compare-table {
       width: 100%;
       border-collapse: collapse;
@@ -531,10 +653,10 @@
       overflow: hidden;
     }
     .compare-table th, .compare-table td {
-      padding: 12px 14px;
+      padding: 10px 12px;
       text-align: left;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 14px;
+      font-size: 13.5px;
     }
     .compare-table th {
       background: rgba(15, 23, 42, 0.8);
@@ -550,207 +672,196 @@
       width: 22%;
     }
 
+    /* Tabs 2, 3, 4 internal scroll */
+    #tab-realworld, #tab-drill, #tab-history {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    #tab-realworld::-webkit-scrollbar,
+    #tab-drill::-webkit-scrollbar,
+    #tab-history::-webkit-scrollbar,
+    .discovery-modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    #tab-realworld::-webkit-scrollbar-thumb,
+    #tab-drill::-webkit-scrollbar-thumb,
+    #tab-history::-webkit-scrollbar-thumb,
+    .discovery-modal-body::-webkit-scrollbar-thumb {
+      background: rgba(0, 196, 204, 0.35);
+      border-radius: 9999px;
+    }
+
     /* Module 2: Real World Simulator */
     .app-cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
+      gap: 16px;
     }
 
     .app-card {
-      background: rgba(30, 41, 59, 0.7);
+      background: var(--bg-card);
       border: 1px solid var(--border-card);
       border-radius: var(--radius-xl);
-      padding: 20px;
+      padding: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-canva);
       display: flex;
       flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      gap: 12px;
+      transition: transform 0.2s, border-color 0.2s;
     }
     .app-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(0, 196, 204, 0.4);
+      border-color: rgba(0, 196, 204, 0.3);
+      transform: translateY(-2px);
     }
 
     .app-card-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
+      gap: 10px;
     }
 
     .app-icon {
-      font-size: 26px;
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.08);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 20px;
       flex-shrink: 0;
     }
 
     .app-title-group h3 {
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
       color: #fff;
     }
     .app-title-group p {
-      font-size: 12.5px;
+      font-size: 12px;
       color: var(--text-muted);
     }
 
     .app-canvas-container {
       background: #0f172a;
       border-radius: 12px;
-      height: 220px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
       position: relative;
       overflow: hidden;
+      min-height: 190px;
     }
 
     .canvas-fs-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(0, 196, 204, 0.4);
-      color: #00c4cc;
-      padding: 5px 12px;
-      border-radius: var(--radius-pill);
-      font-size: 12px;
+      top: 8px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffd166;
+      font-size: 11px;
       font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s;
       z-index: 5;
-      backdrop-filter: blur(8px);
-      transition: all 0.2s ease;
     }
     .canvas-fs-btn:hover {
-      background: rgba(0, 196, 204, 0.25);
-      border-color: #00c4cc;
-      color: #fff;
-      transform: translateY(-1px);
+      background: var(--canva-cyan);
+      color: #0b1120;
     }
 
     .app-param-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-      font-size: 13.5px;
-    }
-
-    .app-result-box {
-      background: rgba(15, 23, 42, 0.7);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: auto;
-      border: 1px solid rgba(0, 196, 204, 0.2);
-    }
-
-    .result-metric {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
-      font-size: 13.5px;
-    }
-
-    .metric-val {
-      font-weight: 800;
-      color: #ffd166;
-    }
-
-    .insight-badge {
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: rgba(0, 196, 204, 0.12);
-      border-left: 3px solid var(--canva-cyan);
-      border-radius: 6px;
       font-size: 12.5px;
-      color: #a5f3fc;
+      color: var(--text-muted);
+    }
+
+    .app-result-pill {
+      background: rgba(0, 196, 204, 0.12);
+      border: 1px solid rgba(0, 196, 204, 0.3);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      color: #cffafe;
       line-height: 1.5;
     }
 
-    /* Module 3: Drill Arena */
+    /* Module 3: Quiz Arena */
     .arena-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .level-pills {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .level-pill {
-      padding: 7px 15px;
+      padding: 5px 12px;
       border-radius: var(--radius-pill);
       border: 1px solid var(--border-card);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text-muted);
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
     }
     .level-pill:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.3);
     }
     .level-pill.active {
       background: linear-gradient(135deg, #ffaa00, #ff5757);
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 4px 12px rgba(255, 170, 0, 0.35);
+      box-shadow: 0 2px 10px rgba(255, 170, 0, 0.3);
     }
 
     .score-banner {
       display: flex;
       align-items: center;
-      gap: 16px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-card);
-      padding: 6px 16px;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 5px 14px;
       border-radius: var(--radius-pill);
-      font-size: 14px;
-      font-weight: 700;
+      border: 1px solid var(--border-card);
     }
 
     .score-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 800;
     }
 
     .quiz-card {
-      background: rgba(30, 41, 59, 0.85);
-      border: 1px solid var(--border-card);
-      border-radius: var(--radius-xl);
-      padding: 24px;
-      position: relative;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
     }
 
     .question-layout {
       display: grid;
       grid-template-columns: 1fr 280px;
-      gap: 20px;
+      gap: 18px;
     }
     @media (max-width: 768px) {
       .question-layout {
@@ -761,7 +872,7 @@
     .question-text-area {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .q-badge {
@@ -771,15 +882,15 @@
       background: rgba(255, 170, 0, 0.15);
       color: #ffaa00;
       border: 1px solid rgba(255, 170, 0, 0.3);
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: var(--radius-pill);
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 800;
       width: fit-content;
     }
 
     .question-stem {
-      font-size: 18px;
+      font-size: 16.5px;
       font-weight: 700;
       color: #fff;
       line-height: 1.6;
@@ -787,21 +898,21 @@
 
     .question-canvas-box {
       background: #0f172a;
-      border-radius: 16px;
+      border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 220px;
+      height: 200px;
       position: relative;
       overflow: hidden;
     }
 
     .answer-action-bar {
-      margin-top: 20px;
+      margin-top: 16px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -815,31 +926,31 @@
       background: rgba(15, 23, 42, 0.9);
       border: 2px solid rgba(255, 255, 255, 0.15);
       color: #fff;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      padding: 10px 18px;
-      border-radius: 12px;
-      width: 180px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      width: 160px;
       outline: none;
       transition: all 0.2s;
     }
     .math-input:focus {
       border-color: #00c4cc;
-      box-shadow: 0 0 14px rgba(0, 196, 204, 0.4);
+      box-shadow: 0 0 12px rgba(0, 196, 204, 0.4);
     }
 
     .input-unit {
-      margin-left: 8px;
-      font-size: 15px;
+      margin-left: 6px;
+      font-size: 14px;
       color: var(--text-muted);
       font-weight: 600;
     }
 
     .feedback-banner {
-      margin-top: 16px;
-      padding: 14px 18px;
-      border-radius: 12px;
-      font-size: 15px;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14.5px;
       font-weight: 700;
       display: none;
       animation: fadeIn 0.25s ease;
@@ -847,7 +958,7 @@
     .feedback-banner.correct {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: rgba(16, 185, 129, 0.2);
       border: 1.5px solid #10b981;
       color: #34d399;
@@ -855,18 +966,18 @@
     .feedback-banner.wrong {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: rgba(239, 68, 68, 0.2);
       border: 1.5px solid #ef4444;
       color: #f87171;
     }
 
     .solution-box {
-      margin-top: 16px;
+      margin-top: 14px;
       background: rgba(15, 23, 42, 0.85);
       border: 1px dashed rgba(255, 209, 102, 0.4);
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 14px;
       display: none;
     }
     .solution-box.show {
@@ -875,12 +986,12 @@
     }
 
     .hint-box {
-      margin-top: 10px;
+      margin-top: 8px;
       background: rgba(0, 196, 204, 0.08);
       border-left: 3px solid var(--canva-cyan);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13.5px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      font-size: 13px;
       color: #cffafe;
       display: none;
     }
@@ -898,7 +1009,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
     .fullscreen-modal.active {
       display: flex;
@@ -906,14 +1017,14 @@
 
     .fs-close-btn {
       position: absolute;
-      top: 16px;
-      right: 20px;
+      top: 14px;
+      right: 18px;
       background: rgba(255, 255, 255, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
-      padding: 8px 18px;
+      padding: 6px 16px;
       border-radius: var(--radius-pill);
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(8px);
@@ -926,25 +1037,25 @@
 
     .fs-header-title {
       position: absolute;
-      top: 16px;
-      left: 20px;
-      font-size: 17px;
+      top: 14px;
+      left: 18px;
+      font-size: 15.5px;
       font-weight: 800;
       color: #ffd166;
       background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 6px 18px;
+      padding: 5px 16px;
       border-radius: var(--radius-pill);
       backdrop-filter: blur(8px);
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .fs-canvas-holder {
       width: 100%;
-      height: calc(100vh - 120px);
+      height: calc(100vh - 100px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -952,7 +1063,7 @@
 
     #fsCanvas {
       max-width: 96vw;
-      max-height: calc(100vh - 130px);
+      max-height: calc(100vh - 110px);
       width: auto;
       height: auto;
       object-fit: contain;
@@ -961,19 +1072,19 @@
 
     .fs-toolbar-bottom {
       position: absolute;
-      bottom: 20px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(15, 23, 42, 0.92);
       border: 1.5px solid rgba(0, 196, 204, 0.5);
       border-radius: var(--radius-pill);
-      padding: 10px 24px;
+      padding: 8px 20px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       backdrop-filter: blur(16px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 196, 204, 0.2);
-      max-width: 90vw;
+      max-width: 92vw;
       width: 720px;
       z-index: 1000;
     }
@@ -989,70 +1100,140 @@
       z-index: 999999;
     }
 
-    /* Footer */
-    footer {
+    /* Compact 1-line Footer */
+    .app-footer {
       text-align: center;
-      margin-top: 40px;
       color: var(--text-dim);
-      font-size: 13px;
+      font-size: 11px;
+      flex-shrink: 0;
+      line-height: 1.2;
+      padding: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-  </style>
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .app-topbar {
+        flex-wrap: wrap;
+        padding: 4px 8px;
+        gap: 4px;
+      }
+      .tab-nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+      .topbar-title {
+        font-size: 15px;
+      }
+      .derivation-subnav .subnav-btn {
+        font-size: 11.5px;
+        padding: 3px 8px;
+      }
+      .controls-action-bar {
+        flex-wrap: wrap;
+      }
+      .slider-container {
+        min-width: 100%;
+        order: 1;
+      }
+      .action-btn-group {
+        width: 100%;
+        justify-content: center;
+        order: 2;
+        margin-top: 2px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .badge-pill {
+        display: none;
+      }
+      .topbar-title {
+        font-size: 13.5px;
+      }
+      .nav-btn-mini {
+        font-size: 11.5px;
+        padding: 3px 7px;
+      }
+      .tab-pill {
+        font-size: 11.5px;
+        padding: 3px 8px;
+      }
+      .slice-btn {
+        font-size: 11px;
+        padding: 2px 6px;
+      }
+      .action-btn {
+        font-size: 11px;
+        padding: 2px 6px;
+      }
+    }
+</style>
 </head>
 <body>
   <canvas id="confettiCanvas"></canvas>
 
   <div class="container">
-    <!-- Header -->
-    <header>
-      <div class="top-bar">
-        <a href="../circle-area/" class="nav-btn">
-          <span>⬅️ 回到原本推導版</span>
-        </a>
-        <div style="display: flex; gap: 8px;">
-          <a href="../math.html" class="nav-btn">
-            <span>📚 數學教具大廳</span>
-          </a>
-          <button id="soundToggle" class="nav-btn sound-btn" onclick="toggleSound()">
-            <span id="soundIcon">🔊 音效開啟</span>
-          </button>
+    <!-- Header / Top Navigation -->
+    <header class="app-topbar">
+      <div class="topbar-brand">
+        <a href="../math.html" class="nav-btn-mini" title="回數學教具大廳">📚 數學吧</a>
+        <a href="../circle-area/" class="nav-btn-mini" title="回原本推導版">⬅️ 原始版</a>
+        <div class="title-cluster">
+          <h1 class="topbar-title">🎯 圓面積大師探究實驗室</h1>
+          <span class="badge-pill">Canva 旗艦版</span>
         </div>
       </div>
 
-      <div class="main-title-container">
-        <div class="badge-hero">✨ Canva Educator 旗艦版視覺教具</div>
-        <h1>🎯 圓面積大師探究實驗室</h1>
-        <p class="subtitle">長方形拼接與金字塔堆疊雙法深入對照 ✕ 生活幾何素養模擬 ✕ 階梯式闖關挑戰演練</p>
+      <div class="tab-nav">
+        <button class="tab-pill active" onclick="switchMainTab('derivation')">
+          <span>⚖️ 雙法深入對照</span>
+        </button>
+        <button class="tab-pill" onclick="switchMainTab('realworld')">
+          <span>🍕 生活情境探究</span>
+        </button>
+        <button class="tab-pill" onclick="switchMainTab('drill')">
+          <span>🏆 題目實戰演練</span>
+        </button>
+        <button class="tab-pill" onclick="switchMainTab('history')">
+          <span>📜 割圓術思維</span>
+        </button>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="nav-btn-mini secret-btn" onclick="openDiscoveryModal()" title="查看完整公式推導步驟與對照表">
+          <span>💡 推導秘笈</span>
+        </button>
+        <button id="soundToggle" class="nav-btn-mini sound-btn" onclick="toggleSound()">
+          <span id="soundIcon">🔊 音效開啟</span>
+        </button>
       </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
-    <div class="tab-nav">
-      <button class="tab-pill active" onclick="switchMainTab('derivation')">
-        <span>⚖️ 雙法深入對照</span>
-      </button>
-      <button class="tab-pill" onclick="switchMainTab('realworld')">
-        <span>🍕 生活情境探究</span>
-      </button>
-      <button class="tab-pill" onclick="switchMainTab('drill')">
-        <span>🏆 題目實戰演練</span>
-      </button>
-      <button class="tab-pill" onclick="switchMainTab('history')">
-        <span>📜 割圓術與思維啟程</span>
-      </button>
-    </div>
-
-    <!-- TAB 1: 雙法深入對照 -->
+    <!-- TAB 1: 雙法深入對照 (Zero-Scroll Single-Screen Dashboard) -->
     <div id="tab-derivation" class="tab-panel active">
-      <div class="glass-card">
+      <div class="main-screen-card">
+        <!-- Subnav: 3 Modes -->
         <div class="derivation-subnav">
           <button id="modeBtn-rect" class="subnav-btn active" onclick="setDerivationMode('rect')">
-            🟩 方法一：長方形上下交錯法
+            <span class="btn-text-full">🟩 方法一：長方形上下交錯法</span>
+            <span class="btn-text-short">🟩 長方形法</span>
           </button>
           <button id="modeBtn-pyramid" class="subnav-btn" onclick="setDerivationMode('pyramid')">
-            🔺 方法二：金字塔奇數層三角堆疊
+            <span class="btn-text-full">🔺 方法二：金字塔奇數層三角堆疊</span>
+            <span class="btn-text-short">🔺 金字塔法</span>
           </button>
           <button id="modeBtn-dual" class="subnav-btn" onclick="setDerivationMode('dual')">
-            ⚡ 雙法同場聯動對照（同步變形）
+            <span class="btn-text-full">⚡ 雙法同場聯動對照</span>
+            <span class="btn-text-short">⚡ 雙法聯動</span>
           </button>
         </div>
 
@@ -1064,32 +1245,36 @@
           <canvas id="derivationCanvas" width="1000" height="520"></canvas>
         </div>
 
-        <!-- Derivation Interactive Controls -->
+        <!-- Derivation Interactive Controls Panel -->
         <div class="controls-panel">
-          <!-- Row 1: Slices Selector -->
-          <div class="control-row" id="rectSliceRow">
-            <span class="control-label">🔪 等分數：</span>
-            <div class="slice-btn-group">
-              <button class="slice-btn" onclick="setRectSlices(8)">8 等分</button>
-              <button class="slice-btn active" onclick="setRectSlices(16)">16 等分</button>
-              <button class="slice-btn" onclick="setRectSlices(32)">32 等分</button>
-              <button class="slice-btn" onclick="setRectSlices(64)">64 等分</button>
+          <!-- Row 1: Slices & Configurations -->
+          <div class="controls-config-bar">
+            <!-- Rect slices row -->
+            <div class="control-row inline-row" id="rectSliceRow">
+              <span class="control-label">🔪 等分數：</span>
+              <div class="slice-btn-group">
+                <button class="slice-btn" onclick="setRectSlices(8)">8 等分</button>
+                <button class="slice-btn active" onclick="setRectSlices(16)">16 等分</button>
+                <button class="slice-btn" onclick="setRectSlices(32)">32 等分</button>
+                <button class="slice-btn" onclick="setRectSlices(64)">64 等分</button>
+              </div>
+              <button id="halfSliceBtn" class="slice-btn active half-cut-pill" onclick="toggleHalfCut()">
+                📐 端點切半（已開）
+              </button>
             </div>
-            <button id="halfSliceBtn" class="slice-btn active" style="margin-left: 10px;" onclick="toggleHalfCut()">
-              📐 端點切半直角化（已開啟）
-            </button>
+
+            <!-- Pyramid slices row -->
+            <div class="control-row inline-row" id="pyramidSliceRow" style="display: none;">
+              <span class="control-label">🔺 金字塔：</span>
+              <div class="slice-btn-group">
+                <button class="slice-btn active" onclick="setPyramidSlices(9)">9 等分（3層）</button>
+                <button class="slice-btn" onclick="setPyramidSlices(16)">16 等分（4層）</button>
+              </div>
+            </div>
           </div>
 
-          <div class="control-row" id="pyramidSliceRow" style="display: none;">
-            <span class="control-label">🔺 金字塔層數：</span>
-            <div class="slice-btn-group">
-              <button class="slice-btn active" onclick="setPyramidSlices(9)">9 等分（1+3+5，共3層）</button>
-              <button class="slice-btn" onclick="setPyramidSlices(16)">16 等分（1+3+5+7，共4層）</button>
-            </div>
-          </div>
-
-          <!-- Row 2: Deformation Slider -->
-          <div class="control-row">
+          <!-- Row 2: Deformation Slider & Action Buttons -->
+          <div class="controls-action-bar">
             <span class="control-label">🔄 變形進度：</span>
             <div class="slider-container">
               <input type="range" id="progressSlider" class="custom-slider" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
@@ -1099,141 +1284,15 @@
               <button id="playBtn" class="action-btn action-btn-primary" onclick="togglePlay()">
                 <span id="playIcon">▶ 播放變形</span>
               </button>
-              <button class="action-btn action-btn-secondary" onclick="resetProgress()">
-                <span>⏮ 圓形 (0%)</span>
+              <button class="action-btn action-btn-secondary" onclick="resetProgress()" title="回圓形">
+                <span>⏮ 圓形</span>
               </button>
-              <button class="action-btn action-btn-secondary" onclick="maxProgress()">
-                <span>⏭ 拼接完成 (100%)</span>
+              <button class="action-btn action-btn-secondary" onclick="maxProgress()" title="拼組完成">
+                <span>⏭ 拼接完成</span>
               </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step-by-Step Discovery Accordion -->
-        <div class="discovery-box">
-          <div class="discovery-header" onclick="toggleDiscoveryContent()">
-            <div class="discovery-title">
-              <span>💡 課堂探究引導：讓學生觀察並自行發現長寬／底高關係</span>
-            </div>
-            <button class="reveal-toggle-btn" id="discoveryToggleBtn">點我揭曉推導關係 ▼</button>
-          </div>
-
-          <div class="discovery-content" id="discoveryContent">
-            <!-- Method 1 text -->
-            <div id="disc-rect-block" style="margin-top: 10px;">
-              <h4 style="color: #00c4cc; margin-bottom: 8px;">🟩 方法一：扇形上下交錯為【長方形】之推導</h4>
-              <div class="step-list">
-                <div class="step-item">
-                  <div class="step-num">1</div>
-                  <div class="step-text">
-                    觀察拼成長方形的<strong>「寬」</strong>：正是原本圓形的 <span class="math-highlight-cyan">半徑 \(r\)</span>。
-                  </div>
-                </div>
-                <div class="step-item gold">
-                  <div class="step-num">2</div>
-                  <div class="step-text">
-                    觀察長方形的<strong>「長」</strong>：上下兩排弧長加起來剛好是圓周長，因此長是一半的圓周長：<br>
-                    <span class="math-highlight">長 = 圓周長的一半 = (直徑 × 3.14) ÷ 2 = 半徑 × 3.14</span>
-                  </div>
-                </div>
-                <div class="step-item purple">
-                  <div class="step-num">3</div>
-                  <div class="step-text">
-                    代入長方形面積公式：<br>
-                    <strong>圓面積 = 長方形面積 = 長 × 寬</strong><br>
-                    \(=\) (<span class="math-highlight">半徑 × 3.14</span>) × <span class="math-highlight-cyan">半徑</span><br>
-                    \(=\) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Method 2 text -->
-            <div id="disc-pyramid-block" style="margin-top: 18px;">
-              <h4 style="color: #ffaa00; margin-bottom: 8px;">🔺 方法二：扇形奇數層堆疊為【金字塔三角形】之推導（9等分與16等分）</h4>
-              <div class="step-list">
-                <div class="step-item gold">
-                  <div class="step-num">1</div>
-                  <div class="step-text">
-                    <strong>奇數層咬合堆疊結構：</strong><br>
-                    • <strong>9 等分（3 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片（\(1+3+5=9=3^2\)）<br>
-                    • <strong>16 等分（4 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片、第 4 層 7 片（\(1+3+5+7=16=4^2\)）
-                  </div>
-                </div>
-                <div class="step-item">
-                  <div class="step-num">2</div>
-                  <div class="step-text">
-                    觀察金字塔大三角形的<strong>「高」</strong>：由頂點垂直向下，各層扇形腰長貼合疊加：<br>
-                    • 9 等分（3 層）：<span class="math-highlight-cyan">高 = 3 個半徑 = 3r</span><br>
-                    • 16 等分（4 層）：<span class="math-highlight-cyan">高 = 4 個半徑 = 4r</span>
-                  </div>
-                </div>
-                <div class="step-item gold">
-                  <div class="step-num">3</div>
-                  <div class="step-text">
-                    觀察金字塔大三角形的<strong>「底」</strong>：由最底層正立扇形的底弧構成：<br>
-                    • 9 等分底層有 3 個底弧，佔全圓 \(\frac{3}{9} = \frac{1}{3}\)：<span class="math-highlight">底 = 圓周長 ÷ 3 = \frac{C}{3}</span><br>
-                    • 16 等分底層有 4 個底弧，佔全圓 \(\frac{4}{16} = \frac{1}{4}\)：<span class="math-highlight">底 = 圓周長 ÷ 4 = \frac{C}{4}</span>
-                  </div>
-                </div>
-                <div class="step-item purple">
-                  <div class="step-num">4</div>
-                  <div class="step-text">
-                    代入三角形面積公式：<strong>面積 = (底 × 高) ÷ 2</strong><br>
-                    • <strong>9 等分：</strong>\([(\frac{C}{3}) \times 3r] \div 2\) ⚡ <strong>高的 3 與底邊分母 3 約分消去！</strong><br>
-                    • <strong>16 等分：</strong>\([(\frac{C}{4}) \times 4r] \div 2\) ⚡ <strong>高的 4 與底邊分母 4 約分消去！</strong><br>
-                    皆化簡為：\((C \times r) \div 2 = (2 \times \text{半徑} \times 3.14 \times \text{半徑}) \div 2\)<br>
-                    ⚡ <strong>係數 2 與公式除以 2 再次完美約分！</strong><br>
-                    \(= \) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Deep Comparison Table -->
-            <div style="margin-top: 20px;">
-              <h4 style="color: #a855f7; margin-bottom: 8px;">⚖️ 雙法深入對照一覽表（殊途同歸）</h4>
-              <table class="compare-table">
-                <thead>
-                  <tr>
-                    <th>對照項目</th>
-                    <th>方法一：長方形法</th>
-                    <th>方法二：金字塔三角形法</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>拼組形狀</td>
-                    <td>趨近長方形</td>
-                    <td>等腰三角形（金字塔）</td>
-                  </tr>
-                  <tr>
-                    <td>水平邊長</td>
-                    <td>長 = 圓周長的一半（\(C \div 2 = \text{半徑} \times 3.14\)）</td>
-                    <td>底 = 最下層底弧總和（9等分為 \(C \div 3\)；16等分為 \(C \div 4\)）</td>
-                  </tr>
-                  <tr>
-                    <td>垂直高度</td>
-                    <td>寬 = 半徑 \(r\)</td>
-                    <td>高 = 層數 × 半徑（9等分為 \(3r\)；16等分為 \(4r\)）</td>
-                  </tr>
-                  <tr>
-                    <td>圖形面積</td>
-                    <td>長 × 寬</td>
-                    <td>(底 × 高) ÷ 2</td>
-                  </tr>
-                  <tr>
-                    <td>代數展開</td>
-                    <td>(半徑 × 3.14) × 半徑</td>
-                    <td>[(\(C \div \text{層數}\)) × (\(\text{層數} \times r\))] ÷ 2</td>
-                  </tr>
-                  <tr>
-                    <td>約分與結論</td>
-                    <td>直接得出 \(r \times r \times 3.14\)</td>
-                    <td>高的層數與底邊分母約分消去，再與公式 \(\div 2\) 約分，得出 \(r \times r \times 3.14\)</td>
-                  </tr>
-                </tbody>
-              </table>
+              <button class="action-btn action-btn-guide" onclick="openDiscoveryModal()" title="打開課堂推導步驟與對照表">
+                <span id="discoveryToggleBtn">💡 課堂推導秘笈</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1460,9 +1519,140 @@
     </div>
 
     <!-- Footer -->
-    <footer>
-      <p>🎯 圓面積大師探究實驗室 · 國小六年級數學資優教具 ✕ Canva 現代教學視覺 · 偉朕老師以 Antigravity 製作</p>
+    <footer class="app-footer">
+      <span>偉朕老師以 antigravity 製作 ✕ Canva Educator 圓面積大師探究實驗室 ✕ 國小六上康軒圓面積核心探究</span>
     </footer>
+  </div>
+
+  <!-- Classroom Derivation Secret Guide Modal -->
+  <div id="discoveryModal" class="discovery-modal" onclick="if(event.target===this) closeDiscoveryModal()">
+    <div class="discovery-modal-dialog">
+      <div class="discovery-modal-header">
+        <div class="discovery-modal-title">
+          <span>💡 課堂探究引導：長寬／底高與圓面積公式完整推導秘笈</span>
+        </div>
+        <button class="discovery-modal-close" onclick="closeDiscoveryModal()">✕ 關閉</button>
+      </div>
+
+      <div class="discovery-modal-body" id="discoveryContent">
+        <!-- Method 1: Rect Proof -->
+        <div id="disc-rect-block" style="margin-top: 10px;">
+          <h4 style="color: #00c4cc; margin-bottom: 8px;">🟩 方法一：扇形上下交錯為【長方形】之推導</h4>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-text">
+                觀察拼成長方形的<strong>「寬」</strong>：正是原本圓形的 <span class="math-highlight-cyan">半徑 \(r\)</span>。
+              </div>
+            </div>
+            <div class="step-item gold">
+              <div class="step-num">2</div>
+              <div class="step-text">
+                觀察長方形的<strong>「長」</strong>：上下兩排弧長加起來剛好是圓周長，因此長是一半的圓周長：<br>
+                <span class="math-highlight">長 = 圓周長的一半 = (直徑 × 3.14) ÷ 2 = 半徑 × 3.14</span>
+              </div>
+            </div>
+            <div class="step-item purple">
+              <div class="step-num">3</div>
+              <div class="step-text">
+                代入長方形面積公式：<br>
+                <strong>圓面積 = 長方形面積 = 長 × 寬</strong><br>
+                \(=\) (<span class="math-highlight">半徑 × 3.14</span>) × <span class="math-highlight-cyan">半徑</span><br>
+                \(=\) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Method 2: Pyramid Proof -->
+        <div id="disc-pyramid-block" style="margin-top: 18px;">
+          <h4 style="color: #ffaa00; margin-bottom: 8px;">🔺 方法二：扇形奇數層堆疊為【金字塔三角形】之推導（9等分與16等分）</h4>
+          <div class="step-list">
+            <div class="step-item gold">
+              <div class="step-num">1</div>
+              <div class="step-text">
+                <strong>奇數層咬合堆疊結構：</strong><br>
+                • <strong>9 等分（3 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片（\(1+3+5=9=3^2\)）<br>
+                • <strong>16 等分（4 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片、第 4 層 7 片（\(1+3+5+7=16=4^2\)）
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-text">
+                觀察金字塔大三角形的<strong>「高」</strong>：由頂點垂直向下，各層扇形腰長貼合疊加：<br>
+                • 9 等分（3 層）：<span class="math-highlight-cyan">高 = 3 個半徑 = 3r</span><br>
+                • 16 等分（4 層）：<span class="math-highlight-cyan">高 = 4 個半徑 = 4r</span>
+              </div>
+            </div>
+            <div class="step-item gold">
+              <div class="step-num">3</div>
+              <div class="step-text">
+                觀察金字塔大三角形的<strong>「底」</strong>：由最底層正立扇形的底弧構成：<br>
+                • 9 等分底層有 3 個底弧，佔全圓 \(\frac{3}{9} = \frac{1}{3}\)：<span class="math-highlight">底 = 圓周長 ÷ 3 = \frac{C}{3}</span><br>
+                • 16 等分底層有 4 個底弧，佔全圓 \(\frac{4}{16} = \frac{1}{4}\)：<span class="math-highlight">底 = 圓周長 ÷ 4 = \frac{C}{4}</span>
+              </div>
+            </div>
+            <div class="step-item purple">
+              <div class="step-num">4</div>
+              <div class="step-text">
+                代入三角形面積公式：<strong>面積 = (底 × 高) ÷ 2</strong><br>
+                • <strong>9 等分：</strong>\([(\frac{C}{3}) \times 3r] \div 2\) ⚡ <strong>高的 3 與底邊分母 3 約分消去！</strong><br>
+                • <strong>16 等分：</strong>\([(\frac{C}{4}) \times 4r] \div 2\) ⚡ <strong>高的 4 與底邊分母 4 約分消去！</strong><br>
+                皆化簡為：\((C \times r) \div 2 = (2 \times \text{半徑} \times 3.14 \times \text{半徑}) \div 2\)<br>
+                ⚡ <strong>係數 2 與公式除以 2 再次完美約分！</strong><br>
+                \(= \) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deep Comparison Table -->
+        <div style="margin-top: 20px;">
+          <h4 style="color: #a855f7; margin-bottom: 8px;">⚖️ 雙法深入對照一覽表（殊途同歸）</h4>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>對照項目</th>
+                <th>方法一：長方形法</th>
+                <th>方法二：金字塔三角形法</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>拼組形狀</td>
+                <td>趨近長方形</td>
+                <td>等腰三角形（金字塔）</td>
+              </tr>
+              <tr>
+                <td>水平邊長</td>
+                <td>長 = 圓周長的一半（\(C \div 2 = \text{半徑} \times 3.14\)）</td>
+                <td>底 = 最下層底弧總和（9等分為 \(C \div 3\)；16等分為 \(C \div 4\)）</td>
+              </tr>
+              <tr>
+                <td>垂直高度</td>
+                <td>寬 = 半徑 \(r\)</td>
+                <td>高 = 層數 × 半徑（9等分為 \(3r\)；16等分為 \(4r\)）</td>
+              </tr>
+              <tr>
+                <td>圖形面積</td>
+                <td>長 × 寬</td>
+                <td>(底 × 高) ÷ 2</td>
+              </tr>
+              <tr>
+                <td>代數展開</td>
+                <td>(半徑 × 3.14) × 半徑</td>
+                <td>[(\(C \div \text{層數}\)) × (\(\text{層數} \times r\))] ÷ 2</td>
+              </tr>
+              <tr>
+                <td>約分與結論</td>
+                <td>直接得出 \(r \times r \times 3.14\)</td>
+                <td>高的層數與底邊分母約分消去，再與公式 \(\div 2\) 約分，得出 \(r \times r \times 3.14\)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Universal Fullscreen Modal -->
@@ -1581,18 +1771,41 @@
       drawDerivation();
     }
 
-    function toggleDiscoveryContent() {
-      const content = document.getElementById('discoveryContent');
-      const btn = document.getElementById('discoveryToggleBtn');
-      content.classList.toggle('open');
-      if (content.classList.contains('open')) {
-        btn.textContent = '收合推導說明 ▲';
+    function openDiscoveryModal() {
+      const modal = document.getElementById('discoveryModal');
+      if (modal) {
+        modal.classList.add('active');
         playTone(587.33, 0.06);
-      } else {
-        btn.textContent = '點我揭曉推導關係 ▼';
+      }
+    }
+
+    function closeDiscoveryModal() {
+      const modal = document.getElementById('discoveryModal');
+      if (modal) {
+        modal.classList.remove('active');
         playTone(392.00, 0.06);
       }
     }
+
+    function toggleDiscoveryContent() {
+      const modal = document.getElementById('discoveryModal');
+      if (modal) {
+        if (modal.classList.contains('active')) {
+          closeDiscoveryModal();
+        } else {
+          openDiscoveryModal();
+        }
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const dm = document.getElementById('discoveryModal');
+        if (dm && dm.classList.contains('active')) {
+          closeDiscoveryModal();
+        }
+      }
+    });
 
     /* ==========================================================================
        Derivation Engine: Rect & Pyramid
@@ -1619,10 +1832,10 @@
       const btn = document.getElementById('halfSliceBtn');
       if (halfCutEnabled) {
         btn.classList.add('active');
-        btn.textContent = '📐 端點切半直角化（已開啟）';
+        btn.textContent = '📐 端點切半（已開）';
       } else {
         btn.classList.remove('active');
-        btn.textContent = '📐 端點切半直角化（關閉）';
+        btn.textContent = '📐 端點切半（關）';
       }
       playTone(600, 0.05);
       drawDerivation();
