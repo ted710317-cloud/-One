@@ -275,7 +275,7 @@ export default function App() {
             專為中小學師生打造之語文教學與自學鷹架平台 · 具備四向度規準評定 · 修辭技巧檢驗 · 錯別字診療 · 原汁原味六級分示範昇華
           </p>
           <p className="text-xs text-slate-400 pt-0.5">
-            © 偉朕老師 研發製作 · 歡迎教學推廣與課堂應用
+            ✨ 偉朕老師以 Antigravity 製作 · 歡迎教學推廣與課堂應用
           </p>
         </div>
       </footer>
