@@ -330,7 +330,34 @@
       display: block;
     }
 
-    .fullscreen-trigger-btn {
+        .canvas-guide-trigger-btn {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(255, 209, 102, 0.5);
+      color: #ffd166;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s;
+    }
+    .canvas-guide-trigger-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(125, 42, 232, 0.35));
+      border-color: #ffd166;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+.fullscreen-trigger-btn {
       position: absolute;
       top: 6px;
       right: 8px;
@@ -1053,6 +1080,39 @@
       gap: 6px;
     }
 
+    .fs-guide-btn {
+      position: absolute;
+      top: 14px;
+      left: 235px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(255, 209, 102, 0.5);
+      color: #ffd166;
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      transition: all 0.2s;
+    }
+    .fs-guide-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(125, 42, 232, 0.35));
+      border-color: #ffd166;
+      color: #fff;
+    }
+    @media (max-width: 768px) {
+      .fs-guide-btn {
+        left: auto;
+        right: 140px;
+        font-size: 11.5px;
+        padding: 4px 10px;
+      }
+    }
+
     .fs-canvas-holder {
       width: 100%;
       height: calc(100vh - 100px);
@@ -1239,6 +1299,9 @@
 
         <!-- Canvas Container -->
         <div class="canvas-wrapper">
+          <button id="discoveryToggleBtn" class="canvas-guide-trigger-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂公式推導解答秘笈">
+            <span>💡 課堂推導秘笈</span>
+          </button>
           <button class="fullscreen-trigger-btn" onclick="openUniversalFullscreen('derivation')">
             <span>⛶ 全螢幕講課模式</span>
           </button>
@@ -1291,7 +1354,7 @@
                 <span>⏭ 拼接完成</span>
               </button>
               <button class="action-btn action-btn-guide" onclick="openDiscoveryModal()" title="打開課堂推導步驟與對照表">
-                <span id="discoveryToggleBtn">💡 課堂推導秘笈</span>
+                <span>💡 推導秘笈</span>
               </button>
             </div>
           </div>
@@ -1660,6 +1723,9 @@
     <div class="fs-header-title" id="fsHeaderTitle">
       <span>⛶ 全螢幕黑板講課模式</span>
     </div>
+    <button class="fs-guide-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂公式推導解答秘笈">
+      <span>💡 課堂推導秘笈</span>
+    </button>
     <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
     <div class="fs-canvas-holder">
       <canvas id="fsCanvas" width="1280" height="660"></canvas>
@@ -1678,28 +1744,7 @@
     let audioCtx = null;
 
     
-    // Canvas click listener to open discovery guide modal when clicking discussion box
-    const derivCanvas = document.getElementById('derivationCanvas');
-    if (derivCanvas) {
-      derivCanvas.addEventListener('click', (e) => {
-        const rect = derivCanvas.getBoundingClientRect();
-        const yRatio = (e.clientY - rect.top) / rect.height;
-        if (animProgress > 0.4 && yRatio > 0.65) {
-          openDiscoveryModal();
-        }
-      });
-    }
 
-    const fsCanvasEl = document.getElementById('fsCanvas');
-    if (fsCanvasEl) {
-      fsCanvasEl.addEventListener('click', (e) => {
-        const rect = fsCanvasEl.getBoundingClientRect();
-        const yRatio = (e.clientY - rect.top) / rect.height;
-        if (animProgress > 0.4 && yRatio > 0.65) {
-          openDiscoveryModal();
-        }
-      });
-    }
 
     function initAudio() {
       if (!audioCtx) {
@@ -2248,14 +2293,10 @@
         const cardH = isCompact ? 92 : 104;
         const cardY = isCompact ? (h - cardH - 12) : Math.max(rectTop + rectH + 28, h - cardH - 24);
 
-        const q1 = isCompact
-          ? '1. 長方形的「寬」跟圓形半徑有什麼關係？怎麼發現的？'
-          : '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
-        const q2 = isCompact
-          ? '2. 請你想想看，這個長方形的「長」跟圓周長有什麼關係？怎麼發現的？'
-          : '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
+        const q1 = '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        const q2 = '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
 
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💡 小組討論', q1, q2, isCompact);
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isCompact);
 
         ctx.restore();
       }
@@ -2462,14 +2503,10 @@
         const cardW = Math.min(isDual ? 460 : 880, w - (isDual ? 24 : 60));
         const cardY = isDual ? (h - cardH - 12) : (h - cardH - 12);
 
-        const q1 = isDual
-          ? '1. 三角形的「高」跟圓形半徑有什麼關係？怎麼發現的？'
-          : '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
-        const q2 = isDual
-          ? '2. 請你想想看，這個三角形的「底」跟圓周長有什麼關係？怎麼發現的？'
-          : '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
+        const q1 = '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        const q2 = '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
 
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💡 小組討論', q1, q2, isDual);
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isDual);
 
         ctx.restore();
       }
@@ -2565,7 +2602,7 @@
       ctx.stroke();
 
       // Title Badge: 💡 小組討論
-      const badgeText = title || '💡 小組討論';
+      const badgeText = title || '💬 小組討論';
       const titleFontSize = isCompact ? 12.5 : 14;
       ctx.font = `bold ${titleFontSize}px sans-serif`;
       ctx.textAlign = 'left';
@@ -2586,13 +2623,7 @@
       ctx.fillStyle = '#ffd166';
       ctx.fillText(badgeText, badgeX + 8, badgeY + badgeH / 2);
 
-      // Interactive hint on the top right
-      if (!isCompact && cardW >= 600) {
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillStyle = 'rgba(0, 196, 204, 0.85)';
-        ctx.textAlign = 'right';
-        ctx.fillText('💡 點擊可揭曉推導秘笈 ➔', cardX + cardW - 16, badgeY + badgeH / 2);
-      }
+
 
       // Questions
       const maxTextW = cardW - 28;
