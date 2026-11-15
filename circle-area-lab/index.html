@@ -606,7 +606,7 @@
     .app-canvas-container {
       background: #0f172a;
       border-radius: 12px;
-      height: 200px;
+      height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -614,6 +614,32 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       position: relative;
       overflow: hidden;
+    }
+
+    .canvas-fs-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(0, 196, 204, 0.4);
+      color: #00c4cc;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 5;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+    .canvas-fs-btn:hover {
+      background: rgba(0, 196, 204, 0.25);
+      border-color: #00c4cc;
+      color: #fff;
+      transform: translateY(-1px);
     }
 
     .app-param-row {
@@ -767,6 +793,7 @@
       align-items: center;
       justify-content: center;
       height: 220px;
+      position: relative;
       overflow: hidden;
     }
 
@@ -897,12 +924,39 @@
       border-color: #ef4444;
     }
 
+    .fs-header-title {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #ffd166;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 18px;
+      border-radius: var(--radius-pill);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .fs-canvas-holder {
       width: 100%;
       height: calc(100vh - 120px);
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    #fsCanvas {
+      max-width: 96vw;
+      max-height: calc(100vh - 130px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
     }
 
     .fs-toolbar-bottom {
@@ -1004,7 +1058,7 @@
 
         <!-- Canvas Container -->
         <div class="canvas-wrapper">
-          <button class="fullscreen-trigger-btn" onclick="openFullscreen()">
+          <button class="fullscreen-trigger-btn" onclick="openUniversalFullscreen('derivation')">
             <span>⛶ 全螢幕講課模式</span>
           </button>
           <canvas id="derivationCanvas" width="1000" height="520"></canvas>
@@ -1200,7 +1254,8 @@
           </div>
 
           <div class="app-canvas-container">
-            <canvas id="pizzaCanvas" width="360" height="200"></canvas>
+            <button class="canvas-fs-btn" onclick="openUniversalFullscreen('pizza')">⛶ 全螢幕講課模式</button>
+            <canvas id="pizzaCanvas" width="360" height="220"></canvas>
           </div>
 
           <div class="app-param-row">
@@ -1240,7 +1295,8 @@
           </div>
 
           <div class="app-canvas-container">
-            <canvas id="sprinklerCanvas" width="360" height="200"></canvas>
+            <button class="canvas-fs-btn" onclick="openUniversalFullscreen('sprinkler')">⛶ 全螢幕講課模式</button>
+            <canvas id="sprinklerCanvas" width="360" height="220"></canvas>
           </div>
 
           <div class="app-param-row">
@@ -1275,7 +1331,8 @@
           </div>
 
           <div class="app-canvas-container">
-            <canvas id="annulusCanvas" width="360" height="200"></canvas>
+            <button class="canvas-fs-btn" onclick="openUniversalFullscreen('annulus')">⛶ 全螢幕講課模式</button>
+            <canvas id="annulusCanvas" width="360" height="220"></canvas>
           </div>
 
           <div class="app-param-row">
@@ -1366,6 +1423,7 @@
 
             <!-- Question Geometry Visual Canvas -->
             <div class="question-canvas-box">
+              <button class="canvas-fs-btn" onclick="openUniversalFullscreen('quiz')">⛶ 全螢幕放大題意圖</button>
               <canvas id="quizCanvas" width="280" height="220"></canvas>
             </div>
           </div>
@@ -1406,22 +1464,18 @@
     </footer>
   </div>
 
-  <!-- Fullscreen Modal -->
+  <!-- Universal Fullscreen Modal -->
   <div id="fullscreenModal" class="fullscreen-modal">
+    <div class="fs-header-title" id="fsHeaderTitle">
+      <span>⛶ 全螢幕黑板講課模式</span>
+    </div>
     <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
     <div class="fs-canvas-holder">
-      <canvas id="fsCanvas" width="1280" height="720"></canvas>
+      <canvas id="fsCanvas" width="1280" height="660"></canvas>
     </div>
 
-    <!-- Floating bottom slider toolbar for presentation -->
-    <div class="fs-toolbar-bottom">
-      <button class="action-btn action-btn-primary" onclick="togglePlay()" style="padding: 6px 14px;">
-        <span id="fsPlayIcon">▶ 播放</span>
-      </button>
-      <input type="range" id="fsProgressSlider" class="custom-slider" min="0" max="100" value="0" oninput="onProgressChange(this.value)">
-      <span id="fsSliderValBadge" class="slider-val-badge">0%</span>
-      <button class="action-btn action-btn-secondary" onclick="resetProgress()" style="padding: 6px 12px;">⏮ 0%</button>
-      <button class="action-btn action-btn-secondary" onclick="maxProgress()" style="padding: 6px 12px;">⏭ 100%</button>
+    <!-- Dynamic Bottom Toolbar for Presentation -->
+    <div class="fs-toolbar-bottom" id="fsToolbar">
     </div>
   </div>
 
@@ -1590,10 +1644,14 @@
 
     function updateSliderBadges(val) {
       const text = val == 0 ? '0% (圓形)' : (val == 100 ? '100% (拼接完成)' : val + '%');
-      document.getElementById('sliderValBadge').textContent = text;
-      document.getElementById('fsSliderValBadge').textContent = val + '%';
-      document.getElementById('progressSlider').value = val;
-      document.getElementById('fsProgressSlider').value = val;
+      const badge = document.getElementById('sliderValBadge');
+      if (badge) badge.textContent = text;
+      const fsBadge = document.getElementById('fsSliderValBadge');
+      if (fsBadge) fsBadge.textContent = val + '%';
+      const slider = document.getElementById('progressSlider');
+      if (slider) slider.value = val;
+      const fsSlider = document.getElementById('fsProgressSlider');
+      if (fsSlider) fsSlider.value = val;
     }
 
     function resetProgress() {
@@ -1617,13 +1675,13 @@
       const playIcon = document.getElementById('playIcon');
       const fsPlayIcon = document.getElementById('fsPlayIcon');
       if (isPlaying) {
-        playIcon.textContent = '⏸ 暫停';
-        fsPlayIcon.textContent = '⏸ 暫停';
+        if (playIcon) playIcon.textContent = '⏸ 暫停';
+        if (fsPlayIcon) fsPlayIcon.textContent = '⏸ 暫停';
         if (animProgress >= 1) animProgress = 0;
         animLoop();
       } else {
-        playIcon.textContent = '▶ 播放變形';
-        fsPlayIcon.textContent = '▶ 播放';
+        if (playIcon) playIcon.textContent = '▶ 播放變形';
+        if (fsPlayIcon) fsPlayIcon.textContent = '▶ 播放';
         if (animId) cancelAnimationFrame(animId);
       }
     }
@@ -1634,8 +1692,10 @@
       if (animProgress >= 1) {
         animProgress = 1;
         isPlaying = false;
-        document.getElementById('playIcon').textContent = '▶ 播放變形';
-        document.getElementById('fsPlayIcon').textContent = '▶ 播放';
+        const playIcon = document.getElementById('playIcon');
+        const fsPlayIcon = document.getElementById('fsPlayIcon');
+        if (playIcon) playIcon.textContent = '▶ 播放變形';
+        if (fsPlayIcon) fsPlayIcon.textContent = '▶ 播放';
         playSuccessSound();
       }
       const val = Math.round(animProgress * 100);
@@ -1663,18 +1723,20 @@
         drawDualDerivation(ctx, canvas.width, canvas.height, animProgress);
       }
 
-      // If fullscreen modal is open, also update fsCanvas
+      // If fullscreen modal is open and in derivation mode, also update fsCanvas
       const fsModal = document.getElementById('fullscreenModal');
-      if (fsModal && fsModal.classList.contains('active')) {
+      if (fsModal && fsModal.classList.contains('active') && currentFsMode === 'derivation') {
         const fsCanvas = document.getElementById('fsCanvas');
-        const fsCtx = fsCanvas.getContext('2d');
-        fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
-        if (derivationMode === 'rect') {
-          drawRectangleDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
-        } else if (derivationMode === 'pyramid') {
-          drawPyramidDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
-        } else if (derivationMode === 'dual') {
-          drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
+        if (fsCanvas) {
+          const fsCtx = fsCanvas.getContext('2d');
+          fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
+          if (derivationMode === 'rect') {
+            drawRectangleDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+          } else if (derivationMode === 'pyramid') {
+            drawPyramidDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+          } else if (derivationMode === 'dual') {
+            drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
+          }
         }
       }
     }
@@ -2154,19 +2216,320 @@
     }
 
     /* ==========================================================================
-       Fullscreen Presentation Mode
+       Canvas Drawing Helpers (Round Rect & High-Contrast Pill Badges)
        ========================================================================== */
-    function openFullscreen() {
+    function drawRoundRectPath(ctx, x, y, w, h, r) {
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, r);
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+      }
+    }
+
+    function drawPillBadge(ctx, x, y, text, fontSize = 13, textColor = '#ffd166', bgColor = 'rgba(15, 23, 42, 0.94)', borderColor = 'rgba(255, 209, 102, 0.75)') {
+      ctx.save();
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const m = ctx.measureText(text);
+      const padX = fontSize >= 16 ? 16 : 10;
+      const padY = fontSize >= 16 ? 8 : 5;
+      const w = m.width + padX * 2;
+      const h = fontSize + padY * 2;
+      const r = h / 2;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      drawRoundRectPath(ctx, x - w / 2, y - h / 2, w, h, r);
+      ctx.fillStyle = bgColor;
+      ctx.fill();
+      ctx.restore();
+
+      ctx.beginPath();
+      drawRoundRectPath(ctx, x - w / 2, y - h / 2, w, h, r);
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = borderColor;
+      ctx.stroke();
+
+      ctx.fillStyle = textColor;
+      ctx.fillText(text, x, y + 1);
+      ctx.restore();
+    }
+
+    /* ==========================================================================
+       Universal Fullscreen Presentation Engine (All Modules Supported!)
+       ========================================================================== */
+    let currentFsMode = 'derivation'; // 'derivation' | 'pizza' | 'sprinkler' | 'annulus' | 'quiz'
+    let fsShowHint = false;
+    let fsShowSolution = false;
+
+    function openUniversalFullscreen(mode) {
+      currentFsMode = mode || 'derivation';
+      fsShowHint = false;
+      fsShowSolution = false;
       const modal = document.getElementById('fullscreenModal');
-      modal.classList.add('active');
-      drawDerivation();
+      const title = document.getElementById('fsHeaderTitle');
+
+      const titles = {
+        'derivation': '⚖️ 圓面積公式推導 · 全螢幕黑板講課模式',
+        'pizza': '🍕 生活情境探究：披薩大對決（1個大披薩 vs 2個小披薩）',
+        'sprinkler': '💦 生活情境探究：旋轉自動灑水器草地灌溉模擬',
+        'annulus': '🌺 生活情境探究：花圃與環形步道（圓環面積公式）',
+        'quiz': '🏆 題目實戰演練 · 全螢幕題意幾何講課模式'
+      };
+
+      if (title) {
+        title.innerHTML = `<span>${titles[currentFsMode] || '⛶ 全螢幕黑板講課模式'}</span>`;
+      }
+      if (modal) {
+        modal.classList.add('active');
+      }
+
+      updateFsToolbar();
+      renderFullscreenCanvas();
       playTone(523, 0.08);
     }
 
     function closeFullscreen() {
       const modal = document.getElementById('fullscreenModal');
-      modal.classList.remove('active');
+      if (modal) modal.classList.remove('active');
       playTone(392, 0.08);
+    }
+
+    function openFullscreen() {
+      openUniversalFullscreen('derivation');
+    }
+
+    function updateFsToolbar() {
+      const toolbar = document.getElementById('fsToolbar');
+      if (!toolbar) return;
+
+      if (currentFsMode === 'derivation') {
+        toolbar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="action-btn action-btn-primary" onclick="togglePlay()" style="padding: 6px 14px;">
+              <span id="fsPlayIcon">${isPlaying ? '⏸ 暫停' : '▶ 播放'}</span>
+            </button>
+            <button class="action-btn action-btn-secondary" onclick="resetProgress()" style="padding: 6px 12px;">⏮ 0%</button>
+            <button class="action-btn action-btn-secondary" onclick="maxProgress()" style="padding: 6px 12px;">⏭ 100%</button>
+          </div>
+          <input type="range" id="fsProgressSlider" class="custom-slider" min="0" max="100" value="${Math.round(animProgress * 100)}" oninput="onProgressChange(this.value)" style="flex:1;">
+          <span id="fsSliderValBadge" class="slider-val-badge" style="min-width: 60px;">${Math.round(animProgress * 100)}%</span>
+          <div style="display:flex; gap:6px;">
+            <button class="slice-btn ${derivationMode==='rect'?'active':''}" onclick="setDerivationModeFromFs('rect')">長方形</button>
+            <button class="slice-btn ${derivationMode==='pyramid'?'active':''}" onclick="setDerivationModeFromFs('pyramid')">金字塔</button>
+            <button class="slice-btn ${derivationMode==='dual'?'active':''}" onclick="setDerivationModeFromFs('dual')">雙法對照</button>
+          </div>
+        `;
+      } else if (currentFsMode === 'pizza') {
+        const d1 = document.getElementById('pizzaD1') ? document.getElementById('pizzaD1').value : 12;
+        const d2 = document.getElementById('pizzaD2') ? document.getElementById('pizzaD2').value : 8;
+        toolbar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px; width:100%; justify-content:space-between; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px; color:#ffd166; font-weight:700;">🍕 大披薩直徑：</span>
+              <input type="range" min="10" max="16" value="${d1}" step="1" oninput="syncPizzaFromFs('d1', this.value)" style="width:120px;" class="custom-slider">
+              <span id="fsPizzaD1Label" style="font-weight:800; color:#ffd166; font-size:15px;">${d1} 吋</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px; color:#00c4cc; font-weight:700;">🍕 小披薩直徑(2個)：</span>
+              <input type="range" min="6" max="10" value="${d2}" step="1" oninput="syncPizzaFromFs('d2', this.value)" style="width:120px;" class="custom-slider">
+              <span id="fsPizzaD2Label" style="font-weight:800; color:#00c4cc; font-size:15px;">${d2} 吋</span>
+            </div>
+            <div id="fsPizzaResultPill" style="background:rgba(0,196,204,0.15); border:1px solid #00c4cc; border-radius:20px; padding:5px 16px; font-size:13px; font-weight:700; color:#cffafe;">
+              計算中...
+            </div>
+          </div>
+        `;
+        updatePizzaFsPill();
+      } else if (currentFsMode === 'sprinkler') {
+        const r = document.getElementById('sprinklerR') ? document.getElementById('sprinklerR').value : 3;
+        toolbar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:16px; width:100%; justify-content:center;">
+            <span style="font-size:15px; color:#38bdf8; font-weight:700;">💦 噴灑半徑 r：</span>
+            <input type="range" min="2" max="8" value="${r}" step="0.5" oninput="syncSprinklerFromFs(this.value)" style="width:240px;" class="custom-slider">
+            <span id="fsSprinklerRLabel" style="font-weight:800; color:#ffd166; font-size:16px;">${parseFloat(r).toFixed(1)} 公尺</span>
+            <div style="background:rgba(56,189,248,0.15); border:1px solid #38bdf8; border-radius:20px; padding:5px 18px; font-size:13px; font-weight:700; color:#e0f2fe;">
+              灌溉面積：<span id="fsSprinklerAreaVal">${(r*r*3.14).toFixed(2)}</span> 平方公尺
+            </div>
+          </div>
+        `;
+      } else if (currentFsMode === 'annulus') {
+        const r1 = document.getElementById('annulusR1') ? document.getElementById('annulusR1').value : 3;
+        const w = document.getElementById('annulusW') ? document.getElementById('annulusW').value : 2;
+        toolbar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:14px; width:100%; justify-content:space-between; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px; color:#ff5757; font-weight:700;">🌺 內圈半徑 R₁：</span>
+              <input type="range" min="2" max="6" value="${r1}" step="1" oninput="syncAnnulusFromFs('r1', this.value)" style="width:120px;" class="custom-slider">
+              <span id="fsAnnulusR1Label" style="font-weight:800; color:#ff5757; font-size:14px;">${r1} m</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px; color:#ffd166; font-weight:700;">🧱 步道寬度 w：</span>
+              <input type="range" min="1" max="4" value="${w}" step="1" oninput="syncAnnulusFromFs('w', this.value)" style="width:120px;" class="custom-slider">
+              <span id="fsAnnulusWLabel" style="font-weight:800; color:#ffd166; font-size:14px;">${w} m</span>
+            </div>
+            <div id="fsAnnulusAreaPill" style="background:rgba(251,191,36,0.15); border:1px solid #f59e0b; border-radius:20px; padding:5px 16px; font-size:13px; font-weight:700; color:#fef08a;">
+              步道面積：${((parseInt(r1)+parseInt(w))**2 * 3.14 - r1**2 * 3.14).toFixed(2)} 平方公尺
+            </div>
+          </div>
+        `;
+      } else if (currentFsMode === 'quiz') {
+        toolbar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px; width:100%; justify-content:center; flex-wrap:wrap;">
+            <div style="display:flex; gap:6px;">
+              <button class="slice-btn ${currentQuizLevel===1?'active':''}" onclick="setQuizLevelFromFs(1)">關卡 1</button>
+              <button class="slice-btn ${currentQuizLevel===2?'active':''}" onclick="setQuizLevelFromFs(2)">關卡 2</button>
+              <button class="slice-btn ${currentQuizLevel===3?'active':''}" onclick="setQuizLevelFromFs(3)">關卡 3</button>
+              <button class="slice-btn ${currentQuizLevel===4?'active':''}" onclick="setQuizLevelFromFs(4)">關卡 4</button>
+            </div>
+            <button class="action-btn action-btn-secondary" onclick="nextQuestion(); renderFullscreenCanvas();" style="padding: 6px 14px;">
+              <span>🎲 換一題</span>
+            </button>
+            <button class="action-btn action-btn-secondary" onclick="toggleFsHint()" style="padding: 6px 14px;">
+              <span>💡 思考提示</span>
+            </button>
+            <button class="action-btn action-btn-primary" onclick="toggleFsSolution()" style="padding: 6px 14px;">
+              <span>👁️ 教師示範詳解</span>
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    function setDerivationModeFromFs(mode) {
+      setDerivationMode(mode);
+      updateFsToolbar();
+      renderFullscreenCanvas();
+    }
+
+    function syncPizzaFromFs(param, val) {
+      if (param === 'd1') {
+        const input = document.getElementById('pizzaD1');
+        if (input) input.value = val;
+        const lbl = document.getElementById('fsPizzaD1Label');
+        if (lbl) lbl.textContent = val + ' 吋';
+      } else {
+        const input = document.getElementById('pizzaD2');
+        if (input) input.value = val;
+        const lbl = document.getElementById('fsPizzaD2Label');
+        if (lbl) lbl.textContent = val + ' 吋';
+      }
+      updatePizzaSim();
+      updatePizzaFsPill();
+      renderFullscreenCanvas();
+    }
+
+    function updatePizzaFsPill() {
+      const d1 = parseInt(document.getElementById('pizzaD1').value);
+      const d2 = parseInt(document.getElementById('pizzaD2').value);
+      const r1 = d1 / 2;
+      const r2 = d2 / 2;
+      const area1 = (r1 * r1 * 3.14).toFixed(2);
+      const area2 = (2 * (r2 * r2 * 3.14)).toFixed(2);
+      const diff = (parseFloat(area1) - parseFloat(area2)).toFixed(2);
+      const pill = document.getElementById('fsPizzaResultPill');
+      if (pill) {
+        if (diff > 0) {
+          pill.innerHTML = `🍕 大披薩(${area1}吋²) 比 2個小披薩(${area2}吋²) <strong>多 ${diff} 平方吋</strong>！`;
+        } else if (diff < 0) {
+          pill.innerHTML = `🍕 2個小披薩(${area2}吋²) 比 1個大披薩(${area1}吋²) <strong>多 ${Math.abs(diff)} 平方吋</strong>！`;
+        } else {
+          pill.innerHTML = `🍕 兩者面積完全相同！皆為 <strong>${area1} 平方吋</strong>`;
+        }
+      }
+    }
+
+    function syncSprinklerFromFs(val) {
+      const input = document.getElementById('sprinklerR');
+      if (input) input.value = val;
+      updateSprinklerSim();
+      const lbl = document.getElementById('fsSprinklerRLabel');
+      if (lbl) lbl.textContent = parseFloat(val).toFixed(1) + ' 公尺';
+      const aVal = document.getElementById('fsSprinklerAreaVal');
+      if (aVal) aVal.textContent = (val * val * 3.14).toFixed(2);
+      renderFullscreenCanvas();
+    }
+
+    function syncAnnulusFromFs(param, val) {
+      if (param === 'r1') {
+        const input = document.getElementById('annulusR1');
+        if (input) input.value = val;
+        const lbl = document.getElementById('fsAnnulusR1Label');
+        if (lbl) lbl.textContent = val + ' m';
+      } else {
+        const input = document.getElementById('annulusW');
+        if (input) input.value = val;
+        const lbl = document.getElementById('fsAnnulusWLabel');
+        if (lbl) lbl.textContent = val + ' m';
+      }
+      updateAnnulusSim();
+      const r1 = parseInt(document.getElementById('annulusR1').value);
+      const w = parseInt(document.getElementById('annulusW').value);
+      const aPill = document.getElementById('fsAnnulusAreaPill');
+      if (aPill) {
+        aPill.textContent = '步道面積：' + (((r1 + w)**2 * 3.14) - (r1**2 * 3.14)).toFixed(2) + ' 平方公尺';
+      }
+      renderFullscreenCanvas();
+    }
+
+    function setQuizLevelFromFs(lvl) {
+      setQuizLevel(lvl);
+      fsShowHint = false;
+      fsShowSolution = false;
+      updateFsToolbar();
+      renderFullscreenCanvas();
+    }
+
+    function toggleFsHint() {
+      fsShowHint = !fsShowHint;
+      renderFullscreenCanvas();
+      playTone(480, 0.05);
+    }
+
+    function toggleFsSolution() {
+      fsShowSolution = !fsShowSolution;
+      renderFullscreenCanvas();
+      playTone(550, 0.05);
+    }
+
+    function renderFullscreenCanvas() {
+      const fsModal = document.getElementById('fullscreenModal');
+      if (!fsModal || !fsModal.classList.contains('active')) return;
+      const fsCanvas = document.getElementById('fsCanvas');
+      if (!fsCanvas) return;
+      const fsCtx = fsCanvas.getContext('2d');
+      fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
+
+      if (currentFsMode === 'derivation') {
+        if (derivationMode === 'rect') {
+          drawRectangleDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+        } else if (derivationMode === 'pyramid') {
+          drawPyramidDerivation(fsCtx, fsCanvas.width / 2, fsCanvas.height / 2, fsCanvas.width, fsCanvas.height, animProgress);
+        } else if (derivationMode === 'dual') {
+          drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
+        }
+      } else if (currentFsMode === 'pizza') {
+        drawPizzaView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+      } else if (currentFsMode === 'sprinkler') {
+        drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+      } else if (currentFsMode === 'annulus') {
+        drawAnnulusView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+      } else if (currentFsMode === 'quiz') {
+        drawQuizView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+      }
     }
 
     /* ==========================================================================
@@ -2189,69 +2552,368 @@
 
       const diff = (parseFloat(area1) - parseFloat(area2)).toFixed(2);
       const insight = document.getElementById('pizzaInsight');
-      if (diff > 0) {
-        insight.innerHTML = `💡 <strong>計算結果：</strong> 1 個 ${d1} 吋大披薩面積為 <strong>${area1}</strong> 平方吋，比 2 個 ${d2} 吋小披薩（共 <strong>${area2}</strong> 平方吋）<strong>多了 ${diff} 平方吋</strong>！買大披薩更划算！`;
-      } else if (diff < 0) {
-        insight.innerHTML = `💡 <strong>計算結果：</strong> 2 個 ${d2} 吋小披薩面積為 <strong>${area2}</strong> 平方吋，比 1 個 ${d1} 吋大披薩（<strong>${area1}</strong> 平方吋）<strong>多了 ${Math.abs(diff)} 平方吋</strong>！`;
-      } else {
-        insight.innerHTML = `💡 <strong>計算結果：</strong> 兩者面積剛好完全相同！都是 <strong>${area1}</strong> 平方吋！`;
+      if (insight) {
+        if (diff > 0) {
+          insight.innerHTML = `💡 <strong>計算結果：</strong> 1 個 ${d1} 吋大披薩面積為 <strong>${area1}</strong> 平方吋，比 2 個 ${d2} 吋小披薩（共 <strong>${area2}</strong> 平方吋）<strong>多了 ${diff} 平方吋</strong>！買大披薩更划算！`;
+        } else if (diff < 0) {
+          insight.innerHTML = `💡 <strong>計算結果：</strong> 2 個 ${d2} 吋小披薩面積為 <strong>${area2}</strong> 平方吋，比 1 個 ${d1} 吋大披薩（<strong>${area1}</strong> 平方吋）<strong>多了 ${Math.abs(diff)} 平方吋</strong>！`;
+        } else {
+          insight.innerHTML = `💡 <strong>計算結果：</strong> 兩者面積剛好完全相同！都是 <strong>${area1}</strong> 平方吋！`;
+        }
       }
 
       // Draw Pizza Canvas
       const canvas = document.getElementById('pizzaCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawPizzaView(ctx, canvas.width, canvas.height, false);
+      }
 
-      // Scale factor
-      const maxD = 18;
-      const pixR1 = (d1 / maxD) * 75;
-      const pixR2 = (d2 / maxD) * 75;
-
-      // Draw 1 Big Pizza on Left
-      drawSinglePizza(ctx, 100, 100, pixR1, d1 + ' 吋大披薩', '#f59e0b');
-
-      // Draw 2 Small Pizzas on Right
-      drawSinglePizza(ctx, 230, 60, pixR2 * 0.85, '', '#06b6d4');
-      drawSinglePizza(ctx, 290, 130, pixR2 * 0.85, '2 個 ' + d2 + ' 吋', '#06b6d4');
+      if (currentFsMode === 'pizza') {
+        renderFullscreenCanvas();
+      }
     }
 
-    function drawSinglePizza(ctx, cx, cy, r, label, crustColor) {
+    /* Upgraded 3D Pizza Drawing with Crust Gradient, Slices, Toppings & Explicit Radius */
+    function drawSinglePizza(ctx, cx, cy, r, dInches, countLabel, crustColor, isFs) {
+      const radiusInches = dInches / 2;
       ctx.save();
-      // Crust
+
+      // 1. 3D Drop Shadow for Depth
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = isFs ? 24 : 10;
+      ctx.shadowOffsetY = isFs ? 10 : 4;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = crustColor;
+      ctx.fillStyle = '#92400e';
       ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#fff';
+      ctx.restore();
+
+      // 2. Crust Rim with Baked Gradient (Golden Wheat to Dark Roasted Crust)
+      const crustGrad = ctx.createRadialGradient(cx, cy, r * 0.78, cx, cy, r);
+      crustGrad.addColorStop(0, '#f59e0b');
+      crustGrad.addColorStop(0.7, '#d97706');
+      crustGrad.addColorStop(1, '#92400e');
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = crustGrad;
+      ctx.fill();
+
+      // Outer bevel highlight
+      ctx.lineWidth = isFs ? 3 : 1.5;
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.45)';
       ctx.stroke();
 
-      // Cheese
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.86, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffd166';
-      ctx.fill();
-
-      // Pepperoni slices
-      const pCount = 5;
-      for (let i = 0; i < pCount; i++) {
-        const ang = (i * 2 * Math.PI) / pCount;
-        const px = cx + Math.cos(ang) * (r * 0.5);
-        const py = cy + Math.sin(ang) * (r * 0.5);
+      // Toasted crust bubbles
+      const bubbleCount = isFs ? 14 : 7;
+      for (let i = 0; i < bubbleCount; i++) {
+        const ang = i * 2.39996;
+        const dist = r * 0.93;
+        const bx = cx + Math.cos(ang) * dist;
+        const by = cy + Math.sin(ang) * dist;
         ctx.beginPath();
-        ctx.arc(px, py, r * 0.16, 0, Math.PI * 2);
-        ctx.fillStyle = '#ef4444';
+        ctx.arc(bx, by, isFs ? 3.5 : 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(120, 53, 15, 0.75)';
         ctx.fill();
       }
 
-      if (label) {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, cx, cy + r + 18);
+      // 3. Cheese Surface (Mozzarella Melt)
+      const cheeseR = r * 0.83;
+      const cheeseGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cheeseR);
+      cheeseGrad.addColorStop(0, '#fef08a');
+      cheeseGrad.addColorStop(0.45, '#fde047');
+      cheeseGrad.addColorStop(0.85, '#f59e0b');
+      cheeseGrad.addColorStop(1, '#ea580c');
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, cheeseR, 0, Math.PI * 2);
+      ctx.fillStyle = cheeseGrad;
+      ctx.fill();
+
+      // 4. Slice Cut Grooves (8 slices)
+      ctx.save();
+      ctx.strokeStyle = 'rgba(180, 83, 9, 0.35)';
+      ctx.lineWidth = isFs ? 2 : 1.2;
+      for (let i = 0; i < 4; i++) {
+        const ang = (i * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.moveTo(cx - Math.cos(ang) * cheeseR, cy - Math.sin(ang) * cheeseR);
+        ctx.lineTo(cx + Math.cos(ang) * cheeseR, cy + Math.sin(ang) * cheeseR);
+        ctx.stroke();
       }
       ctx.restore();
+
+      // 5. Toppings: Pepperoni, Olives & Fresh Basil
+      const pepCount = isFs ? 7 : 5;
+      const pepR = cheeseR * (isFs ? 0.22 : 0.24);
+      for (let i = 0; i < pepCount; i++) {
+        const ang = (i * 2 * Math.PI) / pepCount + 0.3;
+        const dist = cheeseR * 0.52;
+        const px = cx + Math.cos(ang) * dist;
+        const py = cy + Math.sin(ang) * dist;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(px, py, pepR, 0, Math.PI * 2);
+        const pepGrad = ctx.createRadialGradient(px, py, 0, px, py, pepR);
+        pepGrad.addColorStop(0, '#ef4444');
+        pepGrad.addColorStop(0.8, '#dc2626');
+        pepGrad.addColorStop(1, '#991b1b');
+        ctx.fillStyle = pepGrad;
+        ctx.fill();
+        ctx.lineWidth = isFs ? 1.5 : 1;
+        ctx.strokeStyle = '#7f1d1d';
+        ctx.stroke();
+
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(px - pepR * 0.3, py - pepR * 0.2, isFs ? 1.5 : 1, 0, Math.PI * 2);
+        ctx.arc(px + pepR * 0.2, py + pepR * 0.3, isFs ? 1.5 : 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Olives
+      const oliveCount = isFs ? 6 : 3;
+      for (let i = 0; i < oliveCount; i++) {
+        const ang = (i * 2 * Math.PI) / oliveCount + 0.8;
+        const dist = cheeseR * 0.72;
+        const ox = cx + Math.cos(ang) * dist;
+        const oy = cy + Math.sin(ang) * dist;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ox, oy, isFs ? 4.5 : 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ox, oy, isFs ? 2 : 1, 0, Math.PI * 2);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Fresh Basil leaves
+      if (isFs || r > 45) {
+        const basilCount = isFs ? 4 : 2;
+        for (let i = 0; i < basilCount; i++) {
+          const ang = (i * 2 * Math.PI) / basilCount + 1.2;
+          const dist = cheeseR * 0.28;
+          const bx = cx + Math.cos(ang) * dist;
+          const by = cy + Math.sin(ang) * dist;
+          ctx.save();
+          ctx.translate(bx, by);
+          ctx.rotate(ang + 0.5);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, isFs ? 8 : 4, isFs ? 4 : 2, 0, 0, Math.PI * 2);
+          ctx.fillStyle = '#16a34a';
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 6. Explicit Radius Measurement Line & Numeric Value Badge (USER REQUEST!)
+      const rAngle = -Math.PI * 0.12;
+      const rxEnd = cx + Math.cos(rAngle) * r;
+      const ryEnd = cy + Math.sin(rAngle) * r;
+
+      ctx.save();
+      // Center origin dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, isFs ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd166';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // Glowing Radius Line
+      ctx.shadowColor = '#00c4cc';
+      ctx.shadowBlur = isFs ? 8 : 4;
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = isFs ? 3.5 : 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(rxEnd, ryEnd);
+      ctx.stroke();
+      ctx.restore();
+
+      // Outer tick mark
+      ctx.save();
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = isFs ? 3 : 2;
+      const tickLen = isFs ? 8 : 5;
+      const normAng = rAngle + Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(rxEnd - Math.cos(normAng) * tickLen, ryEnd - Math.sin(normAng) * tickLen);
+      ctx.lineTo(rxEnd + Math.cos(normAng) * tickLen, ryEnd + Math.sin(normAng) * tickLen);
+      ctx.stroke();
+      ctx.restore();
+
+      // Prominent Radius Numeric Badge directly on the radius!
+      const midX = (cx + rxEnd) / 2;
+      const midY = (cy + ryEnd) / 2;
+      const bOffX = -Math.sin(rAngle) * (isFs ? 22 : 13);
+      const bOffY = Math.cos(rAngle) * (isFs ? 22 : 13);
+      const badgeText = isFs ? `📏 半徑 r = ${radiusInches} 吋` : `r = ${radiusInches} 吋`;
+
+      drawPillBadge(
+        ctx,
+        midX + bOffX,
+        midY + bOffY,
+        badgeText,
+        isFs ? 15 : 10.5,
+        '#ffd166',
+        'rgba(15, 23, 42, 0.94)',
+        '#ffd166'
+      );
+
+      ctx.restore();
+    }
+
+    function drawPizzaView(ctx, width, height, isFs) {
+      ctx.clearRect(0, 0, width, height);
+      const d1 = parseInt(document.getElementById('pizzaD1').value);
+      const d2 = parseInt(document.getElementById('pizzaD2').value);
+      const r1 = d1 / 2;
+      const r2 = d2 / 2;
+      const area1 = (r1 * r1 * 3.14).toFixed(2);
+      const area2 = (2 * (r2 * r2 * 3.14)).toFixed(2);
+      const diff = (parseFloat(area1) - parseFloat(area2)).toFixed(2);
+
+      if (!isFs) {
+        // Small Card View (360x220)
+        const maxD = 18;
+        const pixR1 = (d1 / maxD) * 76;
+        const pixR2 = (d2 / maxD) * 58;
+
+        // Draw 1 Big Pizza on Left
+        drawSinglePizza(ctx, 105, 95, pixR1, d1, '1個大披薩', '#f59e0b', false);
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`1個 ${d1}吋大披薩`, 105, 185);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`${area1} 吋²`, 105, 203);
+
+        // Draw 2 Small Pizzas on Right
+        drawSinglePizza(ctx, 245, 62, pixR2, d2, '', '#06b6d4', false);
+        drawSinglePizza(ctx, 305, 132, pixR2, d2, '', '#06b6d4', false);
+        ctx.fillStyle = '#00c4cc';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`2個 ${d2}吋小披薩`, 275, 185);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`共 ${area2} 吋²`, 275, 203);
+      } else {
+        // High-Definition Fullscreen Blackboard View (1280x660)
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, '#070b18');
+        bgGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Top Banner Title
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🍕 生活幾何素養探究：披薩大對決（1 個大披薩 vs 2 個小披薩，哪個面積大？）', width / 2, 45);
+
+        // Divider Line in center
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.setLineDash([8, 8]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(width / 2, 70);
+        ctx.lineTo(width / 2, height - 70);
+        ctx.stroke();
+        ctx.restore();
+
+        // Big Pizza on Left (cx = 300, cy = 260)
+        const pixR1 = (d1 / 18) * 180;
+        drawSinglePizza(ctx, 300, 260, pixR1, d1, '大披薩', '#f59e0b', true);
+
+        // Big Pizza Title Badge
+        drawPillBadge(ctx, 300, 90, `🍕 1 個 ${d1} 吋大披薩`, 20, '#ffd166', 'rgba(251, 191, 36, 0.15)', '#f59e0b');
+
+        // Big Pizza Formula Box
+        ctx.save();
+        const fBoxW = 460;
+        const fBoxH = 100;
+        const fBoxX = 300 - fBoxW / 2;
+        const fBoxY = 465;
+        drawRoundRectPath(ctx, fBoxX, fBoxY, fBoxW, fBoxH, 12);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`【大披薩面積計算】`, fBoxX + 16, fBoxY + 28);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(`• 半徑 r = 直徑 ÷ 2 = ${d1} ÷ 2 = ${r1} 吋`, fBoxX + 16, fBoxY + 54);
+        ctx.fillText(`• 面積 = 半徑 × 半徑 × 3.14 = ${r1} × ${r1} × 3.14 = `, fBoxX + 16, fBoxY + 80);
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 17px sans-serif';
+        ctx.fillText(`${area1} 平方吋`, fBoxX + 355, fBoxY + 80);
+        ctx.restore();
+
+        // 2 Small Pizzas on Right (cx1 = 770, cx2 = 1050, cy = 260)
+        const pixR2 = (d2 / 18) * 130;
+        drawSinglePizza(ctx, 770, 260, pixR2, d2, '小披薩1', '#06b6d4', true);
+        drawSinglePizza(ctx, 1050, 260, pixR2, d2, '小披薩2', '#06b6d4', true);
+
+        // Small Pizzas Title Badge
+        drawPillBadge(ctx, 910, 90, `🍕 2 個 ${d2} 吋小披薩（雙份滿足）`, 20, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
+
+        // Small Pizzas Formula Box
+        ctx.save();
+        const sBoxW = 500;
+        const sBoxH = 100;
+        const sBoxX = 910 - sBoxW / 2;
+        const sBoxY = 465;
+        drawRoundRectPath(ctx, sBoxX, sBoxY, sBoxW, sBoxH, 12);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#00c4cc';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`【2 個小披薩總面積計算】`, sBoxX + 16, sBoxY + 28);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(`• 單個半徑 r = ${d2} ÷ 2 = ${r2} 吋`, sBoxX + 16, sBoxY + 54);
+        ctx.fillText(`• 單個面積 = ${r2} × ${r2} × 3.14 = ${(r2 * r2 * 3.14).toFixed(2)} 平方吋`, sBoxX + 16, sBoxY + 80);
+        ctx.fillStyle = '#00c4cc';
+        ctx.font = 'bold 17px sans-serif';
+        ctx.fillText(`• 2 個總面積 = ${area2} 平方吋`, sBoxX + 270, sBoxY + 54);
+        ctx.restore();
+
+        // Center VS Badge
+        drawPillBadge(ctx, width / 2, 260, '⚡ VS ⚡', 20, '#ffd166', '#0f172a', '#ffd166');
+
+        // Bottom Conclusion Banner
+        let conclusionText = '';
+        if (diff > 0) {
+          conclusionText = `🏆 驚人發現：1 個 ${d1} 吋大披薩比 2 個 ${d2} 吋小披薩多出了 ${diff} 平方吋（約多出 ${Math.round(((area1/area2)-1)*100)}% 面積）！買大披薩更划算！`;
+        } else if (diff < 0) {
+          conclusionText = `🏆 驚人發現：2 個 ${d2} 吋小披薩比 1 個 ${d1} 吋大披薩多出了 ${Math.abs(diff)} 平方吋！買 2 個小披薩更划算！`;
+        } else {
+          conclusionText = `⚖️ 驚人發現：兩者面積剛好完全相同！都是 ${area1} 平方吋！`;
+        }
+        drawPillBadge(ctx, width / 2, 595, conclusionText, 16, '#cffafe', 'rgba(15, 23, 42, 0.95)', '#00c4cc');
+      }
     }
 
     /* Sprinkler Simulator */
@@ -2268,86 +2930,265 @@
       document.getElementById('sprinklerCirc').textContent = circ + ' 公尺';
       document.getElementById('sprinklerArea').textContent = area + ' 平方公尺';
 
-      drawSprinkler();
+      if (!sprinklerAnimId) {
+        sprinklerAnimId = requestAnimationFrame(drawSprinkler);
+      }
     }
 
     function drawSprinkler() {
+      sprinklerAngle += 0.04;
+
       const canvas = document.getElementById('sprinklerCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      const rVal = parseFloat(document.getElementById('sprinklerR').value);
-      const pixR = (rVal / 8) * 85;
-
-      // Lawn background grid
-      ctx.fillStyle = '#064e3b';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Sprinkled Area Water Circle
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, pixR, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
-      ctx.fill();
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = '#38bdf8';
-      ctx.setLineDash([4, 4]);
-      ctx.stroke();
-      ctx.restore();
-
-      // Rotating Water Jet
-      sprinklerAngle += 0.05;
-      const jetX = cx + Math.cos(sprinklerAngle) * pixR;
-      const jetY = cy + Math.sin(sprinklerAngle) * pixR;
-
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(jetX, jetY);
-      ctx.stroke();
-
-      // Water spray droplets
-      for (let i = 0; i < 6; i++) {
-        const dropDist = (pixR / 6) * i;
-        const dx = cx + Math.cos(sprinklerAngle + 0.1 * i) * dropDist;
-        const dy = cy + Math.sin(sprinklerAngle + 0.1 * i) * dropDist;
-        ctx.beginPath();
-        ctx.arc(dx, dy, 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#67e8f9';
-        ctx.fill();
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawSprinklerView(ctx, canvas.width, canvas.height, false);
       }
 
-      // Sprinkler Head Center
-      ctx.beginPath();
-      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffd166';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      if (currentFsMode === 'sprinkler') {
+        const fsCanvas = document.getElementById('fsCanvas');
+        if (fsCanvas) {
+          const fsCtx = fsCanvas.getContext('2d');
+          drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+        }
+      }
 
-      // Radius line & text
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + pixR, cy);
-      ctx.strokeStyle = '#ffd166';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([]);
-      ctx.stroke();
+      sprinklerAnimId = requestAnimationFrame(drawSprinkler);
+    }
 
-      ctx.fillStyle = '#ffd166';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(`r=${rVal}m`, cx + pixR / 2 - 12, cy - 8);
+    function drawSprinklerView(ctx, width, height, isFs) {
+      ctx.clearRect(0, 0, width, height);
+      const rVal = parseFloat(document.getElementById('sprinklerR').value);
+      const circ = (2 * rVal * 3.14).toFixed(2);
+      const area = (rVal * rVal * 3.14).toFixed(2);
 
-      ctx.restore();
+      if (!isFs) {
+        // Card View (360x220)
+        const cx = width / 2;
+        const cy = height / 2;
+        const pixR = (rVal / 8) * 88;
 
-      if (!sprinklerAnimId) {
-        sprinklerAnimId = requestAnimationFrame(drawSprinkler);
+        // Lawn background
+        ctx.fillStyle = '#064e3b';
+        ctx.fillRect(0, 0, width, height);
+
+        // Water Circle
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#38bdf8';
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.restore();
+
+        // Rotating Water Jet
+        const jetX = cx + Math.cos(sprinklerAngle) * pixR;
+        const jetY = cy + Math.sin(sprinklerAngle) * pixR;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(jetX, jetY);
+        ctx.stroke();
+
+        // Droplets
+        for (let i = 0; i < 6; i++) {
+          const d = (pixR / 6) * i;
+          const dx = cx + Math.cos(sprinklerAngle + 0.1 * i) * d;
+          const dy = cy + Math.sin(sprinklerAngle + 0.1 * i) * d;
+          ctx.beginPath();
+          ctx.arc(dx, dy, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#67e8f9';
+          ctx.fill();
+        }
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd166';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Radius line & badge
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + pixR, cy);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+
+        drawPillBadge(ctx, cx + pixR / 2, cy - 14, `r=${rVal}m`, 11, '#ffd166', 'rgba(15, 23, 42, 0.9)', '#ffd166');
+      } else {
+        // High-Definition Fullscreen Blackboard View (1280x660)
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, '#070b18');
+        bgGrad.addColorStop(1, '#064e3b');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Top Banner Title
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('💦 旋轉自動灑水器：草地灌溉幾何探究（圓周長與圓面積）', width / 2, 45);
+
+        // Center garden circle on Left (cx = 440, cy = 340)
+        const cx = 440;
+        const cy = 340;
+        const pixR = (rVal / 8) * 230;
+
+        // Lawn patch
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 255, 0, Math.PI * 2);
+        ctx.fillStyle = '#065f46';
+        ctx.fill();
+        ctx.strokeStyle = '#047857';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+
+        // Wet irrigated zone
+        ctx.save();
+        const waterGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, pixR);
+        waterGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
+        waterGrad.addColorStop(0.85, 'rgba(6, 182, 212, 0.35)');
+        waterGrad.addColorStop(1, 'rgba(14, 165, 233, 0.15)');
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR, 0, Math.PI * 2);
+        ctx.fillStyle = waterGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([8, 6]);
+        ctx.stroke();
+        ctx.restore();
+
+        // 3 Streams of Water Jets
+        for (let s = 0; s < 3; s++) {
+          const streamAng = sprinklerAngle + (s * Math.PI * 2) / 3;
+          const jetX = cx + Math.cos(streamAng) * pixR;
+          const jetY = cy + Math.sin(streamAng) * pixR;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(jetX, jetY);
+          ctx.stroke();
+
+          // Droplets along stream
+          for (let i = 1; i <= 8; i++) {
+            const d = (pixR / 8) * i;
+            const dx = cx + Math.cos(streamAng + 0.08 * i) * d;
+            const dy = cy + Math.sin(streamAng + 0.08 * i) * d;
+            ctx.beginPath();
+            ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#67e8f9';
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // Center sprinkler mechanism
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd166';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+
+        // Radius Measurement Line
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + pixR, cy);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.restore();
+
+        drawPillBadge(ctx, cx + pixR / 2, cy - 20, `📏 噴灑半徑 r = ${rVal.toFixed(1)} 公尺`, 16, '#ffd166', 'rgba(15, 23, 42, 0.92)', '#ffd166');
+
+        // Right side: Blackboard Lesson Cards (x = 760 ~ 1220)
+        const bX = 760;
+        const bW = 470;
+
+        // Card 1: Circumference
+        ctx.save();
+        drawRoundRectPath(ctx, bX, 90, bW, 140, 14);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('【邊界圓周長】（水柱噴灑最外圈總長度）', bX + 20, 122);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '16px sans-serif';
+        ctx.fillText(`• 公式：周長 C = 直徑 × 3.14 = (2 × 半徑) × 3.14`, bX + 20, 156);
+        ctx.fillText(`• 計算：2 × ${rVal.toFixed(1)} × 3.14 = `, bX + 20, 192);
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`${circ} 公尺`, bX + 265, 192);
+        ctx.restore();
+
+        // Card 2: Area
+        ctx.save();
+        drawRoundRectPath(ctx, bX, 255, bW, 140, 14);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('【草地灌溉面積】（水柱覆蓋之全圓面積）', bX + 20, 287);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '16px sans-serif';
+        ctx.fillText(`• 公式：面積 A = 半徑 × 半徑 × 3.14`, bX + 20, 321);
+        ctx.fillText(`• 計算：${rVal.toFixed(1)} × ${rVal.toFixed(1)} × 3.14 = `, bX + 20, 357);
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`${area} 平方公尺`, bX + 275, 357);
+        ctx.restore();
+
+        // Card 3: Deep Insight
+        ctx.save();
+        drawRoundRectPath(ctx, bX, 420, bW, 160, 14);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 17px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('💡 深度探究思維（平方倍數威力）：', bX + 20, 452);
+        ctx.fillStyle = '#cffafe';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(`• 當半徑加倍為 2 倍時（如 3m → 6m）：`, bX + 20, 482);
+        ctx.fillText(`  周長只增加 2 倍（18.84m → 37.68m）`, bX + 20, 508);
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.fillText(`  但灌溉面積暴增為 2² = 4 倍（28.26m² → 113.04m²）！`, bX + 20, 536);
+        ctx.fillText(`• 面積跟「半徑的平方」成正比！`, bX + 20, 562);
+        ctx.restore();
       }
     }
 
@@ -2368,55 +3209,199 @@
       document.getElementById('annulusArea').textContent = annulusArea + ' 平方公尺';
 
       const canvas = document.getElementById('annulusCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      const maxR = 10;
-      const pixR1 = (r1 / maxR) * 80;
-      const pixR2 = (r2 / maxR) * 80;
-
-      // Outer Walkway Circle
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, pixR2, 0, Math.PI * 2);
-      ctx.fillStyle = '#64748b'; // stone walk
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.stroke();
-
-      // Inner Flowerbed Circle
-      ctx.beginPath();
-      ctx.arc(cx, cy, pixR1, 0, Math.PI * 2);
-      ctx.fillStyle = '#10b981'; // green flowerbed
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#ffd166';
-      ctx.stroke();
-
-      // Flower dots
-      for (let i = 0; i < 7; i++) {
-        const ang = (i * 2 * Math.PI) / 7;
-        const fx = cx + Math.cos(ang) * (pixR1 * 0.55);
-        const fy = cy + Math.sin(ang) * (pixR1 * 0.55);
-        ctx.beginPath();
-        ctx.arc(fx, fy, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#f43f5e';
-        ctx.fill();
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawAnnulusView(ctx, canvas.width, canvas.height, false);
       }
 
-      // Radius Labels
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(`花圃 r₁=${r1}m`, cx - 30, cy + 4);
+      if (currentFsMode === 'annulus') {
+        renderFullscreenCanvas();
+      }
+    }
 
-      ctx.fillStyle = '#ffd166';
-      ctx.fillText(`步道寬度 w=${w}m`, cx + pixR1 + 6, cy - 6);
+    function drawAnnulusView(ctx, width, height, isFs) {
+      ctx.clearRect(0, 0, width, height);
+      const r1 = parseInt(document.getElementById('annulusR1').value);
+      const w = parseInt(document.getElementById('annulusW').value);
+      const r2 = r1 + w;
+      const a1 = r1 * r1 * 3.14;
+      const a2 = r2 * r2 * 3.14;
+      const annulusArea = (a2 - a1).toFixed(2);
 
-      ctx.restore();
+      if (!isFs) {
+        // Card View (360x220)
+        const cx = width / 2;
+        const cy = height / 2;
+        const maxR = 10;
+        const pixR1 = (r1 / maxR) * 80;
+        const pixR2 = (r2 / maxR) * 80;
+
+        // Outer Walkway Circle
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR2, 0, Math.PI * 2);
+        ctx.fillStyle = '#64748b';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.stroke();
+
+        // Inner Flowerbed Circle
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR1, 0, Math.PI * 2);
+        ctx.fillStyle = '#10b981';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffd166';
+        ctx.stroke();
+
+        // Flower dots
+        for (let i = 0; i < 7; i++) {
+          const ang = (i * 2 * Math.PI) / 7;
+          const fx = cx + Math.cos(ang) * (pixR1 * 0.55);
+          const fy = cy + Math.sin(ang) * (pixR1 * 0.55);
+          ctx.beginPath();
+          ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#f43f5e';
+          ctx.fill();
+        }
+        ctx.restore();
+
+        drawPillBadge(ctx, cx, cy, `花圃 r₁=${r1}m`, 11, '#ffffff', 'rgba(15, 23, 42, 0.85)', '#10b981');
+        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 25, `步道 w=${w}m`, 10.5, '#ffd166', 'rgba(15, 23, 42, 0.85)', '#ffd166');
+      } else {
+        // Fullscreen Blackboard View (1280x660)
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, '#070b18');
+        bgGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Title
+        ctx.fillStyle = '#c084fc';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🌺 花圃與環形步道：圓環面積公式與解題思考', width / 2, 45);
+
+        const cx = 430;
+        const cy = 340;
+        const maxR = 10;
+        const pixR1 = (r1 / maxR) * 230;
+        const pixR2 = (r2 / maxR) * 230;
+
+        // Outer Walkway
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR2, 0, Math.PI * 2);
+        ctx.fillStyle = '#475569';
+        ctx.fill();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Paving texture lines
+        for (let i = 0; i < 16; i++) {
+          const ang = (i * Math.PI * 2) / 16;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(ang) * pixR1, cy + Math.sin(ang) * pixR1);
+          ctx.lineTo(cx + Math.cos(ang) * pixR2, cy + Math.sin(ang) * pixR2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Inner Flowerbed
+        ctx.beginPath();
+        ctx.arc(cx, cy, pixR1, 0, Math.PI * 2);
+        ctx.fillStyle = '#15803d';
+        ctx.fill();
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+
+        // Flower blooms
+        const flowerCols = ['#f43f5e', '#fbbf24', '#ec4899', '#38bdf8'];
+        for (let i = 0; i < 12; i++) {
+          const ang = (i * 2.39996);
+          const dist = pixR1 * 0.6;
+          const fx = cx + Math.cos(ang) * dist;
+          const fy = cy + Math.sin(ang) * dist;
+          ctx.beginPath();
+          ctx.arc(fx, fy, 6, 0, Math.PI * 2);
+          ctx.fillStyle = flowerCols[i % flowerCols.length];
+          ctx.fill();
+        }
+
+        // Measurement Lines
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx - pixR1, cy);
+        ctx.strokeStyle = '#ff5757';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx, cy + pixR2);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + pixR1, cy);
+        ctx.lineTo(cx + pixR2, cy);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.restore();
+
+        drawPillBadge(ctx, cx - pixR1 / 2, cy - 18, `內圈半徑 R₁ = ${r1}m`, 14, '#ff5757', 'rgba(15, 23, 42, 0.92)', '#ff5757');
+        drawPillBadge(ctx, cx + 80, cy + pixR2 / 2, `外大圓半徑 R₂ = ${r2}m`, 14, '#38bdf8', 'rgba(15, 23, 42, 0.92)', '#38bdf8');
+        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 22, `步道寬度 w = ${w}m`, 14, '#ffd166', 'rgba(15, 23, 42, 0.92)', '#ffd166');
+
+        // Right side: Blackboard steps
+        const bX = 760;
+        const bW = 470;
+
+        ctx.save();
+        drawRoundRectPath(ctx, bX, 85, bW, 490, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#c084fc';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('【圓環面積標準解題三部曲】', bX + 24, 125);
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('① 求外大圓半徑與面積：', bX + 24, 168);
+        ctx.fillText(`   R₂ = R₁ + 步道寬 = ${r1} + ${w} = ${r2} 公尺`, bX + 24, 196);
+        ctx.fillText(`   大圓面積 = ${r2} × ${r2} × 3.14 = ${a2.toFixed(2)} m²`, bX + 24, 224);
+
+        ctx.fillText('② 求內小圓花圃面積：', bX + 24, 272);
+        ctx.fillText(`   小圓面積 = ${r1} × ${r1} × 3.14 = ${a1.toFixed(2)} m²`, bX + 24, 300);
+
+        ctx.fillText('③ 兩圓相扣得出步道面積：', bX + 24, 348);
+        ctx.fillText(`   圓環面積 = 外大圓 － 內小圓`, bX + 24, 376);
+        ctx.fillText(`   = ${a2.toFixed(2)} － ${a1.toFixed(2)} = `, bX + 24, 404);
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(`${annulusArea} 平方公尺`, bX + 240, 404);
+
+        // Fast Formula Card
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('⚡ 國小乘法分配律速算技巧：', bX + 24, 452);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(`圓環面積 = (R₂² － R₁²) × 3.14`, bX + 24, 480);
+        ctx.fillText(`= (${r2 * r2} － ${r1 * r1}) × 3.14 = ${r2 * r2 - r1 * r1} × 3.14 = ${annulusArea} m²`, bX + 24, 508);
+        ctx.restore();
+      }
     }
 
     /* ==========================================================================
@@ -2561,15 +3546,140 @@
       drawQuizGeometry();
     }
 
+    function stripHtml(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split('');
+      let line = '';
+      let curY = y;
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, curY);
+          line = words[n];
+          curY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, curY);
+      return curY + lineHeight;
+    }
+
     function drawQuizGeometry() {
       const canvas = document.getElementById('quizCanvas');
-      if (!canvas || !currentQ) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawQuizView(ctx, canvas.width, canvas.height, false);
+      }
+      if (currentFsMode === 'quiz') {
+        renderFullscreenCanvas();
+      }
+    }
 
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
+    function drawQuizView(ctx, width, height, isFs) {
+      ctx.clearRect(0, 0, width, height);
+      if (!currentQ) return;
 
+      if (!isFs) {
+        // Small Card Geometry (280x220)
+        drawQuizCardGeometry(ctx, width, height);
+      } else {
+        // High-Definition Fullscreen Blackboard View (1280x660)
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, '#070b18');
+        bgGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Top Banner Title
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏆 題目實戰演練：全螢幕黑板講課模式（師生共構解題）', width / 2, 45);
+
+        // Left Side: Problem Card (x = 60 ~ 680)
+        const pX = 60;
+        const pW = 620;
+        ctx.save();
+        drawRoundRectPath(ctx, pX, 85, pW, 490, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Level Pill
+        const badgeEl = document.getElementById('qBadge');
+        const badgeText = badgeEl ? badgeEl.textContent : `第 ${currentQuizLevel} 關`;
+        drawPillBadge(ctx, pX + 140, 122, badgeText, 15, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
+
+        // Question Stem Text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 21px sans-serif';
+        ctx.textAlign = 'left';
+        const rawStem = stripHtml(document.getElementById('questionStem').innerHTML);
+        let nextY = wrapCanvasText(ctx, rawStem, pX + 24, 165, pW - 48, 34);
+
+        // If Hint is opened
+        if (fsShowHint) {
+          ctx.save();
+          drawRoundRectPath(ctx, pX + 20, nextY + 10, pW - 40, 100, 12);
+          ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+          ctx.fill();
+          ctx.strokeStyle = '#00c4cc';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd166';
+          ctx.font = 'bold 15px sans-serif';
+          ctx.fillText('💡 思考提示：', pX + 34, nextY + 36);
+
+          ctx.fillStyle = '#cffafe';
+          ctx.font = '14.5px sans-serif';
+          const rawHint = stripHtml(currentQ.hint);
+          wrapCanvasText(ctx, rawHint, pX + 34, nextY + 62, pW - 68, 24);
+          ctx.restore();
+          nextY += 120;
+        }
+
+        // If Solution is opened
+        if (fsShowSolution) {
+          ctx.save();
+          drawRoundRectPath(ctx, pX + 20, nextY + 10, pW - 40, 130, 12);
+          ctx.fillStyle = 'rgba(52, 211, 153, 0.12)';
+          ctx.fill();
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#34d399';
+          ctx.font = 'bold 15px sans-serif';
+          ctx.fillText('👁️ 教師示範詳解步驟：', pX + 34, nextY + 36);
+
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = '14.5px sans-serif';
+          const rawSol = stripHtml(currentQ.solution);
+          wrapCanvasText(ctx, rawSol, pX + 34, nextY + 62, pW - 68, 24);
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // Right Side: Giant Geometry Graphic (cx = 980, cy = 330)
+        const cx = 980;
+        const cy = 330;
+        drawQuizFullscreenGraphic(ctx, cx, cy);
+      }
+    }
+
+    function drawQuizCardGeometry(ctx, width, height) {
+      const cx = width / 2;
+      const cy = height / 2;
       ctx.save();
       if (currentQ.type === 'radius' || currentQ.type === 'diameter' || currentQ.type === 'circumference') {
         const r = 65;
@@ -2588,10 +3698,7 @@
           ctx.strokeStyle = '#ffd166';
           ctx.lineWidth = 3;
           ctx.stroke();
-
-          ctx.fillStyle = '#ffd166';
-          ctx.font = 'bold 14px sans-serif';
-          ctx.fillText(`r = ${currentQ.r}`, cx + 15, cy - 8);
+          drawPillBadge(ctx, cx + r / 2, cy - 14, `r = ${currentQ.r}`, 11, '#ffd166');
         } else if (currentQ.type === 'diameter') {
           ctx.beginPath();
           ctx.moveTo(cx - r, cy);
@@ -2599,14 +3706,9 @@
           ctx.strokeStyle = '#f43f5e';
           ctx.lineWidth = 3;
           ctx.stroke();
-
-          ctx.fillStyle = '#f43f5e';
-          ctx.font = 'bold 14px sans-serif';
-          ctx.fillText(`d = ${currentQ.d}`, cx - 20, cy - 8);
+          drawPillBadge(ctx, cx, cy - 14, `d = ${currentQ.d}`, 11, '#f43f5e');
         } else if (currentQ.type === 'circumference') {
-          ctx.fillStyle = '#38bdf8';
-          ctx.font = 'bold 13px sans-serif';
-          ctx.fillText(`圓周長 = ${currentQ.c}`, cx - 45, cy + 5);
+          drawPillBadge(ctx, cx, cy, `周長=${currentQ.c}`, 11, '#38bdf8');
         }
       } else if (currentQ.type === 'semicircle') {
         const r = 70;
@@ -2626,9 +3728,7 @@
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText(`r = ${currentQ.r}`, cx + 20, cy + 12);
+        drawPillBadge(ctx, cx + r / 2, cy + 6, `r = ${currentQ.r}`, 11, '#ffd166');
       } else if (currentQ.type === 'annulus') {
         const r1 = 35;
         const r2 = 70;
@@ -2647,9 +3747,112 @@
         ctx.strokeStyle = '#64748b';
         ctx.stroke();
 
-        ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText(`R=5, r=3`, cx - 25, cy + 5);
+        drawPillBadge(ctx, cx, cy, `R=5, r=3`, 11, '#ffd166');
+      }
+      ctx.restore();
+    }
+
+    function drawQuizFullscreenGraphic(ctx, cx, cy) {
+      ctx.save();
+      if (currentQ.type === 'radius' || currentQ.type === 'diameter' || currentQ.type === 'circumference') {
+        const r = 180;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        const circleGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        circleGrad.addColorStop(0, 'rgba(0, 196, 204, 0.35)');
+        circleGrad.addColorStop(1, 'rgba(0, 196, 204, 0.12)');
+        ctx.fillStyle = circleGrad;
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#00c4cc';
+        ctx.stroke();
+        ctx.restore();
+
+        // Origin
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        if (currentQ.type === 'radius') {
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + r, cy);
+          ctx.strokeStyle = '#ffd166';
+          ctx.lineWidth = 4.5;
+          ctx.stroke();
+
+          drawPillBadge(ctx, cx + r / 2, cy - 22, `📏 半徑 r = ${currentQ.r} 公分`, 17, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
+          drawPillBadge(ctx, cx, cy + r + 35, '💡 公式：面積 = 半徑 × 半徑 × 3.14', 15, '#cffafe', 'rgba(15, 23, 42, 0.9)', '#00c4cc');
+        } else if (currentQ.type === 'diameter') {
+          ctx.beginPath();
+          ctx.moveTo(cx - r, cy);
+          ctx.lineTo(cx + r, cy);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 4.5;
+          ctx.stroke();
+
+          drawPillBadge(ctx, cx, cy - 25, `📏 直徑 d = ${currentQ.d} 公尺`, 18, '#ff5757', 'rgba(15, 23, 42, 0.95)', '#ff5757');
+          drawPillBadge(ctx, cx, cy + r + 35, `⚠️ 防陷阱提示：半徑 = 直徑 ÷ 2 = ${currentQ.d} ÷ 2 = ${currentQ.r} 公尺`, 15, '#ffd166', 'rgba(15, 23, 42, 0.9)', '#ffd166');
+        } else if (currentQ.type === 'circumference') {
+          ctx.save();
+          ctx.setLineDash([8, 8]);
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = '#38bdf8';
+          ctx.stroke();
+          ctx.restore();
+
+          drawPillBadge(ctx, cx, cy - 25, `📏 圓周長 C = ${currentQ.c} 公分`, 18, '#38bdf8', 'rgba(15, 23, 42, 0.95)', '#38bdf8');
+          drawPillBadge(ctx, cx, cy + r + 35, `💡 兩步驟思維：① 直徑 = ${currentQ.c} ÷ 3.14  →  ② 半徑 = 直徑 ÷ 2 = ${currentQ.r}`, 14.5, '#cffafe', 'rgba(15, 23, 42, 0.9)', '#38bdf8');
+        }
+      } else if (currentQ.type === 'semicircle') {
+        const r = 185;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 50, r, Math.PI, 0);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#c084fc';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy + 50, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 50);
+        ctx.lineTo(cx + r, cy + 50);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        drawPillBadge(ctx, cx + r / 2, cy + 22, `📏 半徑 r = ${currentQ.r} 公分`, 17, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
+        drawPillBadge(ctx, cx, cy + 115, '💡 半圓面積 = (半徑 × 半徑 × 3.14) ÷ 2', 16, '#c084fc', 'rgba(15, 23, 42, 0.9)', '#c084fc');
+      } else if (currentQ.type === 'annulus') {
+        const r1 = 90;
+        const r2 = 185;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r1, 0, Math.PI * 2);
+        ctx.fillStyle = '#070b18';
+        ctx.fill();
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        drawPillBadge(ctx, cx, cy, `內孔 r = 3 cm`, 15, '#94a3b8', 'rgba(15, 23, 42, 0.95)', '#64748b');
+        drawPillBadge(ctx, cx, cy - (r1 + r2) / 2, `外大圓 R = 5 cm`, 16, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
+        drawPillBadge(ctx, cx, cy + r2 + 35, '💡 圓環面積 = 外大圓面積 － 內小圓面積', 15.5, '#fef08a', 'rgba(15, 23, 42, 0.9)', '#f59e0b');
       }
       ctx.restore();
     }
@@ -2778,6 +3981,10 @@
         updatePizzaSim();
         updateSprinklerSim();
         updateAnnulusSim();
+      }
+      const fsModal = document.getElementById('fullscreenModal');
+      if (fsModal && fsModal.classList.contains('active')) {
+        renderFullscreenCanvas();
       }
     });
 
