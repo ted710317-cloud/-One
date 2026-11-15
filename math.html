@@ -266,6 +266,31 @@
       filter: brightness(1.1);
     }
 
+    /* Card: Circle Area Lab (Canva Flagship) */
+    .card-arealab::before {
+      background: linear-gradient(90deg, #00c4cc, #7d2ae8, #ff5757);
+    }
+    .card-arealab:hover {
+      transform: translateY(-8px);
+      border-color: rgba(0, 196, 204, 0.7);
+      box-shadow: 0 16px 40px rgba(0, 196, 204, 0.35);
+    }
+    .badge-arealab {
+      background: rgba(0, 196, 204, 0.15);
+      color: #00c4cc;
+      border: 1px solid rgba(0, 196, 204, 0.4);
+    }
+    .btn-arealab {
+      background: linear-gradient(135deg, #00c4cc 0%, #7d2ae8 100%);
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 4px 18px rgba(0, 196, 204, 0.4);
+    }
+    .btn-arealab:hover {
+      box-shadow: 0 6px 25px rgba(0, 196, 204, 0.7);
+      filter: brightness(1.1);
+    }
+
     /* Card 6: Speed Lab */
     .card-speed::before {
       background: linear-gradient(90deg, #f59e0b, #ef4444);
@@ -501,7 +526,7 @@
       </p>
     </header>
 
-    <!-- Games Grid (7 Games) -->
+    <!-- Games Grid (8 Games) -->
     <div class="games-grid">
 
       <!-- Game 1: 因數保衛戰 (高年級適用) -->
@@ -614,14 +639,14 @@
         </a>
       </div>
 
-      <!-- Game 6: 圓面積公式推導實驗室 (高年級適用) -->
+      <!-- Game 6: 圓面積公式推導實驗室 (經典版) -->
       <div class="game-card card-area">
         <div>
-          <div class="card-badge badge-area">🌟 國小高年級適用</div>
+          <div class="card-badge badge-area">🌟 國小高年級適用 · 經典推導</div>
           <div class="game-name">
             <span>📐 圓面積公式推導實驗室</span>
           </div>
-          <div class="game-en">Circle Area Discovery Lab</div>
+          <div class="game-en">Circle Area Discovery Lab (Classic)</div>
           <p class="game-summary">
             將圓等分切成細小扇形，重組為長方形或展開成等腰三角形！透過幾何化曲為直與約分消去，徹底證明半徑×半徑×3.14！
           </p>
@@ -631,17 +656,34 @@
             <li class="feature-item"><span class="feature-icon">⚖️</span> 雙法同場對照 ✕ 自訂半徑算術驗證沙盒</li>
           </ul>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <a href="./circle-area/" class="btn-enter btn-area">
-            <span>📐 進入《圓面積公式推導實驗室》（經典版）</span>
-          </a>
-          <a href="./circle-area-lab/" class="btn-enter" style="background: linear-gradient(135deg, #00c4cc, #7d2ae8); color: #fff; text-decoration: none; text-align: center; padding: 10px; border-radius: 12px; font-weight: 700;">
-            <span>✨ 進入 Canva 旗艦版（對照+生活模擬+題庫）</span>
-          </a>
-        </div>
+        <a href="./circle-area/" class="btn-enter btn-area">
+          <span>📐 進入《圓面積公式推導實驗室》</span>
+        </a>
       </div>
 
-      <!-- Game 7: 認識速率互動實驗室 (康軒六上專用) -->
+      <!-- Game 7: 圓面積大師探究實驗室 (Canva 旗艦版) -->
+      <div class="game-card card-arealab">
+        <div>
+          <div class="card-badge badge-arealab">✨ Canva 旗艦版 ✕ 素養闖關</div>
+          <div class="game-name">
+            <span>🎯 圓面積大師探究實驗室</span>
+          </div>
+          <div class="game-en">Circle Area Master Lab</div>
+          <p class="game-summary">
+            長方形與金字塔三角形雙法深入對照、披薩大對決與灑水器生活情境模擬、4 關階梯式素養挑戰題庫！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">⚖️</span> 雙法深入對照：長方形法 ✕ 金字塔向量堆疊（約分消去之美）</li>
+            <li class="feature-item"><span class="feature-icon">🍕</span> 生活情境探究：12 吋披薩大對決 ✕ 旋轉灑水器 ✕ 環形步道</li>
+            <li class="feature-item"><span class="feature-icon">🏆</span> 題目實戰演練：4 關階梯題庫 ✕ 隨機出題 ✕ 思考提示 ✕ 教師板書詳解</li>
+          </ul>
+        </div>
+        <a href="./circle-area-lab/" class="btn-enter btn-arealab">
+          <span>🎯 進入《圓面積大師探究實驗室》</span>
+        </a>
+      </div>
+
+      <!-- Game 8: 認識速率互動實驗室 (康軒六上專用) -->
       <div class="game-card card-speed">
         <div>
           <div class="card-badge badge-speed">🌟 國小六上康軒專用</div>
@@ -667,7 +709,7 @@
 
     <!-- Footer Note -->
     <div class="footer-note">
-      👑 <strong>教師課堂指引提示</strong>：大廳各項教具遊戲皆具備各自獨立運作能力。<br>
+      👑 <strong>教師課堂指引提示</strong>：大廳八大教具遊戲皆具備各自獨立運作能力。<br>
       老師可以直接將個別遊戲專屬網址（<strong>.../factor/</strong>、<strong>.../factor-dragon/</strong>、<strong>.../multiplication/</strong>、<strong>.../candy-multiplier/</strong>、<strong>.../pi-discovery/</strong>、<strong>.../circle-area/</strong>、<strong>.../circle-area-lab/</strong>、<strong>.../speed-lab/</strong>）分發給班級孩子，也可以分享「朕的數學遊戲」大廳網址讓孩子自由選擇挑戰！
     </div>
   </div>
