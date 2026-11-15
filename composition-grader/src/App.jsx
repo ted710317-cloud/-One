@@ -190,7 +190,6 @@ export default function App() {
         hasResult={Boolean(result)}
         apiKey={apiKey}
         hasServerKey={hasServerKey}
-        usageCount={usageCount}
       />
 
       {/* Main Container */}
