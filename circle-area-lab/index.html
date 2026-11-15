@@ -1372,6 +1372,7 @@
             <button class="level-pill" onclick="setQuizLevel(2)">關卡 2：直徑防陷阱</button>
             <button class="level-pill" onclick="setQuizLevel(3)">關卡 3：周長反求面積</button>
             <button class="level-pill" onclick="setQuizLevel(4)">關卡 4：生活複合圓</button>
+            <button class="level-pill" onclick="setQuizLevel(5)">關卡 5：多元扇形面積</button>
           </div>
 
           <div class="score-banner">
@@ -2394,6 +2395,7 @@
               <button class="slice-btn ${currentQuizLevel===2?'active':''}" onclick="setQuizLevelFromFs(2)">關卡 2</button>
               <button class="slice-btn ${currentQuizLevel===3?'active':''}" onclick="setQuizLevelFromFs(3)">關卡 3</button>
               <button class="slice-btn ${currentQuizLevel===4?'active':''}" onclick="setQuizLevelFromFs(4)">關卡 4</button>
+              <button class="slice-btn ${currentQuizLevel===5?'active':''}" onclick="setQuizLevelFromFs(5)">關卡 5</button>
             </div>
             <button class="action-btn action-btn-secondary" onclick="nextQuestion(); renderFullscreenCanvas();" style="padding: 6px 14px;">
               <span>🎲 換一題</span>
@@ -3541,6 +3543,110 @@
           };
           stem.innerHTML = `光碟片的形狀是一個圓環，外圓半徑是 <strong>5 公分</strong>，內圓小孔半徑是 <strong>3 公分</strong>，請問光碟片可讀取區域（圓環）的面積是多少平方公分？（圓周率以 3.14 計算）`;
         }
+      } else if (lvl === 5) {
+        // Level 5: Diverse Sector Areas (Authentic examples from Kang Hsuan Grade 6 Unit 7)
+        badge.textContent = '第 5 關 · 多元扇形面積（康軒六上第七單元課本例題）';
+        const sectorQuestions = [
+          {
+            subType: 'angle72',
+            r: 10,
+            angle: 72,
+            fractionText: '1/5',
+            unit: '平方公分',
+            answer: 62.8,
+            stem: '右圖是一個<strong>圓心角 72°、半徑 10 公分</strong>的扇形，請問這個扇形的面積大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 104 頁例題 1 觀念：</strong><br>1. 先算這是幾分之幾圓：72° ÷ 360° = 1/5 圓。<br>2. 扇形面積公式：圓面積 × (圓心角 ÷ 360°) = 10 × 10 × 3.14 × (1/5)！',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 判斷圓心角比例：72° ÷ 360° = 1/5 圓。<br>
+              2. 全圓面積 = 10 × 10 × 3.14 = 314 平方公分。<br>
+              3. 扇形面積 = 314 × 1/5 = <strong>62.8</strong> 平方公分。
+            `
+          },
+          {
+            subType: 'angle135',
+            r: 8,
+            angle: 135,
+            fractionText: '3/8',
+            unit: '平方公分',
+            answer: 75.36,
+            stem: '右圖是一個<strong>圓心角 135°、半徑 8 公分</strong>的扇形，請問這個扇形的面積大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 104 頁做做看觀念：</strong><br>1. 圓心角 135° 占周角 360° 的幾分之幾？135/360 約分後為 3/8 圓。<br>2. 扇形面積 = 半徑 × 半徑 × 3.14 × (3/8)！',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 判斷圓心角比例：135° ÷ 360° = 3/8 圓。<br>
+              2. 代入公式：8 × 8 × 3.14 × (3/8) = 64 × 3.14 × (3/8) = 8 × 3.14 × 3 = <strong>75.36</strong> 平方公分。
+            `
+          },
+          {
+            subType: 'angle45',
+            r: 10,
+            angle: 45,
+            fractionText: '1/8',
+            unit: '平方公分',
+            answer: 39.25,
+            stem: '右圖是一個<strong>圓心角 45°、半徑 10 公分</strong>的扇形，請問這個扇形的面積大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 110 頁練習百分百題型：</strong><br>1. 45° ÷ 360° = 1/8 圓。<br>2. 扇形面積 = 10 × 10 × 3.14 × 1/8！',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 判斷比例：45° ÷ 360° = 1/8 圓。<br>
+              2. 計算扇形面積：10 × 10 × 3.14 × 1/8 = 314 ÷ 8 = <strong>39.25</strong> 平方公分。
+            `
+          },
+          {
+            subType: 'angle270',
+            r: 20,
+            angle: 270,
+            fractionText: '3/4',
+            unit: '平方公分',
+            answer: 942,
+            stem: '下圖鋪色部分是一個<strong>半徑 20 公分</strong>的優角扇形（白色未鋪色凹角為直角 90°），請問鋪色部分的面積大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 106 頁做做看優角扇形思維：</strong><br>1. 鋪色圓心角 = 360° - 90° = 270°（即 3/4 圓）。<br>2. 扇形面積 = 20 × 20 × 3.14 × 3/4！（也可先算全圓 1256 扣除 1/4 圓 314）',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 鋪色圓心角 = 360° - 90° = 270°，占 270/360 = 3/4 圓。<br>
+              2. 扇形面積 = 20 × 20 × 3.14 × 3/4 = 400 × 3.14 × 3/4 = 300 × 3.14 = <strong>942</strong> 平方公分。
+            `
+          },
+          {
+            subType: 'clock150',
+            r: 12,
+            angle: 150,
+            fractionText: '5/12',
+            unit: '平方公分',
+            answer: 188.4,
+            stem: '客廳牆上有一個時鐘，<strong>分針長 12 公分</strong>。從上午 10 時到上午 10 時 25 分，時鐘上的<strong>分針轉動所形成的扇形面積</strong>大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 111 頁綜合題思維：</strong><br>1. 分針旋轉半徑就是分針長度 12 公分。<br>2. 分針走了 25 分鐘，占一圈 60 分鐘的 25/60 = 5/12 圓（圓心角 150°）！',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 判斷轉動比例：25 分鐘 ÷ 60 分鐘 = 5/12 圓（圓心角 360° × 5/12 = 150°）。<br>
+              2. 代入分針半徑 12 公分計算：<br>
+                 12 × 12 × 3.14 × (5/12) = 12 × 3.14 × 5 = <strong>188.4</strong> 平方公分。
+            `
+          },
+          {
+            subType: 'angle120',
+            r: 6,
+            angle: 120,
+            fractionText: '1/3',
+            unit: '平方公分',
+            answer: 37.68,
+            stem: '右圖是一個<strong>圓心角 120°、半徑 6 公分</strong>的扇形，請問這個扇形的面積大約是多少平方公分？（圓周率以 3.14 計算）',
+            hint: '💡 <strong>課本第 104 頁類似題扇形公式：</strong><br>1. 120° ÷ 360° = 1/3 圓。<br>2. 扇形面積 = 半徑 × 半徑 × 3.14 × 1/3！',
+            solution: `
+              <strong>【課本詳解步驟】</strong><br>
+              1. 判斷比例：120° ÷ 360° = 1/3 圓。<br>
+              2. 計算面積：6 × 6 × 3.14 × 1/3 = 36 × 3.14 × 1/3 = 12 × 3.14 = <strong>37.68</strong> 平方公分。
+            `
+          }
+        ];
+        const selected = sectorQuestions[Math.floor(Math.random() * sectorQuestions.length)];
+        unit.textContent = selected.unit;
+        currentQ = {
+          type: 'sector',
+          ...selected
+        };
+        stem.innerHTML = selected.stem;
       }
 
       drawQuizGeometry();
@@ -3748,6 +3854,37 @@
         ctx.stroke();
 
         drawPillBadge(ctx, cx, cy, `R=5, r=3`, 11, '#ffd166');
+      } else if (currentQ.type === 'sector') {
+        const isOver180 = currentQ.angle > 180;
+        const r = isOver180 ? 54 : 68;
+        const startAngle = -Math.PI / 2;
+        const endAngle = startAngle + (currentQ.angle * Math.PI) / 180;
+        const midAngle = startAngle + (currentQ.angle * Math.PI) / 360;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.28)';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#ffd166';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 18, startAngle, endAngle);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        const abDist = isOver180 ? 30 : r * 0.52;
+        drawPillBadge(ctx, cx + Math.cos(midAngle) * abDist, cy + Math.sin(midAngle) * abDist, `${currentQ.angle}°`, 10.5, '#ffd166');
+        drawPillBadge(ctx, cx - 26, cy - r / 2, `r=${currentQ.r}`, 10.5, '#00c4cc');
       }
       ctx.restore();
     }
@@ -3853,6 +3990,105 @@
         drawPillBadge(ctx, cx, cy, `內孔 r = 3 cm`, 15, '#94a3b8', 'rgba(15, 23, 42, 0.95)', '#64748b');
         drawPillBadge(ctx, cx, cy - (r1 + r2) / 2, `外大圓 R = 5 cm`, 16, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
         drawPillBadge(ctx, cx, cy + r2 + 35, '💡 圓環面積 = 外大圓面積 － 內小圓面積', 15.5, '#fef08a', 'rgba(15, 23, 42, 0.9)', '#f59e0b');
+      } else if (currentQ.type === 'sector') {
+        const isOver180 = currentQ.angle > 180;
+        const r = isOver180 ? 150 : 180;
+        const startAngle = -Math.PI / 2;
+        const endAngle = startAngle + (currentQ.angle * Math.PI) / 180;
+        const midAngle = startAngle + (currentQ.angle * Math.PI) / 360;
+
+        // Sector fill & stroke
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, endAngle);
+        ctx.closePath();
+        const secGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        secGrad.addColorStop(0, 'rgba(251, 191, 36, 0.45)');
+        secGrad.addColorStop(0.8, 'rgba(245, 158, 11, 0.22)');
+        secGrad.addColorStop(1, 'rgba(217, 119, 6, 0.12)');
+        ctx.fillStyle = secGrad;
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#ffd166';
+        ctx.stroke();
+
+        // Origin vertex dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // Angle Arc at Vertex
+        ctx.beginPath();
+        ctx.arc(cx, cy, 40, startAngle, endAngle);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Angle Badge
+        const angleBadgeDist = isOver180 ? 75 : 85;
+        const abX = cx + Math.cos(midAngle) * angleBadgeDist;
+        const abY = cy + Math.sin(midAngle) * angleBadgeDist;
+        drawPillBadge(ctx, abX, abY, `圓心角 ${currentQ.angle}°（${currentQ.fractionText} 圓）`, 16, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
+
+        // Radius Measurement on first radial edge (pointing straight up)
+        const rx1 = cx + Math.cos(startAngle) * r;
+        const ry1 = cy + Math.sin(startAngle) * r;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(rx1, ry1);
+        ctx.strokeStyle = '#00c4cc';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        drawPillBadge(ctx, cx - 85, (cy + ry1) / 2, `📏 半徑 r = ${currentQ.r} 公分`, 16, '#00c4cc', 'rgba(15, 23, 42, 0.95)', '#00c4cc');
+
+        // Clock details if it's the clock problem
+        if (currentQ.subType === 'clock150') {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+          ctx.setLineDash([6, 6]);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // 12 hour ticks
+          for (let h = 0; h < 12; h++) {
+            const hAng = (h * Math.PI * 2) / 12 - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(hAng) * (r - 12), cy + Math.sin(hAng) * (r - 12));
+            ctx.lineTo(cx + Math.cos(hAng) * r, cy + Math.sin(hAng) * r);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+          }
+
+          // Hour Hand at 10:25
+          const hourAng = (10 / 12) * Math.PI * 2 - Math.PI / 2 + (25 / 60) * (Math.PI / 6);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(hourAng) * (r * 0.55), cy + Math.sin(hourAng) * (r * 0.55));
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 5;
+          ctx.stroke();
+          drawPillBadge(ctx, cx + Math.cos(hourAng) * (r * 0.35) - 35, cy + Math.sin(hourAng) * (r * 0.35), '時針(8cm)', 12, '#ff5757');
+
+          // Minute Hand at 12 initially, and at 5 (25 min, angle 150°)
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(endAngle) * r, cy + Math.sin(endAngle) * r);
+          ctx.strokeStyle = '#00c4cc';
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          drawPillBadge(ctx, cx + Math.cos(endAngle) * (r * 0.7) + 45, cy + Math.sin(endAngle) * (r * 0.7), '分針(12cm)', 12, '#00c4cc');
+          ctx.restore();
+        }
+
+        // Bottom formula guide pill
+        drawPillBadge(ctx, cx, cy + r + 38, `💡 康軒公式：扇形面積 = 半徑 × 半徑 × 3.14 × (${currentQ.angle}° ÷ 360°)`, 15.5, '#fef08a', 'rgba(15, 23, 42, 0.9)', '#ffd166');
+        ctx.restore();
       }
       ctx.restore();
     }
