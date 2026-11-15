@@ -330,31 +330,32 @@
       display: block;
     }
 
-        .canvas-guide-trigger-btn {
+    .canvas-guide-trigger-btn {
       position: absolute;
       top: 6px;
       left: 8px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1.5px solid rgba(255, 209, 102, 0.5);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid rgba(255, 209, 102, 0.65);
       color: #ffd166;
-      padding: 3px 10px;
-      border-radius: 8px;
-      font-size: 11.5px;
-      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12.5px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       z-index: 10;
       backdrop-filter: blur(8px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 10px rgba(255, 209, 102, 0.25);
       transition: all 0.2s;
     }
     .canvas-guide-trigger-btn:hover {
-      background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(125, 42, 232, 0.35));
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.4), rgba(125, 42, 232, 0.4));
       border-color: #ffd166;
       color: #fff;
       transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(255, 209, 102, 0.4);
     }
 
 .fullscreen-trigger-btn {
@@ -567,9 +568,9 @@
       border: 1.5px solid rgba(0, 196, 204, 0.5);
       border-radius: var(--radius-xl);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 196, 204, 0.2);
-      max-width: 960px;
+      max-width: 740px;
       width: 100%;
-      max-height: 88vh;
+      max-height: 86vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -579,13 +580,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 18px;
+      padding: 14px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       background: rgba(15, 23, 42, 0.7);
     }
 
     .discovery-modal-title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 800;
       color: #ffd166;
       display: flex;
@@ -597,9 +598,9 @@
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
-      padding: 5px 12px;
+      padding: 5px 14px;
       border-radius: var(--radius-pill);
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
@@ -609,94 +610,136 @@
       border-color: #ef4444;
     }
 
+    /* Modal Mode Filter Tabs */
+    .modal-mode-tabs {
+      display: flex;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(15, 23, 42, 0.55);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+    }
+    .modal-tab-btn {
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13.5px;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .modal-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .modal-tab-btn.active {
+      background: linear-gradient(135deg, rgba(0, 196, 204, 0.35), rgba(125, 42, 232, 0.35));
+      border-color: #00c4cc;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 196, 204, 0.35);
+    }
+
     .discovery-modal-body {
-      padding: 16px 20px;
+      padding: 18px 22px;
       overflow-y: auto;
       flex: 1;
     }
 
-    .step-list {
+    /* Classroom Discussion Question Cards (Pure Questions) */
+    .disc-q-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+    .disc-q-card.rect-card {
+      border-color: rgba(0, 196, 204, 0.45);
+      background: linear-gradient(145deg, rgba(0, 196, 204, 0.08), rgba(15, 23, 42, 0.85));
+    }
+    .disc-q-card.pyramid-card {
+      border-color: rgba(255, 170, 0, 0.45);
+      background: linear-gradient(145deg, rgba(255, 170, 0, 0.08), rgba(15, 23, 42, 0.85));
+    }
+    .disc-q-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .disc-q-badge {
+      font-size: 13.5px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+    }
+    .disc-q-badge.rect-badge {
+      background: rgba(0, 196, 204, 0.2);
+      color: #00c4cc;
+      border: 1px solid rgba(0, 196, 204, 0.4);
+    }
+    .disc-q-badge.pyramid-badge {
+      background: rgba(255, 170, 0, 0.2);
+      color: #ffaa00;
+      border: 1px solid rgba(255, 170, 0, 0.4);
+    }
+    .disc-q-title {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #ffd166;
+      letter-spacing: 0.5px;
+    }
+    .disc-q-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
-
-    .step-item {
+    .disc-q-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 14px;
       background: rgba(255, 255, 255, 0.04);
-      padding: 12px 14px;
       border-radius: 12px;
-      border-left: 4px solid var(--canva-cyan);
+      padding: 14px 18px;
+      border-left: 4px solid #00c4cc;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
-    .step-item.gold {
-      border-left-color: #ffd166;
+    .disc-q-card.pyramid-card .disc-q-item {
+      border-left-color: #ffaa00;
     }
-    .step-item.purple {
-      border-left-color: #a855f7;
-    }
-
-    .step-num {
-      width: 26px;
-      height: 26px;
+    .disc-q-num {
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 900;
       color: #fff;
       flex-shrink: 0;
+      margin-top: 1px;
     }
-
-    .step-text {
-      font-size: 14px;
-      color: #e2e8f0;
-      line-height: 1.6;
+    .disc-q-num.rect-num {
+      background: #00c4cc;
+      box-shadow: 0 0 10px rgba(0, 196, 204, 0.5);
     }
-
-    .math-highlight {
-      color: #ffd166;
-      font-weight: 800;
-      padding: 1px 6px;
-      background: rgba(255, 209, 102, 0.12);
-      border-radius: 6px;
+    .disc-q-num.pyramid-num {
+      background: #ffaa00;
+      box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
     }
-    .math-highlight-cyan {
-      color: #00c4cc;
-      font-weight: 800;
-      padding: 1px 6px;
-      background: rgba(0, 196, 204, 0.12);
-      border-radius: 6px;
-    }
-
-    .compare-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .compare-table th, .compare-table td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 13.5px;
-    }
-    .compare-table th {
-      background: rgba(15, 23, 42, 0.8);
-      color: #ffd166;
-      font-weight: 800;
-    }
-    .compare-table tr:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-    .compare-table td:first-child {
+    .disc-q-text {
+      font-size: 16.5px;
       font-weight: 700;
-      color: var(--canva-cyan);
-      width: 22%;
+      color: #f8fafc;
+      line-height: 1.6;
+      letter-spacing: 0.2px;
     }
 
     /* Tabs 2, 3, 4 internal scroll */
@@ -1269,8 +1312,8 @@
       </div>
 
       <div class="topbar-actions">
-        <button class="nav-btn-mini secret-btn" onclick="openDiscoveryModal()" title="查看完整公式推導步驟與對照表">
-          <span>💡 推導秘笈</span>
+        <button class="nav-btn-mini secret-btn" onclick="openDiscoveryModal()" title="查看課堂小組討論思考提問">
+          <span>💡 思考提問</span>
         </button>
         <button id="soundToggle" class="nav-btn-mini sound-btn" onclick="toggleSound()">
           <span id="soundIcon">🔊 音效開啟</span>
@@ -1299,8 +1342,8 @@
 
         <!-- Canvas Container -->
         <div class="canvas-wrapper">
-          <button id="discoveryToggleBtn" class="canvas-guide-trigger-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂公式推導解答秘笈">
-            <span>💡 課堂推導秘笈</span>
+          <button id="discoveryToggleBtn" class="canvas-guide-trigger-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂小組討論思考提問">
+            <span>💡 課堂思考提問</span>
           </button>
           <button class="fullscreen-trigger-btn" onclick="openUniversalFullscreen('derivation')">
             <span>⛶ 全螢幕講課模式</span>
@@ -1353,8 +1396,8 @@
               <button class="action-btn action-btn-secondary" onclick="maxProgress()" title="拼組完成">
                 <span>⏭ 拼接完成</span>
               </button>
-              <button class="action-btn action-btn-guide" onclick="openDiscoveryModal()" title="打開課堂推導步驟與對照表">
-                <span>💡 推導秘笈</span>
+              <button class="action-btn action-btn-guide" onclick="openDiscoveryModal()" title="打開課堂小組討論思考提問">
+                <span>💡 思考提問</span>
               </button>
             </div>
           </div>
@@ -1587,132 +1630,59 @@
     </footer>
   </div>
 
-  <!-- Classroom Derivation Secret Guide Modal -->
+  <!-- Classroom Discussion Inquiry Modal (Pure Questions, No Answers) -->
   <div id="discoveryModal" class="discovery-modal" onclick="if(event.target===this) closeDiscoveryModal()">
     <div class="discovery-modal-dialog">
       <div class="discovery-modal-header">
         <div class="discovery-modal-title">
-          <span>💡 課堂探究引導：長寬／底高與圓面積公式完整推導秘笈</span>
+          <span style="font-size: 20px;">💡</span>
+          <span>課堂思考引導 · 小組討論提問</span>
         </div>
         <button class="discovery-modal-close" onclick="closeDiscoveryModal()">✕ 關閉</button>
       </div>
 
+      <!-- Mode Filter Tabs -->
+      <div class="modal-mode-tabs">
+        <button id="modalTab-rect" class="modal-tab-btn active" onclick="switchModalQuestions('rect')">🟩 長方形法提問</button>
+        <button id="modalTab-pyramid" class="modal-tab-btn" onclick="switchModalQuestions('pyramid')">🔺 三角形法提問</button>
+        <button id="modalTab-all" class="modal-tab-btn" onclick="switchModalQuestions('all')">⚡ 雙法提問並列</button>
+      </div>
+
       <div class="discovery-modal-body" id="discoveryContent">
-        <!-- Method 1: Rect Proof -->
-        <div id="disc-rect-block" style="margin-top: 10px;">
-          <h4 style="color: #00c4cc; margin-bottom: 8px;">🟩 方法一：扇形上下交錯為【長方形】之推導</h4>
-          <div class="step-list">
-            <div class="step-item">
-              <div class="step-num">1</div>
-              <div class="step-text">
-                觀察拼成長方形的<strong>「寬」</strong>：正是原本圓形的 <span class="math-highlight-cyan">半徑 \(r\)</span>。
-              </div>
+        <!-- Method 1: Rectangle Questions -->
+        <div id="disc-rect-block" class="disc-q-card rect-card">
+          <div class="disc-q-header">
+            <span class="disc-q-badge rect-badge">🟩 方法一：長方形法</span>
+            <span class="disc-q-title">💬 小組討論</span>
+          </div>
+          <div class="disc-q-list">
+            <div class="disc-q-item">
+              <div class="disc-q-num rect-num">1</div>
+              <div class="disc-q-text">這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的</div>
             </div>
-            <div class="step-item gold">
-              <div class="step-num">2</div>
-              <div class="step-text">
-                觀察長方形的<strong>「長」</strong>：上下兩排弧長加起來剛好是圓周長，因此長是一半的圓周長：<br>
-                <span class="math-highlight">長 = 圓周長的一半 = (直徑 × 3.14) ÷ 2 = 半徑 × 3.14</span>
-              </div>
-            </div>
-            <div class="step-item purple">
-              <div class="step-num">3</div>
-              <div class="step-text">
-                代入長方形面積公式：<br>
-                <strong>圓面積 = 長方形面積 = 長 × 寬</strong><br>
-                \(=\) (<span class="math-highlight">半徑 × 3.14</span>) × <span class="math-highlight-cyan">半徑</span><br>
-                \(=\) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
-              </div>
+            <div class="disc-q-item">
+              <div class="disc-q-num rect-num">2</div>
+              <div class="disc-q-text">請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的</div>
             </div>
           </div>
         </div>
 
-        <!-- Method 2: Pyramid Proof -->
-        <div id="disc-pyramid-block" style="margin-top: 18px;">
-          <h4 style="color: #ffaa00; margin-bottom: 8px;">🔺 方法二：扇形奇數層堆疊為【金字塔三角形】之推導（9等分與16等分）</h4>
-          <div class="step-list">
-            <div class="step-item gold">
-              <div class="step-num">1</div>
-              <div class="step-text">
-                <strong>奇數層咬合堆疊結構：</strong><br>
-                • <strong>9 等分（3 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片（\(1+3+5=9=3^2\)）<br>
-                • <strong>16 等分（4 層）：</strong>第 1 層 1 片、第 2 層 3 片、第 3 層 5 片、第 4 層 7 片（\(1+3+5+7=16=4^2\)）
-              </div>
+        <!-- Method 2: Triangle Questions -->
+        <div id="disc-pyramid-block" class="disc-q-card pyramid-card">
+          <div class="disc-q-header">
+            <span class="disc-q-badge pyramid-badge">🔺 方法二：三角形法（金字塔堆疊）</span>
+            <span class="disc-q-title">💬 小組討論</span>
+          </div>
+          <div class="disc-q-list">
+            <div class="disc-q-item">
+              <div class="disc-q-num pyramid-num">1</div>
+              <div class="disc-q-text">這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的</div>
             </div>
-            <div class="step-item">
-              <div class="step-num">2</div>
-              <div class="step-text">
-                觀察金字塔大三角形的<strong>「高」</strong>：由頂點垂直向下，各層扇形腰長貼合疊加：<br>
-                • 9 等分（3 層）：<span class="math-highlight-cyan">高 = 3 個半徑 = 3r</span><br>
-                • 16 等分（4 層）：<span class="math-highlight-cyan">高 = 4 個半徑 = 4r</span>
-              </div>
-            </div>
-            <div class="step-item gold">
-              <div class="step-num">3</div>
-              <div class="step-text">
-                觀察金字塔大三角形的<strong>「底」</strong>：由最底層正立扇形的底弧構成：<br>
-                • 9 等分底層有 3 個底弧，佔全圓 \(\frac{3}{9} = \frac{1}{3}\)：<span class="math-highlight">底 = 圓周長 ÷ 3 = \frac{C}{3}</span><br>
-                • 16 等分底層有 4 個底弧，佔全圓 \(\frac{4}{16} = \frac{1}{4}\)：<span class="math-highlight">底 = 圓周長 ÷ 4 = \frac{C}{4}</span>
-              </div>
-            </div>
-            <div class="step-item purple">
-              <div class="step-num">4</div>
-              <div class="step-text">
-                代入三角形面積公式：<strong>面積 = (底 × 高) ÷ 2</strong><br>
-                • <strong>9 等分：</strong>\([(\frac{C}{3}) \times 3r] \div 2\) ⚡ <strong>高的 3 與底邊分母 3 約分消去！</strong><br>
-                • <strong>16 等分：</strong>\([(\frac{C}{4}) \times 4r] \div 2\) ⚡ <strong>高的 4 與底邊分母 4 約分消去！</strong><br>
-                皆化簡為：\((C \times r) \div 2 = (2 \times \text{半徑} \times 3.14 \times \text{半徑}) \div 2\)<br>
-                ⚡ <strong>係數 2 與公式除以 2 再次完美約分！</strong><br>
-                \(= \) <span style="font-size: 16px; font-weight: 900; color: #ffd166;">半徑 × 半徑 × 3.14</span>！
-              </div>
+            <div class="disc-q-item">
+              <div class="disc-q-num pyramid-num">2</div>
+              <div class="disc-q-text">請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的</div>
             </div>
           </div>
-        </div>
-
-        <!-- Deep Comparison Table -->
-        <div style="margin-top: 20px;">
-          <h4 style="color: #a855f7; margin-bottom: 8px;">⚖️ 雙法深入對照一覽表（殊途同歸）</h4>
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th>對照項目</th>
-                <th>方法一：長方形法</th>
-                <th>方法二：金字塔三角形法</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>拼組形狀</td>
-                <td>趨近長方形</td>
-                <td>等腰三角形（金字塔）</td>
-              </tr>
-              <tr>
-                <td>水平邊長</td>
-                <td>長 = 圓周長的一半（\(C \div 2 = \text{半徑} \times 3.14\)）</td>
-                <td>底 = 最下層底弧總和（9等分為 \(C \div 3\)；16等分為 \(C \div 4\)）</td>
-              </tr>
-              <tr>
-                <td>垂直高度</td>
-                <td>寬 = 半徑 \(r\)</td>
-                <td>高 = 層數 × 半徑（9等分為 \(3r\)；16等分為 \(4r\)）</td>
-              </tr>
-              <tr>
-                <td>圖形面積</td>
-                <td>長 × 寬</td>
-                <td>(底 × 高) ÷ 2</td>
-              </tr>
-              <tr>
-                <td>代數展開</td>
-                <td>(半徑 × 3.14) × 半徑</td>
-                <td>[(\(C \div \text{層數}\)) × (\(\text{層數} \times r\))] ÷ 2</td>
-              </tr>
-              <tr>
-                <td>約分與結論</td>
-                <td>直接得出 \(r \times r \times 3.14\)</td>
-                <td>高的層數與底邊分母約分消去，再與公式 \(\div 2\) 約分，得出 \(r \times r \times 3.14\)</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -1723,8 +1693,8 @@
     <div class="fs-header-title" id="fsHeaderTitle">
       <span>⛶ 全螢幕黑板講課模式</span>
     </div>
-    <button class="fs-guide-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂公式推導解答秘笈">
-      <span>💡 課堂推導秘笈</span>
+    <button class="fs-guide-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂小組討論思考提問">
+      <span>💡 課堂思考提問</span>
     </button>
     <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
     <div class="fs-canvas-holder">
@@ -1843,8 +1813,37 @@
     function openDiscoveryModal() {
       const modal = document.getElementById('discoveryModal');
       if (modal) {
+        if (derivationMode === 'rect') {
+          switchModalQuestions('rect', false);
+        } else if (derivationMode === 'pyramid') {
+          switchModalQuestions('pyramid', false);
+        } else {
+          switchModalQuestions('all', false);
+        }
         modal.classList.add('active');
         playTone(587.33, 0.06);
+      }
+    }
+
+    function switchModalQuestions(mode, playSound = true) {
+      const rectBlock = document.getElementById('disc-rect-block');
+      const pyramidBlock = document.getElementById('disc-pyramid-block');
+      const tabRect = document.getElementById('modalTab-rect');
+      const tabPyramid = document.getElementById('modalTab-pyramid');
+      const tabAll = document.getElementById('modalTab-all');
+
+      if (tabRect) tabRect.classList.toggle('active', mode === 'rect');
+      if (tabPyramid) tabPyramid.classList.toggle('active', mode === 'pyramid');
+      if (tabAll) tabAll.classList.toggle('active', mode === 'all');
+
+      if (rectBlock) {
+        rectBlock.style.display = (mode === 'rect' || mode === 'all') ? 'block' : 'none';
+      }
+      if (pyramidBlock) {
+        pyramidBlock.style.display = (mode === 'pyramid' || mode === 'all') ? 'block' : 'none';
+      }
+      if (playSound) {
+        playTone(520, 0.04);
       }
     }
 
