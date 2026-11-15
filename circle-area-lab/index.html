@@ -1772,20 +1772,47 @@
       ctx.stroke();
     }
 
-    /* Mode 1: Rectangle Reassembly */
+    /* Mode 1: Rectangle / Parallelogram Reassembly */
     function drawRectangleDerivation(ctx, cx, cy, w, h, t) {
       const N = rectSlices;
       const halfN = N / 2;
       const theta = (2 * Math.PI) / N;
-      const R = Math.min(w * 0.42, h * 0.36);
+
+      // Ensure rectangle / parallelogram, dimension brackets and labels NEVER disappear at canvas edges
+      // 1. slant: when halfCutEnabled is false, the parallelogram slants right by R * sin(theta / 2)
+      // 2. right clearance: bracket offset + tick + text "寬" + margin
+      const isCompact = (w < 700);
+      const sinHalf = Math.sin(theta / 2);
+      const slantFactor = halfCutEnabled ? 0 : sinHalf;
+      const bracketGap = isCompact ? 16 : 24;
+      const labelClearance = isCompact ? 32 : 44;
+      const safetyMarginX = isCompact ? 60 : 80;
+
+      // Max R limited by width:
+      // rectW + slant + bracketGap + labelClearance + safetyMarginX <= w
+      // (PI + slantFactor) * R <= w - (bracketGap + labelClearance + safetyMarginX)
+      const maxRByWidth = (w - (bracketGap + labelClearance + safetyMarginX)) / (Math.PI + slantFactor);
+      // Max R limited by height:
+      // When t=0: circle diameter is 2R <= h - 70 => R <= (h - 70) / 2.05
+      // When t=1: rectangle height is R + top bracket space (45px) + bottom margin (40px)
+      const maxRByHeight = Math.min(h - 85, (h - 70) / 2.05);
+
+      const maxAllowedR = (w >= 700) ? 185 : (w >= 600 ? 145 : 116);
+      const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, maxAllowedR));
       const arcW = R * theta;
-      const rectW = halfN * arcW;
+      const rectW = halfN * arcW; // = Math.PI * R
       const rectH = R;
 
-      const rectLeft = cx - rectW / 2;
-      const rectTop = cy - rectH / 2;
+      const slant = halfCutEnabled ? 0 : R * sinHalf;
+      const totalVisualW = rectW + slant + bracketGap + labelClearance;
+
+      // Perfectly center the complete visual group inside available width w
+      const rectLeft = cx - totalVisualW / 2;
+      // Vertically center with slight balance for top bracket
+      const rectTop = cy - rectH / 2 + (isCompact ? 8 : 12);
+
       const cx0 = cx;
-      const cy0 = cy;
+      const cy0 = cy + (isCompact ? 8 : 12);
 
       const topColors = ['#06b6d4', '#0284c7'];
       const botColors = ['#f97316', '#ea580c'];
@@ -1936,43 +1963,48 @@
         ctx.save();
         ctx.globalAlpha = alpha;
 
+        const bracketFontSize = isCompact ? 20 : 24;
+        const tick = isCompact ? 6 : 8;
+
         // Top Bracket: 長
         const bx1 = rectLeft;
         const bx2 = rectLeft + rectW;
-        const by = rectTop - 26;
+        const by = rectTop - (isCompact ? 20 : 26);
 
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = isCompact ? 2.5 : 3;
         ctx.beginPath();
-        ctx.moveTo(bx1, by + 8);
+        ctx.moveTo(bx1, by + tick);
         ctx.lineTo(bx1, by);
         ctx.lineTo(bx2, by);
-        ctx.lineTo(bx2, by + 8);
+        ctx.lineTo(bx2, by + tick);
         ctx.stroke();
 
         ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 24px sans-serif';
+        ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('長', (bx1 + bx2) / 2, by - 4);
+        ctx.fillText('長', (bx1 + bx2) / 2, by - 3);
 
-        // Right Bracket: 寬
+        // Right Bracket: 寬 (follows slant in parallelogram so it never collides or clips)
         const ry1 = rectTop;
         const ry2 = rectTop + rectH;
-        const rx = rectLeft + rectW + (halfCutEnabled ? 24 : 32);
+        const rx = rectLeft + rectW + slant + bracketGap;
 
         ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = isCompact ? 2.5 : 3;
         ctx.beginPath();
-        ctx.moveTo(rx - 8, ry1);
+        ctx.moveTo(rx - tick, ry1);
         ctx.lineTo(rx, ry1);
         ctx.lineTo(rx, ry2);
-        ctx.lineTo(rx - 8, ry2);
+        ctx.lineTo(rx - tick, ry2);
         ctx.stroke();
 
         ctx.fillStyle = '#ffd166';
+        ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText('寬', rx + 10, (ry1 + ry2) / 2);
+        ctx.fillText('寬', rx + (isCompact ? 8 : 10), (ry1 + ry2) / 2);
 
         ctx.restore();
       }
@@ -2191,26 +2223,28 @@
       ctx.restore();
 
       // Titles
-      ctx.font = 'bold 17px sans-serif';
+      const titleFontSize = (w < 800) ? 15 : 17;
+      ctx.font = `bold ${titleFontSize}px sans-serif`;
       ctx.fillStyle = '#00c4cc';
       ctx.textAlign = 'center';
-      ctx.fillText('🟩 方法一：長方形法', halfW / 2, 34);
+      const method1Title = halfCutEnabled ? '🟩 方法一：長方形法' : '🟩 方法一：平行四邊形法';
+      ctx.fillText(method1Title, halfW / 2, 32);
 
       ctx.fillStyle = '#ffaa00';
-      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, 34);
+      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, 32);
 
-      // Draw Left Side
+      // Draw Left Side (bounded to left half with full vertical room)
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, 40, halfW, h - 40);
+      ctx.rect(0, 0, halfW, h);
       ctx.clip();
       drawRectangleDerivation(ctx, halfW / 2, (h + 40) / 2, halfW, h - 40, t);
       ctx.restore();
 
-      // Draw Right Side
+      // Draw Right Side (bounded to right half with full vertical room)
       ctx.save();
       ctx.beginPath();
-      ctx.rect(halfW, 40, halfW, h - 40);
+      ctx.rect(halfW, 0, halfW, h);
       ctx.clip();
       drawPyramidDerivation(ctx, halfW + halfW / 2, (h + 40) / 2, halfW, h - 40, t);
       ctx.restore();
