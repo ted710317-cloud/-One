@@ -1677,6 +1677,30 @@
     let soundEnabled = true;
     let audioCtx = null;
 
+    
+    // Canvas click listener to open discovery guide modal when clicking discussion box
+    const derivCanvas = document.getElementById('derivationCanvas');
+    if (derivCanvas) {
+      derivCanvas.addEventListener('click', (e) => {
+        const rect = derivCanvas.getBoundingClientRect();
+        const yRatio = (e.clientY - rect.top) / rect.height;
+        if (animProgress > 0.4 && yRatio > 0.65) {
+          openDiscoveryModal();
+        }
+      });
+    }
+
+    const fsCanvasEl = document.getElementById('fsCanvas');
+    if (fsCanvasEl) {
+      fsCanvasEl.addEventListener('click', (e) => {
+        const rect = fsCanvasEl.getBoundingClientRect();
+        const yRatio = (e.clientY - rect.top) / rect.height;
+        if (animProgress > 0.4 && yRatio > 0.65) {
+          openDiscoveryModal();
+        }
+      });
+    }
+
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2219,6 +2243,20 @@
         ctx.textBaseline = 'middle';
         ctx.fillText('寬', rx + (isCompact ? 8 : 10), (ry1 + ry2) / 2);
 
+        // --- DISCUSSION QUESTIONS BOX ---
+        const cardW = Math.min(isCompact ? 460 : 880, w - (isCompact ? 24 : 60));
+        const cardH = isCompact ? 92 : 104;
+        const cardY = isCompact ? (h - cardH - 12) : Math.max(rectTop + rectH + 28, h - cardH - 24);
+
+        const q1 = isCompact
+          ? '1. 長方形的「寬」跟圓形半徑有什麼關係？怎麼發現的？'
+          : '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        const q2 = isCompact
+          ? '2. 請你想想看，這個長方形的「長」跟圓周長有什麼關係？怎麼發現的？'
+          : '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
+
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💡 小組討論', q1, q2, isCompact);
+
         ctx.restore();
       }
 
@@ -2235,12 +2273,13 @@
 
       // Responsive vertical layout and bounds optimization
       const isDual = (w < 800);
-      const topClearance = isDual ? 48 : 36;
-      const bottomClearance = 52; // Clearance for base bracket and text label '底'
+      const topClearance = isDual ? 32 : 24;
+      const cardH = isDual ? 92 : 100;
+      const bottomClearance = 24 + cardH + 12; // 24px for base bracket & '底' + card + 12px margin
       const shapeHeightMultiplier = ((numLayers - 1) * cosHalf + 1);
       const maxRByHeight = (h - topClearance - bottomClearance) / shapeHeightMultiplier;
-      const maxRByWidth = (w - (isDual ? 120 : 160)) / (2 * numLayers * sinHalf);
-      const R = Math.max(50, Math.min(maxRByWidth, maxRByHeight, 195));
+      const maxRByWidth = (w - (isDual ? 120 : 180)) / (2 * numLayers * sinHalf);
+      const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, 180));
 
       const uLeft = { x: -sinHalf, y: cosHalf };
       const uRight = { x: sinHalf, y: cosHalf };
@@ -2248,8 +2287,7 @@
       const totalH = numLayers * R * cosHalf;
       const maxBottomY = shapeHeightMultiplier * R;
       const apexX = cx;
-      const extraY = Math.max(0, (h - topClearance - bottomClearance - maxBottomY) * 0.5);
-      const apexY = topClearance + extraY;
+      const apexY = topClearance;
       const actualBottomY = apexY + maxBottomY;
 
       const cx0 = cx;
@@ -2420,6 +2458,19 @@
           ctx.fillText(`第 ${l} 層 (${badgeCount} 片)`, layerBadgeX, ly);
         }
 
+        // --- DISCUSSION QUESTIONS BOX ---
+        const cardW = Math.min(isDual ? 460 : 880, w - (isDual ? 24 : 60));
+        const cardY = isDual ? (h - cardH - 12) : (h - cardH - 12);
+
+        const q1 = isDual
+          ? '1. 三角形的「高」跟圓形半徑有什麼關係？怎麼發現的？'
+          : '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        const q2 = isDual
+          ? '2. 請你想想看，這個三角形的「底」跟圓周長有什麼關係？怎麼發現的？'
+          : '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
+
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💡 小組討論', q1, q2, isDual);
+
         ctx.restore();
       }
     }
@@ -2487,6 +2538,86 @@
         ctx.arcTo(x, y, x + r, y, r);
         ctx.closePath();
       }
+    }
+
+    
+    /* Discussion Questions Box on Canvas */
+    function drawDiscussionBox(ctx, cx, y, cardW, cardH, title, q1, q2, isCompact) {
+      const cardX = cx - cardW / 2;
+      const radius = 12;
+
+      ctx.save();
+
+      // Glass card container background
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
+      ctx.lineWidth = 1.5;
+      drawRoundRectPath(ctx, cardX, y, cardW, cardH, radius);
+      ctx.fill();
+      ctx.stroke();
+
+      // Golden top accent line
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.7)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cardX + 20, y);
+      ctx.lineTo(cardX + cardW - 20, y);
+      ctx.stroke();
+
+      // Title Badge: 💡 小組討論
+      const badgeText = title || '💡 小組討論';
+      const titleFontSize = isCompact ? 12.5 : 14;
+      ctx.font = `bold ${titleFontSize}px sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+
+      const badgeW = ctx.measureText(badgeText).width + 16;
+      const badgeH = isCompact ? 22 : 24;
+      const badgeX = cardX + 14;
+      const badgeY = y + 8;
+
+      ctx.fillStyle = 'rgba(255, 209, 102, 0.16)';
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.45)';
+      ctx.lineWidth = 1;
+      drawRoundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 11);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffd166';
+      ctx.fillText(badgeText, badgeX + 8, badgeY + badgeH / 2);
+
+      // Interactive hint on the top right
+      if (!isCompact && cardW >= 600) {
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = 'rgba(0, 196, 204, 0.85)';
+        ctx.textAlign = 'right';
+        ctx.fillText('💡 點擊可揭曉推導秘笈 ➔', cardX + cardW - 16, badgeY + badgeH / 2);
+      }
+
+      // Questions
+      const maxTextW = cardW - 28;
+      let qFontSize = isCompact ? 12 : 13.5;
+      ctx.font = `600 ${qFontSize}px sans-serif`;
+      ctx.fillStyle = '#f8fafc';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+
+      // Auto scale down font if text exceeds card width
+      const q1W = ctx.measureText(q1).width;
+      const q2W = ctx.measureText(q2).width;
+      const maxQW = Math.max(q1W, q2W);
+      if (maxQW > maxTextW) {
+        qFontSize = Math.max(10, Math.floor(qFontSize * (maxTextW / maxQW)));
+        ctx.font = `600 ${qFontSize}px sans-serif`;
+      }
+
+      const q1Y = badgeY + badgeH + (isCompact ? 14 : 16);
+      const q2Y = q1Y + (isCompact ? 22 : 26);
+
+      ctx.fillText(q1, cardX + 16, q1Y);
+      ctx.fillText(q2, cardX + 16, q2Y);
+
+      ctx.restore();
     }
 
     function drawPillBadge(ctx, x, y, text, fontSize = 13, textColor = '#ffd166', bgColor = 'rgba(15, 23, 42, 0.94)', borderColor = 'rgba(255, 209, 102, 0.75)') {
