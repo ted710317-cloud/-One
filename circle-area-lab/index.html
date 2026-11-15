@@ -2233,18 +2233,24 @@
       const sinHalf = Math.sin(theta / 2);
       const cosHalf = Math.cos(theta / 2);
 
-      // Enlarged dynamic R for classroom large screen / whiteboard
-      const maxRByWidth = (w - 180) / (2 * numLayers * sinHalf);
-      const maxRByHeight = (h - 110) / ((numLayers - 1) * cosHalf + 1);
-      const R = Math.max(60, Math.min(maxRByWidth, maxRByHeight, 195));
+      // Responsive vertical layout and bounds optimization
+      const isDual = (w < 800);
+      const topClearance = isDual ? 48 : 36;
+      const bottomClearance = 52; // Clearance for base bracket and text label '底'
+      const shapeHeightMultiplier = ((numLayers - 1) * cosHalf + 1);
+      const maxRByHeight = (h - topClearance - bottomClearance) / shapeHeightMultiplier;
+      const maxRByWidth = (w - (isDual ? 120 : 160)) / (2 * numLayers * sinHalf);
+      const R = Math.max(50, Math.min(maxRByWidth, maxRByHeight, 195));
 
       const uLeft = { x: -sinHalf, y: cosHalf };
       const uRight = { x: sinHalf, y: cosHalf };
 
       const totalH = numLayers * R * cosHalf;
-      const maxBottomY = ((numLayers - 1) * cosHalf + 1) * R;
+      const maxBottomY = shapeHeightMultiplier * R;
       const apexX = cx;
-      const apexY = Math.max(30, cy - maxBottomY * 0.45);
+      const extraY = Math.max(0, (h - topClearance - bottomClearance - maxBottomY) * 0.5);
+      const apexY = topClearance + extraY;
+      const actualBottomY = apexY + maxBottomY;
 
       const cx0 = cx;
       const cy0 = cy;
@@ -2354,27 +2360,26 @@
         ctx.save();
         ctx.globalAlpha = alpha;
 
-        const baseBottomY = apexY + totalH;
         const baseSpan = numLayers * R * sinHalf;
         const baseLeftX = apexX - baseSpan;
         const baseRightX = apexX + baseSpan;
 
-        // Height Bracket (Left side)
-        const hLineX = baseLeftX - 45;
+        // Height Bracket (Left side) - precisely spans from apexY down to actualBottomY
+        const hLineX = baseLeftX - (isDual ? 32 : 45);
         ctx.strokeStyle = '#facc15';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(hLineX + 12, apexY);
+        ctx.moveTo(hLineX + 10, apexY);
         ctx.lineTo(hLineX, apexY);
-        ctx.lineTo(hLineX, baseBottomY);
-        ctx.lineTo(hLineX + 12, baseBottomY);
+        ctx.lineTo(hLineX, actualBottomY);
+        ctx.lineTo(hLineX + 10, actualBottomY);
         ctx.stroke();
 
         ctx.fillStyle = '#fde047';
-        ctx.font = 'bold 26px sans-serif';
+        ctx.font = `bold ${isDual ? 20 : 24}px sans-serif`;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillText('高', hLineX - 12, (apexY + baseBottomY) * 0.5);
+        ctx.fillText('高', hLineX - 8, (apexY + actualBottomY) * 0.5);
 
         // Center dashed line for height
         ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)';
@@ -2382,34 +2387,34 @@
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(apexX, apexY);
-        ctx.lineTo(apexX, baseBottomY);
+        ctx.lineTo(apexX, actualBottomY);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Base Bracket (Bottom)
-        const bracketY = maxBottomY + 22;
+        // Base Bracket (Bottom) - Positioned accurately below the lowest arc of the pyramid
+        const bracketY = actualBottomY + 12;
         ctx.strokeStyle = '#06b6d4';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(baseLeftX, bracketY - 12);
+        ctx.moveTo(baseLeftX, bracketY - 10);
         ctx.lineTo(baseLeftX, bracketY);
         ctx.lineTo(baseRightX, bracketY);
-        ctx.lineTo(baseRightX, bracketY - 12);
+        ctx.lineTo(baseRightX, bracketY - 10);
         ctx.stroke();
 
         ctx.fillStyle = '#67e8f9';
-        ctx.font = 'bold 26px sans-serif';
+        ctx.font = `bold ${isDual ? 20 : 24}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText('底', apexX, bracketY + 8);
+        ctx.fillText('底', apexX, bracketY + 6);
 
         // Layer info badges on the right side
-        ctx.font = 'bold 14px sans-serif';
+        ctx.font = `bold ${isDual ? 12.5 : 14}px sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        const layerBadgeX = baseRightX + 35;
+        const layerBadgeX = baseRightX + (isDual ? 16 : 28);
         for (let l = 1; l <= numLayers; l++) {
-          const ly = apexY + (l - 0.5) * (totalH / numLayers);
+          const ly = apexY + (l - 0.5) * (maxBottomY / numLayers);
           const badgeCount = (2 * l - 1);
           ctx.fillStyle = layerThemes[l - 1][0];
           ctx.fillText(`第 ${l} 層 (${badgeCount} 片)`, layerBadgeX, ly);
