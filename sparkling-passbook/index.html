@@ -121,33 +121,160 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="history"></i> 個人點數異動紀錄</h3>
-                <div class="overflow-x-auto">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex gap-2">
+                        <button id="tab-btn-stu-personal" onclick="app.switchStudentHistoryTab('personal')" class="px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 text-blue-700 flex items-center gap-1.5 transition">
+                            <i data-lucide="user" class="w-4 h-4"></i> 個人異動紀錄
+                        </button>
+                        <button id="tab-btn-stu-class" onclick="app.switchStudentHistoryTab('class')" class="px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center gap-1.5 transition">
+                            <i data-lucide="users" class="w-4 h-4"></i> 全班歷史動態
+                        </button>
+                    </div>
+                    <div id="stu-class-filter-bar" class="hidden flex items-center gap-2">
+                        <input type="text" id="stu-class-search" placeholder="搜尋座號、姓名或事由..." oninput="app.renderStudentClassHistory()" class="border rounded-lg px-2.5 py-1 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-48">
+                    </div>
+                </div>
+
+                <!-- 個人紀錄表格 -->
+                <div id="stu-personal-history-wrap" class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-50 text-slate-600 border-b"><tr><th class="p-3">時間</th><th class="p-3">異動</th><th class="p-3">原因</th></tr></thead>
                         <tbody id="stu-history-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+
+                <!-- 全班動態表格 -->
+                <div id="stu-class-history-wrap" class="hidden-view overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-3">時間</th>
+                                <th class="p-3">座號</th>
+                                <th class="p-3">姓名</th>
+                                <th class="p-3">異動</th>
+                                <th class="p-3">原因</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stu-class-history-list" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <!-- 老師專區 -->
-        <div id="view-teacher" class="hidden-view space-y-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-end justify-between">
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="app.selectAllStudents()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">全選</button>
-                    <button onclick="app.clearSelection()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">清除選取</button>
-                    <button onclick="app.payAllSalaries()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-sm font-medium shadow flex items-center gap-1 transition ml-2"><i data-lucide="banknote" class="w-4 h-4"></i> 發放薪水</button>
-                </div>
-                <div class="flex flex-wrap items-end gap-2 flex-grow justify-end">
-                    <select id="bulk-action" class="border rounded px-2 py-1.5 text-sm outline-none"><option value="add">加點 (+)</option><option value="deduct">扣點 (-)</option></select>
-                    <input type="number" id="bulk-points" min="1" placeholder="點數" class="border rounded px-2 py-1.5 text-sm w-20 outline-none">
-                    <input type="text" id="bulk-reason" placeholder="原因說明" class="border rounded px-2 py-1.5 text-sm w-40 outline-none">
-                    <button onclick="app.submitBulkAction()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium shadow transition flex items-center gap-1"><i data-lucide="zap" class="w-4 h-4"></i> 批量執行</button>
+        <div id="view-teacher" class="hidden-view space-y-5">
+            <!-- 老師分頁標籤切換 -->
+            <div class="flex items-center justify-between border-b border-slate-200 gap-4 pb-1">
+                <div class="flex gap-2 sm:gap-4">
+                    <button id="tab-btn-teacher-students" onclick="app.switchTeacherTab('students')" class="pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2 transition">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>學生點數管理</span>
+                    </button>
+                    <button id="tab-btn-teacher-history" onclick="app.switchTeacherTab('history')" class="pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                        <i data-lucide="history" class="w-4 h-4"></i>
+                        <span>全班歷史紀錄</span>
+                        <span id="teacher-history-badge" class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                    </button>
                 </div>
             </div>
-            <div id="teacher-student-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+
+            <!-- 分頁 1: 學生列表與加扣點操作 -->
+            <div id="teacher-students-section" class="space-y-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-end justify-between">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="app.selectAllStudents()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">全選</button>
+                        <button onclick="app.clearSelection()" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm border transition">清除選取</button>
+                        <button onclick="app.payAllSalaries()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-sm font-medium shadow flex items-center gap-1 transition ml-2"><i data-lucide="banknote" class="w-4 h-4"></i> 發放薪水</button>
+                    </div>
+                    <div class="flex flex-wrap items-end gap-2 flex-grow justify-end">
+                        <select id="bulk-action" class="border rounded px-2 py-1.5 text-sm outline-none"><option value="add">加點 (+)</option><option value="deduct">扣點 (-)</option></select>
+                        <input type="number" id="bulk-points" min="1" placeholder="點數" class="border rounded px-2 py-1.5 text-sm w-20 outline-none">
+                        <input type="text" id="bulk-reason" placeholder="原因說明" class="border rounded px-2 py-1.5 text-sm w-40 outline-none">
+                        <button onclick="app.submitBulkAction()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium shadow transition flex items-center gap-1"><i data-lucide="zap" class="w-4 h-4"></i> 批量執行</button>
+                    </div>
+                </div>
+                <div id="teacher-student-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+            </div>
+
+            <!-- 分頁 2: 全班歷史紀錄管理 -->
+            <div id="teacher-history-section" class="hidden-view space-y-5">
+                <!-- 統計概覽卡片 -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                        <div class="text-xs text-slate-500 mb-1">總紀錄筆數</div>
+                        <div id="hist-stat-total-count" class="text-xl sm:text-2xl font-black text-slate-800">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                        <div class="text-xs text-slate-500 mb-1">累積加點 (+)</div>
+                        <div id="hist-stat-total-add" class="text-xl sm:text-2xl font-black text-emerald-600">+0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                        <div class="text-xs text-slate-500 mb-1">累積扣點 (-)</div>
+                        <div id="hist-stat-total-deduct" class="text-xl sm:text-2xl font-black text-rose-600">-0</div>
+                    </div>
+                </div>
+
+                <!-- 歷史紀錄篩選與工具列 -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+                    <div class="flex flex-wrap items-center gap-2 flex-grow">
+                        <!-- 學生下拉選單 -->
+                        <select id="teacher-hist-filter-stu" onchange="app.onTeacherHistoryFilterChange()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">全班學生 (全部)</option>
+                        </select>
+                        <!-- 類型選單 -->
+                        <select id="teacher-hist-filter-type" onchange="app.onTeacherHistoryFilterChange()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">全部異動 (加/扣點)</option>
+                            <option value="add">僅加點 (+)</option>
+                            <option value="deduct">僅扣點 (-)</option>
+                        </select>
+                        <!-- 搜尋框 -->
+                        <div class="relative flex-grow max-w-xs">
+                            <input type="text" id="teacher-hist-search" placeholder="搜尋座號、姓名或事由..." oninput="app.onTeacherHistoryFilterChange()" class="w-full border border-slate-300 rounded-lg pl-8 pr-3 py-1.5 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+                        </div>
+                        <button onclick="app.resetTeacherHistoryFilters()" class="text-slate-500 hover:text-slate-800 text-xs px-2 py-1.5 rounded transition">
+                            重設
+                        </button>
+                    </div>
+
+                    <!-- 匯出 CSV 按鈕 -->
+                    <button onclick="app.exportHistoryCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow transition flex items-center gap-1.5 shrink-0">
+                        <i data-lucide="download" class="w-4 h-4"></i> 匯出 CSV
+                    </button>
+                </div>
+
+                <!-- 歷史紀錄表格卡片 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-600 border-b">
+                                <tr>
+                                    <th class="p-3">時間</th>
+                                    <th class="p-3">座號</th>
+                                    <th class="p-3">姓名</th>
+                                    <th class="p-3">異動</th>
+                                    <th class="p-3">原因</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-history-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分頁控制 -->
+                    <div class="p-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-xs text-slate-500">
+                        <span id="teacher-history-page-info">顯示第 0 筆</span>
+                        <div class="flex items-center gap-2">
+                            <button id="btn-hist-prev" onclick="app.changeTeacherHistoryPage(-1)" class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                上一頁
+                            </button>
+                            <button id="btn-hist-next" onclick="app.changeTeacherHistoryPage(1)" class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                下一頁
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -168,7 +295,11 @@
                 history: [],
                 selectedIds: new Set(),
                 isBusy: false,
-                cloudReady: false
+                cloudReady: false,
+                teacherTab: 'students',
+                teacherHistoryPage: 1,
+                teacherHistoryPageSize: 50,
+                studentHistoryTab: 'personal'
             },
 
             init() {
@@ -318,8 +449,16 @@
                 this.state.cloudReady = true;
                 this.setConnectionAlert(false);
 
-                if (this.state.role === 'teacher') this.renderTeacherStudents();
-                if (this.state.role === 'student') this.updateStudentDashboard();
+                if (this.state.role === 'teacher') {
+                    this.renderTeacherStudents();
+                    this.renderTeacherHistory();
+                }
+                if (this.state.role === 'student') {
+                    this.updateStudentDashboard();
+                    if (this.state.studentHistoryTab === 'class') {
+                        this.renderStudentClassHistory();
+                    }
+                }
             },
 
             async fetchCloudData(showSuccessToast = false) {
@@ -384,6 +523,8 @@
                 this.state.currentUser = null;
                 this.state.teacherPassword = null;
                 this.state.selectedIds.clear();
+                this.state.teacherTab = 'students';
+                this.state.studentHistoryTab = 'personal';
                 document.getElementById('login-pwd').value = '';
                 document.getElementById('login-seat').value = '';
                 document.getElementById('view-login').classList.remove('hidden-view');
@@ -398,7 +539,9 @@
                 document.getElementById('view-teacher').classList.remove('hidden-view');
                 document.getElementById('user-info').classList.remove('hidden-view');
                 document.getElementById('welcome-text').innerText = '老師您好';
+                this.switchTeacherTab(this.state.teacherTab || 'students');
                 this.renderTeacherStudents();
+                this.renderTeacherHistory();
             },
 
             renderStudentView() {
@@ -406,6 +549,7 @@
                 document.getElementById('view-student').classList.remove('hidden-view');
                 document.getElementById('user-info').classList.remove('hidden-view');
                 document.getElementById('welcome-text').innerText = `${this.state.currentUser.name} 同學`;
+                this.switchStudentHistoryTab(this.state.studentHistoryTab || 'personal');
                 this.updateStudentDashboard();
             },
 
@@ -459,7 +603,10 @@
                     div.innerHTML = `
                         <div class="flex justify-between items-start mb-1">
                             <span class="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 rounded">${s.id} 號</span>
-                            <button onclick="app.openRoleModal(${s.id})" class="text-slate-400 hover:text-amber-500 transition p-1" title="設定幹部"><i data-lucide="award" class="w-4 h-4"></i></button>
+                            <div class="flex items-center gap-0.5">
+                                <button onclick="app.viewStudentHistoryInTeacher(${s.id})" class="text-slate-400 hover:text-blue-600 transition p-1" title="查看該生歷史紀錄"><i data-lucide="file-text" class="w-4 h-4"></i></button>
+                                <button onclick="app.openRoleModal(${s.id})" class="text-slate-400 hover:text-amber-500 transition p-1" title="設定幹部"><i data-lucide="award" class="w-4 h-4"></i></button>
+                            </div>
                         </div>
                         <div class="text-center mb-1">
                             <div class="font-bold text-lg truncate">${this.escapeHtml(s.name)}</div>
@@ -479,6 +626,253 @@
             },
             selectAllStudents() { this.state.students.forEach(s => this.state.selectedIds.add(s.id)); this.renderTeacherStudents(); },
             clearSelection() { this.state.selectedIds.clear(); this.renderTeacherStudents(); },
+
+            // --- 歷史紀錄相關切換與篩選功能 ---
+            switchTeacherTab(tab) {
+                this.state.teacherTab = tab;
+                const btnStudents = document.getElementById('tab-btn-teacher-students');
+                const btnHistory = document.getElementById('tab-btn-teacher-history');
+                const secStudents = document.getElementById('teacher-students-section');
+                const secHistory = document.getElementById('teacher-history-section');
+
+                if (tab === 'students') {
+                    if (btnStudents) btnStudents.className = 'pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2 transition';
+                    if (btnHistory) btnHistory.className = 'pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
+                    if (secStudents) secStudents.classList.remove('hidden-view');
+                    if (secHistory) secHistory.classList.add('hidden-view');
+                } else {
+                    if (btnHistory) btnHistory.className = 'pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2 transition';
+                    if (btnStudents) btnStudents.className = 'pb-2.5 px-3 text-sm sm:text-base font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
+                    if (secStudents) secStudents.classList.add('hidden-view');
+                    if (secHistory) secHistory.classList.remove('hidden-view');
+                    this.renderTeacherHistory();
+                }
+                lucide.createIcons();
+            },
+
+            viewStudentHistoryInTeacher(id) {
+                this.switchTeacherTab('history');
+                const select = document.getElementById('teacher-hist-filter-stu');
+                if (select) {
+                    select.value = String(id);
+                }
+                this.state.teacherHistoryPage = 1;
+                this.renderTeacherHistory();
+            },
+
+            onTeacherHistoryFilterChange() {
+                this.state.teacherHistoryPage = 1;
+                this.renderTeacherHistory();
+            },
+
+            resetTeacherHistoryFilters() {
+                const stuSelect = document.getElementById('teacher-hist-filter-stu');
+                const typeSelect = document.getElementById('teacher-hist-filter-type');
+                const searchInput = document.getElementById('teacher-hist-search');
+                if (stuSelect) stuSelect.value = 'all';
+                if (typeSelect) typeSelect.value = 'all';
+                if (searchInput) searchInput.value = '';
+                this.state.teacherHistoryPage = 1;
+                this.renderTeacherHistory();
+            },
+
+            changeTeacherHistoryPage(delta) {
+                this.state.teacherHistoryPage += delta;
+                this.renderTeacherHistory();
+            },
+
+            updateTeacherHistoryStats() {
+                const history = this.state.history || [];
+                let totalAdd = 0;
+                let totalDeduct = 0;
+                history.forEach(h => {
+                    const ch = Number(h.change) || 0;
+                    if (ch > 0) totalAdd += ch;
+                    else if (ch < 0) totalDeduct += Math.abs(ch);
+                });
+
+                const badge = document.getElementById('teacher-history-badge');
+                if (badge) badge.innerText = history.length;
+                const statCount = document.getElementById('hist-stat-total-count');
+                if (statCount) statCount.innerText = history.length;
+                const statAdd = document.getElementById('hist-stat-total-add');
+                if (statAdd) statAdd.innerText = `+${totalAdd}`;
+                const statDeduct = document.getElementById('hist-stat-total-deduct');
+                if (statDeduct) statDeduct.innerText = `-${totalDeduct}`;
+            },
+
+            populateTeacherHistoryStudentDropdown() {
+                const select = document.getElementById('teacher-hist-filter-stu');
+                if (!select) return;
+                const currentVal = select.value;
+                select.innerHTML = '<option value="all">全班學生 (全部)</option>';
+                this.state.students.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = `${s.id} 號 ${s.name}`;
+                    select.appendChild(opt);
+                });
+                if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+                    select.value = currentVal;
+                }
+            },
+
+            getFilteredTeacherHistory() {
+                const stuFilter = document.getElementById('teacher-hist-filter-stu')?.value || 'all';
+                const typeFilter = document.getElementById('teacher-hist-filter-type')?.value || 'all';
+                const keyword = (document.getElementById('teacher-hist-search')?.value || '').trim().toLowerCase();
+
+                return this.state.history.filter(h => {
+                    if (stuFilter !== 'all' && Number(h.studentId) !== Number(stuFilter)) return false;
+                    const ch = Number(h.change) || 0;
+                    if (typeFilter === 'add' && ch <= 0) return false;
+                    if (typeFilter === 'deduct' && ch >= 0) return false;
+                    if (keyword) {
+                        const matchText = `${h.studentId} ${h.studentName} ${h.reason} ${h.timestamp}`.toLowerCase();
+                        if (!matchText.includes(keyword)) return false;
+                    }
+                    return true;
+                });
+            },
+
+            renderTeacherHistory() {
+                this.updateTeacherHistoryStats();
+                this.populateTeacherHistoryStudentDropdown();
+
+                const filtered = this.getFilteredTeacherHistory();
+                const total = filtered.length;
+                const pageSize = this.state.teacherHistoryPageSize;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+                if (this.state.teacherHistoryPage > totalPages) {
+                    this.state.teacherHistoryPage = totalPages;
+                }
+                if (this.state.teacherHistoryPage < 1) {
+                    this.state.teacherHistoryPage = 1;
+                }
+                const page = this.state.teacherHistoryPage;
+                const startIdx = (page - 1) * pageSize;
+                const paged = filtered.slice(startIdx, startIdx + pageSize);
+
+                const tbody = document.getElementById('teacher-history-tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (paged.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><div class="flex flex-col items-center gap-2"><i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i><span>尚無符合條件的歷史紀錄</span></div></td></tr>';
+                    lucide.createIcons();
+                } else {
+                    paged.forEach(h => {
+                        const ch = Number(h.change) || 0;
+                        const isAdd = ch >= 0;
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-50 transition';
+                        tr.innerHTML = `
+                            <td class="p-3 text-slate-500 whitespace-nowrap text-xs sm:text-sm">${this.escapeHtml(h.timestamp)}</td>
+                            <td class="p-3 whitespace-nowrap"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">${h.studentId} 號</span></td>
+                            <td class="p-3 whitespace-nowrap font-medium text-slate-800">${this.escapeHtml(h.studentName)}</td>
+                            <td class="p-3 whitespace-nowrap font-bold ${isAdd ? 'text-emerald-600' : 'text-rose-600'}">
+                                <span class="inline-flex items-center gap-0.5">${isAdd ? '+' : ''}${ch}</span>
+                            </td>
+                            <td class="p-3 text-slate-700">${this.escapeHtml(h.reason)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                const infoEl = document.getElementById('teacher-history-page-info');
+                if (infoEl) {
+                    const startNum = total === 0 ? 0 : startIdx + 1;
+                    const endNum = Math.min(startIdx + pageSize, total);
+                    infoEl.innerText = `顯示第 ${startNum} - ${endNum} 筆 (共 ${total} 筆，頁次 ${page}/${totalPages})`;
+                }
+                const prevBtn = document.getElementById('btn-hist-prev');
+                const nextBtn = document.getElementById('btn-hist-next');
+                if (prevBtn) prevBtn.disabled = page <= 1;
+                if (nextBtn) nextBtn.disabled = page >= totalPages;
+            },
+
+            exportHistoryCsv() {
+                if (!this.state.history || this.state.history.length === 0) {
+                    return this.showToast('目前尚無歷史紀錄可供匯出', 'warning');
+                }
+                const headers = ['時間', '座號', '姓名', '異動點數', '原因'];
+                const rows = this.state.history.map(h => [
+                    `"${String(h.timestamp || '').replace(/"/g, '""')}"`,
+                    h.studentId,
+                    `"${String(h.studentName || '').replace(/"/g, '""')}"`,
+                    h.change,
+                    `"${String(h.reason || '').replace(/"/g, '""')}"`
+                ]);
+                const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = `全班點數歷史紀錄_${dateStr}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.showToast('已成功匯出 CSV 歷史紀錄！', 'success');
+            },
+
+            switchStudentHistoryTab(tab) {
+                this.state.studentHistoryTab = tab;
+                const btnPersonal = document.getElementById('tab-btn-stu-personal');
+                const btnClass = document.getElementById('tab-btn-stu-class');
+                const wrapPersonal = document.getElementById('stu-personal-history-wrap');
+                const wrapClass = document.getElementById('stu-class-history-wrap');
+                const filterBar = document.getElementById('stu-class-filter-bar');
+
+                if (tab === 'personal') {
+                    if (btnPersonal) btnPersonal.className = 'px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 text-blue-700 flex items-center gap-1.5 transition';
+                    if (btnClass) btnClass.className = 'px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center gap-1.5 transition';
+                    if (wrapPersonal) wrapPersonal.classList.remove('hidden-view');
+                    if (wrapClass) wrapClass.classList.add('hidden-view');
+                    if (filterBar) filterBar.classList.add('hidden');
+                } else {
+                    if (btnClass) btnClass.className = 'px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 text-blue-700 flex items-center gap-1.5 transition';
+                    if (btnPersonal) btnPersonal.className = 'px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center gap-1.5 transition';
+                    if (wrapPersonal) wrapPersonal.classList.add('hidden-view');
+                    if (wrapClass) wrapClass.classList.remove('hidden-view');
+                    if (filterBar) filterBar.classList.remove('hidden');
+                    this.renderStudentClassHistory();
+                }
+                lucide.createIcons();
+            },
+
+            renderStudentClassHistory() {
+                const keyword = (document.getElementById('stu-class-search')?.value || '').trim().toLowerCase();
+                const tbody = document.getElementById('stu-class-history-list');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                const list = this.state.history.filter(h => {
+                    if (!keyword) return true;
+                    const matchText = `${h.studentId} ${h.studentName} ${h.reason} ${h.timestamp}`.toLowerCase();
+                    return matchText.includes(keyword);
+                }).slice(0, 100);
+
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">尚無符合條件的全班紀錄</td></tr>';
+                    return;
+                }
+
+                list.forEach(h => {
+                    const ch = Number(h.change) || 0;
+                    const isAdd = ch >= 0;
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-500 whitespace-nowrap text-xs">${this.escapeHtml(h.timestamp)}</td>
+                        <td class="p-3 whitespace-nowrap"><span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-xs font-bold">${h.studentId} 號</span></td>
+                        <td class="p-3 whitespace-nowrap font-medium text-slate-800">${this.escapeHtml(h.studentName)}</td>
+                        <td class="p-3 whitespace-nowrap font-bold ${isAdd ? 'text-emerald-500' : 'text-rose-500'}">${isAdd ? '+' : ''}${ch}</td>
+                        <td class="p-3 text-slate-700">${this.escapeHtml(h.reason)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            },
 
             handleWriteError(err) {
                 if (err && err.code === 'UNAUTHORIZED') {
