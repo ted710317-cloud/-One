@@ -418,13 +418,15 @@
             },
 
             normalizeGasUrl(rawUrl) {
-                const clean = String(rawUrl || '')
-                    .trim()
-                    .replace(/\/a\/u\/\d+\/macros\//, '/a/macros/')
-                    .replace(/\/macros\/u\/\d+\/s\//, '/macros/s/')
-                    .replace(/(\/a\/macros\/[^/]+)\/u\/\d+\/s\//, '$1/s/');
+                let clean = String(rawUrl || '').trim();
+                clean = clean.replace(/\/u\/\d+\//g, '/');
+
                 if (/^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.-]+\/s|macros\/s)\/[A-Za-z0-9_-]{20,}\/exec$/.test(clean)) {
                     return clean;
+                }
+                const m = clean.match(/^https:\/\/script\.google\.com\/a\/([A-Za-z0-9.-]+\.[A-Za-z]{2,})\/macros\/s\/([A-Za-z0-9_-]{20,})\/exec$/);
+                if (m) {
+                    return `https://script.google.com/a/macros/${m[1]}/s/${m[2]}/exec`;
                 }
                 return '';
             },
