@@ -106,6 +106,10 @@
             <!-- 老師模式操作 -->
             <div id="user-info" class="hidden-view flex items-center gap-2 sm:gap-3">
                 <span id="welcome-text" class="text-sm font-bold bg-blue-700 px-2.5 py-1 rounded">老師您好</span>
+                <button id="btn-back-to-teacher" onclick="app.goBackToTeacher()" class="hidden-view bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 font-bold">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">返回管理</span>
+                </button>
                 <button onclick="app.fetchCloudData(true)" class="bg-blue-500 hover:bg-blue-700 px-3 py-1.5 rounded text-sm transition flex items-center gap-1.5 shadow-sm" title="重新同步雲端資料">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">重新整理</span>
@@ -131,7 +135,7 @@
                     <div class="flex items-center gap-2">
                         <span class="p-1.5 rounded-lg bg-blue-100 text-blue-600"><i data-lucide="layout-grid" class="w-5 h-5"></i></span>
                         <h2 class="text-xl font-bold text-slate-800">全班點數總表</h2>
-                        <span id="overview-student-count-badge" class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-0.5 rounded-full font-bold">26 位同學</span>
+                        <span id="overview-student-count-badge" class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-0.5 rounded-full font-bold">載入中...</span>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">點擊自己的座號卡片，即可查看個人給點、扣點的詳細歷史紀錄。</p>
                 </div>
@@ -690,12 +694,23 @@
                 if (this.state.role === 'teacher') {
                     document.getElementById('public-header-actions')?.classList.add('hidden-view');
                     document.getElementById('user-info')?.classList.remove('hidden-view');
+                    document.getElementById('btn-back-to-teacher')?.classList.remove('hidden-view');
                 } else {
                     document.getElementById('public-header-actions')?.classList.remove('hidden-view');
                     document.getElementById('user-info')?.classList.add('hidden-view');
                 }
 
                 this.renderOverviewStudents();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            goBackToTeacher() {
+                this.state.currentView = 'teacher';
+                document.getElementById('view-overview')?.classList.add('hidden-view');
+                document.getElementById('view-student')?.classList.add('hidden-view');
+                document.getElementById('view-teacher')?.classList.remove('hidden-view');
+                document.getElementById('btn-back-to-teacher')?.classList.add('hidden-view');
+                this.renderTeacherView();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
 
@@ -760,6 +775,7 @@
                 document.getElementById('view-teacher')?.classList.remove('hidden-view');
                 document.getElementById('public-header-actions')?.classList.add('hidden-view');
                 document.getElementById('user-info')?.classList.remove('hidden-view');
+                document.getElementById('btn-back-to-teacher')?.classList.add('hidden-view');
                 document.getElementById('welcome-text').innerText = '老師您好';
                 this.switchTeacherTab(this.state.teacherTab || 'students');
                 this.renderTeacherStudents();
