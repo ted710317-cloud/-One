@@ -192,7 +192,7 @@
                     </div>
                     <div id="qr-container" class="hidden shrink-0 bg-white p-3 rounded-xl border border-blue-200 shadow-sm text-center">
                         <canvas id="qr-canvas"></canvas>
-                        <div class="text-[11px] text-slate-500 mt-1">學生掃碼查詢</div>
+                        <div class="text-[11px] text-slate-500 mt-1">掃碼查看全班總表</div>
                     </div>
                 </div>
             </div>
@@ -280,7 +280,7 @@
             },
 
             copyTeacherInvite() {
-                const msg = `分享一個好用的免費「班級電子存摺」工具！\n只要建一份自己的 Google 試算表、跟著這頁 3 分鐘設定好，全班和家長免登入就能查點數，而且不受多帳號登入干擾：\n${this.getSetupPageUrl()}`;
+                const msg = `分享一個好用的免費「班級電子存摺」工具！\n只要建一份自己的 Google 試算表、跟著這頁 3 分鐘設定好，全班免登入即可瀏覽全班點數總表，點擊座號卡片還能查看給點扣點歷史紀錄，完全不受 Google 多帳號干擾：\n${this.getSetupPageUrl()}`;
                 this.copyText(msg, '已複製教師群組分享文案！');
             },
 
