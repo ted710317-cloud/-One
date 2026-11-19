@@ -738,6 +738,36 @@
       font-size: 16.5px;
       font-weight: 700;
       color: #f8fafc;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 1200px) {
+      .discovery-modal-dialog {
+        max-width: 960px;
+      }
+      .discovery-modal-title {
+        font-size: 24px;
+      }
+      .modal-tab-btn {
+        font-size: 17px;
+        padding: 8px 22px;
+      }
+      .disc-q-badge {
+        font-size: 17px;
+        padding: 6px 18px;
+      }
+      .disc-q-title {
+        font-size: 20px;
+      }
+      .disc-q-text {
+        font-size: 22px;
+      }
+      .disc-q-num {
+        width: 36px;
+        height: 36px;
+        font-size: 19px;
+      }
+    }
       line-height: 1.6;
       letter-spacing: 0.2px;
     }
@@ -1079,117 +1109,147 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 12px;
     }
     .fullscreen-modal.active {
       display: flex;
     }
 
-    .fs-close-btn {
+    .fs-top-left-group {
       position: absolute;
       top: 14px;
-      right: 18px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: var(--radius-pill);
-      font-size: 13.5px;
-      font-weight: 700;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       z-index: 1000;
-    }
-    .fs-close-btn:hover {
-      background: rgba(239, 68, 68, 0.4);
-      border-color: #ef4444;
+      flex-wrap: wrap;
     }
 
     .fs-header-title {
-      position: absolute;
-      top: 14px;
-      left: 18px;
-      font-size: 15.5px;
+      font-size: 17px;
       font-weight: 800;
       color: #ffd166;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 5px 16px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      padding: 7px 20px;
       border-radius: var(--radius-pill);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
+      backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
     }
 
     .fs-guide-btn {
-      position: absolute;
-      top: 14px;
-      left: 235px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1.5px solid rgba(255, 209, 102, 0.5);
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid rgba(255, 209, 102, 0.7);
       color: #ffd166;
-      padding: 5px 14px;
+      padding: 7px 20px;
       border-radius: var(--radius-pill);
-      font-size: 13.5px;
-      font-weight: 700;
+      font-size: 15.5px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
-      backdrop-filter: blur(8px);
-      z-index: 1000;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 209, 102, 0.3);
       transition: all 0.2s;
     }
     .fs-guide-btn:hover {
-      background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(125, 42, 232, 0.35));
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.4), rgba(125, 42, 232, 0.4));
       border-color: #ffd166;
       color: #fff;
+      transform: translateY(-1px);
     }
-    @media (max-width: 768px) {
-      .fs-guide-btn {
-        left: auto;
-        right: 140px;
-        font-size: 11.5px;
-        padding: 4px 10px;
-      }
+
+    .fs-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 20px;
+      background: rgba(239, 68, 68, 0.3);
+      border: 1.5px solid rgba(239, 68, 68, 0.7);
+      color: #fff;
+      padding: 7px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 15.5px;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    .fs-close-btn:hover {
+      background: rgba(239, 68, 68, 0.5);
+      border-color: #ef4444;
     }
 
     .fs-canvas-holder {
       width: 100%;
-      height: calc(100vh - 100px);
+      height: calc(100vh - 84px);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      position: relative;
     }
 
     #fsCanvas {
+      width: 100%;
+      height: 100%;
       max-width: 96vw;
-      max-height: calc(100vh - 110px);
-      width: auto;
-      height: auto;
+      max-height: calc(100vh - 88px);
       object-fit: contain;
       border-radius: 12px;
+      display: block;
     }
 
     .fs-toolbar-bottom {
       position: absolute;
-      bottom: 16px;
+      bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.92);
-      border: 1.5px solid rgba(0, 196, 204, 0.5);
+      background: rgba(15, 23, 42, 0.96);
+      border: 2px solid rgba(0, 196, 204, 0.6);
       border-radius: var(--radius-pill);
-      padding: 8px 20px;
+      padding: 10px 24px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 196, 204, 0.2);
-      max-width: 92vw;
-      width: 720px;
+      gap: 16px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 196, 204, 0.3);
+      max-width: 95vw;
+      width: 920px;
       z-index: 1000;
+    }
+    .fs-toolbar-bottom .action-btn {
+      padding: 8px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      min-height: 46px;
+      border-radius: 12px;
+    }
+    .fs-toolbar-bottom .slice-btn {
+      padding: 8px 18px;
+      font-size: 15.5px;
+      font-weight: 800;
+      min-height: 46px;
+      border-radius: 12px;
+    }
+    .fs-toolbar-bottom .slider-val-badge {
+      min-width: 72px;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 5px 12px;
+    }
+    .fs-toolbar-bottom .custom-slider {
+      height: 12px;
+    }
+    .fs-toolbar-bottom .custom-slider::-webkit-slider-thumb {
+      width: 26px;
+      height: 26px;
     }
 
     /* Confetti Canvas */
@@ -1690,15 +1750,17 @@
 
   <!-- Universal Fullscreen Modal -->
   <div id="fullscreenModal" class="fullscreen-modal">
-    <div class="fs-header-title" id="fsHeaderTitle">
-      <span>⛶ 全螢幕黑板講課模式</span>
+    <div class="fs-top-left-group">
+      <div class="fs-header-title" id="fsHeaderTitle">
+        <span>⛶ 全螢幕黑板講課模式</span>
+      </div>
+      <button class="fs-guide-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂小組討論思考提問">
+        <span>💡 課堂思考提問</span>
+      </button>
     </div>
-    <button class="fs-guide-btn" onclick="openDiscoveryModal()" title="老師專用：開啟課堂小組討論思考提問">
-      <span>💡 課堂思考提問</span>
-    </button>
     <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
     <div class="fs-canvas-holder">
-      <canvas id="fsCanvas" width="1280" height="660"></canvas>
+      <canvas id="fsCanvas" width="1600" height="900"></canvas>
     </div>
 
     <!-- Dynamic Bottom Toolbar for Presentation -->
@@ -2010,6 +2072,7 @@
       if (fsModal && fsModal.classList.contains('active') && currentFsMode === 'derivation') {
         const fsCanvas = document.getElementById('fsCanvas');
         if (fsCanvas) {
+          resizeFullscreenCanvas();
           const fsCtx = fsCanvas.getContext('2d');
           fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
           if (derivationMode === 'rect') {
@@ -2060,25 +2123,32 @@
       const theta = (2 * Math.PI) / N;
 
       // Ensure rectangle / parallelogram, dimension brackets and labels NEVER disappear at canvas edges
-      // 1. slant: when halfCutEnabled is false, the parallelogram slants right by R * sin(theta / 2)
-      // 2. right clearance: bracket offset + tick + text "寬" + margin
       const isCompact = (w < 700);
+      const isFs = (ctx.canvas.id === 'fsCanvas') || (w >= 1100);
       const sinHalf = Math.sin(theta / 2);
       const slantFactor = halfCutEnabled ? 0 : sinHalf;
-      const bracketGap = isCompact ? 16 : 24;
-      const labelClearance = isCompact ? 32 : 44;
-      const safetyMarginX = isCompact ? 60 : 80;
+      const bracketGap = isFs ? 30 : (isCompact ? 16 : 24);
+      const labelClearance = isFs ? 65 : (isCompact ? 32 : 44);
+      const safetyMarginX = isFs ? 100 : (isCompact ? 60 : 80);
+
+      // Card dimensions for discussion questions at bottom
+      const cardW = isFs ? Math.min(1400, w - 80) : Math.min(isCompact ? 460 : 880, w - (isCompact ? 24 : 60));
+      const cardH = isFs ? 142 : (isCompact ? 92 : 104);
+      const cardY = isFs ? (h - cardH - 16) : (isCompact ? (h - cardH - 12) : Math.max(cy + 100, h - cardH - 24));
+
+      // Available vertical height above discussion card
+      const topAreaY = isFs ? 45 : 20;
+      const bottomAreaY = isFs ? (cardY - 25) : (h - 60);
+      const availH = Math.max(100, bottomAreaY - topAreaY);
 
       // Max R limited by width:
-      // rectW + slant + bracketGap + labelClearance + safetyMarginX <= w
-      // (PI + slantFactor) * R <= w - (bracketGap + labelClearance + safetyMarginX)
       const maxRByWidth = (w - (bracketGap + labelClearance + safetyMarginX)) / (Math.PI + slantFactor);
       // Max R limited by height:
-      // When t=0: circle diameter is 2R <= h - 70 => R <= (h - 70) / 2.05
-      // When t=1: rectangle height is R + top bracket space (45px) + bottom margin (40px)
-      const maxRByHeight = Math.min(h - 85, (h - 70) / 2.05);
+      // When t=0: circle diameter is 2R <= availH - 40 => R <= (availH - 40) / 2.05
+      // When t=1: rectangle height is R + top bracket space
+      const maxRByHeight = Math.min(availH - (isFs ? 55 : 45), (availH - (isFs ? 40 : 30)) / 2.05);
 
-      const maxAllowedR = (w >= 700) ? 185 : (w >= 600 ? 145 : 116);
+      const maxAllowedR = isFs ? 275 : ((w >= 700) ? 185 : (w >= 600 ? 145 : 116));
       const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, maxAllowedR));
       const arcW = R * theta;
       const rectW = halfN * arcW; // = Math.PI * R
@@ -2089,11 +2159,12 @@
 
       // Perfectly center the complete visual group inside available width w
       const rectLeft = cx - totalVisualW / 2;
-      // Vertically center with slight balance for top bracket
-      const rectTop = cy - rectH / 2 + (isCompact ? 8 : 12);
+      // Vertically center inside available area above discussion card
+      const centerAreaY = isFs ? ((topAreaY + bottomAreaY) / 2 + 10) : (cy + (isCompact ? 8 : 12));
+      const rectTop = centerAreaY - rectH / 2;
 
       const cx0 = cx;
-      const cy0 = cy + (isCompact ? 8 : 12);
+      const cy0 = centerAreaY;
 
       const topColors = ['#06b6d4', '#0284c7'];
       const botColors = ['#f97316', '#ea580c'];
@@ -2227,14 +2298,16 @@
         ctx.moveTo(cx0, cy0);
         ctx.lineTo(cx0 + R, cy0);
         ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = isFs ? 5 : 3;
         ctx.stroke();
 
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = `bold ${isFs ? 30 : 18}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('半徑 r', cx0 + R / 2, cy0 - 6);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('半徑 r', cx0 + R / 2, cy0 - (isFs ? 10 : 6));
         ctx.restore();
       }
 
@@ -2244,16 +2317,17 @@
         ctx.save();
         ctx.globalAlpha = alpha;
 
-        const bracketFontSize = isCompact ? 20 : 24;
-        const tick = isCompact ? 6 : 8;
+        const bracketFontSize = isFs ? 46 : (isCompact ? 20 : 24);
+        const tick = isFs ? 14 : (isCompact ? 6 : 8);
+        const bracketLineWidth = isFs ? 5 : (isCompact ? 2.5 : 3);
 
         // Top Bracket: 長
         const bx1 = rectLeft;
         const bx2 = rectLeft + rectW;
-        const by = rectTop - (isCompact ? 20 : 26);
+        const by = rectTop - (isFs ? 36 : (isCompact ? 20 : 26));
 
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = isCompact ? 2.5 : 3;
+        ctx.lineWidth = bracketLineWidth;
         ctx.beginPath();
         ctx.moveTo(bx1, by + tick);
         ctx.lineTo(bx1, by);
@@ -2265,7 +2339,9 @@
         ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('長', (bx1 + bx2) / 2, by - 3);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('長', (bx1 + bx2) / 2, by - (isFs ? 8 : 3));
 
         // Right Bracket: 寬 (follows slant in parallelogram so it never collides or clips)
         const ry1 = rectTop;
@@ -2273,7 +2349,7 @@
         const rx = rectLeft + rectW + slant + bracketGap;
 
         ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = isCompact ? 2.5 : 3;
+        ctx.lineWidth = bracketLineWidth;
         ctx.beginPath();
         ctx.moveTo(rx - tick, ry1);
         ctx.lineTo(rx, ry1);
@@ -2285,17 +2361,16 @@
         ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText('寬', rx + (isCompact ? 8 : 10), (ry1 + ry2) / 2);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('寬', rx + (isFs ? 18 : (isCompact ? 8 : 10)), (ry1 + ry2) / 2);
+        ctx.shadowBlur = 0;
 
         // --- DISCUSSION QUESTIONS BOX ---
-        const cardW = Math.min(isCompact ? 460 : 880, w - (isCompact ? 24 : 60));
-        const cardH = isCompact ? 92 : 104;
-        const cardY = isCompact ? (h - cardH - 12) : Math.max(rectTop + rectH + 28, h - cardH - 24);
-
         const q1 = '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
         const q2 = '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
 
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isCompact);
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isCompact, isFs);
 
         ctx.restore();
       }
@@ -2313,13 +2388,19 @@
 
       // Responsive vertical layout and bounds optimization
       const isDual = (w < 800);
-      const topClearance = isDual ? 32 : 24;
-      const cardH = isDual ? 92 : 100;
-      const bottomClearance = 24 + cardH + 12; // 24px for base bracket & '底' + card + 12px margin
+      const isFs = (ctx.canvas.id === 'fsCanvas') || (w >= 1100);
+
+      const cardW = isFs ? Math.min(1400, w - 80) : Math.min(isDual ? 460 : 880, w - (isDual ? 24 : 60));
+      const cardH = isFs ? 142 : (isDual ? 92 : 100);
+      const cardY = isFs ? (h - cardH - 16) : (h - cardH - 12);
+
+      const topClearance = isFs ? 36 : (isDual ? 32 : 24);
+      const bottomClearance = isFs ? (cardH + 42) : (24 + cardH + 12); // space for base bracket & '底' + card
       const shapeHeightMultiplier = ((numLayers - 1) * cosHalf + 1);
       const maxRByHeight = (h - topClearance - bottomClearance) / shapeHeightMultiplier;
-      const maxRByWidth = (w - (isDual ? 120 : 180)) / (2 * numLayers * sinHalf);
-      const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, 180));
+      const maxRByWidth = (w - (isFs ? 280 : (isDual ? 120 : 180))) / (2 * numLayers * sinHalf);
+      const maxAllowedR = isFs ? 245 : 180;
+      const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, maxAllowedR));
 
       const uLeft = { x: -sinHalf, y: cosHalf };
       const uRight = { x: sinHalf, y: cosHalf };
@@ -2397,17 +2478,18 @@
         drawWedge(ctx, R, theta, targets[i].color, 'rgba(255, 255, 255, 0.45)');
         ctx.restore();
 
-        // Upright, bold, high-contrast sector index badge
+        // Upright, bold, high-contrast sector index badge (Super clear on large screens)
         ctx.save();
         const labelDist = R * 0.48;
         const lx = curX + labelDist * Math.cos(curAngle);
         const ly = curY + labelDist * Math.sin(curAngle);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold ' + (N === 9 ? '20px' : '16px') + ' sans-serif';
+        const numFontSize = isFs ? (N === 9 ? 34 : 26) : (N === 9 ? 20 : 16);
+        ctx.font = `bold ${numFontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = isFs ? 8 : 4;
         ctx.fillText(String(i + 1), lx, ly);
         ctx.restore();
       }
@@ -2421,14 +2503,16 @@
         ctx.moveTo(cx0, cy0);
         ctx.lineTo(cx0 + R, cy0);
         ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = isFs ? 5 : 3;
         ctx.stroke();
 
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = `bold ${isFs ? 30 : 18}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('半徑 r', cx0 + R / 2, cy0 - 6);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('半徑 r', cx0 + R / 2, cy0 - (isFs ? 10 : 6));
         ctx.restore();
       }
 
@@ -2442,27 +2526,33 @@
         const baseLeftX = apexX - baseSpan;
         const baseRightX = apexX + baseSpan;
 
+        const bracketFontSize = isFs ? 46 : (isDual ? 20 : 24);
+        const bracketLineWidth = isFs ? 5 : 3;
+        const tick = isFs ? 14 : 10;
+
         // Height Bracket (Left side) - precisely spans from apexY down to actualBottomY
-        const hLineX = baseLeftX - (isDual ? 32 : 45);
+        const hLineX = baseLeftX - (isFs ? 65 : (isDual ? 32 : 45));
         ctx.strokeStyle = '#facc15';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = bracketLineWidth;
         ctx.beginPath();
-        ctx.moveTo(hLineX + 10, apexY);
+        ctx.moveTo(hLineX + tick, apexY);
         ctx.lineTo(hLineX, apexY);
         ctx.lineTo(hLineX, actualBottomY);
-        ctx.lineTo(hLineX + 10, actualBottomY);
+        ctx.lineTo(hLineX + tick, actualBottomY);
         ctx.stroke();
 
         ctx.fillStyle = '#fde047';
-        ctx.font = `bold ${isDual ? 20 : 24}px sans-serif`;
+        ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillText('高', hLineX - 8, (apexY + actualBottomY) * 0.5);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('高', hLineX - (isFs ? 16 : 8), (apexY + actualBottomY) * 0.5);
 
         // Center dashed line for height
-        ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)';
-        ctx.setLineDash([6, 6]);
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.85)';
+        ctx.setLineDash(isFs ? [10, 10] : [6, 6]);
+        ctx.lineWidth = isFs ? 4 : 2.5;
         ctx.beginPath();
         ctx.moveTo(apexX, apexY);
         ctx.lineTo(apexX, actualBottomY);
@@ -2470,27 +2560,31 @@
         ctx.setLineDash([]);
 
         // Base Bracket (Bottom) - Positioned accurately below the lowest arc of the pyramid
-        const bracketY = actualBottomY + 12;
+        const bracketY = actualBottomY + (isFs ? 18 : 12);
         ctx.strokeStyle = '#06b6d4';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = bracketLineWidth;
         ctx.beginPath();
-        ctx.moveTo(baseLeftX, bracketY - 10);
+        ctx.moveTo(baseLeftX, bracketY - tick);
         ctx.lineTo(baseLeftX, bracketY);
         ctx.lineTo(baseRightX, bracketY);
-        ctx.lineTo(baseRightX, bracketY - 10);
+        ctx.lineTo(baseRightX, bracketY - tick);
         ctx.stroke();
 
         ctx.fillStyle = '#67e8f9';
-        ctx.font = `bold ${isDual ? 20 : 24}px sans-serif`;
+        ctx.font = `bold ${bracketFontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText('底', apexX, bracketY + 6);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = isFs ? 8 : 4;
+        ctx.fillText('底', apexX, bracketY + (isFs ? 12 : 6));
+        ctx.shadowBlur = 0;
 
         // Layer info badges on the right side
-        ctx.font = `bold ${isDual ? 12.5 : 14}px sans-serif`;
+        const layerFontSize = isFs ? 26 : (isDual ? 12.5 : 14);
+        ctx.font = `bold ${layerFontSize}px sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        const layerBadgeX = baseRightX + (isDual ? 16 : 28);
+        const layerBadgeX = baseRightX + (isFs ? 45 : (isDual ? 16 : 28));
         for (let l = 1; l <= numLayers; l++) {
           const ly = apexY + (l - 0.5) * (maxBottomY / numLayers);
           const badgeCount = (2 * l - 1);
@@ -2499,13 +2593,10 @@
         }
 
         // --- DISCUSSION QUESTIONS BOX ---
-        const cardW = Math.min(isDual ? 460 : 880, w - (isDual ? 24 : 60));
-        const cardY = isDual ? (h - cardH - 12) : (h - cardH - 12);
-
         const q1 = '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
         const q2 = '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
 
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isDual);
+        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isDual, isFs);
 
         ctx.restore();
       }
@@ -2515,12 +2606,13 @@
     function drawDualDerivation(ctx, w, h, t) {
       // Split canvas into Left (Rect) and Right (Pyramid)
       const halfW = w / 2;
+      const isFs = (ctx.canvas.id === 'fsCanvas') || (w >= 1100);
 
       // Divider line
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.setLineDash([6, 6]);
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.setLineDash(isFs ? [10, 10] : [6, 6]);
+      ctx.lineWidth = isFs ? 3 : 2;
       ctx.beginPath();
       ctx.moveTo(halfW, 20);
       ctx.lineTo(halfW, h - 20);
@@ -2528,22 +2620,22 @@
       ctx.restore();
 
       // Titles
-      const titleFontSize = (w < 800) ? 15 : 17;
+      const titleFontSize = isFs ? 28 : ((w < 800) ? 15 : 17);
       ctx.font = `bold ${titleFontSize}px sans-serif`;
       ctx.fillStyle = '#00c4cc';
       ctx.textAlign = 'center';
       const method1Title = halfCutEnabled ? '🟩 方法一：長方形法' : '🟩 方法一：平行四邊形法';
-      ctx.fillText(method1Title, halfW / 2, 32);
+      ctx.fillText(method1Title, halfW / 2, isFs ? 42 : 32);
 
       ctx.fillStyle = '#ffaa00';
-      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, 32);
+      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, isFs ? 42 : 32);
 
       // Draw Left Side (bounded to left half with full vertical room)
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, 0, halfW, h);
       ctx.clip();
-      drawRectangleDerivation(ctx, halfW / 2, (h + 40) / 2, halfW, h - 40, t);
+      drawRectangleDerivation(ctx, halfW / 2, (h + (isFs ? 50 : 40)) / 2, halfW, h - (isFs ? 50 : 40), t);
       ctx.restore();
 
       // Draw Right Side (bounded to right half with full vertical room)
@@ -2551,7 +2643,7 @@
       ctx.beginPath();
       ctx.rect(halfW, 0, halfW, h);
       ctx.clip();
-      drawPyramidDerivation(ctx, halfW + halfW / 2, (h + 40) / 2, halfW, h - 40, t);
+      drawPyramidDerivation(ctx, halfW + halfW / 2, (h + (isFs ? 50 : 40)) / 2, halfW, h - (isFs ? 50 : 40), t);
       ctx.restore();
     }
 
@@ -2576,59 +2668,60 @@
       }
     }
 
-    
-    /* Discussion Questions Box on Canvas */
-    function drawDiscussionBox(ctx, cx, y, cardW, cardH, title, q1, q2, isCompact) {
+    /* Discussion Questions Box on Canvas (Classroom Big Screen Optimized) */
+    function drawDiscussionBox(ctx, cx, y, cardW, cardH, title, q1, q2, isCompact, isFs) {
+      if (isFs === undefined) {
+        isFs = (cardW >= 950) || (cardH >= 120);
+      }
       const cardX = cx - cardW / 2;
-      const radius = 12;
+      const radius = isFs ? 18 : 12;
 
       ctx.save();
 
       // Glass card container background
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-      ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+      ctx.strokeStyle = isFs ? 'rgba(0, 196, 204, 0.65)' : 'rgba(0, 196, 204, 0.4)';
+      ctx.lineWidth = isFs ? 2.5 : 1.5;
       drawRoundRectPath(ctx, cardX, y, cardW, cardH, radius);
       ctx.fill();
       ctx.stroke();
 
       // Golden top accent line
-      ctx.strokeStyle = 'rgba(255, 209, 102, 0.7)';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.85)';
+      ctx.lineWidth = isFs ? 4 : 2.5;
       ctx.beginPath();
-      ctx.moveTo(cardX + 20, y);
-      ctx.lineTo(cardX + cardW - 20, y);
+      ctx.moveTo(cardX + (isFs ? 30 : 20), y);
+      ctx.lineTo(cardX + cardW - (isFs ? 30 : 20), y);
       ctx.stroke();
 
-      // Title Badge: 💡 小組討論
+      // Title Badge: 💬 小組討論
       const badgeText = title || '💬 小組討論';
-      const titleFontSize = isCompact ? 12.5 : 14;
+      const titleFontSize = isFs ? 22 : (isCompact ? 12.5 : 14);
       ctx.font = `bold ${titleFontSize}px sans-serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
 
-      const badgeW = ctx.measureText(badgeText).width + 16;
-      const badgeH = isCompact ? 22 : 24;
-      const badgeX = cardX + 14;
-      const badgeY = y + 8;
+      const badgePadX = isFs ? 24 : 16;
+      const badgeW = ctx.measureText(badgeText).width + badgePadX;
+      const badgeH = isFs ? 36 : (isCompact ? 22 : 24);
+      const badgeX = cardX + (isFs ? 24 : 14);
+      const badgeY = y + (isFs ? 14 : 8);
 
-      ctx.fillStyle = 'rgba(255, 209, 102, 0.16)';
-      ctx.strokeStyle = 'rgba(255, 209, 102, 0.45)';
-      ctx.lineWidth = 1;
-      drawRoundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 11);
+      ctx.fillStyle = 'rgba(255, 209, 102, 0.2)';
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.6)';
+      ctx.lineWidth = isFs ? 1.8 : 1;
+      drawRoundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#ffd166';
-      ctx.fillText(badgeText, badgeX + 8, badgeY + badgeH / 2);
+      ctx.fillText(badgeText, badgeX + badgePadX / 2, badgeY + badgeH / 2);
 
-
-
-      // Questions
-      const maxTextW = cardW - 28;
-      let qFontSize = isCompact ? 12 : 13.5;
-      ctx.font = `600 ${qFontSize}px sans-serif`;
-      ctx.fillStyle = '#f8fafc';
+      // Questions (Super Large 26px for classroom back row students)
+      const maxTextW = cardW - (isFs ? 48 : 28);
+      let qFontSize = isFs ? 26 : (isCompact ? 12 : 13.5);
+      ctx.font = `bold ${qFontSize}px sans-serif`;
+      ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
 
@@ -2637,15 +2730,18 @@
       const q2W = ctx.measureText(q2).width;
       const maxQW = Math.max(q1W, q2W);
       if (maxQW > maxTextW) {
-        qFontSize = Math.max(10, Math.floor(qFontSize * (maxTextW / maxQW)));
-        ctx.font = `600 ${qFontSize}px sans-serif`;
+        qFontSize = Math.max(isFs ? 18 : 10, Math.floor(qFontSize * (maxTextW / maxQW)));
+        ctx.font = `bold ${qFontSize}px sans-serif`;
       }
 
-      const q1Y = badgeY + badgeH + (isCompact ? 14 : 16);
-      const q2Y = q1Y + (isCompact ? 22 : 26);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = isFs ? 6 : 2;
 
-      ctx.fillText(q1, cardX + 16, q1Y);
-      ctx.fillText(q2, cardX + 16, q2Y);
+      const q1Y = badgeY + badgeH + (isFs ? 24 : (isCompact ? 14 : 16));
+      const q2Y = q1Y + (isFs ? 38 : (isCompact ? 22 : 26));
+
+      ctx.fillText(q1, cardX + (isFs ? 24 : 16), q1Y);
+      ctx.fillText(q2, cardX + (isFs ? 24 : 16), q2Y);
 
       ctx.restore();
     }
@@ -2726,25 +2822,34 @@
       openUniversalFullscreen('derivation');
     }
 
+    function resizeFullscreenCanvas() {
+      const fsCanvas = document.getElementById('fsCanvas');
+      if (!fsCanvas) return;
+      if (fsCanvas.width !== 1600 || fsCanvas.height !== 900) {
+        fsCanvas.width = 1600;
+        fsCanvas.height = 900;
+      }
+    }
+
     function updateFsToolbar() {
       const toolbar = document.getElementById('fsToolbar');
       if (!toolbar) return;
 
       if (currentFsMode === 'derivation') {
         toolbar.innerHTML = `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="action-btn action-btn-primary" onclick="togglePlay()" style="padding: 6px 14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="action-btn action-btn-primary" onclick="togglePlay()" style="padding: 8px 20px; font-size: 16.5px; font-weight: 800; min-height: 48px; border-radius: 12px;">
               <span id="fsPlayIcon">${isPlaying ? '⏸ 暫停' : '▶ 播放'}</span>
             </button>
-            <button class="action-btn action-btn-secondary" onclick="resetProgress()" style="padding: 6px 12px;">⏮ 0%</button>
-            <button class="action-btn action-btn-secondary" onclick="maxProgress()" style="padding: 6px 12px;">⏭ 100%</button>
+            <button class="action-btn action-btn-secondary" onclick="resetProgress()" style="padding: 8px 16px; font-size: 15.5px; font-weight: 800; min-height: 48px; border-radius: 12px;">⏮ 0%</button>
+            <button class="action-btn action-btn-secondary" onclick="maxProgress()" style="padding: 8px 16px; font-size: 15.5px; font-weight: 800; min-height: 48px; border-radius: 12px;">⏭ 100%</button>
           </div>
-          <input type="range" id="fsProgressSlider" class="custom-slider" min="0" max="100" value="${Math.round(animProgress * 100)}" oninput="onProgressChange(this.value)" style="flex:1;">
-          <span id="fsSliderValBadge" class="slider-val-badge" style="min-width: 60px;">${Math.round(animProgress * 100)}%</span>
-          <div style="display:flex; gap:6px;">
-            <button class="slice-btn ${derivationMode==='rect'?'active':''}" onclick="setDerivationModeFromFs('rect')">長方形</button>
-            <button class="slice-btn ${derivationMode==='pyramid'?'active':''}" onclick="setDerivationModeFromFs('pyramid')">金字塔</button>
-            <button class="slice-btn ${derivationMode==='dual'?'active':''}" onclick="setDerivationModeFromFs('dual')">雙法對照</button>
+          <input type="range" id="fsProgressSlider" class="custom-slider" min="0" max="100" value="${Math.round(animProgress * 100)}" oninput="onProgressChange(this.value)" style="flex:1; min-width: 200px;">
+          <span id="fsSliderValBadge" class="slider-val-badge" style="min-width: 76px; font-size: 17px; font-weight: 800; padding: 6px 14px;">${Math.round(animProgress * 100)}%</span>
+          <div style="display:flex; gap:8px;">
+            <button class="slice-btn ${derivationMode==='rect'?'active':''}" onclick="setDerivationModeFromFs('rect')" style="padding: 8px 18px; font-size: 16px; font-weight: 800; min-height: 48px; border-radius: 12px;">長方形</button>
+            <button class="slice-btn ${derivationMode==='pyramid'?'active':''}" onclick="setDerivationModeFromFs('pyramid')" style="padding: 8px 18px; font-size: 16px; font-weight: 800; min-height: 48px; border-radius: 12px;">金字塔</button>
+            <button class="slice-btn ${derivationMode==='dual'?'active':''}" onclick="setDerivationModeFromFs('dual')" style="padding: 8px 18px; font-size: 16px; font-weight: 800; min-height: 48px; border-radius: 12px;">雙法對照</button>
           </div>
         `;
       } else if (currentFsMode === 'pizza') {
@@ -2925,6 +3030,7 @@
       if (!fsModal || !fsModal.classList.contains('active')) return;
       const fsCanvas = document.getElementById('fsCanvas');
       if (!fsCanvas) return;
+      resizeFullscreenCanvas();
       const fsCtx = fsCanvas.getContext('2d');
       fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
 
@@ -2937,13 +3043,25 @@
           drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
         }
       } else if (currentFsMode === 'pizza') {
-        drawPizzaView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+        fsCtx.save();
+        fsCtx.scale(1600 / 1280, 900 / 660);
+        drawPizzaView(fsCtx, 1280, 660, true);
+        fsCtx.restore();
       } else if (currentFsMode === 'sprinkler') {
-        drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+        fsCtx.save();
+        fsCtx.scale(1600 / 1280, 900 / 660);
+        drawSprinklerView(fsCtx, 1280, 660, true);
+        fsCtx.restore();
       } else if (currentFsMode === 'annulus') {
-        drawAnnulusView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+        fsCtx.save();
+        fsCtx.scale(1600 / 1280, 900 / 660);
+        drawAnnulusView(fsCtx, 1280, 660, true);
+        fsCtx.restore();
       } else if (currentFsMode === 'quiz') {
-        drawQuizView(fsCtx, fsCanvas.width, fsCanvas.height, true);
+        fsCtx.save();
+        fsCtx.scale(1600 / 1280, 900 / 660);
+        drawQuizView(fsCtx, 1280, 660, true);
+        fsCtx.restore();
       }
     }
 
