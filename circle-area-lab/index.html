@@ -4013,7 +4013,6 @@
         ctx.restore();
 
         drawPillBadge(ctx, cx, cy, `花圃 r₁=${r1}m`, 13, '#ffffff', 'rgba(15, 23, 42, 0.92)', '#10b981');
-        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 25, `步道 w=${w}m`, 13, '#ffffff', 'rgba(15, 23, 42, 0.92)', '#fde047');
       } else {
         // Fullscreen Blackboard View (Native 1600x900 Large Screen View)
         const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -4111,21 +4110,6 @@
         ctx.lineTo(cx + 12, cy + pixR2);
         ctx.stroke();
 
-        // 3. w Yellow Line (Inner circle to outer circle on right)
-        ctx.beginPath();
-        ctx.moveTo(cx + pixR1, cy);
-        ctx.lineTo(cx + pixR2, cy);
-        ctx.strokeStyle = '#fde047';
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        // End tick marks
-        ctx.beginPath();
-        ctx.moveTo(cx + pixR1, cy - 14);
-        ctx.lineTo(cx + pixR1, cy + 14);
-        ctx.moveTo(cx + pixR2, cy - 14);
-        ctx.lineTo(cx + pixR2, cy + 14);
-        ctx.stroke();
-
         // Center dot
         ctx.beginPath();
         ctx.arc(cx, cy, 6, 0, Math.PI * 2);
@@ -4139,9 +4123,6 @@
 
         // 2. Outer radius R2
         drawPillBadge(ctx, cx + 115, cy + pixR2 / 2, `外大圓半徑 R₂ = ${r2}m`, 24, '#ffffff', 'rgba(15, 23, 42, 0.96)', '#38bdf8');
-
-        // 3. Walkway width w (High-voltage Yellow/White, 0% grey, 100% visible from back row!)
-        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 36, `步道寬度 w = ${w}m`, 26, '#fde047', 'rgba(15, 23, 42, 0.98)', '#fde047');
 
         // Right side: Blackboard steps (Native 1600x900 Big Screen Typography)
         const bX = 880;
