@@ -1186,6 +1186,92 @@
       border-color: #ef4444;
     }
 
+    /* Fullscreen Dedicated Top Discussion Questions Banner (Super large font, placed at top to avoid toolbar overlap) */
+    .fs-top-question-banner {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 1420px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
+      border: 2px solid rgba(0, 196, 204, 0.7);
+      border-radius: 18px;
+      padding: 10px 22px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 196, 204, 0.25);
+      backdrop-filter: blur(14px);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+    .fs-top-q-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+    .fs-top-q-badge {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffd166;
+      background: rgba(255, 209, 102, 0.18);
+      border: 1px solid rgba(255, 209, 102, 0.5);
+      padding: 3px 14px;
+      border-radius: var(--radius-pill);
+      letter-spacing: 0.5px;
+    }
+    .fs-top-q-method {
+      font-size: 15px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .fs-top-q-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .fs-top-q-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .fs-top-q-pill {
+      font-size: 15px;
+      font-weight: 900;
+      background: #00c4cc;
+      color: #0f172a;
+      padding: 3px 12px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 196, 204, 0.4);
+    }
+    .fs-top-q-text {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.35;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+    }
+    @media (max-width: 900px) {
+      .fs-top-question-banner {
+        top: 56px;
+        width: 96%;
+        padding: 6px 12px;
+      }
+      .fs-top-q-text {
+        font-size: 16px;
+      }
+      .fs-top-q-pill {
+        font-size: 12px;
+        padding: 2px 8px;
+      }
+    }
+
     .fs-canvas-holder {
       width: 100%;
       height: calc(100vh - 84px);
@@ -1759,6 +1845,25 @@
       </button>
     </div>
     <button class="fs-close-btn" onclick="closeFullscreen()">✕ 退出全螢幕講課</button>
+
+    <!-- Top Discussion Questions Banner (Super large font, placed at top to avoid toolbar overlap) -->
+    <div id="fsTopQuestionBanner" class="fs-top-question-banner">
+      <div class="fs-top-q-header">
+        <span class="fs-top-q-badge" id="fsTopQBadge">💬 小組討論思考任務</span>
+        <span class="fs-top-q-method" id="fsTopQMethod">🟩 方法一：長方形法</span>
+      </div>
+      <div class="fs-top-q-items" id="fsTopQItems">
+        <div class="fs-top-q-row">
+          <span class="fs-top-q-pill" id="fsTopQPill1">提問 1</span>
+          <span class="fs-top-q-text" id="fsTopQ1">這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的</span>
+        </div>
+        <div class="fs-top-q-row">
+          <span class="fs-top-q-pill" id="fsTopQPill2">提問 2</span>
+          <span class="fs-top-q-text" id="fsTopQ2">請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的</span>
+        </div>
+      </div>
+    </div>
+
     <div class="fs-canvas-holder">
       <canvas id="fsCanvas" width="1600" height="900"></canvas>
     </div>
@@ -1870,6 +1975,7 @@
 
       playTone(520, 0.05);
       drawDerivation();
+      updateFsTopQuestionBanner();
     }
 
     function openDiscoveryModal() {
@@ -1969,6 +2075,7 @@
       }
       playTone(600, 0.05);
       drawDerivation();
+      updateFsTopQuestionBanner();
     }
 
     function setPyramidSlices(n) {
@@ -1978,6 +2085,7 @@
       });
       playTone(450 + n * 10, 0.05);
       drawDerivation();
+      updateFsTopQuestionBanner();
     }
 
     function onProgressChange(val) {
@@ -2136,9 +2244,9 @@
       const cardH = isFs ? 142 : (isCompact ? 92 : 104);
       const cardY = isFs ? (h - cardH - 16) : (isCompact ? (h - cardH - 12) : Math.max(cy + 100, h - cardH - 24));
 
-      // Available vertical height above discussion card
-      const topAreaY = isFs ? 45 : 20;
-      const bottomAreaY = isFs ? (cardY - 25) : (h - 60);
+      // Available vertical height for geometry
+      const topAreaY = isFs ? 210 : 20;
+      const bottomAreaY = isFs ? (h - 110) : (cardY - 25);
       const availH = Math.max(100, bottomAreaY - topAreaY);
 
       // Max R limited by width:
@@ -2148,7 +2256,7 @@
       // When t=1: rectangle height is R + top bracket space
       const maxRByHeight = Math.min(availH - (isFs ? 55 : 45), (availH - (isFs ? 40 : 30)) / 2.05);
 
-      const maxAllowedR = isFs ? 275 : ((w >= 700) ? 185 : (w >= 600 ? 145 : 116));
+      const maxAllowedR = isFs ? 250 : ((w >= 700) ? 185 : (w >= 600 ? 145 : 116));
       const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, maxAllowedR));
       const arcW = R * theta;
       const rectW = halfN * arcW; // = Math.PI * R
@@ -2159,8 +2267,8 @@
 
       // Perfectly center the complete visual group inside available width w
       const rectLeft = cx - totalVisualW / 2;
-      // Vertically center inside available area above discussion card
-      const centerAreaY = isFs ? ((topAreaY + bottomAreaY) / 2 + 10) : (cy + (isCompact ? 8 : 12));
+      // Vertically center inside available area between top banner and bottom toolbar
+      const centerAreaY = isFs ? ((topAreaY + bottomAreaY) / 2) : (cy + (isCompact ? 8 : 12));
       const rectTop = centerAreaY - rectH / 2;
 
       const cx0 = cx;
@@ -2366,11 +2474,12 @@
         ctx.fillText('寬', rx + (isFs ? 18 : (isCompact ? 8 : 10)), (ry1 + ry2) / 2);
         ctx.shadowBlur = 0;
 
-        // --- DISCUSSION QUESTIONS BOX ---
-        const q1 = '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
-        const q2 = '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
-
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isCompact, isFs);
+        // --- DISCUSSION QUESTIONS BOX (In Non-Fullscreen Mode; in Fullscreen it is displayed at TOP via HTML Banner) ---
+        if (!isFs) {
+          const q1 = '1. 這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+          const q2 = '2. 請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
+          drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isCompact, isFs);
+        }
 
         ctx.restore();
       }
@@ -2394,12 +2503,12 @@
       const cardH = isFs ? 142 : (isDual ? 92 : 100);
       const cardY = isFs ? (h - cardH - 16) : (h - cardH - 12);
 
-      const topClearance = isFs ? 36 : (isDual ? 32 : 24);
-      const bottomClearance = isFs ? (cardH + 42) : (24 + cardH + 12); // space for base bracket & '底' + card
+      const topClearance = isFs ? 200 : (isDual ? 32 : 24);
+      const bottomClearance = isFs ? 110 : (24 + cardH + 12);
       const shapeHeightMultiplier = ((numLayers - 1) * cosHalf + 1);
       const maxRByHeight = (h - topClearance - bottomClearance) / shapeHeightMultiplier;
       const maxRByWidth = (w - (isFs ? 280 : (isDual ? 120 : 180))) / (2 * numLayers * sinHalf);
-      const maxAllowedR = isFs ? 245 : 180;
+      const maxAllowedR = isFs ? 230 : 180;
       const R = Math.max(45, Math.min(maxRByWidth, maxRByHeight, maxAllowedR));
 
       const uLeft = { x: -sinHalf, y: cosHalf };
@@ -2592,11 +2701,12 @@
           ctx.fillText(`第 ${l} 層 (${badgeCount} 片)`, layerBadgeX, ly);
         }
 
-        // --- DISCUSSION QUESTIONS BOX ---
-        const q1 = '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
-        const q2 = '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
-
-        drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isDual, isFs);
+        // --- DISCUSSION QUESTIONS BOX (In Non-Fullscreen Mode; in Fullscreen it is displayed at TOP via HTML Banner) ---
+        if (!isFs) {
+          const q1 = '1. 這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+          const q2 = '2. 請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
+          drawDiscussionBox(ctx, cx, cardY, cardW, cardH, '💬 小組討論', q1, q2, isDual, isFs);
+        }
 
         ctx.restore();
       }
@@ -2614,7 +2724,7 @@
       ctx.setLineDash(isFs ? [10, 10] : [6, 6]);
       ctx.lineWidth = isFs ? 3 : 2;
       ctx.beginPath();
-      ctx.moveTo(halfW, 20);
+      ctx.moveTo(halfW, isFs ? 180 : 20);
       ctx.lineTo(halfW, h - 20);
       ctx.stroke();
       ctx.restore();
@@ -2625,10 +2735,10 @@
       ctx.fillStyle = '#00c4cc';
       ctx.textAlign = 'center';
       const method1Title = halfCutEnabled ? '🟩 方法一：長方形法' : '🟩 方法一：平行四邊形法';
-      ctx.fillText(method1Title, halfW / 2, isFs ? 42 : 32);
+      ctx.fillText(method1Title, halfW / 2, isFs ? 195 : 32);
 
       ctx.fillStyle = '#ffaa00';
-      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, isFs ? 42 : 32);
+      ctx.fillText('🔺 方法二：金字塔三角形法', halfW + halfW / 2, isFs ? 195 : 32);
 
       // Draw Left Side (bounded to left half with full vertical room)
       ctx.save();
@@ -2808,8 +2918,72 @@
       }
 
       updateFsToolbar();
+      updateFsTopQuestionBanner();
       renderFullscreenCanvas();
       playTone(523, 0.08);
+    }
+
+    function updateFsTopQuestionBanner() {
+      const banner = document.getElementById('fsTopQuestionBanner');
+      if (!banner) return;
+      if (currentFsMode !== 'derivation') {
+        banner.style.display = 'none';
+        return;
+      }
+      banner.style.display = 'flex';
+
+      const methodBadge = document.getElementById('fsTopQMethod');
+      const q1El = document.getElementById('fsTopQ1');
+      const q2El = document.getElementById('fsTopQ2');
+      const pill1 = document.getElementById('fsTopQPill1');
+      const pill2 = document.getElementById('fsTopQPill2');
+
+      if (derivationMode === 'rect') {
+        if (methodBadge) {
+          methodBadge.textContent = halfCutEnabled ? '🟩 方法一：長方形法' : '🟩 方法一：平行四邊形法';
+          methodBadge.style.color = '#38bdf8';
+        }
+        if (pill1) {
+          pill1.style.background = '#00c4cc';
+          pill1.textContent = '提問 1';
+        }
+        if (pill2) {
+          pill2.style.background = '#00c4cc';
+          pill2.textContent = '提問 2';
+        }
+        if (q1El) q1El.textContent = '這個長方形的寬跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        if (q2El) q2El.textContent = '請你想想看，這個長方形的長跟圓周長之間的關係。說出你們是怎麼發現的';
+      } else if (derivationMode === 'pyramid') {
+        if (methodBadge) {
+          methodBadge.textContent = `🔺 方法二：金字塔三角形法 (${pyramidSlices}等分)`;
+          methodBadge.style.color = '#ffaa00';
+        }
+        if (pill1) {
+          pill1.style.background = '#ffaa00';
+          pill1.textContent = '提問 1';
+        }
+        if (pill2) {
+          pill2.style.background = '#ffaa00';
+          pill2.textContent = '提問 2';
+        }
+        if (q1El) q1El.textContent = '這個三角形的高跟圓形半徑有什麼關係？說出你們是怎麼發現的';
+        if (q2El) q2El.textContent = '請你想想看，這個三角形的底跟圓周長之間的關係。說出你們是怎麼發現的';
+      } else if (derivationMode === 'dual') {
+        if (methodBadge) {
+          methodBadge.textContent = '⚡ 雙法同場聯動對照（長方形 vs 金字塔三角形）';
+          methodBadge.style.color = '#ffd166';
+        }
+        if (pill1) {
+          pill1.style.background = '#00c4cc';
+          pill1.textContent = '長方形提問';
+        }
+        if (pill2) {
+          pill2.style.background = '#ffaa00';
+          pill2.textContent = '三角形提問';
+        }
+        if (q1El) q1El.textContent = '觀察長方形的「長」與「寬」，各與圓周長、半徑有什麼關係？';
+        if (q2El) q2El.textContent = '觀察三角形的「底」與「高」，各與圓周長、半徑有什麼關係？說出你們的發現';
+      }
     }
 
     function closeFullscreen() {
@@ -2932,6 +3106,7 @@
     function setDerivationModeFromFs(mode) {
       setDerivationMode(mode);
       updateFsToolbar();
+      updateFsTopQuestionBanner();
       renderFullscreenCanvas();
     }
 
