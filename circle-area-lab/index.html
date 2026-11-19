@@ -3223,10 +3223,7 @@
         drawPizzaView(fsCtx, 1280, 660, true);
         fsCtx.restore();
       } else if (currentFsMode === 'sprinkler') {
-        fsCtx.save();
-        fsCtx.scale(1600 / 1280, 900 / 660);
-        drawSprinklerView(fsCtx, 1280, 660, true);
-        fsCtx.restore();
+        drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'annulus') {
         fsCtx.save();
         fsCtx.scale(1600 / 1280, 900 / 660);
@@ -3733,7 +3730,7 @@
 
         drawPillBadge(ctx, cx + pixR / 2, cy - 14, `r=${rVal}m`, 11, '#ffd166', 'rgba(15, 23, 42, 0.9)', '#ffd166');
       } else {
-        // High-Definition Fullscreen Blackboard View (1280x660)
+        // High-Definition Fullscreen Blackboard View (1600x900 native)
         const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
         bgGrad.addColorStop(0, '#070b18');
         bgGrad.addColorStop(1, '#064e3b');
@@ -3742,39 +3739,40 @@
 
         // Top Banner Title
         ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 24px sans-serif';
+        ctx.font = 'bold 28px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('💦 旋轉自動灑水器：草地灌溉幾何探究（圓周長與圓面積）', width / 2, 45);
+        ctx.fillText('💦 旋轉自動灑水器：草地灌溉幾何探究（圓周長與圓面積）', width / 2, 48);
 
-        // Center garden circle on Left (cx = 440, cy = 340)
-        const cx = 440;
-        const cy = 340;
-        const pixR = (rVal / 8) * 230;
+        // Center garden circle on Left (cx = 460, cy = 460)
+        const cx = 460;
+        const cy = 460;
+        const maxPixR = 340;
+        const pixR = (rVal / 8) * maxPixR;
 
-        // Lawn patch
+        // Lawn patch (Background Outer Circle)
         ctx.save();
         ctx.beginPath();
-        ctx.arc(cx, cy, 255, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 370, 0, Math.PI * 2);
         ctx.fillStyle = '#065f46';
         ctx.fill();
         ctx.strokeStyle = '#047857';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
         ctx.restore();
 
-        // Wet irrigated zone
+        // Wet irrigated zone (Rotating Water Spray Zone)
         ctx.save();
         const waterGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, pixR);
-        waterGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
-        waterGrad.addColorStop(0.85, 'rgba(6, 182, 212, 0.35)');
-        waterGrad.addColorStop(1, 'rgba(14, 165, 233, 0.15)');
+        waterGrad.addColorStop(0, 'rgba(56, 189, 248, 0.5)');
+        waterGrad.addColorStop(0.85, 'rgba(6, 182, 212, 0.4)');
+        waterGrad.addColorStop(1, 'rgba(14, 165, 233, 0.2)');
         ctx.beginPath();
         ctx.arc(cx, cy, pixR, 0, Math.PI * 2);
         ctx.fillStyle = waterGrad;
         ctx.fill();
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([8, 6]);
+        ctx.lineWidth = 3.5;
+        ctx.setLineDash([10, 8]);
         ctx.stroke();
         ctx.restore();
 
@@ -3785,19 +3783,19 @@
           const jetY = cy + Math.sin(streamAng) * pixR;
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-          ctx.lineWidth = 2.5;
+          ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.moveTo(cx, cy);
           ctx.lineTo(jetX, jetY);
           ctx.stroke();
 
           // Droplets along stream
-          for (let i = 1; i <= 8; i++) {
-            const d = (pixR / 8) * i;
+          for (let i = 1; i <= 10; i++) {
+            const d = (pixR / 10) * i;
             const dx = cx + Math.cos(streamAng + 0.08 * i) * d;
             const dy = cy + Math.sin(streamAng + 0.08 * i) * d;
             ctx.beginPath();
-            ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
+            ctx.arc(dx, dy, 4, 0, Math.PI * 2);
             ctx.fillStyle = '#67e8f9';
             ctx.fill();
           }
@@ -3807,95 +3805,137 @@
         // Center sprinkler mechanism
         ctx.save();
         ctx.beginPath();
-        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 18, 0, Math.PI * 2);
         ctx.fillStyle = '#ffd166';
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         ctx.stroke();
         ctx.restore();
 
-        // Radius Measurement Line
+        // --- RADIUS MEASUREMENT LINE & SUPER CLEAR HIGH-CONTRAST LABEL ---
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(cx + pixR, cy);
-        ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        // Ticks at end
+        ctx.beginPath();
+        ctx.moveTo(cx + pixR, cy - 14);
+        ctx.lineTo(cx + pixR, cy + 14);
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 5;
         ctx.stroke();
         ctx.restore();
 
-        drawPillBadge(ctx, cx + pixR / 2, cy - 20, `📏 噴灑半徑 r = ${rVal.toFixed(1)} 公尺`, 16, '#ffd166', 'rgba(15, 23, 42, 0.92)', '#ffd166');
+        // Extra large high-contrast radius badge (No Emoji, 100% visible, bold 28px)
+        const radiusText = `半徑 r = ${rVal.toFixed(1)} 公尺`;
+        ctx.save();
+        ctx.font = 'bold 28px sans-serif';
+        const textMetrics = ctx.measureText(radiusText);
+        const badgeW = textMetrics.width + 44;
+        const badgeH = 48;
+        const badgeX = cx + pixR / 2;
+        const badgeY = cy - 40;
 
-        // Right side: Blackboard Lesson Cards (x = 760 ~ 1220)
-        const bX = 760;
-        const bW = 470;
+        // Shadow & Background Pill
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2.8;
+        drawRoundRectPath(ctx, badgeX - badgeW / 2, badgeY - badgeH / 2, badgeW, badgeH, 14);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // High-contrast Yellow Text
+        ctx.fillStyle = '#fde047';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(radiusText, badgeX, badgeY + 1);
+        ctx.restore();
+
+        // Right side: Blackboard Lesson Cards (x = 920 ~ 1540, w = 620)
+        const bX = 920;
+        const bW = 620;
 
         // Card 1: Circumference
         ctx.save();
-        drawRoundRectPath(ctx, bX, 90, bW, 140, 14);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        drawRoundRectPath(ctx, bX, 95, bW, 165, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('【邊界圓周長】（水柱噴灑最外圈總長度）', bX + 20, 122);
+        ctx.fillText('【邊界圓周長】（水柱噴灑最外圈總長度）', bX + 24, 134);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText(`• 公式：周長 C = 直徑 × 3.14 = (2 × 半徑) × 3.14`, bX + 24, 174);
         ctx.fillStyle = '#cbd5e1';
-        ctx.font = '16px sans-serif';
-        ctx.fillText(`• 公式：周長 C = 直徑 × 3.14 = (2 × 半徑) × 3.14`, bX + 20, 156);
-        ctx.fillText(`• 計算：2 × ${rVal.toFixed(1)} × 3.14 = `, bX + 20, 192);
+        ctx.fillText(`• 計算：2 × ${rVal.toFixed(1)} × 3.14 = `, bX + 24, 218);
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 20px sans-serif';
-        ctx.fillText(`${circ} 公尺`, bX + 265, 192);
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillText(`${circ} 公尺`, bX + 285, 218);
         ctx.restore();
 
         // Card 2: Area
         ctx.save();
-        drawRoundRectPath(ctx, bX, 255, bW, 140, 14);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        drawRoundRectPath(ctx, bX, 285, bW, 175, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#34d399';
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('【草地灌溉面積】（水柱覆蓋之全圓面積）', bX + 20, 287);
+        ctx.fillText('【草地灌溉面積】（水柱覆蓋之全圓面積）', bX + 24, 324);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText(`• 公式：面積 A = 半徑 × 半徑 × 3.14`, bX + 24, 364);
         ctx.fillStyle = '#cbd5e1';
-        ctx.font = '16px sans-serif';
-        ctx.fillText(`• 公式：面積 A = 半徑 × 半徑 × 3.14`, bX + 20, 321);
-        ctx.fillText(`• 計算：${rVal.toFixed(1)} × ${rVal.toFixed(1)} × 3.14 = `, bX + 20, 357);
+        ctx.fillText(`• 計算：${rVal.toFixed(1)} × ${rVal.toFixed(1)} × 3.14 = `, bX + 24, 410);
         ctx.fillStyle = '#34d399';
-        ctx.font = 'bold 20px sans-serif';
-        ctx.fillText(`${area} 平方公尺`, bX + 275, 357);
+        ctx.font = 'bold 30px sans-serif';
+        ctx.fillText(`${area} 平方公尺`, bX + 305, 410);
         ctx.restore();
 
         // Card 3: Deep Insight
         ctx.save();
-        drawRoundRectPath(ctx, bX, 420, bW, 160, 14);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        drawRoundRectPath(ctx, bX, 485, bW, 210, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 17px sans-serif';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('💡 深度探究思維（平方倍數威力）：', bX + 20, 452);
-        ctx.fillStyle = '#cffafe';
-        ctx.font = '15px sans-serif';
-        ctx.fillText(`• 當半徑加倍為 2 倍時（如 3m → 6m）：`, bX + 20, 482);
-        ctx.fillText(`  周長只增加 2 倍（18.84m → 37.68m）`, bX + 20, 508);
+        ctx.fillText('💡 深度探究思維（平方倍數威力）：', bX + 24, 524);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '18px sans-serif';
+        ctx.fillText(`• 當半徑加倍為 2 倍時（如 3m → 6m）：`, bX + 24, 562);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText(`  周長只增加 2 倍（18.84m → 37.68m）`, bX + 24, 594);
         ctx.fillStyle = '#fde047';
-        ctx.font = 'bold 15px sans-serif';
-        ctx.fillText(`  但灌溉面積暴增為 2² = 4 倍（28.26m² → 113.04m²）！`, bX + 20, 536);
-        ctx.fillText(`• 面積跟「半徑的平方」成正比！`, bX + 20, 562);
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`  但灌溉面積暴增為 2² = 4 倍（28.26m² → 113.04m²）！`, bX + 24, 628);
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText(`• 面積跟「半徑的平方」成正比！`, bX + 24, 660);
         ctx.restore();
       }
     }
