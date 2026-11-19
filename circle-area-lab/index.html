@@ -2862,15 +2862,15 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const m = ctx.measureText(text);
-      const padX = fontSize >= 16 ? 16 : 10;
-      const padY = fontSize >= 16 ? 8 : 5;
+      const padX = fontSize >= 20 ? 20 : (fontSize >= 16 ? 16 : 10);
+      const padY = fontSize >= 20 ? 10 : (fontSize >= 16 ? 8 : 5);
       const w = m.width + padX * 2;
       const h = fontSize + padY * 2;
       const r = h / 2;
 
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowBlur = fontSize >= 20 ? 14 : 8;
       ctx.beginPath();
       drawRoundRectPath(ctx, x - w / 2, y - h / 2, w, h, r);
       ctx.fillStyle = bgColor;
@@ -2879,7 +2879,7 @@
 
       ctx.beginPath();
       drawRoundRectPath(ctx, x - w / 2, y - h / 2, w, h, r);
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = fontSize >= 20 ? 3 : (fontSize >= 16 ? 2.2 : 1.6);
       ctx.strokeStyle = borderColor;
       ctx.stroke();
 
@@ -3063,18 +3063,18 @@
         const r1 = document.getElementById('annulusR1') ? document.getElementById('annulusR1').value : 3;
         const w = document.getElementById('annulusW') ? document.getElementById('annulusW').value : 2;
         toolbar.innerHTML = `
-          <div style="display:flex; align-items:center; gap:14px; width:100%; justify-content:space-between; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:14px; color:#ff5757; font-weight:700;">🌺 內圈半徑 R₁：</span>
-              <input type="range" min="2" max="6" value="${r1}" step="1" oninput="syncAnnulusFromFs('r1', this.value)" style="width:120px;" class="custom-slider">
-              <span id="fsAnnulusR1Label" style="font-weight:800; color:#ff5757; font-size:14px;">${r1} m</span>
+          <div style="display:flex; align-items:center; gap:20px; width:100%; justify-content:space-between; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:18px; color:#f87171; font-weight:700;">🌺 內圈半徑 R₁：</span>
+              <input type="range" min="2" max="6" value="${r1}" step="1" oninput="syncAnnulusFromFs('r1', this.value)" style="width:140px; height:8px;" class="custom-slider">
+              <span id="fsAnnulusR1Label" style="font-weight:800; color:#f87171; font-size:20px;">${r1} m</span>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:14px; color:#ffd166; font-weight:700;">🧱 步道寬度 w：</span>
-              <input type="range" min="1" max="4" value="${w}" step="1" oninput="syncAnnulusFromFs('w', this.value)" style="width:120px;" class="custom-slider">
-              <span id="fsAnnulusWLabel" style="font-weight:800; color:#ffd166; font-size:14px;">${w} m</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:18px; color:#fde047; font-weight:700;">🧱 步道寬度 w：</span>
+              <input type="range" min="1" max="4" value="${w}" step="1" oninput="syncAnnulusFromFs('w', this.value)" style="width:140px; height:8px;" class="custom-slider">
+              <span id="fsAnnulusWLabel" style="font-weight:800; color:#fde047; font-size:20px;">${w} m</span>
             </div>
-            <div id="fsAnnulusAreaPill" style="background:rgba(251,191,36,0.15); border:1px solid #f59e0b; border-radius:20px; padding:5px 16px; font-size:13px; font-weight:700; color:#fef08a;">
+            <div id="fsAnnulusAreaPill" style="background:rgba(251,191,36,0.18); border:2px solid #f59e0b; border-radius:24px; padding:6px 20px; font-size:17px; font-weight:800; color:#fef08a;">
               步道面積：${((parseInt(r1)+parseInt(w))**2 * 3.14 - r1**2 * 3.14).toFixed(2)} 平方公尺
             </div>
           </div>
@@ -3225,10 +3225,7 @@
       } else if (currentFsMode === 'sprinkler') {
         drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'annulus') {
-        fsCtx.save();
-        fsCtx.scale(1600 / 1280, 900 / 660);
-        drawAnnulusView(fsCtx, 1280, 660, true);
-        fsCtx.restore();
+        drawAnnulusView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'quiz') {
         fsCtx.save();
         fsCtx.scale(1600 / 1280, 900 / 660);
@@ -4015,10 +4012,10 @@
         }
         ctx.restore();
 
-        drawPillBadge(ctx, cx, cy, `花圃 r₁=${r1}m`, 11, '#ffffff', 'rgba(15, 23, 42, 0.85)', '#10b981');
-        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 25, `步道 w=${w}m`, 10.5, '#ffd166', 'rgba(15, 23, 42, 0.85)', '#ffd166');
+        drawPillBadge(ctx, cx, cy, `花圃 r₁=${r1}m`, 13, '#ffffff', 'rgba(15, 23, 42, 0.92)', '#10b981');
+        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 25, `步道 w=${w}m`, 13, '#ffffff', 'rgba(15, 23, 42, 0.92)', '#fde047');
       } else {
-        // Fullscreen Blackboard View (1280x660)
+        // Fullscreen Blackboard View (Native 1600x900 Large Screen View)
         const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
         bgGrad.addColorStop(0, '#070b18');
         bgGrad.addColorStop(1, '#0f172a');
@@ -4026,128 +4023,190 @@
         ctx.fillRect(0, 0, width, height);
 
         // Title
+        ctx.save();
         ctx.fillStyle = '#c084fc';
-        ctx.font = 'bold 24px sans-serif';
+        ctx.font = 'bold 30px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🌺 花圃與環形步道：圓環面積公式與解題思考', width / 2, 45);
+        ctx.shadowColor = 'rgba(192, 132, 252, 0.5)';
+        ctx.shadowBlur = 12;
+        ctx.fillText('🌺 生活情境探究：花圃與環形步道（圓環面積公式與解題思考）', width / 2, 52);
+        ctx.restore();
 
-        const cx = 430;
-        const cy = 340;
+        const cx = 460;
+        const cy = 470;
         const maxR = 10;
-        const pixR1 = (r1 / maxR) * 230;
-        const pixR2 = (r2 / maxR) * 230;
+        const pixR1 = (r1 / maxR) * 330;
+        const pixR2 = (r2 / maxR) * 330;
 
-        // Outer Walkway
+        // Outer Walkway Circle
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, pixR2, 0, Math.PI * 2);
-        ctx.fillStyle = '#475569';
+        ctx.fillStyle = '#334155';
         ctx.fill();
         ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
         // Paving texture lines
-        for (let i = 0; i < 16; i++) {
-          const ang = (i * Math.PI * 2) / 16;
+        for (let i = 0; i < 24; i++) {
+          const ang = (i * Math.PI * 2) / 24;
           ctx.beginPath();
           ctx.moveTo(cx + Math.cos(ang) * pixR1, cy + Math.sin(ang) * pixR1);
           ctx.lineTo(cx + Math.cos(ang) * pixR2, cy + Math.sin(ang) * pixR2);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+          ctx.lineWidth = 2;
           ctx.stroke();
         }
 
-        // Inner Flowerbed
+        // Inner Flowerbed Circle
         ctx.beginPath();
         ctx.arc(cx, cy, pixR1, 0, Math.PI * 2);
         ctx.fillStyle = '#15803d';
         ctx.fill();
-        ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 4.5;
         ctx.stroke();
 
         // Flower blooms
-        const flowerCols = ['#f43f5e', '#fbbf24', '#ec4899', '#38bdf8'];
-        for (let i = 0; i < 12; i++) {
+        const flowerCols = ['#f43f5e', '#fbbf24', '#ec4899', '#38bdf8', '#a855f7'];
+        for (let i = 0; i < 16; i++) {
           const ang = (i * 2.39996);
-          const dist = pixR1 * 0.6;
+          const dist = pixR1 * 0.65;
           const fx = cx + Math.cos(ang) * dist;
           const fy = cy + Math.sin(ang) * dist;
           ctx.beginPath();
-          ctx.arc(fx, fy, 6, 0, Math.PI * 2);
+          ctx.arc(fx, fy, 9, 0, Math.PI * 2);
           ctx.fillStyle = flowerCols[i % flowerCols.length];
           ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
         }
 
         // Measurement Lines
+        // 1. R1 Red Line (Center to left edge of flowerbed)
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(cx - pixR1, cy);
-        ctx.strokeStyle = '#ff5757';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#f87171';
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+        // End tick mark
+        ctx.beginPath();
+        ctx.moveTo(cx - pixR1, cy - 12);
+        ctx.lineTo(cx - pixR1, cy + 12);
         ctx.stroke();
 
+        // 2. R2 Blue Line (Center straight down to outer walkway)
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(cx, cy + pixR2);
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+        // End tick mark
+        ctx.beginPath();
+        ctx.moveTo(cx - 12, cy + pixR2);
+        ctx.lineTo(cx + 12, cy + pixR2);
         ctx.stroke();
 
+        // 3. w Yellow Line (Inner circle to outer circle on right)
         ctx.beginPath();
         ctx.moveTo(cx + pixR1, cy);
         ctx.lineTo(cx + pixR2, cy);
-        ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 5;
         ctx.stroke();
+        // End tick marks
+        ctx.beginPath();
+        ctx.moveTo(cx + pixR1, cy - 14);
+        ctx.lineTo(cx + pixR1, cy + 14);
+        ctx.moveTo(cx + pixR2, cy - 14);
+        ctx.lineTo(cx + pixR2, cy + 14);
+        ctx.stroke();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
         ctx.restore();
 
-        drawPillBadge(ctx, cx - pixR1 / 2, cy - 18, `內圈半徑 R₁ = ${r1}m`, 14, '#ff5757', 'rgba(15, 23, 42, 0.92)', '#ff5757');
-        drawPillBadge(ctx, cx + 80, cy + pixR2 / 2, `外大圓半徑 R₂ = ${r2}m`, 14, '#38bdf8', 'rgba(15, 23, 42, 0.92)', '#38bdf8');
-        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 22, `步道寬度 w = ${w}m`, 14, '#ffd166', 'rgba(15, 23, 42, 0.92)', '#ffd166');
+        // Badges (High Contrast, Large Bold Fonts for Classroom Screens)
+        // 1. Inner radius R1
+        drawPillBadge(ctx, cx - pixR1 / 2, cy - 32, `內圈半徑 R₁ = ${r1}m`, 24, '#ffffff', 'rgba(15, 23, 42, 0.96)', '#f87171');
 
-        // Right side: Blackboard steps
-        const bX = 760;
-        const bW = 470;
+        // 2. Outer radius R2
+        drawPillBadge(ctx, cx + 115, cy + pixR2 / 2, `外大圓半徑 R₂ = ${r2}m`, 24, '#ffffff', 'rgba(15, 23, 42, 0.96)', '#38bdf8');
+
+        // 3. Walkway width w (High-voltage Yellow/White, 0% grey, 100% visible from back row!)
+        drawPillBadge(ctx, cx + (pixR1 + pixR2) / 2, cy - 36, `步道寬度 w = ${w}m`, 26, '#fde047', 'rgba(15, 23, 42, 0.98)', '#fde047');
+
+        // Right side: Blackboard steps (Native 1600x900 Big Screen Typography)
+        const bX = 880;
+        const bY = 105;
+        const bW = 670;
+        const bH = 680;
 
         ctx.save();
-        drawRoundRectPath(ctx, bX, 85, bW, 490, 16);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        drawRoundRectPath(ctx, bX, bY, bW, bH, 20);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(192, 132, 252, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.5)';
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
         ctx.fillStyle = '#c084fc';
-        ctx.font = 'bold 20px sans-serif';
+        ctx.font = 'bold 26px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('【圓環面積標準解題三部曲】', bX + 24, 125);
+        ctx.fillText('【圓環面積標準解題三部曲】', bX + 32, bY + 50);
 
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '16px sans-serif';
-        ctx.fillText('① 求外大圓半徑與面積：', bX + 24, 168);
-        ctx.fillText(`   R₂ = R₁ + 步道寬 = ${r1} + ${w} = ${r2} 公尺`, bX + 24, 196);
-        ctx.fillText(`   大圓面積 = ${r2} × ${r2} × 3.14 = ${a2.toFixed(2)} m²`, bX + 24, 224);
-
-        ctx.fillText('② 求內小圓花圃面積：', bX + 24, 272);
-        ctx.fillText(`   小圓面積 = ${r1} × ${r1} × 3.14 = ${a1.toFixed(2)} m²`, bX + 24, 300);
-
-        ctx.fillText('③ 兩圓相扣得出步道面積：', bX + 24, 348);
-        ctx.fillText(`   圓環面積 = 外大圓 － 內小圓`, bX + 24, 376);
-        ctx.fillText(`   = ${a2.toFixed(2)} － ${a1.toFixed(2)} = `, bX + 24, 404);
-        ctx.fillStyle = '#ffd166';
+        ctx.fillStyle = '#38bdf8';
         ctx.font = 'bold 22px sans-serif';
-        ctx.fillText(`${annulusArea} 平方公尺`, bX + 240, 404);
+        ctx.fillText('① 求外大圓半徑與面積：', bX + 32, bY + 105);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`   R₂ = R₁ + 步道寬 = ${r1} + ${w} = ${r2} 公尺`, bX + 32, bY + 140);
+        ctx.fillText(`   大圓面積 = ${r2} × ${r2} × 3.14 = ${a2.toFixed(2)} 平方公尺`, bX + 32, bY + 175);
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('② 求內小圓花圃面積：', bX + 32, bY + 235);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`   小圓面積 = ${r1} × ${r1} × 3.14 = ${a1.toFixed(2)} 平方公尺`, bX + 32, bY + 270);
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('③ 兩圓相扣得出步道面積：', bX + 32, bY + 330);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`   圓環面積 = 外大圓面積 － 內小圓面積`, bX + 32, bY + 365);
+        ctx.fillText(`   = ${a2.toFixed(2)} － ${a1.toFixed(2)} = `, bX + 32, bY + 402);
+
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 32px sans-serif';
+        ctx.fillText(`${annulusArea} 平方公尺`, bX + 280, bY + 404);
 
         // Fast Formula Card
+        ctx.save();
+        drawRoundRectPath(ctx, bX + 24, bY + 450, bW - 48, 185, 14);
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
         ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText('⚡ 國小乘法分配律速算技巧：', bX + 24, 452);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '15px sans-serif';
-        ctx.fillText(`圓環面積 = (R₂² － R₁²) × 3.14`, bX + 24, 480);
-        ctx.fillText(`= (${r2 * r2} － ${r1 * r1}) × 3.14 = ${r2 * r2 - r1 * r1} × 3.14 = ${annulusArea} m²`, bX + 24, 508);
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('⚡ 國小乘法分配律速算技巧：', bX + 44, bY + 490);
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`圓環面積 = (R₂² － R₁²) × 3.14`, bX + 44, bY + 530);
+        ctx.fillText(`= (${r2 * r2} － ${r1 * r1}) × 3.14 = ${r2 * r2 - r1 * r1} × 3.14 = ${annulusArea} m²`, bX + 44, bY + 572);
+        ctx.restore();
+
         ctx.restore();
       }
     }
