@@ -3218,19 +3218,13 @@
           drawDualDerivation(fsCtx, fsCanvas.width, fsCanvas.height, animProgress);
         }
       } else if (currentFsMode === 'pizza') {
-        fsCtx.save();
-        fsCtx.scale(1600 / 1280, 900 / 660);
-        drawPizzaView(fsCtx, 1280, 660, true);
-        fsCtx.restore();
+        drawPizzaView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'sprinkler') {
         drawSprinklerView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'annulus') {
         drawAnnulusView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       } else if (currentFsMode === 'quiz') {
-        fsCtx.save();
-        fsCtx.scale(1600 / 1280, 900 / 660);
-        drawQuizView(fsCtx, 1280, 660, true);
-        fsCtx.restore();
+        drawQuizView(fsCtx, fsCanvas.width, fsCanvas.height, true);
       }
     }
 
@@ -3465,7 +3459,7 @@
         midX + bOffX,
         midY + bOffY,
         badgeText,
-        isFs ? 15 : 10.5,
+        isFs ? 20 : 11,
         '#ffd166',
         'rgba(15, 23, 42, 0.94)',
         '#ffd166'
@@ -3511,7 +3505,7 @@
         ctx.font = '11px sans-serif';
         ctx.fillText(`共 ${area2} 吋²`, 275, 203);
       } else {
-        // High-Definition Fullscreen Blackboard View (1280x660)
+        // High-Definition Fullscreen Blackboard View (Native 1600x900 Large Screen View)
         const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
         bgGrad.addColorStop(0, '#070b18');
         bgGrad.addColorStop(1, '#0f172a');
@@ -3519,91 +3513,95 @@
         ctx.fillRect(0, 0, width, height);
 
         // Top Banner Title
+        ctx.save();
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 24px sans-serif';
+        ctx.font = 'bold 30px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🍕 生活幾何素養探究：披薩大對決（1 個大披薩 vs 2 個小披薩，哪個面積大？）', width / 2, 45);
+        ctx.shadowColor = 'rgba(255, 209, 102, 0.4)';
+        ctx.shadowBlur = 10;
+        ctx.fillText('🍕 生活幾何素養探究：披薩大對決（1 個大披薩 vs 2 個小披薩，哪個面積大？）', width / 2, 52);
+        ctx.restore();
 
         // Divider Line in center
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-        ctx.setLineDash([8, 8]);
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.setLineDash([10, 10]);
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(width / 2, 70);
-        ctx.lineTo(width / 2, height - 70);
+        ctx.moveTo(width / 2, 85);
+        ctx.lineTo(width / 2, height - 100);
         ctx.stroke();
         ctx.restore();
 
-        // Big Pizza on Left (cx = 300, cy = 260)
-        const pixR1 = (d1 / 18) * 180;
-        drawSinglePizza(ctx, 300, 260, pixR1, d1, '大披薩', '#f59e0b', true);
+        // Big Pizza on Left (cx = 390, cy = 350)
+        const pixR1 = (d1 / 18) * 230;
+        drawSinglePizza(ctx, 390, 350, pixR1, d1, '大披薩', '#f59e0b', true);
 
         // Big Pizza Title Badge
-        drawPillBadge(ctx, 300, 90, `🍕 1 個 ${d1} 吋大披薩`, 20, '#ffd166', 'rgba(251, 191, 36, 0.15)', '#f59e0b');
+        drawPillBadge(ctx, 390, 95, `🍕 1 個 ${d1} 吋大披薩`, 24, '#ffd166', 'rgba(251, 191, 36, 0.15)', '#f59e0b');
 
         // Big Pizza Formula Box
         ctx.save();
-        const fBoxW = 460;
-        const fBoxH = 100;
-        const fBoxX = 300 - fBoxW / 2;
-        const fBoxY = 465;
-        drawRoundRectPath(ctx, fBoxX, fBoxY, fBoxW, fBoxH, 12);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        const fBoxW = 620;
+        const fBoxH = 145;
+        const fBoxX = 390 - fBoxW / 2;
+        const fBoxY = 620;
+        drawRoundRectPath(ctx, fBoxX, fBoxY, fBoxW, fBoxH, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(`【大披薩面積計算】`, fBoxX + 16, fBoxY + 28);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '15px sans-serif';
-        ctx.fillText(`• 半徑 r = 直徑 ÷ 2 = ${d1} ÷ 2 = ${r1} 吋`, fBoxX + 16, fBoxY + 54);
-        ctx.fillText(`• 面積 = 半徑 × 半徑 × 3.14 = ${r1} × ${r1} × 3.14 = `, fBoxX + 16, fBoxY + 80);
+        ctx.fillText(`【大披薩面積計算】`, fBoxX + 24, fBoxY + 36);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`• 半徑 r = 直徑 ÷ 2 = ${d1} ÷ 2 = ${r1} 吋`, fBoxX + 24, fBoxY + 72);
+        ctx.fillText(`• 面積 = 半徑 × 半徑 × 3.14 = ${r1} × ${r1} × 3.14 = `, fBoxX + 24, fBoxY + 110);
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 17px sans-serif';
-        ctx.fillText(`${area1} 平方吋`, fBoxX + 355, fBoxY + 80);
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(`${area1} 平方吋`, fBoxX + 465, fBoxY + 110);
         ctx.restore();
 
-        // 2 Small Pizzas on Right (cx1 = 770, cx2 = 1050, cy = 260)
-        const pixR2 = (d2 / 18) * 130;
-        drawSinglePizza(ctx, 770, 260, pixR2, d2, '小披薩1', '#06b6d4', true);
-        drawSinglePizza(ctx, 1050, 260, pixR2, d2, '小披薩2', '#06b6d4', true);
+        // 2 Small Pizzas on Right (cx1 = 990, cx2 = 1390, cy = 350)
+        const pixR2 = (d2 / 18) * 165;
+        drawSinglePizza(ctx, 990, 350, pixR2, d2, '小披薩1', '#06b6d4', true);
+        drawSinglePizza(ctx, 1390, 350, pixR2, d2, '小披薩2', '#06b6d4', true);
 
         // Small Pizzas Title Badge
-        drawPillBadge(ctx, 910, 90, `🍕 2 個 ${d2} 吋小披薩（雙份滿足）`, 20, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
+        drawPillBadge(ctx, 1190, 95, `🍕 2 個 ${d2} 吋小披薩（雙份滿足）`, 24, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
 
         // Small Pizzas Formula Box
         ctx.save();
-        const sBoxW = 500;
-        const sBoxH = 100;
-        const sBoxX = 910 - sBoxW / 2;
-        const sBoxY = 465;
-        drawRoundRectPath(ctx, sBoxX, sBoxY, sBoxW, sBoxH, 12);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        const sBoxW = 660;
+        const sBoxH = 145;
+        const sBoxX = 1190 - sBoxW / 2;
+        const sBoxY = 620;
+        drawRoundRectPath(ctx, sBoxX, sBoxY, sBoxW, sBoxH, 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0, 196, 204, 0.5)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#00c4cc';
-        ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(`【2 個小披薩總面積計算】`, sBoxX + 16, sBoxY + 28);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '15px sans-serif';
-        ctx.fillText(`• 單個半徑 r = ${d2} ÷ 2 = ${r2} 吋`, sBoxX + 16, sBoxY + 54);
-        ctx.fillText(`• 單個面積 = ${r2} × ${r2} × 3.14 = ${(r2 * r2 * 3.14).toFixed(2)} 平方吋`, sBoxX + 16, sBoxY + 80);
+        ctx.fillText(`【2 個小披薩總面積計算】`, sBoxX + 24, sBoxY + 36);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`• 單個半徑 r = ${d2} ÷ 2 = ${r2} 吋`, sBoxX + 24, sBoxY + 72);
+        ctx.fillText(`• 單個面積 = ${r2} × ${r2} × 3.14 = ${(r2 * r2 * 3.14).toFixed(2)} 平方吋`, sBoxX + 24, sBoxY + 110);
         ctx.fillStyle = '#00c4cc';
-        ctx.font = 'bold 17px sans-serif';
-        ctx.fillText(`• 2 個總面積 = ${area2} 平方吋`, sBoxX + 270, sBoxY + 54);
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(`• 2 個總面積 = ${area2} 平方吋`, sBoxX + 355, sBoxY + 72);
         ctx.restore();
 
         // Center VS Badge
-        drawPillBadge(ctx, width / 2, 260, '⚡ VS ⚡', 20, '#ffd166', '#0f172a', '#ffd166');
+        drawPillBadge(ctx, width / 2, 350, '⚡ VS ⚡', 26, '#ffd166', '#0f172a', '#ffd166');
 
         // Bottom Conclusion Banner
         let conclusionText = '';
@@ -3614,7 +3612,7 @@
         } else {
           conclusionText = `⚖️ 驚人發現：兩者面積剛好完全相同！都是 ${area1} 平方吋！`;
         }
-        drawPillBadge(ctx, width / 2, 595, conclusionText, 16, '#cffafe', 'rgba(15, 23, 42, 0.95)', '#00c4cc');
+        drawPillBadge(ctx, width / 2, 810, conclusionText, 22, '#cffafe', 'rgba(15, 23, 42, 0.96)', '#00c4cc');
       }
     }
 
@@ -4482,7 +4480,7 @@
         // Small Card Geometry (280x220)
         drawQuizCardGeometry(ctx, width, height);
       } else {
-        // High-Definition Fullscreen Blackboard View (1280x660)
+        // High-Definition Fullscreen Blackboard View (Native 1600x900 Large Screen View)
         const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
         bgGrad.addColorStop(0, '#070b18');
         bgGrad.addColorStop(1, '#0f172a');
@@ -4490,81 +4488,86 @@
         ctx.fillRect(0, 0, width, height);
 
         // Top Banner Title
-        ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('🏆 題目實戰演練：全螢幕黑板講課模式（師生共構解題）', width / 2, 45);
-
-        // Left Side: Problem Card (x = 60 ~ 680)
-        const pX = 60;
-        const pW = 620;
         ctx.save();
-        drawRoundRectPath(ctx, pX, 85, pW, 490, 16);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(255, 209, 102, 0.4)';
+        ctx.shadowBlur = 10;
+        ctx.fillText('🏆 題目實戰演練：全螢幕黑板講課模式（師生共構解題）', width / 2, 52);
+        ctx.restore();
+
+        // Left Side: Problem Card (x = 70, w = 740, y = 95, h = 690)
+        const pX = 70;
+        const pW = 740;
+        const pH = 690;
+        ctx.save();
+        drawRoundRectPath(ctx, pX, 95, pW, pH, 20);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 196, 204, 0.4)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0, 196, 204, 0.5)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         // Level Pill
         const badgeEl = document.getElementById('qBadge');
         const badgeText = badgeEl ? badgeEl.textContent : `第 ${currentQuizLevel} 關`;
-        drawPillBadge(ctx, pX + 140, 122, badgeText, 15, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
+        drawPillBadge(ctx, pX + 180, 140, badgeText, 20, '#00c4cc', 'rgba(0, 196, 204, 0.15)', '#00c4cc');
 
         // Question Stem Text
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 21px sans-serif';
+        ctx.font = 'bold 24px sans-serif';
         ctx.textAlign = 'left';
         const rawStem = stripHtml(document.getElementById('questionStem').innerHTML);
-        let nextY = wrapCanvasText(ctx, rawStem, pX + 24, 165, pW - 48, 34);
+        let nextY = wrapCanvasText(ctx, rawStem, pX + 32, 195, pW - 64, 40);
 
         // If Hint is opened
         if (fsShowHint) {
           ctx.save();
-          drawRoundRectPath(ctx, pX + 20, nextY + 10, pW - 40, 100, 12);
-          ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+          drawRoundRectPath(ctx, pX + 24, nextY + 15, pW - 48, 130, 14);
+          ctx.fillStyle = 'rgba(6, 182, 212, 0.14)';
           ctx.fill();
           ctx.strokeStyle = '#00c4cc';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2;
           ctx.stroke();
 
           ctx.fillStyle = '#ffd166';
-          ctx.font = 'bold 15px sans-serif';
-          ctx.fillText('💡 思考提示：', pX + 34, nextY + 36);
+          ctx.font = 'bold 20px sans-serif';
+          ctx.fillText('💡 思考提示：', pX + 44, nextY + 50);
 
           ctx.fillStyle = '#cffafe';
-          ctx.font = '14.5px sans-serif';
+          ctx.font = '18px sans-serif';
           const rawHint = stripHtml(currentQ.hint);
-          wrapCanvasText(ctx, rawHint, pX + 34, nextY + 62, pW - 68, 24);
+          wrapCanvasText(ctx, rawHint, pX + 44, nextY + 84, pW - 88, 30);
           ctx.restore();
-          nextY += 120;
+          nextY += 155;
         }
 
         // If Solution is opened
         if (fsShowSolution) {
           ctx.save();
-          drawRoundRectPath(ctx, pX + 20, nextY + 10, pW - 40, 130, 12);
-          ctx.fillStyle = 'rgba(52, 211, 153, 0.12)';
+          drawRoundRectPath(ctx, pX + 24, nextY + 15, pW - 48, 175, 14);
+          ctx.fillStyle = 'rgba(52, 211, 153, 0.14)';
           ctx.fill();
           ctx.strokeStyle = '#10b981';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2;
           ctx.stroke();
 
           ctx.fillStyle = '#34d399';
-          ctx.font = 'bold 15px sans-serif';
-          ctx.fillText('👁️ 教師示範詳解步驟：', pX + 34, nextY + 36);
+          ctx.font = 'bold 20px sans-serif';
+          ctx.fillText('👁️ 教師示範詳解步驟：', pX + 44, nextY + 50);
 
-          ctx.fillStyle = '#e2e8f0';
-          ctx.font = '14.5px sans-serif';
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = '18px sans-serif';
           const rawSol = stripHtml(currentQ.solution);
-          wrapCanvasText(ctx, rawSol, pX + 34, nextY + 62, pW - 68, 24);
+          wrapCanvasText(ctx, rawSol, pX + 44, nextY + 84, pW - 88, 30);
           ctx.restore();
         }
         ctx.restore();
 
-        // Right Side: Giant Geometry Graphic (cx = 980, cy = 330)
-        const cx = 980;
-        const cy = 330;
+        // Right Side: Giant Geometry Graphic (cx = 1200, cy = 440)
+        const cx = 1200;
+        const cy = 440;
         drawQuizFullscreenGraphic(ctx, cx, cy);
       }
     }
@@ -4678,7 +4681,7 @@
     function drawQuizFullscreenGraphic(ctx, cx, cy) {
       ctx.save();
       if (currentQ.type === 'radius' || currentQ.type === 'diameter' || currentQ.type === 'circumference') {
-        const r = 180;
+        const r = 230;
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -4687,14 +4690,14 @@
         circleGrad.addColorStop(1, 'rgba(0, 196, 204, 0.12)');
         ctx.fillStyle = circleGrad;
         ctx.fill();
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.strokeStyle = '#00c4cc';
         ctx.stroke();
         ctx.restore();
 
         // Origin
         ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fillStyle = '#fff';
         ctx.fill();
 
@@ -4703,66 +4706,66 @@
           ctx.moveTo(cx, cy);
           ctx.lineTo(cx + r, cy);
           ctx.strokeStyle = '#ffd166';
-          ctx.lineWidth = 4.5;
+          ctx.lineWidth = 5;
           ctx.stroke();
 
-          drawPillBadge(ctx, cx + r / 2, cy - 22, `📏 半徑 r = ${currentQ.r} 公分`, 17, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
-          drawPillBadge(ctx, cx, cy + r + 35, '💡 公式：面積 = 半徑 × 半徑 × 3.14', 15, '#cffafe', 'rgba(15, 23, 42, 0.9)', '#00c4cc');
+          drawPillBadge(ctx, cx + r / 2, cy - 26, `📏 半徑 r = ${currentQ.r} 公分`, 22, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
+          drawPillBadge(ctx, cx, cy + r + 45, '💡 公式：面積 = 半徑 × 半徑 × 3.14', 20, '#cffafe', 'rgba(15, 23, 42, 0.92)', '#00c4cc');
         } else if (currentQ.type === 'diameter') {
           ctx.beginPath();
           ctx.moveTo(cx - r, cy);
           ctx.lineTo(cx + r, cy);
           ctx.strokeStyle = '#f43f5e';
-          ctx.lineWidth = 4.5;
+          ctx.lineWidth = 5;
           ctx.stroke();
 
-          drawPillBadge(ctx, cx, cy - 25, `📏 直徑 d = ${currentQ.d} 公尺`, 18, '#ff5757', 'rgba(15, 23, 42, 0.95)', '#ff5757');
-          drawPillBadge(ctx, cx, cy + r + 35, `⚠️ 防陷阱提示：半徑 = 直徑 ÷ 2 = ${currentQ.d} ÷ 2 = ${currentQ.r} 公尺`, 15, '#ffd166', 'rgba(15, 23, 42, 0.9)', '#ffd166');
+          drawPillBadge(ctx, cx, cy - 30, `📏 直徑 d = ${currentQ.d} 公尺`, 24, '#ff5757', 'rgba(15, 23, 42, 0.95)', '#ff5757');
+          drawPillBadge(ctx, cx, cy + r + 45, `⚠️ 防陷阱提示：半徑 = 直徑 ÷ 2 = ${currentQ.d} ÷ 2 = ${currentQ.r} 公尺`, 20, '#ffd166', 'rgba(15, 23, 42, 0.92)', '#ffd166');
         } else if (currentQ.type === 'circumference') {
           ctx.save();
-          ctx.setLineDash([8, 8]);
-          ctx.lineWidth = 3.5;
+          ctx.setLineDash([10, 10]);
+          ctx.lineWidth = 4;
           ctx.strokeStyle = '#38bdf8';
           ctx.stroke();
           ctx.restore();
 
-          drawPillBadge(ctx, cx, cy - 25, `📏 圓周長 C = ${currentQ.c} 公分`, 18, '#38bdf8', 'rgba(15, 23, 42, 0.95)', '#38bdf8');
-          drawPillBadge(ctx, cx, cy + r + 35, `💡 兩步驟思維：① 直徑 = ${currentQ.c} ÷ 3.14  →  ② 半徑 = 直徑 ÷ 2 = ${currentQ.r}`, 14.5, '#cffafe', 'rgba(15, 23, 42, 0.9)', '#38bdf8');
+          drawPillBadge(ctx, cx, cy - 30, `📏 圓周長 C = ${currentQ.c} 公分`, 24, '#38bdf8', 'rgba(15, 23, 42, 0.95)', '#38bdf8');
+          drawPillBadge(ctx, cx, cy + r + 45, `💡 兩步驟思維：① 直徑 = ${currentQ.c} ÷ 3.14  →  ② 半徑 = 直徑 ÷ 2 = ${currentQ.r}`, 19, '#cffafe', 'rgba(15, 23, 42, 0.92)', '#38bdf8');
         }
       } else if (currentQ.type === 'semicircle') {
-        const r = 185;
+        const r = 240;
         ctx.beginPath();
-        ctx.arc(cx, cy + 50, r, Math.PI, 0);
+        ctx.arc(cx, cy + 60, r, Math.PI, 0);
         ctx.closePath();
         ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
         ctx.fill();
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.strokeStyle = '#c084fc';
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(cx, cy + 50, 6, 0, Math.PI * 2);
+        ctx.arc(cx, cy + 60, 7, 0, Math.PI * 2);
         ctx.fillStyle = '#fff';
         ctx.fill();
 
         ctx.beginPath();
-        ctx.moveTo(cx, cy + 50);
-        ctx.lineTo(cx + r, cy + 50);
+        ctx.moveTo(cx, cy + 60);
+        ctx.lineTo(cx + r, cy + 60);
         ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
-        drawPillBadge(ctx, cx + r / 2, cy + 22, `📏 半徑 r = ${currentQ.r} 公分`, 17, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
-        drawPillBadge(ctx, cx, cy + 115, '💡 半圓面積 = (半徑 × 半徑 × 3.14) ÷ 2', 16, '#c084fc', 'rgba(15, 23, 42, 0.9)', '#c084fc');
+        drawPillBadge(ctx, cx + r / 2, cy + 30, `📏 半徑 r = ${currentQ.r} 公分`, 22, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#ffd166');
+        drawPillBadge(ctx, cx, cy + 140, '💡 半圓面積 = (半徑 × 半徑 × 3.14) ÷ 2', 20, '#c084fc', 'rgba(15, 23, 42, 0.92)', '#c084fc');
       } else if (currentQ.type === 'annulus') {
-        const r1 = 90;
-        const r2 = 185;
+        const r1 = 110;
+        const r2 = 240;
         ctx.beginPath();
         ctx.arc(cx, cy, r2, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
         ctx.fill();
         ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
         ctx.beginPath();
@@ -4770,15 +4773,15 @@
         ctx.fillStyle = '#070b18';
         ctx.fill();
         ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         ctx.stroke();
 
-        drawPillBadge(ctx, cx, cy, `內孔 r = 3 cm`, 15, '#94a3b8', 'rgba(15, 23, 42, 0.95)', '#64748b');
-        drawPillBadge(ctx, cx, cy - (r1 + r2) / 2, `外大圓 R = 5 cm`, 16, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
-        drawPillBadge(ctx, cx, cy + r2 + 35, '💡 圓環面積 = 外大圓面積 － 內小圓面積', 15.5, '#fef08a', 'rgba(15, 23, 42, 0.9)', '#f59e0b');
+        drawPillBadge(ctx, cx, cy, `內孔 r = 3 cm`, 20, '#94a3b8', 'rgba(15, 23, 42, 0.95)', '#64748b');
+        drawPillBadge(ctx, cx, cy - (r1 + r2) / 2, `外大圓 R = 5 cm`, 22, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
+        drawPillBadge(ctx, cx, cy + r2 + 45, '💡 圓環面積 = 外大圓面積 － 內小圓面積', 20, '#fef08a', 'rgba(15, 23, 42, 0.92)', '#f59e0b');
       } else if (currentQ.type === 'sector') {
         const isOver180 = currentQ.angle > 180;
-        const r = isOver180 ? 150 : 180;
+        const r = isOver180 ? 190 : 230;
         const startAngle = -Math.PI / 2;
         const endAngle = startAngle + (currentQ.angle * Math.PI) / 180;
         const midAngle = startAngle + (currentQ.angle * Math.PI) / 360;
@@ -4795,28 +4798,28 @@
         secGrad.addColorStop(1, 'rgba(217, 119, 6, 0.12)');
         ctx.fillStyle = secGrad;
         ctx.fill();
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.strokeStyle = '#ffd166';
         ctx.stroke();
 
         // Origin vertex dot
         ctx.beginPath();
-        ctx.arc(cx, cy, 6.5, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
 
         // Angle Arc at Vertex
         ctx.beginPath();
-        ctx.arc(cx, cy, 40, startAngle, endAngle);
+        ctx.arc(cx, cy, 50, startAngle, endAngle);
         ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         // Angle Badge
-        const angleBadgeDist = isOver180 ? 75 : 85;
+        const angleBadgeDist = isOver180 ? 95 : 110;
         const abX = cx + Math.cos(midAngle) * angleBadgeDist;
         const abY = cy + Math.sin(midAngle) * angleBadgeDist;
-        drawPillBadge(ctx, abX, abY, `圓心角 ${currentQ.angle}°（${currentQ.fractionText} 圓）`, 16, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
+        drawPillBadge(ctx, abX, abY, `圓心角 ${currentQ.angle}°（${currentQ.fractionText} 圓）`, 20, '#ffd166', 'rgba(15, 23, 42, 0.95)', '#f59e0b');
 
         // Radius Measurement on first radial edge (pointing straight up)
         const rx1 = cx + Math.cos(startAngle) * r;
@@ -4825,10 +4828,10 @@
         ctx.moveTo(cx, cy);
         ctx.lineTo(rx1, ry1);
         ctx.strokeStyle = '#00c4cc';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
-        drawPillBadge(ctx, cx - 85, (cy + ry1) / 2, `📏 半徑 r = ${currentQ.r} 公分`, 16, '#00c4cc', 'rgba(15, 23, 42, 0.95)', '#00c4cc');
+        drawPillBadge(ctx, cx - 110, (cy + ry1) / 2, `📏 半徑 r = ${currentQ.r} 公分`, 22, '#00c4cc', 'rgba(15, 23, 42, 0.95)', '#00c4cc');
 
         // Clock details if it's the clock problem
         if (currentQ.subType === 'clock150') {
@@ -4836,18 +4839,18 @@
           ctx.beginPath();
           ctx.arc(cx, cy, r, 0, Math.PI * 2);
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-          ctx.setLineDash([6, 6]);
-          ctx.lineWidth = 2;
+          ctx.setLineDash([8, 8]);
+          ctx.lineWidth = 2.5;
           ctx.stroke();
 
           // 12 hour ticks
           for (let h = 0; h < 12; h++) {
             const hAng = (h * Math.PI * 2) / 12 - Math.PI / 2;
             ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(hAng) * (r - 12), cy + Math.sin(hAng) * (r - 12));
+            ctx.moveTo(cx + Math.cos(hAng) * (r - 16), cy + Math.sin(hAng) * (r - 16));
             ctx.lineTo(cx + Math.cos(hAng) * r, cy + Math.sin(hAng) * r);
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 3;
             ctx.stroke();
           }
 
@@ -4857,23 +4860,23 @@
           ctx.moveTo(cx, cy);
           ctx.lineTo(cx + Math.cos(hourAng) * (r * 0.55), cy + Math.sin(hourAng) * (r * 0.55));
           ctx.strokeStyle = '#f43f5e';
-          ctx.lineWidth = 5;
+          ctx.lineWidth = 6;
           ctx.stroke();
-          drawPillBadge(ctx, cx + Math.cos(hourAng) * (r * 0.35) - 35, cy + Math.sin(hourAng) * (r * 0.35), '時針(8cm)', 12, '#ff5757');
+          drawPillBadge(ctx, cx + Math.cos(hourAng) * (r * 0.35) - 40, cy + Math.sin(hourAng) * (r * 0.35), '時針(8cm)', 16, '#ff5757');
 
           // Minute Hand at 12 initially, and at 5 (25 min, angle 150°)
           ctx.beginPath();
           ctx.moveTo(cx, cy);
           ctx.lineTo(cx + Math.cos(endAngle) * r, cy + Math.sin(endAngle) * r);
           ctx.strokeStyle = '#00c4cc';
-          ctx.lineWidth = 4;
+          ctx.lineWidth = 5;
           ctx.stroke();
-          drawPillBadge(ctx, cx + Math.cos(endAngle) * (r * 0.7) + 45, cy + Math.sin(endAngle) * (r * 0.7), '分針(12cm)', 12, '#00c4cc');
+          drawPillBadge(ctx, cx + Math.cos(endAngle) * (r * 0.7) + 55, cy + Math.sin(endAngle) * (r * 0.7), '分針(12cm)', 16, '#00c4cc');
           ctx.restore();
         }
 
         // Bottom formula guide pill
-        drawPillBadge(ctx, cx, cy + r + 38, `💡 康軒公式：扇形面積 = 半徑 × 半徑 × 3.14 × (${currentQ.angle}° ÷ 360°)`, 15.5, '#fef08a', 'rgba(15, 23, 42, 0.9)', '#ffd166');
+        drawPillBadge(ctx, cx, cy + r + 45, `💡 康軒公式：扇形面積 = 半徑 × 半徑 × 3.14 × (${currentQ.angle}° ÷ 360°)`, 20, '#fef08a', 'rgba(15, 23, 42, 0.92)', '#ffd166');
         ctx.restore();
       }
       ctx.restore();
