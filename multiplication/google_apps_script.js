@@ -57,7 +57,9 @@ function doGet(e) {
       var accuracy = Number(row[6]) || 0;
       var mathMode = String(row[7] || '填空模式').trim();
       var destroyed = Number(row[8]) || 0;
-      var pPlayer = String(row[9] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+      var pPlayer = (pClass && pSeat)
+        ? (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))
+        : String(row[9] || '未知防衛官').trim();
 
       var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || 'player');
 

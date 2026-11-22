@@ -1661,7 +1661,9 @@
       var accuracy = Number(row[6]) || 0;
       var mathMode = String(row[7] || '填空模式').trim();
       var destroyed = Number(row[8]) || 0;
-      var pPlayer = String(row[9] || (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))).trim();
+      var pPlayer = (pClass && pSeat)
+        ? (pClass + '班 ' + pSeat + '號' + (pName ? ' (' + pName + ')' : ''))
+        : String(row[9] || '未知防衛官').trim();
 
       var uniqueKey = (pClass && pSeat) ? (pClass + '_' + pSeat) : (pPlayer || 'player');
 
@@ -2141,9 +2143,13 @@ function createJsonResponse(obj) {
         ? `<span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(0, 243, 255, 0.15); color: #00f3ff;">${escapeHtml(item.mathMode)}</span>`
         : `<span style="font-size: 11px; color: #888;">--</span>`;
 
+      const displayPlayer = (item.class && item.seat)
+        ? `${item.class}班 ${item.seat}號${item.name ? ` (${item.name})` : ''}`
+        : (item.player || '未知防衛官');
+
       tr.innerHTML = `
         <td>${rankHtml}</td>
-        <td class="lb-player-tag">${escapeHtml(item.player)}</td>
+        <td class="lb-player-tag">${escapeHtml(displayPlayer)}</td>
         <td>${mathModeBadge}</td>
         <td class="lb-score-tag">${Number(item.score).toLocaleString()}</td>
         <td style="color: #ffe600; font-weight: bold;">x${item.combo}</td>
