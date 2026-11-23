@@ -11,12 +11,9 @@ import {
   Flame,
   ArrowRight,
   SplitSquareVertical,
-  Maximize2,
-  AlertTriangle,
   Lightbulb,
   Download,
   FileText,
-  Eye,
   Camera
 } from 'lucide-react';
 
@@ -193,13 +190,28 @@ export default function ReportSection({
           </div>
 
           <div className="text-right sm:self-center shrink-0">
-            <div className="text-xs text-slate-400 mb-0.5">指定修辭達成率</div>
-            <div className="text-3xl font-black text-indigo-600">
-              {rhetoric_diagnosis.achievement_rate || `${Math.round((rhetoric_diagnosis.achieved_count / rhetoric_diagnosis.total_target_count) * 100)}%`}
-            </div>
-            <div className="text-xs text-slate-500 font-medium">
-              達成 {rhetoric_diagnosis.achieved_count} / {rhetoric_diagnosis.total_target_count} 項
-            </div>
+            {(rhetoric_diagnosis?.total_target_count || 0) > 0 ? (
+              <>
+                <div className="text-xs text-slate-400 mb-0.5">指定修辭達成率</div>
+                <div className="text-3xl font-black text-indigo-600">
+                  {rhetoric_diagnosis.achievement_rate ||
+                    `${Math.round(((rhetoric_diagnosis.achieved_count || 0) / rhetoric_diagnosis.total_target_count) * 100)}%`}
+                </div>
+                <div className="text-xs text-slate-500 font-medium">
+                  達成 {rhetoric_diagnosis.achieved_count || 0} / {rhetoric_diagnosis.total_target_count} 項
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-xs text-slate-400 mb-0.5">文章修辭檢測</div>
+                <div className="text-xl sm:text-2xl font-black text-indigo-600">自由發揮</div>
+                <div className="text-xs text-slate-500 font-medium">
+                  {(rhetoric_diagnosis?.details?.length || 0) > 0
+                    ? `發現 ${rhetoric_diagnosis.details.filter((d) => d.detected).length} 項亮點`
+                    : '未指定必備修辭'}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -625,64 +637,82 @@ export default function ReportSection({
       {/* Tab 3: 指定修辭達成追蹤 */}
       {activeTab === 'rhetoric' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 gap-3 flex-wrap">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">指定修辭技巧達成清單</h3>
+              <h3 className="text-lg font-bold text-slate-900">
+                {(rhetoric_diagnosis?.total_target_count || 0) > 0
+                  ? '指定修辭技巧達成清單'
+                  : '文章自然修辭亮點檢視（未指定必備修辭）'}
+              </h3>
               <p className="text-sm text-slate-500 mt-0.5">
-                比對老師所指定的修辭項目，驗證學生是否實際運用於作文情境中。
+                {(rhetoric_diagnosis?.total_target_count || 0) > 0
+                  ? '比對老師所指定的修辭項目，驗證學生是否實際運用於作文情境中。'
+                  : '本次未指定必備修辭，系統為您標記文章中自然展現的文采亮點（不影響會考級分判定）。'}
               </p>
             </div>
             <div className="text-right">
               <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-3.5 py-1 rounded-full border border-indigo-200">
-                達成率 {rhetoric_diagnosis.achievement_rate}
+                {(rhetoric_diagnosis?.total_target_count || 0) > 0
+                  ? `達成率 ${rhetoric_diagnosis.achievement_rate || '0%'}`
+                  : '自由發揮模式'}
               </span>
             </div>
           </div>
 
-          <div className="space-y-3.5">
-            {rhetoric_diagnosis.details?.map((item, idx) => (
-              <div
-                key={idx}
-                className={`p-5 rounded-2xl border transition-all ${
-                  item.detected
-                    ? 'bg-emerald-50/40 border-emerald-200'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-2.5">
-                    {item.detected ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-slate-400" />
-                    )}
-                    <h4 className="font-bold text-base text-slate-900">{item.name}</h4>
+          {rhetoric_diagnosis?.details?.length > 0 ? (
+            <div className="space-y-3.5">
+              {rhetoric_diagnosis.details.map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`p-5 rounded-2xl border transition-all ${
+                    item.detected
+                      ? 'bg-emerald-50/40 border-emerald-200'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2.5">
+                      {item.detected ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-slate-400" />
+                      )}
+                      <h4 className="font-bold text-base text-slate-900">{item.name}</h4>
+                    </div>
+                    <span
+                      className={`text-xs sm:text-sm px-3 py-0.5 rounded-full font-bold ${
+                        item.detected
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {item.detected
+                        ? (rhetoric_diagnosis?.total_target_count || 0) > 0
+                          ? '已達成'
+                          : '文采亮點'
+                        : '未發現使用'}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs sm:text-sm px-3 py-0.5 rounded-full font-bold ${
-                      item.detected
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-200 text-slate-600'
-                    }`}
-                  >
-                    {item.detected ? '已達成' : '未發現使用'}
-                  </span>
+
+                  {item.detected && item.sample_sentence && (
+                    <div className="mb-2.5 p-3 rounded-xl bg-white border border-emerald-200/70 text-sm text-slate-800 font-sans leading-relaxed">
+                      <strong className="text-emerald-700 mr-2">【原文摘錄】</strong>
+                      {item.sample_sentence}
+                    </div>
+                  )}
+
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    <strong className="text-slate-800 mr-1.5">評語建議：</strong>
+                    {item.evaluation}
+                  </p>
                 </div>
-
-                {item.detected && item.sample_sentence && (
-                  <div className="mb-2.5 p-3 rounded-xl bg-white border border-emerald-200/70 text-sm text-slate-800 font-sans leading-relaxed">
-                    <strong className="text-emerald-700 mr-2">【原文摘錄】</strong>
-                    {item.sample_sentence}
-                  </div>
-                )}
-
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  <strong className="text-slate-800 mr-1.5">評語建議：</strong>
-                  {item.evaluation}
-                </p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-center text-sm text-slate-600">
+              本次評改未指定特定必備修辭，請參閱「四向度深度診斷」與「六級分示範範文」中的遣詞與修辭精進建議。
+            </div>
+          )}
         </div>
       )}
 

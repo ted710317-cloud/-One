@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Settings, FileText, Download, BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
+import { Sparkles, Settings, Download, BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function Header({
   onOpenSettings,

@@ -1,30 +1,28 @@
 import React, { useState } from 'react';
 import {
-  PenTool,
-  Sliders,
   Type,
   Camera,
-  FileText,
   Sparkles,
   RotateCcw,
   Upload,
   X,
   CheckSquare,
   Square,
-  BookOpen,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { AVAILABLE_RHETORICS, AVAILABLE_GENRES, WORD_COUNT_PRESETS } from '../constants/presets';
 import { optimizeManuscriptImage } from '../utils/imageOptimizer';
 
 export default function InputSection({
+  inputMode = 'text',
+  setInputMode,
   title,
   setTitle,
   promptGuide,
   setPromptGuide,
   targetPreset,
   setTargetPreset,
-  customWordCount,
   setCustomWordCount,
   selectedGenre,
   setSelectedGenre,
@@ -32,18 +30,16 @@ export default function InputSection({
   setSelectedRhetorics,
   content,
   setContent,
-  imageFile,
   setImageFile,
   imageBase64,
   setImageBase64,
   onGrade,
   isLoading,
-  onLoadDemo,
 }) {
-  const [inputMode, setInputMode] = useState('text'); // 'text' | 'image'
   const [showGuideInput, setShowGuideInput] = useState(false);
   const [isOptimizingImage, setIsOptimizingImage] = useState(false);
   const [imageMeta, setImageMeta] = useState(null);
+  const [imageError, setImageError] = useState('');
 
   // Calculate live word count (excluding whitespace)
   const currentWordCount = content.replace(/\s+/g, '').length;
@@ -66,8 +62,10 @@ export default function InputSection({
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
+    setImageError('');
     setIsOptimizingImage(true);
     try {
       const optimized = await optimizeManuscriptImage(file, 2048, 0.92);
@@ -80,14 +78,25 @@ export default function InputSection({
         originalSizeKb: optimized.originalSizeKb,
       });
     } catch (err) {
-      console.warn('圖片優化失敗，採用原始讀取方式:', err);
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result.split(',')[1];
-        setImageBase64(base64);
-      };
-      reader.readAsDataURL(file);
+      console.warn('圖片優化失敗:', err);
+      // 若檔案本身為 JPG/PNG 且小於 3MB，仍嘗試原始讀取；若為不支援格式（如未轉檔之 HEIC）或過大則提示使用者
+      const isStandardWebImage = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+      if (isStandardWebImage && file.size <= 3 * 1024 * 1024) {
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          setImageBase64(base64);
+          setImageMeta(null);
+        };
+        reader.onerror = () => setImageError('讀取圖片失敗，請重新選擇照片。');
+        reader.readAsDataURL(file);
+      } else {
+        setImageFile(null);
+        setImageBase64(null);
+        setImageMeta(null);
+        setImageError(err.message || '無法讀取此圖片格式或檔案過大，請使用 JPG / PNG 照片。');
+      }
     } finally {
       setIsOptimizingImage(false);
     }
@@ -97,14 +106,20 @@ export default function InputSection({
     setImageFile(null);
     setImageBase64(null);
     setImageMeta(null);
+    setImageError('');
   };
+
+  const isSubmitDisabled =
+    isLoading ||
+    isOptimizingImage ||
+    (inputMode === 'text' ? !content.trim() : !imageBase64);
 
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-slate-200/80 space-y-6">
       {/* Step 1: 題目與引導 */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
-          <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
+          <label htmlFor="essay-title" className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
             作文題目與寫作引導
           </label>
@@ -117,6 +132,8 @@ export default function InputSection({
           </button>
         </div>
         <input
+          id="essay-title"
+          name="essayTitle"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -127,6 +144,9 @@ export default function InputSection({
         {showGuideInput && (
           <div className="mt-2.5 animate-in fade-in duration-150">
             <textarea
+              id="essay-guide"
+              name="essayGuide"
+              aria-label="寫作引導說明"
               value={promptGuide}
               onChange={(e) => setPromptGuide(e.target.value)}
               placeholder="老師的出題引導（例如：請融入五感觀察校園角落，寫出對該角落的記憶與深層情感...）"
@@ -264,7 +284,7 @@ export default function InputSection({
       {/* Step 5: 作文輸入區 */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
-          <label className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
+          <label htmlFor="essay-content" className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-800">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
             作文內容輸入
           </label>
@@ -299,6 +319,8 @@ export default function InputSection({
         {inputMode === 'text' ? (
           <div className="relative">
             <textarea
+              id="essay-content"
+              name="essayContent"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="請將學生作文貼在此處，段落前空兩格佳..."
@@ -323,6 +345,12 @@ export default function InputSection({
           </div>
         ) : (
           <div className="space-y-3">
+            {imageError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                <span>{imageError}</span>
+              </div>
+            )}
             {isOptimizingImage ? (
               <div className="border-2 border-dashed border-indigo-300 bg-indigo-50/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center animate-pulse">
                 <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
@@ -384,9 +412,9 @@ export default function InputSection({
         <button
           type="button"
           onClick={onGrade}
-          disabled={isLoading || (!content.trim() && !imageBase64)}
+          disabled={isSubmitDisabled}
           className={`w-full py-4 px-6 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer ${
-            isLoading || (!content.trim() && !imageBase64)
+            isSubmitDisabled
               ? 'bg-slate-300 shadow-none cursor-not-allowed text-slate-500'
               : 'bg-gradient-to-r from-indigo-600 via-indigo-700 to-amber-500 hover:opacity-95 shadow-indigo-200 active:scale-98'
           }`}

@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-export default function PrintReport({ result, originalContent }) {
+export default function PrintReport({ result }) {
+  const [evalDate] = useState(() => new Date().toLocaleDateString('zh-TW'));
+
   if (!result) return null;
 
-  const { meta, overall, four_dimensions, rhetoric_diagnosis, interactive_learning, level_6_model_essay } = result;
+  const {
+    meta = {},
+    overall = {},
+    four_dimensions = {},
+    rhetoric_diagnosis = {},
+    interactive_learning,
+    level_6_model_essay,
+  } = result;
+
+  const hasTargetRhetorics = (rhetoric_diagnosis?.total_target_count || 0) > 0;
+  const themeDim = four_dimensions.theme_and_materials || {};
+  const structDim = four_dimensions.structure_and_organization || {};
+  const vocabDim = four_dimensions.vocabulary_and_sentences || {};
+  const orthoDim = four_dimensions.orthography_and_punctuation || {};
 
   return (
     <div
@@ -56,7 +71,7 @@ export default function PrintReport({ result, originalContent }) {
                 A4 寫作診斷報告書：{meta.title}
               </h1>
               <div style={{ fontSize: '11px', color: '#64748b' }}>
-                評估日期：{new Date().toLocaleDateString('zh-TW')} · 四向度全面診斷與修辭達成追蹤
+                評估日期：{evalDate} · 四向度全面診斷與修辭達成追蹤
               </div>
             </div>
 
@@ -92,7 +107,12 @@ export default function PrintReport({ result, originalContent }) {
             <div><strong>實際字數：</strong>{meta.actual_word_count} 字（目標：{meta.target_word_count}）</div>
             <div><strong>文體規範：</strong>{meta.genre || '不限文體'}</div>
             <div><strong>字數判定：</strong>{meta.word_count_status}</div>
-            <div><strong>修辭達成率：</strong>{rhetoric_diagnosis.achieved_count}/{rhetoric_diagnosis.total_target_count} 項（{rhetoric_diagnosis.achievement_rate}）</div>
+            <div>
+              <strong>修辭檢測：</strong>
+              {hasTargetRhetorics
+                ? `${rhetoric_diagnosis.achieved_count || 0}/${rhetoric_diagnosis.total_target_count} 項（${rhetoric_diagnosis.achievement_rate}）`
+                : '未指定（自由發揮）'}
+            </div>
           </div>
 
           {/* 閱卷導師綜合短評 */}
@@ -113,32 +133,32 @@ export default function PrintReport({ result, originalContent }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px' }}>
               <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                 <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>【一、立意取材】</strong>
-                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{four_dimensions.theme_and_materials.highlights}</p>
-                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{four_dimensions.theme_and_materials.suggestions}</p>
+                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{themeDim.highlights}</p>
+                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{themeDim.suggestions}</p>
               </div>
 
               <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                 <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>【二、結構組織】</strong>
-                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{four_dimensions.structure_and_organization.highlights}</p>
-                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{four_dimensions.structure_and_organization.suggestions}</p>
+                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{structDim.highlights}</p>
+                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{structDim.suggestions}</p>
               </div>
 
               <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                 <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>【三、遣詞造句】</strong>
-                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{four_dimensions.vocabulary_and_sentences.highlights}</p>
-                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{four_dimensions.vocabulary_and_sentences.suggestions}</p>
+                <p style={{ margin: '0 0 3px 0' }}><span style={{ fontWeight: 'bold', color: '#065f46' }}>亮點：</span>{vocabDim.highlights}</p>
+                <p style={{ margin: 0 }}><span style={{ fontWeight: 'bold', color: '#4338ca' }}>建議：</span>{vocabDim.suggestions}</p>
               </div>
 
               <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                 <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>【四、錯別字與標點診療】</strong>
-                {four_dimensions.orthography_and_punctuation.punctuation_comment && (
+                {orthoDim.punctuation_comment && (
                   <div style={{ color: '#64748b', fontSize: '9.5px', marginBottom: '4px', lineHeight: '1.3' }}>
-                    標點指引：{four_dimensions.orthography_and_punctuation.punctuation_comment}
+                    標點指引：{orthoDim.punctuation_comment}
                   </div>
                 )}
-                {four_dimensions.orthography_and_punctuation.typo_corrections?.length > 0 ? (
+                {orthoDim.typo_corrections?.length > 0 ? (
                   <ul style={{ margin: 0, paddingLeft: '14px' }}>
-                    {four_dimensions.orthography_and_punctuation.typo_corrections.slice(0, 4).map((t, idx) => (
+                    {orthoDim.typo_corrections.slice(0, 4).map((t, idx) => (
                       <li key={idx} style={{ marginBottom: '3px', fontSize: '10px', lineHeight: '1.35' }}>
                         {t.context && (
                           <span style={{ color: '#475569', fontSize: '9px', display: 'block' }}>
@@ -160,35 +180,41 @@ export default function PrintReport({ result, originalContent }) {
           {/* 指定修辭技巧達成狀況 (2 Column Grid) */}
           <div style={{ marginBottom: '12px' }}>
             <h2 style={{ fontSize: '12px', fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '3px 10px', borderRadius: '3px', marginBottom: '6px', color: '#1e293b' }}>
-              🎨 指定修辭技巧達成清單
+              🎨 {hasTargetRhetorics ? '指定修辭技巧達成清單' : '文章修辭亮點檢視（未指定必備修辭）'}
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
-              {rhetoric_diagnosis.details?.map((item, idx) => (
-                <div key={idx} style={{ padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: '4px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px', backgroundColor: '#ffffff' }}>
-                  <div>
-                    <strong>{item.name}：</strong>
-                    {item.detected ? (
-                      <span>已達成。{item.sample_sentence && `「${item.sample_sentence.slice(0, 28)}...」`}</span>
-                    ) : (
-                      <span style={{ color: '#64748b' }}>未達成。{item.evaluation.slice(0, 30)}...</span>
-                    )}
+            {rhetoric_diagnosis?.details?.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
+                {rhetoric_diagnosis.details.map((item, idx) => (
+                  <div key={idx} style={{ padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: '4px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px', backgroundColor: '#ffffff' }}>
+                    <div>
+                      <strong>{item.name}：</strong>
+                      {item.detected ? (
+                        <span>已達成。{item.sample_sentence && `「${item.sample_sentence.slice(0, 28)}...」`}</span>
+                      ) : (
+                        <span style={{ color: '#64748b' }}>未達成。{(item.evaluation || '').slice(0, 30)}...</span>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        padding: '1px 5px',
+                        borderRadius: '3px',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        flexShrink: 0,
+                        backgroundColor: item.detected ? '#d1fae5' : '#e2e8f0',
+                        color: item.detected ? '#065f46' : '#475569',
+                      }}
+                    >
+                      {item.detected ? (hasTargetRhetorics ? '達成' : '亮點') : '未達'}
+                    </span>
                   </div>
-                  <span
-                    style={{
-                      padding: '1px 5px',
-                      borderRadius: '3px',
-                      fontSize: '10px',
-                      fontWeight: 'bold',
-                      flexShrink: 0,
-                      backgroundColor: item.detected ? '#d1fae5' : '#e2e8f0',
-                      color: item.detected ? '#065f46' : '#475569',
-                    }}
-                  >
-                    {item.detected ? '達成' : '未達'}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#ffffff', fontSize: '11px', color: '#475569' }}>
+                本次未勾選指定必備修辭，系統已依據整體文章立意、結構與文采自然度進行會考規準評定。
+              </div>
+            )}
           </div>
 
           {/* 句子升級魔法 */}

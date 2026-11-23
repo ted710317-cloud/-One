@@ -50,10 +50,17 @@ export async function optimizeManuscriptImage(file, maxDimension = 2048, quality
         // 繪製原圖（現代瀏覽器自動校正 EXIF 旋轉）
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 轉為高品質 JPEG 格式
+        // 轉為高品質 JPEG 格式；若接近 Vercel 4.5MB 限制則自動調降品質以確保傳輸穩定
         const mimeType = 'image/jpeg';
-        const dataUrl = canvas.toDataURL(mimeType, quality);
-        const base64 = dataUrl.split(',')[1];
+        let activeQuality = quality;
+        let dataUrl = canvas.toDataURL(mimeType, activeQuality);
+        let base64 = dataUrl.split(',')[1];
+
+        if (base64.length > 3_200_000) {
+          activeQuality = 0.78;
+          dataUrl = canvas.toDataURL(mimeType, activeQuality);
+          base64 = dataUrl.split(',')[1];
+        }
 
         resolve({
           base64,

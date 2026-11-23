@@ -1,7 +1,8 @@
 import { SAMPLE_ESSAY_BASKETBALL } from '../constants/presets';
+import { normalizeEvaluationResult } from '../utils/normalizeResult';
 
 /**
- * 檢查後端伺服器是否已內建 Gemini API Key 與使用人次
+ * 檢查後端伺服器是否已內建 Gemini API Key
  */
 export async function checkServerStatus() {
   try {
@@ -12,36 +13,7 @@ export async function checkServerStatus() {
   } catch (err) {
     console.warn('無法連線至後端 /api/status，將切換為純前端模式:', err);
   }
-  return { hasServerKey: false, usageCount: null, model: 'gemini-flash-lite-latest', maxPerHour: 60 };
-}
-
-/**
- * 取得與增加全域使用人次
- */
-export async function fetchUsageCount() {
-  try {
-    const res = await fetch(`/api/counter?_t=${Date.now()}`);
-    if (res.ok) {
-      const data = await res.json();
-      return data.value;
-    }
-  } catch (e) {
-    // fallback
-  }
-  return null;
-}
-
-export async function incrementUsageCount() {
-  try {
-    const res = await fetch(`/api/counter?_t=${Date.now()}`, { method: 'POST' });
-    if (res.ok) {
-      const data = await res.json();
-      return data.value;
-    }
-  } catch (e) {
-    // fallback
-  }
-  return null;
+  return { hasServerKey: false, model: 'gemini-flash-lite-latest', maxPerHour: 60 };
 }
 
 /**
@@ -50,7 +22,7 @@ export async function incrementUsageCount() {
  */
 export async function gradeEssay({
   apiKey = '',
-  model = 'gemini-2.5-flash',
+  model = 'gemini-flash-lite-latest',
   title,
   promptGuide,
   targetWordCount,
@@ -93,14 +65,28 @@ export async function gradeEssay({
 
     if (res.ok) {
       const data = await res.json();
-      return data;
+      return normalizeEvaluationResult(data, {
+        title,
+        genre,
+        targetWordCount,
+        selectedRhetorics,
+        content,
+        imageBase64,
+      });
     }
 
-    // 若後端回傳 500 等錯誤且包含訊息
+    // 處理各種非 2xx 回應，確保絕不靜默回傳 undefined
     const errJson = await res.json().catch(() => ({}));
     if (errJson.error) {
       throw new Error(errJson.error);
     }
+    if (res.status === 413) {
+      throw new Error('上傳的作文照片檔案過大，請重新拍照或縮小圖片後再試。');
+    }
+    if (res.status === 504 || res.status === 502) {
+      throw new Error('AI 伺服器處理時間過長（連線逾時），請稍後再試一次。');
+    }
+    throw new Error(`評改請求失敗 (HTTP ${res.status})，請稍後再試。`);
   } catch (err) {
     // 若為 Rate Limit 錯誤直接往外拋，不嘗試重送
     if (err.message && err.message.includes('上限')) {
@@ -204,7 +190,7 @@ async function directClientGrade({
 【題目引導與說明】：${promptGuide || '無特殊引導說明'}
 【目標字數要求】：${targetWordCount || '未限定字數'}
 【文體規範限定】：${genre ? genre + '（學生作答需符合該文體之文體特質與寫作規範，例如書信需具備稱呼/正文/祝詞/署名/日期等格式要件，讀書報告需包含內容大意與個人心得反思，說明文需客觀條理清晰，議論文需具備論點/論據/論證，記敘文需具備人事時地物完整脈絡。請在結構組織向度中專題評核文體規範之達成度）' : '未指定特殊文體（不限文體，請尊重學生自然呈現之寫作體裁）'}
-【指定檢測之修辭輔助參考（僅供教學診斷與課堂回饋，絕不可作為會考總級分之扣分理由！會考評定核心為立意深淺、架構組織與文字張力）】：${selectedRhetorics.length > 0 ? selectedRhetorics.join('、') : '無指定修辭'}
+【指定檢測之修辭輔助參考（僅供教學診斷與課堂回饋，絕不可作為會考總級分之扣分理由！會考評定核心為立意深淺、架構組織與文字張力）】：${selectedRhetorics.length > 0 ? selectedRhetorics.join('、') : '無指定必備修辭（請將 rhetoric_diagnosis.total_target_count 設為 0、achieved_count 設為 0、target_rhetorics 設為 []、achievement_rate 設為 "未指定"，並在 details 中僅主動摘錄文章已展現的 1~3 項亮點修辭，detected 皆設為 true）'}
 【學生文章內容】：${imageBase64 ? '（請先對手寫作文圖片進行繁體中文 OCR 逐字辨識再批改）' : content}
 
 請回傳純 JSON 格式報告。
@@ -237,14 +223,18 @@ async function directClientGrade({
 
   const result = await response.json();
   const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!rawText) {
+    throw new Error('AI 未回傳評改內容，請稍後重試。');
+  }
   const cleanedJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
   const parsed = JSON.parse(cleanedJson);
 
-  // 純前端評閱成功：背景非同步通知計數器加 1
-  try {
-    const newCount = await incrementUsageCount();
-    if (newCount) parsed.usageCount = newCount;
-  } catch {}
-
-  return parsed;
+  return normalizeEvaluationResult(parsed, {
+    title,
+    genre,
+    targetWordCount,
+    selectedRhetorics,
+    content,
+    imageBase64,
+  });
 }

@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MAX_PER_HOUR = parseInt(process.env.RATE_LIMIT_PER_HOUR || '8', 10);
+const MAX_PER_HOUR = parseInt(process.env.RATE_LIMIT_PER_HOUR || '60', 10);
 
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
@@ -23,7 +23,7 @@ app.get('/api/status', (req, res) => {
   res.json({
     status: 'ok',
     hasServerKey,
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-flash-lite-latest',
     maxPerHour: MAX_PER_HOUR,
     message: hasServerKey ? '伺服器內建 AI 已就緒，學生可免 Key 直接評改' : '伺服器未設定 Key，需手動設定',
   });

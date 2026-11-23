@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { AlertCircle, X, ShieldCheck } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import Header from './components/Header';
 import SettingsModal from './components/SettingsModal';
 import InputSection from './components/InputSection';
@@ -11,12 +11,25 @@ import { gradeEssay, checkServerStatus } from './services/gemini';
 import { exportReportToPdf } from './utils/pdfExport';
 
 export default function App() {
-  const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('gemini-flash-lite-latest');
+  const [apiKey, setApiKey] = useState(() => {
+    try {
+      return localStorage.getItem('GEMINI_API_KEY') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [model, setModel] = useState(() => {
+    try {
+      return localStorage.getItem('GEMINI_MODEL') || 'gemini-flash-lite-latest';
+    } catch {
+      return 'gemini-flash-lite-latest';
+    }
+  });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasServerKey, setHasServerKey] = useState(false);
 
   // Input states: 預設為乾淨空白，方便使用者直接貼上文章，無須先手動刪除範例文字
+  const [inputMode, setInputMode] = useState('text'); // 'text' | 'image'
   const [title, setTitle] = useState('');
   const [promptGuide, setPromptGuide] = useState('');
   const [targetPreset, setTargetPreset] = useState('primary-high');
@@ -36,41 +49,17 @@ export default function App() {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [pdfProgressMsg, setPdfProgressMsg] = useState('');
 
-  // Usage count state: 記錄系統累計評閱人次（學生貼上作文評改即加 1）
-  const [usageCount, setUsageCount] = useState(() => {
-    try {
-      const saved = localStorage.getItem('WEIZHEN_USAGE_COUNT');
-      return saved ? parseInt(saved, 10) : 11;
-    } catch {
-      return 11;
-    }
-  });
-
-  // Load API key from localStorage and check backend status on mount
+  // Check backend status on mount
   useEffect(() => {
-    const savedKey = localStorage.getItem('GEMINI_API_KEY');
-    if (savedKey) setApiKey(savedKey);
-    const savedModel = localStorage.getItem('GEMINI_MODEL');
-    if (savedModel) setModel(savedModel);
-
-    // Check server status
     checkServerStatus().then((status) => {
       setHasServerKey(Boolean(status?.hasServerKey));
       if (status?.model) setModel(status.model);
-      if (typeof status?.usageCount === 'number' && status.usageCount > 0) {
-        setUsageCount((prev) => {
-          const next = Math.max(prev || 0, status.usageCount);
-          try {
-            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
-          } catch {}
-          return next;
-        });
-      }
     });
   }, []);
 
   // 點擊「體驗示範資料」時才載入範例文章
   const handleLoadDemo = () => {
+    setInputMode('text');
     setTitle(SAMPLE_ESSAY_BASKETBALL.title);
     setPromptGuide(SAMPLE_ESSAY_BASKETBALL.promptGuide);
     setTargetPreset(SAMPLE_ESSAY_BASKETBALL.presetId);
@@ -92,8 +81,15 @@ export default function App() {
   };
 
   const handleGrade = async () => {
-    if (!content.trim() && !imageBase64) {
-      setErrorMessage('請先輸入學生作文內容或上傳作文照片。');
+    const activeContent = inputMode === 'text' ? content : '';
+    const activeImageBase64 = inputMode === 'image' ? imageBase64 : null;
+
+    if (!activeContent.trim() && !activeImageBase64) {
+      setErrorMessage(
+        inputMode === 'image'
+          ? '請先上傳學生手寫作文照片。'
+          : '請先輸入學生作文內容。'
+      );
       return;
     }
 
@@ -115,33 +111,12 @@ export default function App() {
         targetWordCount: customWordCount,
         genre: selectedGenre,
         selectedRhetorics,
-        content,
-        imageBase64,
+        content: activeContent,
+        imageBase64: activeImageBase64,
         imageMimeType: imageFile?.type || 'image/jpeg',
       });
 
       setResult(evaluationResult);
-
-      // 評閱成功：使用人次加 1，保證數值只增不減並同步保存至 localStorage
-      if (typeof evaluationResult?.usageCount === 'number' && evaluationResult.usageCount > 0) {
-        setUsageCount((prev) => {
-          const next = Math.max((prev || 0) + 1, evaluationResult.usageCount);
-          try {
-            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
-          } catch {}
-          return next;
-        });
-      } else {
-        setUsageCount((prev) => {
-          const next = (prev || 0) + 1;
-          try {
-            localStorage.setItem('WEIZHEN_USAGE_COUNT', String(next));
-          } catch {}
-          return next;
-        });
-        // 背景非同步通知後端計數器
-        incrementUsageCount().catch(() => {});
-      }
 
       // Celebrate high scores!
       if (evaluationResult?.overall?.score >= 5) {
@@ -187,7 +162,7 @@ export default function App() {
         onDownloadPdf={handleDownloadPdf}
         isExportingPdf={isExportingPdf}
         pdfProgressMsg={pdfProgressMsg}
-        hasResult={Boolean(result)}
+        hasResult={Boolean(result) && !isLoading}
         apiKey={apiKey}
         hasServerKey={hasServerKey}
       />
@@ -217,13 +192,14 @@ export default function App() {
           {/* Left Column: Settings and Input (5 cols on lg) */}
           <div className="lg:col-span-5 sticky lg:top-24">
             <InputSection
+              inputMode={inputMode}
+              setInputMode={setInputMode}
               title={title}
               setTitle={setTitle}
               promptGuide={promptGuide}
               setPromptGuide={setPromptGuide}
               targetPreset={targetPreset}
               setTargetPreset={setTargetPreset}
-              customWordCount={customWordCount}
               setCustomWordCount={setCustomWordCount}
               selectedGenre={selectedGenre}
               setSelectedGenre={setSelectedGenre}
@@ -231,13 +207,11 @@ export default function App() {
               setSelectedRhetorics={setSelectedRhetorics}
               content={content}
               setContent={setContent}
-              imageFile={imageFile}
               setImageFile={setImageFile}
               imageBase64={imageBase64}
               setImageBase64={setImageBase64}
               onGrade={handleGrade}
               isLoading={isLoading}
-              onLoadDemo={handleLoadDemo}
             />
           </div>
 
@@ -245,7 +219,11 @@ export default function App() {
           <div className="lg:col-span-7">
             <ReportSection
               result={result}
-              originalContent={content || result?.meta?.ocr_transcript || ''}
+              originalContent={
+                inputMode === 'text'
+                  ? content || result?.meta?.ocr_transcript || ''
+                  : result?.meta?.ocr_transcript || ''
+              }
               isLoading={isLoading}
               onLoadDemo={handleLoadDemo}
               onDownloadPdf={handleDownloadPdf}
@@ -257,7 +235,7 @@ export default function App() {
       </main>
 
       {/* Printable Report Component (hidden in web view, rendered when exporting PDF) */}
-      <PrintReport result={result} originalContent={content || result?.meta?.ocr_transcript || ''} />
+      <PrintReport result={isLoading ? null : result} />
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-7 text-center text-sm text-slate-500 no-print mt-auto">

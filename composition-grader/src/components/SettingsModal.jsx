@@ -3,17 +3,34 @@ import { X, Key, ExternalLink, Check, AlertCircle } from 'lucide-react';
 
 export default function SettingsModal({ isOpen, onClose, apiKey, setApiKey, model, setModel }) {
   if (!isOpen) return null;
+  return (
+    <SettingsModalForm
+      onClose={onClose}
+      apiKey={apiKey}
+      setApiKey={setApiKey}
+      model={model}
+      setModel={setModel}
+    />
+  );
+}
 
+function SettingsModalForm({ onClose, apiKey, setApiKey, model, setModel }) {
   const [inputKey, setInputKey] = useState(apiKey || '');
-  const [selectedModel, setSelectedModel] = useState(model || 'gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState(model || 'gemini-flash-lite-latest');
   const [testingStatus, setTestingStatus] = useState(null); // null | 'testing' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('');
 
-  const handleSave = () => {
-    setApiKey(inputKey.trim());
+  const handleSave = (e) => {
+    if (e) e.preventDefault();
+    const trimmedKey = inputKey.trim();
+    setApiKey(trimmedKey);
     setModel(selectedModel);
-    localStorage.setItem('GEMINI_API_KEY', inputKey.trim());
-    localStorage.setItem('GEMINI_MODEL', selectedModel);
+    try {
+      localStorage.setItem('GEMINI_API_KEY', trimmedKey);
+      localStorage.setItem('GEMINI_MODEL', selectedModel);
+    } catch {
+      // Ignore storage errors
+    }
     onClose();
   };
 
@@ -68,13 +85,16 @@ export default function SettingsModal({ isOpen, onClose, apiKey, setApiKey, mode
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 sm:p-7 space-y-5">
+        <form onSubmit={handleSave} className="p-6 sm:p-7 space-y-5">
           <div>
-            <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">
+            <label htmlFor="gemini-api-key" className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">
               Google Gemini API Key
             </label>
             <input
+              id="gemini-api-key"
+              name="geminiApiKey"
               type="password"
+              autoComplete="off"
               value={inputKey}
               onChange={(e) => {
                 setInputKey(e.target.value);
@@ -99,17 +119,18 @@ export default function SettingsModal({ isOpen, onClose, apiKey, setApiKey, mode
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">
+            <label htmlFor="gemini-model-select" className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">
               AI 模型選擇
             </label>
             <select
+              id="gemini-model-select"
+              name="geminiModel"
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="w-full px-4 py-3 text-base rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-slate-800 font-medium"
             >
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash（推薦，速度最快且繁體中文理解極佳）</option>
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash（穩定高效）</option>
-              <option value="gemini-2.0-flash">Gemini 2.0 Flash（新一代多模態）</option>
+              <option value="gemini-flash-lite-latest">Gemini Flash Lite（推薦，文字評改速度最快）</option>
+              <option value="gemini-3.8-flash">Gemini 3.8 Flash（手寫照片 OCR 與深度辨析首選）</option>
             </select>
           </div>
 
@@ -152,15 +173,14 @@ export default function SettingsModal({ isOpen, onClose, apiKey, setApiKey, mode
                 取消
               </button>
               <button
-                type="button"
-                onClick={handleSave}
+                type="submit"
                 className="px-5 py-2.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs shadow-indigo-200 transition-colors font-bold cursor-pointer"
               >
                 儲存設定
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

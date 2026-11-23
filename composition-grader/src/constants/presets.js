@@ -43,7 +43,7 @@ export const SAMPLE_ESSAY_BASKETBALL = {
   mockResult: {
     meta: {
       title: '校園中的一角',
-      actual_word_count: 486,
+      actual_word_count: 542,
       target_word_count: '400~550字',
       word_count_status: '達標（篇幅適中、情節具體且飽滿）'
     },
