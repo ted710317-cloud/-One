@@ -202,39 +202,72 @@ async function directClientGrade({
   }
   contentsParts.push({ text: promptUser });
 
-  // 若為手寫照片，優先使用視覺能力最強的 gemini-3.8-flash 確保繁中筆畫 OCR 極致精準
-  const activeModel = imageBase64 ? 'gemini-3.8-flash' : (model || 'gemini-flash-lite-latest');
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
+  // 純前端直連同樣具備多模型容錯切換機制
+  const candidateModels = imageBase64
+    ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest']
+    : Array.from(
+        new Set(
+          [
+            model,
+            'gemini-flash-lite-latest',
+            'gemini-3.5-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-3.6-flash',
+          ].filter(Boolean)
+        )
+      );
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-      contents: [{ role: 'user', parts: contentsParts }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
-    }),
-  });
+  let lastError = null;
+  for (let i = 0; i < candidateModels.length; i++) {
+    const activeModel = candidateModels[i];
+    const isLastModel = i === candidateModels.length - 1;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData?.error?.message || `API 請求失敗 (${response.status})`);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          contents: [{ role: 'user', parts: contentsParts }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData?.error?.message || `API 請求失敗 (${response.status})`;
+        if ([404, 429, 500, 502, 503, 504].includes(response.status) && !isLastModel) {
+          lastError = new Error(message);
+          continue;
+        }
+        throw new Error(message);
+      }
+
+      const result = await response.json();
+      const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) {
+        if (!isLastModel) continue;
+        throw new Error('AI 未回傳評改內容，請稍後重試。');
+      }
+      const cleanedJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+      const parsed = JSON.parse(cleanedJson);
+
+      return normalizeEvaluationResult(parsed, {
+        title,
+        genre,
+        targetWordCount,
+        selectedRhetorics,
+        content,
+        imageBase64,
+      });
+    } catch (err) {
+      lastError = err;
+      if (err.message && err.message.includes('API_KEY_INVALID')) {
+        throw err;
+      }
+    }
   }
 
-  const result = await response.json();
-  const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) {
-    throw new Error('AI 未回傳評改內容，請稍後重試。');
-  }
-  const cleanedJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  const parsed = JSON.parse(cleanedJson);
-
-  return normalizeEvaluationResult(parsed, {
-    title,
-    genre,
-    targetWordCount,
-    selectedRhetorics,
-    content,
-    imageBase64,
-  });
+  throw lastError || new Error('所有可用 AI 模型均暫時無回應，請稍候重試。');
 }

@@ -130,6 +130,8 @@ function SettingsModalForm({ onClose, apiKey, setApiKey, model, setModel }) {
               className="w-full px-4 py-3 text-base rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-slate-800 font-medium"
             >
               <option value="gemini-flash-lite-latest">Gemini Flash Lite（推薦，文字評改速度最快）</option>
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash（均衡高效且穩定）</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash（進階推論與文采）</option>
               <option value="gemini-3.8-flash">Gemini 3.8 Flash（手寫照片 OCR 與深度辨析首選）</option>
             </select>
           </div>

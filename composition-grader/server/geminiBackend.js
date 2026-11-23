@@ -228,20 +228,38 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
   contentsParts.push({ text: promptUser });
 
   // List of models to try in sequence for high resilience
-  // 若為照片檔上傳，優先使用多模態視覺 OCR 最強大的 gemini-3.8-flash，確保中文字筆畫精準辨識
+  // 若為照片檔上傳，優先使用高階視覺多模態模型並依序備援，確保中文字筆畫精準且不因單一模型尖峰壅塞而失敗
   const candidateModels = imageBase64
-    ? ['gemini-3.8-flash', 'gemini-flash-lite-latest']
-    : Array.from(new Set([model, 'gemini-flash-lite-latest', 'gemini-3.8-flash']));
+    ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest']
+    : Array.from(
+        new Set(
+          [
+            model,
+            'gemini-flash-lite-latest',
+            'gemini-3.5-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-3.6-flash',
+            'gemini-3.8-flash',
+          ].filter(Boolean)
+        )
+      );
 
   let lastError = null;
 
-  for (const currentModel of candidateModels) {
+  for (let i = 0; i < candidateModels.length; i++) {
+    const currentModel = candidateModels[i];
+    const isLastModel = i === candidateModels.length - 1;
+    // 非最終備援模型設定 22 秒超時，避免單一模型卡頓導致 Vercel 請求逾時
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), isLastModel ? 40000 : 22000);
+
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${activeApiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
           contents: [{ role: 'user', parts: contentsParts }],
@@ -255,21 +273,23 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const message = errorData?.error?.message || `HTTP ${response.status} 請求失敗`;
-        // If 503 or 404, continue to next candidate model
-        if (response.status === 503 || response.status === 404) {
-          lastError = new Error(`模型 ${currentModel} 暫時繁忙 (${response.status}): ${message}`);
-          continue;
-        }
         if (response.status === 400 && message.includes('API_KEY_INVALID')) {
           throw new Error('伺服器設定的 Gemini API Key 無效，請檢查 .env 設定。');
         }
-        throw new Error(`評改失敗: ${message}`);
+        // 遇到暫時繁忙、限流、找不到或伺服器錯誤，自動切換下一個備援模型
+        if ([404, 429, 500, 502, 503, 504].includes(response.status) && !isLastModel) {
+          lastError = new Error(`模型 ${currentModel} 暫時繁忙 (${response.status}): ${message}`);
+          continue;
+        }
+        throw new Error(`評改失敗 (${currentModel}): ${message}`);
       }
 
       const result = await response.json();
       const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!rawText) {
+        lastError = new Error(`模型 ${currentModel} 未回傳評改內容`);
+        if (!isLastModel) continue;
         throw new Error('AI 未回傳評改內容，請稍後重試。');
       }
 
@@ -289,10 +309,15 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
         imageBase64,
       });
     } catch (err) {
-      lastError = err;
+      lastError =
+        err.name === 'AbortError'
+          ? new Error(`模型 ${currentModel} 回應逾時`)
+          : err;
       if (err.message && err.message.includes('API_KEY_INVALID')) {
         throw err;
       }
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
