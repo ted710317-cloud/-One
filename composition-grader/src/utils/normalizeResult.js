@@ -1,3 +1,5 @@
+import { stripUpgradeTags } from './annotationParser.js';
+
 /**
  * 統一標準化 AI 回傳的作文評閱結果，避免欄位缺失導致前端渲染崩潰，
  * 並精準校準「未指定必備修辭」時的統計與顯示格式。
@@ -89,17 +91,19 @@ export function normalizeEvaluationResult(
       teacher_encouragement: interactive.teacher_encouragement || '',
     },
     level_6_model_essay: modelEssay.model_content
-      ? {
-          essay_title: modelEssay.essay_title || `${meta.title || title || '原創'}（六級分示範升級範文）`,
-          word_count:
-            typeof modelEssay.word_count === 'number'
-              ? modelEssay.word_count
-              : modelEssay.model_content.replace(/\s+/g, '').length,
-          model_content: modelEssay.model_content,
-          elevation_highlights: Array.isArray(modelEssay.elevation_highlights)
-            ? modelEssay.elevation_highlights
-            : [],
-        }
+      ? (() => {
+          const rawAnnotated = modelEssay.annotated_content || modelEssay.model_content;
+          const cleanContent = stripUpgradeTags(modelEssay.model_content);
+          return {
+            essay_title: modelEssay.essay_title || `${meta.title || title || '原創'}（六級分示範升級範文）`,
+            word_count: cleanContent.replace(/\s+/g, '').length || modelEssay.word_count || 0,
+            model_content: cleanContent,
+            annotated_content: rawAnnotated,
+            elevation_highlights: Array.isArray(modelEssay.elevation_highlights)
+              ? modelEssay.elevation_highlights
+              : [],
+          };
+        })()
       : null,
   };
 }

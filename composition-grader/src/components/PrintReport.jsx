@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { parseAnnotatedEssay, UPGRADE_CATEGORIES } from '../utils/annotationParser';
 
 export default function PrintReport({ result }) {
   const [evalDate] = useState(() => new Date().toLocaleDateString('zh-TW'));
@@ -288,22 +289,83 @@ export default function PrintReport({ result }) {
               </span>
             </div>
 
-            {/* 範文主文 (舒朗閱讀排版) */}
-            <div
-              style={{
-                padding: '16px',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '12px',
-                lineHeight: '1.75',
-                whiteSpace: 'pre-line',
-                backgroundColor: '#f8fafc',
-                marginBottom: '12px',
-                color: '#1e293b',
-              }}
-            >
-              {level_6_model_essay.model_content}
-            </div>
+            {/* 範文主文 (舒朗閱讀排版，同步呈現修改升級顏色標記) */}
+            {(() => {
+              const { segments, hasAnnotations } = parseAnnotatedEssay(
+                level_6_model_essay.annotated_content || level_6_model_essay.model_content || ''
+              );
+              return (
+                <>
+                  {hasAnnotations && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        fontSize: '9.5px',
+                        marginBottom: '6px',
+                        color: '#475569',
+                      }}
+                    >
+                      <strong style={{ color: '#0f172a' }}>升級修改標記：</strong>
+                      {Object.values(UPGRADE_CATEGORIES).map((cat) => (
+                        <span
+                          key={cat.id}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            backgroundColor: cat.printBg,
+                            color: cat.printColor,
+                            border: `1px solid ${cat.printBorder}`,
+                            padding: '1px 6px',
+                            borderRadius: '3px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {cat.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      padding: '14px 16px',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '11.5px',
+                      lineHeight: '1.72',
+                      whiteSpace: 'pre-line',
+                      backgroundColor: '#f8fafc',
+                      marginBottom: '12px',
+                      color: '#1e293b',
+                    }}
+                  >
+                    {hasAnnotations
+                      ? segments.map((seg, idx) =>
+                          seg.type === 'plain' ? (
+                            <React.Fragment key={idx}>{seg.text}</React.Fragment>
+                          ) : (
+                            <span
+                              key={idx}
+                              style={{
+                                backgroundColor: UPGRADE_CATEGORIES[seg.type].printBg,
+                                color: UPGRADE_CATEGORIES[seg.type].printColor,
+                                borderBottom: `1.5px solid ${UPGRADE_CATEGORIES[seg.type].printBorder}`,
+                                padding: '0 2px',
+                                borderRadius: '2px',
+                              }}
+                            >
+                              {seg.text}
+                            </span>
+                          )
+                        )
+                      : level_6_model_essay.model_content}
+                  </div>
+                </>
+              );
+            })()}
 
             {/* 升級解密 */}
             {level_6_model_essay.elevation_highlights?.length > 0 && (

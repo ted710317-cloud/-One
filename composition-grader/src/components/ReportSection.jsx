@@ -14,8 +14,10 @@ import {
   Lightbulb,
   Download,
   FileText,
-  Camera
+  Camera,
+  Highlighter
 } from 'lucide-react';
+import { parseAnnotatedEssay, UPGRADE_CATEGORIES } from '../utils/annotationParser';
 
 export default function ReportSection({
   result,
@@ -30,6 +32,7 @@ export default function ReportSection({
   const [copied, setCopied] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [showOcrText, setShowOcrText] = useState(false);
+  const [showUpgradeMarks, setShowUpgradeMarks] = useState(true);
 
   // If loading
   if (isLoading) {
@@ -333,7 +336,29 @@ export default function ReportSection({
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              {(() => {
+                const { hasAnnotations } = parseAnnotatedEssay(
+                  level_6_model_essay.annotated_content || level_6_model_essay.model_content || ''
+                );
+                if (!hasAnnotations) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setShowUpgradeMarks(!showUpgradeMarks)}
+                    className={`px-3.5 py-2 rounded-xl text-sm font-semibold border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                      showUpgradeMarks
+                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                    title="切換是否以不同顏色標記修改與升級之文句"
+                  >
+                    <Highlighter className="w-4 h-4" />
+                    <span>{showUpgradeMarks ? '顯示升級標記' : '純淨閱讀'}</span>
+                  </button>
+                );
+              })()}
+
               <button
                 type="button"
                 onClick={() => setCompareMode(!compareMode)}
@@ -358,48 +383,96 @@ export default function ReportSection({
             </div>
           </div>
 
-          {/* 範文內容區 (支援對照) */}
-          {compareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* 原稿 */}
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/80">
-                <div className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <span>學生原始作文稿件</span>
-                    {meta.ocr_transcript && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                        手寫照片 AI 辨識轉譯
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-400">{meta.actual_word_count} 字</span>
-                </div>
-                <div className="text-base text-slate-700 leading-relaxed font-sans whitespace-pre-line max-h-[500px] overflow-y-auto pr-2">
-                  {originalContent || meta.ocr_transcript || '（手寫稿紙照片）'}
-                </div>
-              </div>
+          {(() => {
+            const { segments, hasAnnotations } = parseAnnotatedEssay(
+              level_6_model_essay.annotated_content || level_6_model_essay.model_content || ''
+            );
+            const showColors = hasAnnotations && showUpgradeMarks;
 
-              {/* 六級分範文 */}
-              <div className="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-6 border border-amber-200/80 shadow-xs">
-                <div className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
-                    六級分示範昇華版
-                  </span>
-                  <span className="text-xs font-semibold text-amber-700">{level_6_model_essay.word_count} 字</span>
-                </div>
-                <div className="text-base text-slate-800 leading-relaxed font-sans whitespace-pre-line max-h-[500px] overflow-y-auto pr-2">
-                  {level_6_model_essay.model_content}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-b from-amber-50/40 via-white to-white rounded-2xl p-6 sm:p-8 border border-amber-200/70 shadow-xs">
-              <div className="text-base sm:text-lg text-slate-800 leading-loose font-sans whitespace-pre-line">
-                {level_6_model_essay.model_content}
-              </div>
-            </div>
-          )}
+            const renderedModelContent = showColors
+              ? segments.map((seg, idx) =>
+                  seg.type === 'plain' ? (
+                    <React.Fragment key={idx}>{seg.text}</React.Fragment>
+                  ) : (
+                    <span
+                      key={idx}
+                      className={UPGRADE_CATEGORIES[seg.type].webClass}
+                      title={`【${seg.label}】`}
+                    >
+                      {seg.text}
+                    </span>
+                  )
+                )
+              : level_6_model_essay.model_content;
+
+            return (
+              <>
+                {/* 升級修改顏色圖例 */}
+                {showColors && (
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 bg-slate-50/90 px-4 py-2.5 rounded-2xl border border-slate-200/80 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-slate-600 mr-0.5">升級標記圖例：</span>
+                      {Object.values(UPGRADE_CATEGORIES).map((cat) => (
+                        <span
+                          key={cat.id}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-semibold ${cat.legendBgClass}`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${cat.dotClass}`} />
+                          {cat.label}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-[11px] text-slate-400">
+                      未標記處為保留原稿句型 · 複製範文時自動去除底色
+                    </span>
+                  </div>
+                )}
+
+                {/* 範文內容區 (支援對照) */}
+                {compareMode ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 原稿 */}
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/80">
+                      <div className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <span>學生原始作文稿件</span>
+                          {meta.ocr_transcript && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                              手寫照片 AI 辨識轉譯
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-400">{meta.actual_word_count} 字</span>
+                      </div>
+                      <div className="text-base text-slate-700 leading-relaxed font-sans whitespace-pre-line max-h-[500px] overflow-y-auto pr-2">
+                        {originalContent || meta.ocr_transcript || '（手寫稿紙照片）'}
+                      </div>
+                    </div>
+
+                    {/* 六級分範文 */}
+                    <div className="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-6 border border-amber-200/80 shadow-xs">
+                      <div className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-amber-600" />
+                          六級分示範昇華版
+                        </span>
+                        <span className="text-xs font-semibold text-amber-700">{level_6_model_essay.word_count} 字</span>
+                      </div>
+                      <div className="text-base text-slate-800 leading-relaxed font-sans whitespace-pre-line max-h-[500px] overflow-y-auto pr-2">
+                        {renderedModelContent}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-b from-amber-50/40 via-white to-white rounded-2xl p-6 sm:p-8 border border-amber-200/70 shadow-xs">
+                    <div className="text-base sm:text-lg text-slate-800 leading-loose font-sans whitespace-pre-line">
+                      {renderedModelContent}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* 升級解密卡片 */}
           {level_6_model_essay.elevation_highlights?.length > 0 && (
