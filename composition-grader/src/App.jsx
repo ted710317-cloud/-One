@@ -27,6 +27,7 @@ export default function App() {
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasServerKey, setHasServerKey] = useState(false);
+  const [serverStatusChecked, setServerStatusChecked] = useState(false);
 
   // Input states: 預設為乾淨空白，方便使用者直接貼上文章，無須先手動刪除範例文字
   const [inputMode, setInputMode] = useState('text'); // 'text' | 'image'
@@ -53,6 +54,7 @@ export default function App() {
   useEffect(() => {
     checkServerStatus().then((status) => {
       setHasServerKey(Boolean(status?.hasServerKey));
+      setServerStatusChecked(true);
       if (status?.model) setModel(status.model);
     });
   }, []);
@@ -93,12 +95,6 @@ export default function App() {
       return;
     }
 
-    // If neither server key nor local client key exists, prompt settings modal
-    if (!hasServerKey && !apiKey) {
-      setIsSettingsOpen(true);
-      return;
-    }
-
     setIsLoading(true);
     setErrorMessage('');
 
@@ -128,7 +124,11 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage(err.message || '評改過程發生未預期的錯誤，請重試。');
+      const msg = err.message || '評改過程發生未預期的錯誤，請重試。';
+      setErrorMessage(msg);
+      if (msg.includes('GEMINI_API_KEY') || msg.includes('尚未設定')) {
+        setIsSettingsOpen(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -165,6 +165,7 @@ export default function App() {
         hasResult={Boolean(result) && !isLoading}
         apiKey={apiKey}
         hasServerKey={hasServerKey}
+        serverStatusChecked={serverStatusChecked}
       />
 
       {/* Main Container */}
@@ -265,6 +266,7 @@ export default function App() {
         setApiKey={setApiKey}
         model={model}
         setModel={setModel}
+        hasServerKey={hasServerKey}
       />
     </div>
   );
