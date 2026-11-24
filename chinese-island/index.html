@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>古韻文學群島 - 國小國語六上・古代像素冒險遊戲島</title>
+  <style>
+    :root {
+      --sea-deep: #0e2238;
+      --sea-mid: #163656;
+      --sea-light: #214e78;
+      --wood-dark: #2a1810;
+      --wood-mid: #4a2c1d;
+      --wood-light: #6e442c;
+      --parchment: #f7eed6;
+      --parchment-dark: #e6d3a7;
+      --ink: #241914;
+      --gold: #f6c445;
+      --gold-bright: #ffe66d;
+      --crimson: #d9383a;
+      --jade: #2c9f7c;
+      --cobalt: #3b6fd8;
+      --pink: #e14b86;
+      --text-light: #fff9ea;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
+      background: var(--sea-deep);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* Pixel Border Utilities */
+    .pixel-box {
+      background: var(--wood-dark);
+      border: 4px solid var(--gold);
+      box-shadow:
+        0 0 0 4px #120a07,
+        inset 0 0 0 3px var(--wood-light),
+        0 8px 0 rgba(0, 0, 0, 0.45);
+      border-radius: 4px;
+    }
+
+    .parchment-box {
+      background: var(--parchment);
+      color: var(--ink);
+      border: 4px solid var(--wood-mid);
+      box-shadow:
+        0 0 0 3px var(--gold),
+        inset 0 0 0 3px var(--parchment-dark),
+        0 8px 0 rgba(0, 0, 0, 0.35);
+      border-radius: 4px;
+    }
+
+    .pixel-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 48px;
+      padding: 10px 18px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-light);
+      background: var(--crimson);
+      border: 3px solid var(--gold);
+      box-shadow: 0 4px 0 #7a1719, inset 0 2px 0 rgba(255,255,255,0.28);
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.15s ease;
+      text-decoration: none;
+    }
+
+    .pixel-btn:hover { filter: brightness(1.1); }
+    .pixel-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #7a1719;
+    }
+
+    .pixel-btn.btn-gold {
+      background: #d98218;
+      color: #fff;
+      box-shadow: 0 4px 0 #7a4508, inset 0 2px 0 rgba(255,255,255,0.3);
+    }
+    .pixel-btn.btn-gold:active { box-shadow: 0 1px 0 #7a4508; }
+
+    .pixel-btn.btn-jade {
+      background: var(--jade);
+      box-shadow: 0 4px 0 #155943, inset 0 2px 0 rgba(255,255,255,0.25);
+    }
+    .pixel-btn.btn-jade:active { box-shadow: 0 1px 0 #155943; }
+
+    .pixel-btn.btn-cobalt {
+      background: var(--cobalt);
+      box-shadow: 0 4px 0 #1d3c7a, inset 0 2px 0 rgba(255,255,255,0.25);
+    }
+    .pixel-btn.btn-cobalt:active { box-shadow: 0 1px 0 #1d3c7a; }
+
+    .pixel-btn.btn-wood {
+      background: var(--wood-mid);
+      box-shadow: 0 4px 0 #1b0f0a, inset 0 2px 0 rgba(255,255,255,0.18);
+    }
+    .pixel-btn.btn-wood:active { box-shadow: 0 1px 0 #1b0f0a; }
+
+    .pixel-btn.btn-sm {
+      min-height: 40px;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    /* Top HUD */
+    .hud-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #351f15 0%, #24140d 100%);
+      border-bottom: 4px solid var(--gold);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+    }
+
+    .hud-player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .avatar-frame {
+      width: 52px;
+      height: 52px;
+      background: #1a2d45;
+      border: 3px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .player-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .player-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--gold-bright);
+    }
+
+    .perk-pill {
+      font-size: 12px;
+      padding: 2px 8px;
+      background: rgba(246, 196, 69, 0.2);
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      border-radius: 3px;
+    }
+
+    .stats-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hud-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Main Workspace */
+    .main-stage {
+      max-width: 1240px;
+      margin: 16px auto 40px;
+      padding: 0 14px;
+    }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* World Map */
+    .map-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px 16px;
+    }
+
+    .map-title h1 {
+      font-size: clamp(20px, 3vw, 28px);
+      color: var(--gold-bright);
+      letter-spacing: 2px;
+    }
+
+    .map-title p {
+      font-size: 14px;
+      color: #e2d4b7;
+      margin-top: 2px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      border: 5px solid var(--gold);
+      box-shadow: 0 0 0 4px #160c08, 0 12px 32px rgba(0,0,0,0.6);
+      background: var(--sea-mid);
+      overflow: hidden;
+    }
+
+    #worldCanvas, #islandCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+    }
+
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      vertical-align: middle;
+      margin-right: 6px;
+      border: 2px solid #fff;
+    }
+
+    /* Island Detail View */
+    .island-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+    }
+
+    .island-banner h2 {
+      font-size: clamp(20px, 3vw, 26px);
+      color: var(--gold-bright);
+    }
+
+    .island-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .island-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stage-list-panel {
+      padding: 14px;
+      max-height: 560px;
+      overflow-y: auto;
+    }
+
+    .stage-list-panel h3 {
+      font-size: 18px;
+      color: var(--gold-bright);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px dashed rgba(246, 196, 69, 0.4);
+    }
+
+    .stage-card-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid rgba(246, 196, 69, 0.35);
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .stage-card-item:hover {
+      background: rgba(246, 196, 69, 0.16);
+      transform: translateX(3px);
+    }
+
+    .stage-card-item.cleared {
+      border-color: #34d399;
+      background: rgba(44, 159, 124, 0.18);
+    }
+
+    .stage-card-item.bonus {
+      border-color: #f472b6;
+      background: rgba(225, 75, 134, 0.14);
+    }
+
+    .stage-zone-tag {
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .stage-name-txt {
+      font-size: 15px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .stage-status-badge {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border: 2px solid currentColor;
+      white-space: nowrap;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 14, 26, 0.85);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 22px;
+      position: relative;
+      animation: popIn 0.2s ease;
+    }
+
+    .modal-card.wide { max-width: 980px; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.94); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      min-height: 38px;
+      min-width: 38px;
+      font-size: 18px;
+      font-weight: 900;
+      background: var(--wood-mid);
+      color: var(--gold-bright);
+      border: 2px solid var(--gold);
+      cursor: pointer;
+    }
+
+    /* Character Select Grid */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .char-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 3px solid rgba(246, 196, 69, 0.4);
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .char-card:hover { background: rgba(246, 196, 69, 0.12); }
+
+    .char-card.selected {
+      border-color: var(--gold-bright);
+      background: rgba(246, 196, 69, 0.22);
+      box-shadow: 0 0 18px rgba(246, 196, 69, 0.35);
+    }
+
+    .char-canvas-box {
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 8px;
+      background: #172b42;
+      border: 3px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-pixel {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: 700;
+      background: #fff9ea;
+      color: var(--ink);
+      border: 3px solid var(--wood-mid);
+      margin-top: 6px;
+    }
+
+    /* Quiz Elements */
+    .quiz-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .quiz-tag {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      background: var(--wood-mid);
+      color: var(--gold-bright);
+      border: 2px solid var(--gold);
+    }
+
+    .quiz-question {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      color: var(--ink);
+    }
+
+    .perk-banner {
+      background: #eef6ff;
+      border: 2px dashed var(--cobalt);
+      color: #163a70;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .option-btn {
+      width: 100%;
+      min-height: 52px;
+      text-align: left;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      background: #fffdf5;
+      border: 3px solid var(--wood-mid);
+      box-shadow: 0 3px 0 #9c8663;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background: #fff3c4;
+      border-color: #b45309;
+    }
+
+    .option-btn.selected {
+      background: #fde68a;
+      border-color: var(--crimson);
+    }
+
+    .option-btn.eliminated {
+      opacity: 0.42;
+      text-decoration: line-through;
+      cursor: not-allowed;
+    }
+
+    .option-btn.correct {
+      background: #bbf7d0;
+      border-color: #15803d;
+    }
+
+    .option-btn.wrong {
+      background: #fecaca;
+      border-color: #b91c1c;
+    }
+
+    /* Classify UI */
+    .classify-item {
+      background: #fffdf5;
+      border: 3px solid var(--wood-mid);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .classify-text {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .classify-toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .cat-btn {
+      min-height: 44px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      background: #ede3c9;
+      color: var(--ink);
+      border: 2px solid var(--wood-mid);
+      cursor: pointer;
+    }
+
+    .cat-btn.active {
+      background: var(--crimson);
+      color: #fff;
+      border-color: var(--gold);
+    }
+
+    /* Rhythm Pad */
+    .rhythm-box {
+      background: #2a1810;
+      color: var(--gold-bright);
+      border: 3px solid var(--gold);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .rhythm-beats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .beat-pad {
+      min-width: 44px;
+      min-height: 46px;
+      font-size: 18px;
+      font-weight: 900;
+      background: var(--crimson);
+      color: #fff;
+      border: 3px solid var(--gold);
+      cursor: pointer;
+    }
+
+    .beat-pad.lit {
+      background: var(--gold);
+      color: var(--wood-dark);
+      transform: scale(1.08);
+    }
+
+    .feedback-box {
+      padding: 12px;
+      border: 3px solid;
+      margin-top: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .feedback-box.ok { background: #dcfce7; border-color: #16a34a; color: #14532d; }
+    .feedback-box.err { background: #fee2e2; border-color: #dc2626; color: #7f1d1d; }
+    .feedback-box.info { background: #fef9c3; border-color: #ca8a04; color: #713f12; }
+
+    /* Treasure Codex */
+    .codex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .treasure-tile {
+      background: rgba(255,255,255,0.06);
+      border: 3px solid rgba(246, 196, 69, 0.35);
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .treasure-tile.owned {
+      border-color: var(--gold-bright);
+      background: rgba(246, 196, 69, 0.16);
+    }
+
+    .treasure-tile.locked {
+      opacity: 0.6;
+      filter: grayscale(0.85);
+    }
+
+    .treasure-sprite-wrap {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 6px;
+      background: #142235;
+      border: 2px solid rgba(246, 196, 69, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Teacher Studio */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 780px) {
+      .studio-grid { grid-template-columns: 1fr; }
+    }
+
+    .studio-list-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 2px solid rgba(246,196,69,0.35);
+      background: rgba(255,255,255,0.05);
+      cursor: pointer;
+    }
+    .studio-list-item.active {
+      border-color: var(--gold-bright);
+      background: rgba(246,196,69,0.2);
+    }
+
+    .form-row {
+      margin-bottom: 10px;
+    }
+    .form-row label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold-bright);
+      margin-bottom: 4px;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stage-editor-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(246, 196, 69, 0.4);
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      background: var(--wood-dark);
+      color: var(--gold-bright);
+      border: 3px solid var(--gold);
+      padding: 12px 22px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top HUD -->
+  <header class="hud-bar">
+    <div class="hud-player">
+      <div class="avatar-frame">
+        <canvas id="hudAvatarCanvas" width="48" height="48"></canvas>
+      </div>
+      <div class="player-meta">
+        <div class="player-name-row">
+          <span id="hudPlayerName">小冒險家</span>
+          <span id="hudCharName" class="perk-pill">無敵小生</span>
+        </div>
+        <div class="stats-row">
+          <span id="hudHearts">❤️❤️❤️</span>
+          <span id="hudTreasures">💎 寶物 0 / 14</span>
+          <span id="hudIslands">🏝️ 探索 1 島</span>
+        </div>
+      </div>
+    </div>
+    <div class="hud-actions">
+      <button class="pixel-btn btn-sm btn-cobalt" id="btnGoWorld">🗺️ 群島海圖</button>
+      <button class="pixel-btn btn-sm btn-gold" id="btnOpenCodex">🎒 百寶閣</button>
+      <button class="pixel-btn btn-sm btn-jade" id="btnOpenStudio">🛠️ 教師造島工坊</button>
+      <button class="pixel-btn btn-sm btn-wood" id="btnToggleAudio">🔊 音效開</button>
+      <button class="pixel-btn btn-sm btn-wood" id="btnSwitchChar">👤 換角</button>
+    </div>
+  </header>
+
+  <main class="main-stage">
+    <!-- World Archipelago View -->
+    <section id="viewWorld" class="view-section active">
+      <div class="map-header pixel-box">
+        <div class="map-title">
+          <h1>⚓ 古韻文學群島・大海圖</h1>
+          <p>點擊已開啟的課文島嶼乘船登島闖關；空白島嶼可於「教師造島工坊」隨時新增課名與題目！</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="pixel-btn btn-sm btn-gold" id="btnQuickLesson9">🏮 直達第九課《孫翠鳳與歌仔戲》</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="worldCanvas" width="1100" height="620"></canvas>
+      </div>
+
+      <div class="map-legend pixel-box">
+        <div class="legend-items">
+          <span><span class="legend-dot" style="background:#d9383a;"></span>已開課島嶼（可登島闖關）</span>
+          <span><span class="legend-dot" style="background:#64748b;"></span>空白預留島嶼（待老師填入課文）</span>
+          <span><span class="legend-dot" style="background:#f6c445;"></span>黃金航道（島嶼互相連線）</span>
+        </div>
+        <div style="font-size:13px; color:#f6c445; font-weight:700;">
+          💡 小技巧：可用網址加上 <code>?island=lesson09</code> 直接讓全班登入該島
+        </div>
+      </div>
+    </section>
+
+    <!-- Single Island Adventure View -->
+    <section id="viewIsland" class="view-section">
+      <div class="island-banner pixel-box">
+        <div>
+          <div id="islandLessonTag" style="font-size:13px; color:#f6c445; font-weight:800;">第九課・梨園戲台島</div>
+          <h2 id="islandTitleHeading">孫翠鳳與歌仔戲</h2>
+          <p id="islandSubtitleTxt" style="font-size:14px; color:#e2d4b7; margin-top:4px;"></p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a id="btnPadletLink" class="pixel-btn btn-sm btn-jade" href="#" target="_blank" rel="noopener">📌 開啟 Padlet 討論牆</a>
+          <button class="pixel-btn btn-sm btn-wood" id="btnBackToSea">⛵ 返回大海圖</button>
+        </div>
+      </div>
+
+      <div class="island-layout">
+        <div class="canvas-wrapper">
+          <canvas id="islandCanvas" width="680" height="540"></canvas>
+        </div>
+        <div class="stage-list-panel pixel-box">
+          <h3 id="stageListHeader">📜 島嶼任務關卡（0 / 14）</h3>
+          <div id="stageListContainer"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Character Selection Modal -->
+  <div id="modalCharacter" class="modal-backdrop">
+    <div class="modal-card wide pixel-box">
+      <h2 style="color:var(--gold-bright); font-size:26px; text-align:center;">🎭 歡迎來到《古韻文學群島》</h2>
+      <p style="text-align:center; color:#e2d4b7; margin-top:6px;">選擇一位古代數位畫素角色，帶上你的天賦航向國語冒險島！</p>
+
+      <div style="max-width:360px; margin:14px auto 0;">
+        <label style="font-size:14px; font-weight:800; color:var(--gold-bright);">玩家座號／姓名（選填）：</label>
+        <input id="inputPlayerName" class="input-pixel" type="text" placeholder="例如：601-08 小明（留空則為小冒險家）" maxlength="16">
+      </div>
+
+      <div id="charGrid" class="char-grid"></div>
+
+      <div style="text-align:center; margin-top:12px;">
+        <button id="btnConfirmChar" class="pixel-btn btn-gold" style="min-width:260px; font-size:18px;">⛵ 確認角色・啟航冒險！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage Quiz Modal -->
+  <div id="modalQuiz" class="modal-backdrop">
+    <div class="modal-card parchment-box">
+      <button class="modal-close" id="btnCloseQuiz">✕</button>
+      <div class="quiz-meta">
+        <span id="quizZoneBadge" class="quiz-tag"></span>
+        <span id="quizPadletBadge" class="quiz-tag" style="background:var(--jade);"></span>
+        <span id="quizHintStatus" class="quiz-tag" style="background:var(--cobalt);"></span>
+      </div>
+      <h2 id="quizTitle" style="font-size:22px; margin-bottom:10px; color:#7a1719;"></h2>
+      <div id="quizPerkBanner" class="perk-banner" style="display:none;"></div>
+      <div id="quizQuestion" class="quiz-question"></div>
+      <div id="quizInteractiveArea"></div>
+      <div id="quizFeedback" style="display:none;"></div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; justify-content:space-between;">
+        <button id="btnUseHint" class="pixel-btn btn-sm btn-cobalt">💡 打開錦囊提示</button>
+        <div style="display:flex; gap:10px;">
+          <button id="btnSubmitQuiz" class="pixel-btn btn-jade">⚔️ 送出答案</button>
+          <button id="btnNextStage" class="pixel-btn btn-gold" style="display:none;">➡️ 繼續冒險</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Treasure Reward Modal -->
+  <div id="modalReward" class="modal-backdrop">
+    <div class="modal-card pixel-box" style="max-width:520px; text-align:center;">
+      <h2 style="color:var(--gold-bright); font-size:26px;">🎉 過關開啟古風寶箱！</h2>
+      <div style="width:120px; height:120px; margin:16px auto; background:#142235; border:4px solid var(--gold); display:flex; align-items:center; justify-content:center;">
+        <canvas id="rewardTreasureCanvas" width="96" height="96"></canvas>
+      </div>
+      <div id="rewardRarity" class="perk-pill" style="display:inline-block; margin-bottom:6px;">珍品</div>
+      <h3 id="rewardName" style="font-size:24px; color:#ffe66d; margin-bottom:10px;"></h3>
+      <div id="rewardQuote" class="parchment-box" style="padding:12px; font-size:15px; font-weight:700; text-align:left; line-height:1.55;"></div>
+      <div id="rewardPadletTip" style="margin-top:10px; font-size:14px; color:#7dd3fc; font-weight:700;"></div>
+      <div style="margin-top:16px;">
+        <button id="btnCloseReward" class="pixel-btn btn-gold" style="min-width:200px;">🎒 收進百寶閣</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Treasure Codex Modal -->
+  <div id="modalCodex" class="modal-backdrop">
+    <div class="modal-card wide pixel-box">
+      <button class="modal-close" id="btnCloseCodex">✕</button>
+      <h2 style="color:var(--gold-bright); font-size:24px;">🎒 古風藏寶百寶閣</h2>
+      <p style="font-size:14px; color:#e2d4b7; margin-top:4px;">點擊已獲得的寶物可查看「課文複習錦囊」；未獲得的寶物會告訴你該前往哪一座島尋找！</p>
+      <div id="codexContent"></div>
+    </div>
+  </div>
+
+  <!-- Blank Island Prompt Modal -->
+  <div id="modalBlank" class="modal-backdrop">
+    <div class="modal-card pixel-box" style="max-width:540px; text-align:center;">
+      <button class="modal-close" id="btnCloseBlank">✕</button>
+      <div style="font-size:52px; margin-bottom:8px;">🌫️🏝️</div>
+      <h2 id="blankTitle" style="color:var(--gold-bright); font-size:24px;">空白預留島嶼</h2>
+      <p id="blankDesc" style="margin:12px 0; line-height:1.6; color:#e2d4b7;">
+        這座島嶼目前保留為空白槽位，尚未填入課文題目。<br>
+        老師可以隨時進入「教師造島工坊」填入新課名、連接航道並出題！
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+        <button id="btnEditBlankIsland" class="pixel-btn btn-jade">🛠️ 立刻在造島工坊編輯這座島</button>
+        <button id="btnCancelBlank" class="pixel-btn btn-wood">返回海圖</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Island Studio Modal -->
+  <div id="modalStudio" class="modal-backdrop">
+    <div class="modal-card wide pixel-box">
+      <button class="modal-close" id="btnCloseStudio">✕</button>
+      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; padding-right:36px;">
+        <div>
+          <h2 style="color:var(--gold-bright); font-size:23px;">🛠️ 教師造島工坊（隨時新增／編輯課文島嶼）</h2>
+          <p style="font-size:13px; color:#e2d4b7;">編輯後會即時儲存於本機瀏覽器並更新大海圖；也可一鍵匯出 <code>islands.js</code> 供全班部署使用。</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnAddNewIsland" class="pixel-btn btn-sm btn-jade">➕ 新增空白島嶼</button>
+          <button id="btnExportIslands" class="pixel-btn btn-sm btn-gold">💾 匯出 islands.js</button>
+          <button id="btnResetDefaults" class="pixel-btn btn-sm btn-wood">↺ 還原預設</button>
+        </div>
+      </div>
+
+      <div class="studio-grid">
+        <div>
+          <h4 style="color:var(--gold); margin-bottom:8px;">🏝️ 群島清單</h4>
+          <div id="studioIslandList" style="max-height:460px; overflow-y:auto;"></div>
+        </div>
+        <div id="studioEditorPane" style="max-height:500px; overflow-y:auto; padding-right:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastBanner" class="toast-banner"></div>
+
+  <script src="islands.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
