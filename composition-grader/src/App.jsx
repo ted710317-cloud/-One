@@ -20,7 +20,10 @@ export default function App() {
   });
   const [model, setModel] = useState(() => {
     try {
-      return localStorage.getItem('GEMINI_MODEL') || 'gemini-flash-lite-latest';
+      const saved = localStorage.getItem('GEMINI_MODEL');
+      const retired = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+      if (saved && !retired.includes(saved)) return saved;
+      return 'gemini-flash-lite-latest';
     } catch {
       return 'gemini-flash-lite-latest';
     }

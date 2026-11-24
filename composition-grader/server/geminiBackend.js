@@ -106,6 +106,7 @@ export async function handleGradeRequest(body) {
     imageMimeType = 'image/jpeg',
   } = body;
 
+  const isUsingCustomKey = Boolean(customApiKey && customApiKey.trim());
   const activeApiKey = (customApiKey || serverApiKey).trim();
 
   if (!activeApiKey) {
@@ -231,17 +232,27 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
 
   contentsParts.push({ text: promptUser });
 
-  // List of models to try in sequence for high resilience
-  // 若為照片檔上傳，優先使用高階視覺多模態模型並依序備援，確保中文字筆畫精準且不因單一模型尖峰壅塞而失敗
+  // 過濾已知已下線的模型，並建置高韌性多模型備援池（兼顧視覺 OCR 與速度）
+  const RETIRED_MODELS = new Set(['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']);
+  const safeUserModel = model && !RETIRED_MODELS.has(model) ? model : null;
+
   const candidateModels = imageBase64
-    ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest']
+    ? [
+        'gemini-3.8-flash',
+        'gemini-3-flash-preview',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-flash-lite-latest',
+      ]
     : Array.from(
         new Set(
           [
-            model,
+            safeUserModel,
             'gemini-flash-lite-latest',
             'gemini-3.5-flash-lite',
-            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3-flash-preview',
             'gemini-3.6-flash',
             'gemini-3.8-flash',
           ].filter(Boolean)
@@ -249,13 +260,19 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
       );
 
   let lastError = null;
+  const startedAt = Date.now();
+  const TOTAL_BUDGET_MS = 52000;
 
   for (let i = 0; i < candidateModels.length; i++) {
+    const remainingBudget = TOTAL_BUDGET_MS - (Date.now() - startedAt);
+    if (remainingBudget < 5000) break;
+
     const currentModel = candidateModels[i];
     const isLastModel = i === candidateModels.length - 1;
-    // 非最終備援模型設定 22 秒超時，避免單一模型卡頓導致 Vercel 請求逾時
+    // 單一模型超時上限：優先模型給 18 秒（避免尖峰卡死佔滿預算），剩餘備援依剩餘預算彈性分配
+    const attemptTimeout = Math.min(isLastModel ? 25000 : 18000, remainingBudget);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), isLastModel ? 40000 : 22000);
+    const timeoutId = setTimeout(() => controller.abort(), attemptTimeout);
 
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${activeApiKey}`;
@@ -278,7 +295,11 @@ ${imageBase64 ? '（請先對附帶之手寫作文圖片進行高精度繁體中
         const errorData = await response.json().catch(() => ({}));
         const message = errorData?.error?.message || `HTTP ${response.status} 請求失敗`;
         if (response.status === 400 && message.includes('API_KEY_INVALID')) {
-          throw new Error('伺服器設定的 Gemini API Key 無效，請檢查 .env 設定。');
+          throw new Error(
+            isUsingCustomKey
+              ? '您輸入的個人 Gemini API Key 無效，請點右上角「AI 設定」清除個人 Key 以恢復免費伺服器模式。'
+              : '伺服器設定的 Gemini API Key 無效，請檢查 .env 設定。'
+          );
         }
         // 遇到暫時繁忙、限流、找不到或伺服器錯誤，自動切換下一個備援模型
         if ([404, 429, 500, 502, 503, 504].includes(response.status) && !isLastModel) {

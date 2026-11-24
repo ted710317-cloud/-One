@@ -126,9 +126,10 @@ function SettingsModalForm({ onClose, apiKey, setApiKey, model, setModel, hasSer
               className="w-full px-4 py-3 text-base rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-slate-800 font-medium"
             >
               <option value="gemini-flash-lite-latest">Gemini Flash Lite（推薦，文字評改速度最快）</option>
-              <option value="gemini-3.5-flash">Gemini 3.5 Flash（均衡高效且穩定）</option>
+              <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite（極速低延遲備援）</option>
+              <option value="gemini-3-flash-preview">Gemini 3 Flash（高穩定視覺與文采兼備）</option>
               <option value="gemini-3.6-flash">Gemini 3.6 Flash（進階推論與文采）</option>
-              <option value="gemini-3.8-flash">Gemini 3.8 Flash（手寫照片 OCR 與深度辨析首選）</option>
+              <option value="gemini-3.8-flash">Gemini 3.8 Flash（手寫照片 OCR 精度首選）</option>
             </select>
             <p className="mt-1.5 text-xs text-slate-500">
               註：上傳「手寫稿紙照片」時，系統會自動優先調用高敏度視覺模型進行繁體筆畫辨識。

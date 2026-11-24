@@ -207,15 +207,26 @@ async function directClientGrade({
   contentsParts.push({ text: promptUser });
 
   // 純前端直連同樣具備多模型容錯切換機制
+  const RETIRED_MODELS = new Set(['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']);
+  const safeUserModel = model && !RETIRED_MODELS.has(model) ? model : null;
+
   const candidateModels = imageBase64
-    ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest']
+    ? [
+        'gemini-3.8-flash',
+        'gemini-3-flash-preview',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-flash-lite-latest',
+      ]
     : Array.from(
         new Set(
           [
-            model,
+            safeUserModel,
             'gemini-flash-lite-latest',
             'gemini-3.5-flash-lite',
-            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3-flash-preview',
             'gemini-3.6-flash',
           ].filter(Boolean)
         )
