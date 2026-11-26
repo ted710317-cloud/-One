@@ -253,6 +253,16 @@
       box-shadow: 0 16px 40px rgba(59, 130, 246, 0.32);
     }
 
+    /* Card: Homework Board Setup Wizard */
+    .card-hw-wizard::before {
+      background: linear-gradient(90deg, #22d3ee, #6366f1, #a855f7);
+    }
+    .card-hw-wizard:hover {
+      transform: translateY(-8px);
+      border-color: rgba(34, 211, 238, 0.7);
+      box-shadow: 0 16px 40px rgba(34, 211, 238, 0.32);
+    }
+
     .card-badge {
       display: inline-flex;
       align-items: center;
@@ -419,6 +429,15 @@
       box-shadow: 0 6px 25px rgba(59, 130, 246, 0.75);
       filter: brightness(1.1);
     }
+    .btn-hw-wizard {
+      background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.45);
+    }
+    .btn-hw-wizard:hover {
+      box-shadow: 0 6px 25px rgba(34, 211, 238, 0.75);
+      filter: brightness(1.1);
+    }
 
     .sub-buttons {
       display: grid;
@@ -492,7 +511,7 @@
       </p>
     </header>
 
-    <!-- Tools Grid (5 Classroom Tools) -->
+    <!-- Tools Grid (6 Classroom Tools) -->
     <div class="tools-grid">
 
       <!-- Tool 1: 羚藝汽泡水電子存摺 -->
@@ -612,15 +631,50 @@
           </ul>
         </div>
         <div class="btn-group">
-          <a href="./homework-board/" class="btn-action btn-homework">
+          <a href="https://ted710317-cloud.github.io/607-homework-board/" class="btn-action btn-homework" target="_blank">
             <span>📋 開啟《羚藝汽泡水作業佈告欄》</span>
           </a>
           <div class="sub-buttons">
-            <a href="https://ted710317-cloud.github.io/607-homework-board/" class="btn-sub" target="_blank">
-              <span>🌐 雲端線上版</span>
+            <a href="https://ted710317-cloud.github.io/607-homework-board/wizard.html" class="btn-sub" target="_blank">
+              <span>🧙‍♂️ 作業看板設定精靈</span>
+            </a>
+            <a href="./homework-board/" class="btn-sub">
+              <span>📂 本機鏡像版</span>
             </a>
             <a href="./homework-board/README.md" class="btn-sub" target="_blank">
               <span>📖 系統部署指引</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 4: 作業佈告欄一鍵設定精靈 -->
+      <div class="tool-card card-hw-wizard">
+        <div>
+          <div class="card-badge badge-teal">🧙‍♂️ 教師分享專用 · 30秒建置 · 附免費 Firebase 教學</div>
+          <div class="tool-name">
+            <span>🧙‍♂️ 作業佈告欄設定精靈</span>
+          </div>
+          <div class="tool-en">Homework Board Setup & Share Wizard</div>
+          <p class="tool-summary">
+            想把作業清點佈告欄分享給其他老師嗎？免寫程式、30 秒完成設定！自訂班級人數、空號跳號、組長簽到組數與解鎖密碼，支援教室單機即用或依內建 5 步驟教學綁定老師自己的免費 Firebase 帳號！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">📋</span> 完整內建功能：同畫面多卡片展開 ✕ 整日與逐項鎖定 ✕ 學期統計匯出 Excel</li>
+            <li class="feature-item"><span class="feature-icon">☁️</span> 附 5 步驟免費申請 Firebase 圖文教學，各班資料獨立存在自己帳號不互衝</li>
+            <li class="feature-item"><span class="feature-icon">🔗</span> 雙軌一鍵產出：自動生成班級專屬網址、平板掃碼 QR Code ✕ 下載獨立 HTML 檔</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="https://ted710317-cloud.github.io/607-homework-board/wizard.html" class="btn-action btn-hw-wizard" target="_blank">
+            <span>🧙‍♂️ 前往《作業佈告欄設定精靈》</span>
+          </a>
+          <div class="sub-buttons">
+            <a href="https://ted710317-cloud.github.io/607-homework-board/board.html" class="btn-sub" target="_blank">
+              <span>👀 空白示範看板</span>
+            </a>
+            <a href="https://ted710317-cloud.github.io/607-homework-board/" class="btn-sub" target="_blank">
+              <span>🫧 607 線上版</span>
             </a>
           </div>
         </div>
