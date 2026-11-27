@@ -263,6 +263,16 @@
       box-shadow: 0 16px 40px rgba(34, 211, 238, 0.32);
     }
 
+    /* Card: Class Picker & Discussion Timer */
+    .card-picker::before {
+      background: linear-gradient(90deg, #ffe600, #ff2a85, #00f0ff);
+    }
+    .card-picker:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 42, 133, 0.7);
+      box-shadow: 0 16px 40px rgba(255, 42, 133, 0.32);
+    }
+
     .card-badge {
       display: inline-flex;
       align-items: center;
@@ -438,6 +448,21 @@
       box-shadow: 0 6px 25px rgba(34, 211, 238, 0.75);
       filter: brightness(1.1);
     }
+    .badge-pink {
+      background: rgba(255, 42, 133, 0.16);
+      color: #ff7ab8;
+      border: 1px solid rgba(255, 42, 133, 0.4);
+    }
+    .btn-picker {
+      background: linear-gradient(135deg, #ffe600 0%, #ff2a85 100%);
+      color: #ffffff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 4px 18px rgba(255, 42, 133, 0.45);
+    }
+    .btn-picker:hover {
+      box-shadow: 0 6px 25px rgba(255, 230, 0, 0.65);
+      filter: brightness(1.08);
+    }
 
     .sub-buttons {
       display: grid;
@@ -511,8 +536,32 @@
       </p>
     </header>
 
-    <!-- Tools Grid (6 Classroom Tools) -->
+    <!-- Tools Grid (7 Classroom Tools) -->
     <div class="tools-grid">
+
+      <!-- Tool: 課堂超級抽籤機 × 討論倒數燈箱 -->
+      <div class="tool-card card-picker">
+        <div>
+          <div class="card-badge badge-pink">🎰 派對機台 · 兩段式小組抽籤 · 超浮誇結束警報</div>
+          <div class="tool-name">
+            <span>🎰 課堂超級抽籤機 × 討論倒數燈箱</span>
+          </div>
+          <div class="tool-en">Classroom Slot Picker &amp; Discussion Timer</div>
+          <p class="tool-summary">
+            上課提問與小組討論最佳神隊友！左半邊支援 1～26 號個人抽籤與第 1～6 組兩段式懸念開獎（先停 X 組、3 秒後再停 Y 號），右半邊整合 3/5 分鐘討論倒數、臨時 +1 分鐘與全螢幕震動「討論結束」鈴聲！
+          </p>
+          <ul class="feature-list">
+            <li class="feature-item"><span class="feature-icon">🎲</span> 個人 (1~26) 與小組 (1~6組) 雙模式，支援不重複抽籤與請假跳過</li>
+            <li class="feature-item"><span class="feature-icon">⚡</span> 小組兩段式拉霸：X 組與 Y 號齊跑，先鎖定組別、3 秒後揭曉組員</li>
+            <li class="feature-item"><span class="feature-icon">🚨</span> 3 分 / 5 分預設 + 臨時加 1 分鐘，時間到觸發超浮誇全螢幕震動鈴聲</li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <a href="./class-picker/" class="btn-action btn-picker">
+            <span>🎰 開啟《課堂超級抽籤機 × 討論倒數》</span>
+          </a>
+        </div>
+      </div>
 
       <!-- Tool 1: 羚藝汽泡水電子存摺 -->
       <div class="tool-card card-passbook">

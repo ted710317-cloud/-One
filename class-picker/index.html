@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>課堂超級抽籤機 × 討論倒數燈箱｜偉朕老師教學工具</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+  <style>
+    :root {
+      --bg-deep: #0b0618;
+      --bg-stage: #150b2e;
+      --panel-bg: rgba(24, 14, 52, 0.92);
+      --panel-border: rgba(255, 214, 0, 0.35);
+      --gold: #ffe600;
+      --amber: #ff9d00;
+      --pink: #ff2a85;
+      --cyan: #00f0ff;
+      --lime: #39ff14;
+      --red: #ff2e4c;
+      --violet: #8b5cf6;
+      --text: #ffffff;
+      --text-dim: #b8b2d8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255, 42, 133, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 80% 15%, rgba(0, 240, 255, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(139, 92, 246, 0.25) 0%, transparent 55%),
+        linear-gradient(160deg, #0b0618 0%, #170d36 55%, #0e0722 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 950;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 20px;
+      background: rgba(12, 7, 28, 0.85);
+      border-bottom: 2px solid rgba(255, 230, 0, 0.25);
+      backdrop-filter: blur(12px);
+      z-index: 20;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      min-height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 230, 0, 0.18);
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(18px, 2.2vw, 24px);
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #ffe600 0%, #ff9d00 45%, #ff2a85 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 24px rgba(255, 230, 0, 0.25);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Main Dual Arcade Grid: 抽籤在左、計時在右 */
+    .arcade-stage {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+      gap: 20px;
+      padding: 18px 20px 20px;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    @media (max-width: 960px) {
+      .arcade-stage {
+        gap: 12px;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .arcade-stage {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+    }
+
+    /* Machine Cabinet Card */
+    .cabinet {
+      position: relative;
+      min-width: 0;
+      background: var(--panel-bg);
+      border-radius: 26px;
+      padding: 20px 22px 18px;
+      border: 3px solid rgba(255, 230, 0, 0.45);
+      box-shadow:
+        0 0 35px rgba(255, 42, 133, 0.16),
+        inset 0 0 28px rgba(139, 92, 246, 0.18),
+        0 18px 40px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .cabinet-timer {
+      border-color: rgba(0, 240, 255, 0.45);
+      box-shadow:
+        0 0 35px rgba(0, 240, 255, 0.16),
+        inset 0 0 28px rgba(0, 240, 255, 0.12),
+        0 18px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Marquee Bulbs Strip */
+    .marquee-bulbs {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 6px 12px;
+      gap: 6px;
+    }
+
+    .bulb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+      opacity: 0.35;
+      transition: opacity 0.15s;
+    }
+
+    .bulb:nth-child(odd) {
+      animation: bulbChase 1.2s infinite alternate;
+    }
+    .bulb:nth-child(even) {
+      background: var(--pink);
+      box-shadow: 0 0 10px var(--pink);
+      animation: bulbChase 1.2s 0.6s infinite alternate;
+    }
+    .cabinet-timer .bulb:nth-child(even) {
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .cabinet.is-active .bulb {
+      animation-duration: 0.25s;
+    }
+
+    @keyframes bulbChase {
+      0% { opacity: 0.25; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .cabinet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .cabinet-title {
+      font-size: clamp(16px, 2vw, 26px);
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Mode Switcher */
+    .mode-tabs {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 5px;
+      border-radius: 16px;
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      gap: 6px;
+    }
+
+    .mode-tab {
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: clamp(13px, 1.4vw, 16px);
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab.active {
+      background: linear-gradient(135deg, #ffe600 0%, #ff9d00 100%);
+      color: #1b0e00;
+      box-shadow: 0 4px 16px rgba(255, 157, 0, 0.5);
+    }
+
+    /* Slot Machine Display Window */
+    .slot-stage {
+      background: linear-gradient(180deg, #070312 0%, #140933 50%, #070312 100%);
+      border: 4px solid #3c2670;
+      border-radius: 22px;
+      padding: 18px 16px;
+      box-shadow:
+        inset 0 10px 30px rgba(0, 0, 0, 0.85),
+        0 0 24px rgba(255, 230, 0, 0.12);
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .slot-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    .slot-status-pill.dramatic {
+      background: rgba(255, 42, 133, 0.25);
+      border-color: var(--pink);
+      color: #ffd1e6;
+      animation: pulsePill 0.5s infinite alternate;
+    }
+
+    .slot-status-pill.winner {
+      background: rgba(255, 230, 0, 0.22);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    @keyframes pulsePill {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.06); }
+    }
+
+    .reels-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .reel-box {
+      flex: 1;
+      min-width: 0;
+      min-height: clamp(114px, 14vw, 158px);
+      background: linear-gradient(180deg, #1b0f3f 0%, #2a1761 50%, #160b35 100%);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .reel-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.45) 100%);
+      pointer-events: none;
+    }
+
+    .reel-label {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      z-index: 1;
+    }
+
+    .reel-value {
+      font-size: clamp(28px, 4.2vw, 76px);
+      font-weight: 900;
+      line-height: 1.08;
+      color: #ffffff;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+      font-variant-numeric: tabular-nums;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .reel-box.spinning {
+      border-color: var(--cyan);
+      box-shadow: 0 0 22px rgba(0, 240, 255, 0.4);
+    }
+
+    .reel-box.spinning .reel-value {
+      color: var(--cyan);
+      filter: blur(0.4px);
+      animation: reelJitter 0.09s infinite linear;
+    }
+
+    .reel-box.locked {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, #321f06 0%, #4a2e08 50%, #2a1904 100%);
+      box-shadow: 0 0 30px rgba(255, 230, 0, 0.55), inset 0 0 20px rgba(255, 230, 0, 0.25);
+      animation: lockPop 0.4s cubic-bezier(0.2, 1.5, 0.4, 1);
+    }
+
+    .reel-box.locked .reel-value {
+      color: var(--gold);
+      text-shadow: 0 0 22px rgba(255, 230, 0, 0.8);
+    }
+
+    @keyframes reelJitter {
+      0% { transform: translateY(-3px); }
+      50% { transform: translateY(3px); }
+      100% { transform: translateY(-3px); }
+    }
+
+    @keyframes lockPop {
+      0% { transform: scale(0.92); }
+      55% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    /* Big Spin Button & Options */
+    .spin-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-spin {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      min-height: 62px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(180deg, #ffea3b 0%, #ff9d00 55%, #e65c00 100%);
+      color: #240f00;
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow:
+        0 6px 0 #9b3d00,
+        0 12px 28px rgba(255, 157, 0, 0.45);
+      transition: all 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-spin:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 0 #9b3d00,
+        0 16px 34px rgba(255, 230, 0, 0.6);
+    }
+
+    .btn-spin:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #9b3d00, 0 4px 12px rgba(255, 157, 0, 0.4);
+    }
+
+    .btn-spin:disabled {
+      opacity: 0.72;
+      cursor: not-allowed;
+      background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+      color: #e5e7eb;
+      box-shadow: 0 4px 0 #1f2937;
+    }
+
+    .picker-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toggle-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-chip.on {
+      background: rgba(57, 255, 20, 0.14);
+      border-color: rgba(57, 255, 20, 0.55);
+      color: #9eff8a;
+    }
+
+    .toggle-chip:hover {
+      border-color: var(--gold);
+    }
+
+    .mini-btn {
+      min-height: 40px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mini-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--cyan);
+    }
+
+    .pool-stats {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dim);
+    }
+
+    .pool-stats strong {
+      color: var(--gold);
+      font-size: 15px;
+    }
+
+    /* Roster Grids (Attendance & Drawn State) */
+    .roster-hint {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .individual-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 6px;
+    }
+
+    .seat-chip {
+      min-height: 44px;
+      border-radius: 11px;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      user-select: none;
+    }
+
+    .seat-chip:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+    }
+
+    .seat-chip.drawn {
+      background: rgba(0, 240, 255, 0.14);
+      border-color: rgba(0, 240, 255, 0.45);
+      color: #7df6ff;
+    }
+
+    .seat-chip.drawn::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 10px;
+      color: var(--lime);
+    }
+
+    .seat-chip.current-winner {
+      background: linear-gradient(135deg, #ffe600 0%, #ff9d00 100%);
+      color: #210d00;
+      border-color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 230, 0, 0.7);
+      transform: scale(1.06);
+    }
+
+    .seat-chip.absent {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.3);
+      text-decoration: line-through;
+    }
+
+    .seat-chip.absent::after {
+      content: '休';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 9px;
+      color: #ff6b8b;
+      text-decoration: none;
+    }
+
+    /* Group Roster Grid */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .groups-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .cabinet {
+        padding: 14px 14px 12px;
+      }
+    }
+
+    .group-card {
+      background: rgba(0, 0, 0, 0.32);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      border-radius: 13px;
+      padding: 8px 9px;
+      transition: all 0.2s;
+    }
+
+    .group-card.active-group {
+      border-color: var(--gold);
+      background: rgba(255, 230, 0, 0.1);
+      box-shadow: 0 0 16px rgba(255, 230, 0, 0.25);
+    }
+
+    .group-card-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .group-members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .group-seat {
+      flex: 1;
+      min-width: 34px;
+      min-height: 36px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    /* ==================== TIMER CABINET ==================== */
+    .timer-display-box {
+      background: linear-gradient(180deg, #050814 0%, #0d1633 50%, #050814 100%);
+      border: 4px solid #1d3b66;
+      border-radius: 22px;
+      padding: 20px 18px 16px;
+      text-align: center;
+      box-shadow:
+        inset 0 10px 30px rgba(0, 0, 0, 0.85),
+        0 0 26px rgba(0, 240, 255, 0.14);
+      margin-bottom: 14px;
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .timer-display-box.state-warning {
+      border-color: var(--amber);
+      box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 30px rgba(255, 157, 0, 0.4);
+    }
+
+    .timer-display-box.state-danger {
+      border-color: var(--red);
+      box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 38px rgba(255, 46, 76, 0.65);
+      animation: dangerPulse 0.6s infinite alternate;
+    }
+
+    @keyframes dangerPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.015); }
+    }
+
+    .timer-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      background: rgba(0, 240, 255, 0.14);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      margin-bottom: 6px;
+    }
+
+    .timer-digits {
+      font-size: clamp(46px, 6.8vw, 118px);
+      font-weight: 900;
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      text-shadow: 0 0 28px rgba(0, 240, 255, 0.55);
+      margin: 4px 0 12px;
+    }
+
+    .timer-display-box.state-warning .timer-digits {
+      color: var(--gold);
+      text-shadow: 0 0 28px rgba(255, 230, 0, 0.65);
+    }
+
+    .timer-display-box.state-danger .timer-digits {
+      color: #ff4b66;
+      text-shadow: 0 0 34px rgba(255, 46, 76, 0.9);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #00f0ff 0%, #39ff14 100%);
+      transition: width 0.25s linear, background 0.3s ease;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+    }
+
+    .timer-display-box.state-warning .progress-fill {
+      background: linear-gradient(90deg, #ff9d00 0%, #ffe600 100%);
+    }
+
+    .timer-display-box.state-danger .progress-fill {
+      background: linear-gradient(90deg, #ff2e4c 0%, #ff7b00 100%);
+    }
+
+    .plus-toast {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--lime);
+      text-shadow: 0 0 14px rgba(57, 255, 20, 0.8);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .plus-toast.show {
+      animation: floatUp 0.9s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(10px) scale(0.9); }
+      40% { opacity: 1; transform: translateY(-6px) scale(1.15); }
+      100% { opacity: 0; transform: translateY(-28px) scale(1); }
+    }
+
+    /* Preset Duration Row (3 min & 5 min below timer) */
+    .preset-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn-preset {
+      min-height: 54px;
+      border-radius: 15px;
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      background: rgba(0, 240, 255, 0.1);
+      color: #ffffff;
+      font-size: clamp(15px, 1.7vw, 20px);
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-preset:hover {
+      background: rgba(0, 240, 255, 0.24);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.28);
+    }
+
+    .btn-preset.selected {
+      background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%);
+      color: #031326;
+      border-color: #ffffff;
+      box-shadow: 0 6px 22px rgba(0, 240, 255, 0.45);
+    }
+
+    /* Timer Main Actions + "+1分鐘" */
+    .timer-actions {
+      display: grid;
+      grid-template-columns: 1.35fr 0.75fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 920px) {
+      .timer-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+      .btn-plus-one {
+        grid-column: span 2;
+      }
+    }
+
+    .btn-timer-start {
+      min-height: 60px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(180deg, #39ff14 0%, #00c853 100%);
+      color: #02210b;
+      font-size: clamp(16px, 1.8vw, 21px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #007a33, 0 10px 24px rgba(57, 255, 20, 0.35);
+      transition: all 0.12s;
+    }
+
+    .btn-timer-start.running {
+      background: linear-gradient(180deg, #ffe600 0%, #ff9d00 100%);
+      color: #261200;
+      box-shadow: 0 5px 0 #a35200, 0 10px 24px rgba(255, 157, 0, 0.4);
+    }
+
+    .btn-timer-start:hover {
+      filter: brightness(1.07);
+      transform: translateY(-2px);
+    }
+
+    .btn-timer-start:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #007a33;
+    }
+
+    .btn-timer-reset {
+      min-height: 60px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-size: clamp(15px, 1.6vw, 18px);
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-timer-reset:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: #ffffff;
+    }
+
+    .btn-plus-one {
+      min-height: 60px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(180deg, #ff4da6 0%, #e11d48 100%);
+      color: #ffffff;
+      font-size: clamp(16px, 1.7vw, 20px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #881337, 0 10px 24px rgba(255, 42, 133, 0.4);
+      transition: all 0.12s;
+    }
+
+    .btn-plus-one:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-plus-one:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #881337;
+    }
+
+    /* Bell Style Selector */
+    .bell-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.32);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .bell-options {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .bell-chip {
+      min-height: 38px;
+      padding: 6px 11px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .bell-chip.active {
+      background: rgba(255, 230, 0, 0.18);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ==================== EXTREME TIME'S UP OVERLAY ==================== */
+    .timesup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #7f0024 0%, #1a0214 70%, #000000 100%);
+    }
+
+    .timesup-overlay.active {
+      display: flex;
+      animation: bgFlash 0.38s infinite alternate;
+    }
+
+    .timesup-beams {
+      position: absolute;
+      width: 220vmax;
+      height: 220vmax;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 230, 0, 0.24) 0deg 12deg,
+        transparent 12deg 24deg,
+        rgba(255, 42, 133, 0.24) 24deg 36deg,
+        transparent 36deg 48deg
+      );
+      animation: spinBeams 8s linear infinite;
+      pointer-events: none;
+    }
+
+    .timesup-strobe-frame {
+      position: absolute;
+      inset: 0;
+      border: 18px solid #ffe600;
+      box-shadow: inset 0 0 90px #ff2e4c;
+      animation: strobeBorder 0.25s infinite alternate;
+      pointer-events: none;
+    }
+
+    .timesup-content {
+      position: relative;
+      z-index: 2;
+      animation: megaShake 0.32s infinite;
+    }
+
+    .timesup-emoji-row {
+      font-size: clamp(48px, 8vw, 92px);
+      margin-bottom: 8px;
+      animation: emojiBounce 0.4s infinite alternate;
+    }
+
+    .timesup-mega-text {
+      font-size: clamp(66px, 14.5vw, 185px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: 6px;
+      color: #ffe600;
+      -webkit-text-stroke: 4px #450016;
+      text-shadow:
+        0 0 25px #ff2e4c,
+        0 0 55px #ff9d00,
+        0 12px 0 #7a0022,
+        0 20px 45px rgba(0, 0, 0, 0.9);
+      animation: megaZoom 0.45s infinite alternate;
+      margin-bottom: 16px;
+    }
+
+    .timesup-sub {
+      font-size: clamp(20px, 3vw, 34px);
+      font-weight: 900;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.65);
+      border: 2px solid rgba(255, 230, 0, 0.7);
+      padding: 10px 26px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 30px;
+      box-shadow: 0 0 24px rgba(255, 230, 0, 0.35);
+    }
+
+    .btn-dismiss-alarm {
+      position: relative;
+      z-index: 3;
+      min-height: 70px;
+      padding: 16px 42px;
+      border-radius: 999px;
+      border: 4px solid #ffffff;
+      background: linear-gradient(180deg, #ffe600 0%, #ff9d00 100%);
+      color: #240800;
+      font-size: clamp(20px, 2.4vw, 28px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 30px rgba(255, 230, 0, 0.8);
+      transition: transform 0.15s;
+    }
+
+    .btn-dismiss-alarm:hover {
+      transform: scale(1.06);
+    }
+
+    @keyframes bgFlash {
+      0% { background: radial-gradient(circle at center, #9e002c 0%, #240218 70%, #09000a 100%); }
+      100% { background: radial-gradient(circle at center, #3b0078 0%, #160430 70%, #050012 100%); }
+    }
+
+    @keyframes spinBeams {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes strobeBorder {
+      0% { border-color: #ffe600; box-shadow: inset 0 0 90px #ff2e4c; }
+      100% { border-color: #00f0ff; box-shadow: inset 0 0 90px #ffe600; }
+    }
+
+    @keyframes megaShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-7px, 5px) rotate(-1.4deg); }
+      40% { transform: translate(7px, -5px) rotate(1.4deg); }
+      60% { transform: translate(-6px, -4px) rotate(-1deg); }
+      80% { transform: translate(6px, 4px) rotate(1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes megaZoom {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.06); }
+    }
+
+    @keyframes emojiBounce {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-14px) scale(1.15); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="../classroom.html" class="nav-btn">🏫 返回教學工具大廳</a>
+      <div class="brand-title">🎰 課堂超級抽籤機 × 討論倒數燈箱</div>
+    </div>
+    <div class="topbar-right">
+      <button id="btnSoundToggle" class="nav-btn" type="button">🔊 音效：開啟</button>
+      <button id="btnFullscreen" class="nav-btn" type="button">⛶ 全螢幕</button>
+    </div>
+  </header>
+
+  <!-- Main Stage -->
+  <main class="arcade-stage">
+    <!-- ==================== LEFT: LOTTERY MACHINE ==================== -->
+    <section id="lotteryCabinet" class="cabinet">
+      <div>
+        <div class="marquee-bulbs" aria-hidden="true">
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span>
+        </div>
+
+        <div class="cabinet-header">
+          <h1 class="cabinet-title">🎲 幸運回答抽籤機</h1>
+          <div class="mode-tabs" role="tablist" aria-label="抽籤模式">
+            <button id="tabIndividual" class="mode-tab active" type="button" role="tab" aria-selected="true">👤 個人 (1~26)</button>
+            <button id="tabGroup" class="mode-tab" type="button" role="tab" aria-selected="false">👥 小組 (1~6組)</button>
+          </div>
+        </div>
+
+        <!-- Slot Display -->
+        <div class="slot-stage">
+          <div id="slotStatusPill" class="slot-status-pill">✨ 準備就緒！點擊下方按鈕開抽</div>
+
+          <!-- Individual Reel -->
+          <div id="individualReels" class="reels-row">
+            <div id="reelIndividual" class="reel-box">
+              <div class="reel-label">幸運座號</div>
+              <div id="valIndividual" class="reel-value">? 號</div>
+            </div>
+          </div>
+
+          <!-- Group Dual Reels (X組 + Y號) -->
+          <div id="groupReels" class="reels-row hidden">
+            <div id="reelGroupX" class="reel-box">
+              <div class="reel-label">STEP 1 · 組別</div>
+              <div id="valGroupX" class="reel-value">第 ? 組</div>
+            </div>
+            <div id="reelMemberY" class="reel-box">
+              <div class="reel-label">STEP 2 · 組內號次</div>
+              <div id="valMemberY" class="reel-value">? 號</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spin Action -->
+        <div class="spin-controls">
+          <button id="btnSpin" class="btn-spin" type="button">🎰 開始抽籤！</button>
+        </div>
+
+        <!-- Options & Pool Status -->
+        <div class="picker-toolbar">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button id="btnNoRepeat" class="toggle-chip on" type="button">🔒 不重複抽籤：開</button>
+            <button id="btnResetDrawn" class="mini-btn" type="button">🔄 重置已抽名單</button>
+            <button id="btnClearAbsent" class="mini-btn" type="button">🙋 全部設為出席</button>
+          </div>
+          <div id="poolStats" class="pool-stats">可抽：<strong>26</strong> / 26 人</div>
+        </div>
+      </div>
+
+      <!-- Attendance & Drawn Roster -->
+      <div>
+        <div class="roster-hint">
+          <span>💡 點擊號碼可標記 <strong>請假／跳過</strong>（再點一次恢復出席）</span>
+          <span style="color:#7df6ff;">✓ 已抽過 &nbsp;|&nbsp; 休 請假</span>
+        </div>
+        <div id="individualRoster" class="individual-grid"></div>
+        <div id="groupRoster" class="groups-grid hidden"></div>
+      </div>
+    </section>
+
+    <!-- ==================== RIGHT: COUNTDOWN TIMER ==================== -->
+    <section id="timerCabinet" class="cabinet cabinet-timer">
+      <div>
+        <div class="marquee-bulbs" aria-hidden="true">
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+          <span class="bulb"></span><span class="bulb"></span>
+        </div>
+
+        <div class="cabinet-header">
+          <h2 class="cabinet-title">⏱️ 小組討論倒數燈箱</h2>
+          <button id="btnPreviewAlarm" class="mini-btn" type="button">🔔 試聽鈴聲</button>
+        </div>
+
+        <!-- Timer LED Box -->
+        <div id="timerDisplayBox" class="timer-display-box">
+          <div id="plusToast" class="plus-toast">+1 分鐘！</div>
+          <div id="timerBadge" class="timer-badge">準備倒數 · 3 分鐘</div>
+          <div id="timerDigits" class="timer-digits">03:00</div>
+          <div class="progress-track">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- Preset Buttons (3 min / 5 min) directly below timer -->
+        <div class="preset-row">
+          <button id="btnPreset3" class="btn-preset selected" type="button">⚡ 3 分鐘</button>
+          <button id="btnPreset5" class="btn-preset" type="button">🔥 5 分鐘</button>
+        </div>
+
+        <!-- Start / Reset / +1 Min -->
+        <div class="timer-actions">
+          <button id="btnTimerStart" class="btn-timer-start" type="button">▶ 開始倒數</button>
+          <button id="btnTimerReset" class="btn-timer-reset" type="button">↺ 重設</button>
+          <button id="btnPlusOne" class="btn-plus-one" type="button">➕ 臨時+1分鐘</button>
+        </div>
+      </div>
+
+      <!-- Bell Sound Selector -->
+      <div class="bell-bar">
+        <span style="font-size:13.5px; font-weight:800; color:var(--text-dim);">🔊 結束鈴聲風格：</span>
+        <div class="bell-options">
+          <button class="bell-chip active" data-bell="school" type="button">🔔 連環電鈴</button>
+          <button class="bell-chip" data-bell="quiz" type="button">🚨 綜藝警報</button>
+          <button class="bell-chip" data-bell="fanfare" type="button">🎺 派對號角</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== EXTREME TIME'S UP OVERLAY ==================== -->
+  <div id="timesupOverlay" class="timesup-overlay" role="dialog" aria-modal="true" aria-labelledby="timesupText">
+    <div class="timesup-beams" aria-hidden="true"></div>
+    <div class="timesup-strobe-frame" aria-hidden="true"></div>
+    <div class="timesup-content">
+      <div class="timesup-emoji-row">🚨🔔📢💥⚡</div>
+      <div id="timesupText" class="timesup-mega-text">討論結束！</div>
+      <div class="timesup-sub">⏰ 時間到！請立刻停下手邊動作，眼睛看前面！</div>
+    </div>
+    <button id="btnDismissAlarm" class="btn-dismiss-alarm" type="button">✋ 收到！關閉鈴聲與提醒</button>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // ==================== DATA DEFINITIONS ====================
+      const TOTAL_STUDENTS = 26;
+      const GROUP_CONFIG = [
+        { group: 1, count: 4 },
+        { group: 2, count: 4 },
+        { group: 3, count: 4 },
+        { group: 4, count: 5 },
+        { group: 5, count: 5 },
+        { group: 6, count: 4 }
+      ];
+
+      const STORAGE_KEY = 'weizhen_class_picker_v1';
+
+      const state = {
+        mode: 'individual', // 'individual' | 'group'
+        noRepeat: true,
+        soundEnabled: true,
+        bellStyle: 'school', // 'school' | 'quiz' | 'fanfare'
+        isSpinning: false,
+
+        // Individual state
+        indivAbsent: new Set(),
+        indivDrawn: new Set(),
+        indivCurrent: null,
+
+        // Group state: keys like "1-3" (group 1, member 3)
+        groupAbsent: new Set(),
+        groupDrawn: new Set(),
+        groupCurrent: null, // { group, member }
+
+        // Timer state
+        presetSeconds: 180,
+        totalSeconds: 180,
+        remainingSeconds: 180,
+        timerRunning: false,
+        timerInterval: null,
+        lastTickSecond: null,
+        alarmLoopTimer: null,
+        confettiActive: false
+      };
+
+      // ==================== DOM ELEMENTS ====================
+      const el = {
+        btnSoundToggle: document.getElementById('btnSoundToggle'),
+        btnFullscreen: document.getElementById('btnFullscreen'),
+        lotteryCabinet: document.getElementById('lotteryCabinet'),
+        timerCabinet: document.getElementById('timerCabinet'),
+
+        tabIndividual: document.getElementById('tabIndividual'),
+        tabGroup: document.getElementById('tabGroup'),
+        slotStatusPill: document.getElementById('slotStatusPill'),
+        individualReels: document.getElementById('individualReels'),
+        groupReels: document.getElementById('groupReels'),
+        reelIndividual: document.getElementById('reelIndividual'),
+        valIndividual: document.getElementById('valIndividual'),
+        reelGroupX: document.getElementById('reelGroupX'),
+        valGroupX: document.getElementById('valGroupX'),
+        reelMemberY: document.getElementById('reelMemberY'),
+        valMemberY: document.getElementById('valMemberY'),
+        btnSpin: document.getElementById('btnSpin'),
+        btnNoRepeat: document.getElementById('btnNoRepeat'),
+        btnResetDrawn: document.getElementById('btnResetDrawn'),
+        btnClearAbsent: document.getElementById('btnClearAbsent'),
+        poolStats: document.getElementById('poolStats'),
+        individualRoster: document.getElementById('individualRoster'),
+        groupRoster: document.getElementById('groupRoster'),
+
+        timerDisplayBox: document.getElementById('timerDisplayBox'),
+        plusToast: document.getElementById('plusToast'),
+        timerBadge: document.getElementById('timerBadge'),
+        timerDigits: document.getElementById('timerDigits'),
+        progressFill: document.getElementById('progressFill'),
+        btnPreset3: document.getElementById('btnPreset3'),
+        btnPreset5: document.getElementById('btnPreset5'),
+        btnTimerStart: document.getElementById('btnTimerStart'),
+        btnTimerReset: document.getElementById('btnTimerReset'),
+        btnPlusOne: document.getElementById('btnPlusOne'),
+        btnPreviewAlarm: document.getElementById('btnPreviewAlarm'),
+        bellChips: document.querySelectorAll('.bell-chip'),
+
+        timesupOverlay: document.getElementById('timesupOverlay'),
+        btnDismissAlarm: document.getElementById('btnDismissAlarm'),
+        confettiCanvas: document.getElementById('confettiCanvas')
+      };
+
+      // ==================== PERSISTENCE ====================
+      function loadSavedState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          if (Array.isArray(saved.indivAbsent)) state.indivAbsent = new Set(saved.indivAbsent);
+          if (Array.isArray(saved.groupAbsent)) state.groupAbsent = new Set(saved.groupAbsent);
+          if (typeof saved.noRepeat === 'boolean') state.noRepeat = saved.noRepeat;
+          if (typeof saved.bellStyle === 'string') state.bellStyle = saved.bellStyle;
+        } catch (_) {
+          // Ignore malformed storage
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            indivAbsent: Array.from(state.indivAbsent),
+            groupAbsent: Array.from(state.groupAbsent),
+            noRepeat: state.noRepeat,
+            bellStyle: state.bellStyle
+          }));
+        } catch (_) {
+          // Ignore storage quota errors
+        }
+      }
+
+      // ==================== WEB AUDIO API SYNTHESIZER ====================
+      let audioCtx = null;
+
+      function getAudioContext() {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) audioCtx = new Ctx();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function playTone(freq, duration, type = 'sine', volume = 0.2, delay = 0) {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      function playSpinTick(pitchBoost = 0) {
+        playTone(480 + pitchBoost, 0.045, 'triangle', 0.1);
+      }
+
+      function playStageLockSound() {
+        // Dramatic game-show lock chime for X group
+        playTone(523.25, 0.16, 'triangle', 0.25, 0);
+        playTone(783.99, 0.28, 'triangle', 0.28, 0.08);
+      }
+
+      function playWinnerFanfare() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((f, idx) => {
+          playTone(f, idx === 3 ? 0.45 : 0.14, 'triangle', 0.24, idx * 0.085);
+        });
+      }
+
+      function playCountdownBeep(urgent = false) {
+        playTone(urgent ? 980 : 720, urgent ? 0.11 : 0.07, 'square', urgent ? 0.12 : 0.07);
+      }
+
+      function playPlusOneSound() {
+        playTone(587.33, 0.1, 'sine', 0.2, 0);
+        playTone(880, 0.18, 'sine', 0.22, 0.08);
+      }
+
+      function playAlarmBurst() {
+        if (!state.soundEnabled) return;
+        const style = state.bellStyle;
+
+        if (style === 'school') {
+          // Rapid metallic electric school bell rings
+          for (let i = 0; i < 12; i++) {
+            playTone(i % 2 === 0 ? 1320 : 1480, 0.07, 'triangle', 0.28, i * 0.075);
+            playTone(i % 2 === 0 ? 2640 : 2960, 0.05, 'sine', 0.12, i * 0.075);
+          }
+        } else if (style === 'quiz') {
+          // High-energy TV game show siren
+          for (let i = 0; i < 6; i++) {
+            playTone(i % 2 === 0 ? 880 : 660, 0.14, 'sawtooth', 0.16, i * 0.15);
+          }
+        } else {
+          // Party brass fanfare
+          const chord = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+          chord.forEach((f, i) => {
+            playTone(f, i === chord.length - 1 ? 0.4 : 0.13, 'sawtooth', 0.15, i * 0.12);
+          });
+        }
+      }
+
+      // ==================== CONFETTI ENGINE ====================
+      const confettiParticles = [];
+      const confettiColors = ['#ffe600', '#ff2a85', '#00f0ff', '#39ff14', '#ff9d00', '#ffffff'];
+
+      function launchConfetti(count = 90) {
+        const canvas = el.confettiCanvas;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        for (let i = 0; i < count; i++) {
+          confettiParticles.push({
+            x: canvas.width * (0.2 + Math.random() * 0.6),
+            y: canvas.height * (0.2 + Math.random() * 0.35),
+            vx: (Math.random() - 0.5) * 16,
+            vy: -Math.random() * 14 - 4,
+            size: Math.random() * 9 + 5,
+            color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+            rot: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.28,
+            life: 1
+          });
+        }
+        if (!state.confettiActive) {
+          state.confettiActive = true;
+          requestAnimationFrame(stepConfetti);
+        }
+      }
+
+      function stepConfetti() {
+        const canvas = el.confettiCanvas;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = confettiParticles.length - 1; i >= 0; i--) {
+          const p = confettiParticles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.38;
+          p.rot += p.vRot;
+          p.life -= 0.011;
+
+          if (p.life <= 0 || p.y > canvas.height + 40) {
+            confettiParticles.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size * 0.6);
+          ctx.restore();
+        }
+
+        if (confettiParticles.length > 0) {
+          requestAnimationFrame(stepConfetti);
+        } else {
+          state.confettiActive = false;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      // ==================== LOTTERY LOGIC ====================
+      function getAvailableIndividuals() {
+        const list = [];
+        for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+          if (state.indivAbsent.has(i)) continue;
+          if (state.noRepeat && state.indivDrawn.has(i)) continue;
+          list.push(i);
+        }
+        return list;
+      }
+
+      function getPresentIndividualsCount() {
+        let n = 0;
+        for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+          if (!state.indivAbsent.has(i)) n++;
+        }
+        return n;
+      }
+
+      function getAvailableGroupMembers(groupNum) {
+        const cfg = GROUP_CONFIG.find(g => g.group === groupNum);
+        if (!cfg) return [];
+        const list = [];
+        for (let m = 1; m <= cfg.count; m++) {
+          const key = `${groupNum}-${m}`;
+          if (state.groupAbsent.has(key)) continue;
+          if (state.noRepeat && state.groupDrawn.has(key)) continue;
+          list.push(m);
+        }
+        return list;
+      }
+
+      function getAvailableGroups() {
+        return GROUP_CONFIG
+          .map(g => g.group)
+          .filter(groupNum => getAvailableGroupMembers(groupNum).length > 0);
+      }
+
+      function getPresentGroupMembersCount() {
+        let n = 0;
+        for (const cfg of GROUP_CONFIG) {
+          for (let m = 1; m <= cfg.count; m++) {
+            if (!state.groupAbsent.has(`${cfg.group}-${m}`)) n++;
+          }
+        }
+        return n;
+      }
+
+      function getAvailableGroupMembersTotal() {
+        return GROUP_CONFIG.reduce((sum, cfg) => sum + getAvailableGroupMembers(cfg.group).length, 0);
+      }
+
+      function renderRoster() {
+        // Update toolbar toggle & stats
+        el.btnNoRepeat.classList.toggle('on', state.noRepeat);
+        el.btnNoRepeat.textContent = state.noRepeat ? '🔒 不重複抽籤：開' : '♾️ 不重複抽籤：關';
+
+        if (state.mode === 'individual') {
+          el.individualRoster.classList.remove('hidden');
+          el.groupRoster.classList.add('hidden');
+          el.individualReels.classList.remove('hidden');
+          el.groupReels.classList.add('hidden');
+
+          const avail = getAvailableIndividuals().length;
+          const present = getPresentIndividualsCount();
+          el.poolStats.innerHTML = `可抽：<strong>${avail}</strong> / ${present} 位出席`;
+
+          el.individualRoster.innerHTML = '';
+          for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'seat-chip';
+            btn.textContent = i;
+            if (state.indivAbsent.has(i)) btn.classList.add('absent');
+            else if (state.indivCurrent === i) btn.classList.add('current-winner');
+            else if (state.indivDrawn.has(i)) btn.classList.add('drawn');
+
+            btn.title = state.indivAbsent.has(i) ? `${i}號（請假中，點擊恢復出席）` : `點擊將 ${i}號 設為請假/出席`;
+            btn.addEventListener('click', () => {
+              if (state.isSpinning) return;
+              if (state.indivAbsent.has(i)) state.indivAbsent.delete(i);
+              else state.indivAbsent.add(i);
+              saveState();
+              renderRoster();
+            });
+            el.individualRoster.appendChild(btn);
+          }
+        } else {
+          el.individualRoster.classList.add('hidden');
+          el.groupRoster.classList.remove('hidden');
+          el.individualReels.classList.add('hidden');
+          el.groupReels.classList.remove('hidden');
+
+          const avail = getAvailableGroupMembersTotal();
+          const present = getPresentGroupMembersCount();
+          el.poolStats.innerHTML = `可抽：<strong>${avail}</strong> / ${present} 位組員`;
+
+          el.groupRoster.innerHTML = '';
+          for (const cfg of GROUP_CONFIG) {
+            const card = document.createElement('div');
+            card.className = 'group-card';
+            if (state.groupCurrent && state.groupCurrent.group === cfg.group) {
+              card.classList.add('active-group');
+            }
+
+            const title = document.createElement('div');
+            title.className = 'group-card-title';
+            title.innerHTML = `<span>第 ${cfg.group} 組</span><span style="color:var(--text-dim);font-size:11px;">1~${cfg.count}號</span>`;
+            card.appendChild(title);
+
+            const membersWrap = document.createElement('div');
+            membersWrap.className = 'group-members';
+
+            for (let m = 1; m <= cfg.count; m++) {
+              const key = `${cfg.group}-${m}`;
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'seat-chip group-seat';
+              btn.textContent = m;
+
+              if (state.groupAbsent.has(key)) btn.classList.add('absent');
+              else if (state.groupCurrent && state.groupCurrent.group === cfg.group && state.groupCurrent.member === m) {
+                btn.classList.add('current-winner');
+              } else if (state.groupDrawn.has(key)) {
+                btn.classList.add('drawn');
+              }
+
+              btn.title = `第 ${cfg.group} 組 ${m} 號（點擊切換請假/出席）`;
+              btn.addEventListener('click', () => {
+                if (state.isSpinning) return;
+                if (state.groupAbsent.has(key)) state.groupAbsent.delete(key);
+                else state.groupAbsent.add(key);
+                saveState();
+                renderRoster();
+              });
+              membersWrap.appendChild(btn);
+            }
+            card.appendChild(membersWrap);
+            el.groupRoster.appendChild(card);
+          }
+        }
+      }
+
+      function setSpinUIState(spinning) {
+        state.isSpinning = spinning;
+        el.btnSpin.disabled = spinning;
+        el.tabIndividual.disabled = spinning;
+        el.tabGroup.disabled = spinning;
+        el.lotteryCabinet.classList.toggle('is-active', spinning);
+        el.btnSpin.textContent = spinning ? '🌀 緊張開獎中...' : '🎰 開始抽籤！';
+      }
+
+      function runIndividualSpin() {
+        const pool = getAvailableIndividuals();
+        if (pool.length === 0) {
+          const present = getPresentIndividualsCount();
+          if (present === 0) {
+            el.slotStatusPill.className = 'slot-status-pill dramatic';
+            el.slotStatusPill.textContent = '⚠️ 目前所有座號皆設為請假，請先點選恢復出席！';
+          } else {
+            el.slotStatusPill.className = 'slot-status-pill dramatic';
+            el.slotStatusPill.textContent = '🎉 全班出席同學都已抽過！請點「重置已抽名單」再抽一輪';
+          }
+          return;
+        }
+
+        const winner = pool[Math.floor(Math.random() * pool.length)];
+        setSpinUIState(true);
+        el.reelIndividual.classList.remove('locked');
+        el.reelIndividual.classList.add('spinning');
+        el.slotStatusPill.className = 'slot-status-pill dramatic';
+        el.slotStatusPill.textContent = '🥁 幸運轉盤高速旋轉中...';
+
+        const startTime = performance.now();
+        const duration = 2000;
+        let lastStep = 0;
+
+        function frame(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          // Ease out step interval from 45ms -> 220ms
+          const interval = 45 + Math.pow(progress, 2.2) * 180;
+
+          if (now - lastStep >= interval && progress < 1) {
+            lastStep = now;
+            const preview = pool[Math.floor(Math.random() * pool.length)];
+            el.valIndividual.textContent = `${preview} 號`;
+            playSpinTick(progress * 220);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            el.reelIndividual.classList.remove('spinning');
+            el.reelIndividual.classList.add('locked');
+            el.valIndividual.textContent = `${winner} 號`;
+
+            state.indivCurrent = winner;
+            if (state.noRepeat) state.indivDrawn.add(winner);
+
+            el.slotStatusPill.className = 'slot-status-pill winner';
+            el.slotStatusPill.textContent = `🎊 恭喜 ${winner} 號同學中選！請起立回答`;
+            playWinnerFanfare();
+            launchConfetti(85);
+            setSpinUIState(false);
+            renderRoster();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      function runGroupTwoStepSpin() {
+        const availableGroups = getAvailableGroups();
+        if (availableGroups.length === 0) {
+          const present = getPresentGroupMembersCount();
+          if (present === 0) {
+            el.slotStatusPill.className = 'slot-status-pill dramatic';
+            el.slotStatusPill.textContent = '⚠️ 目前所有組員皆設為請假，請先點選恢復出席！';
+          } else {
+            el.slotStatusPill.className = 'slot-status-pill dramatic';
+            el.slotStatusPill.textContent = '🎉 全班所有小組組員都已抽過！請點「重置已抽名單」';
+          }
+          return;
+        }
+
+        // Pre-pick final group X and member Y within X
+        const chosenGroup = availableGroups[Math.floor(Math.random() * availableGroups.length)];
+        const memberPool = getAvailableGroupMembers(chosenGroup);
+        const chosenMember = memberPool[Math.floor(Math.random() * memberPool.length)];
+        const groupMaxCount = GROUP_CONFIG.find(g => g.group === chosenGroup).count;
+
+        setSpinUIState(true);
+        el.reelGroupX.classList.remove('locked');
+        el.reelMemberY.classList.remove('locked');
+        el.reelGroupX.classList.add('spinning');
+        el.reelMemberY.classList.add('spinning');
+
+        el.slotStatusPill.className = 'slot-status-pill dramatic';
+        el.slotStatusPill.textContent = '🔥 雙轉輪啟動！X 組與 Y 號同時飛速跑動中...';
+
+        // Phase 1: Both X and Y spin simultaneously (~1600ms), then X locks!
+        // Phase 2: After X stops, Y keeps spinning for ~3000ms before stopping!
+        const PHASE1_DURATION = 1600;
+        const PHASE2_DURATION = 3000;
+        const startTime = performance.now();
+        let xLocked = false;
+        let lastXStep = 0;
+        let lastYStep = 0;
+
+        function frame(now) {
+          const elapsed = now - startTime;
+
+          if (!xLocked) {
+            const p1 = Math.min(1, elapsed / PHASE1_DURATION);
+            const xInterval = 55 + Math.pow(p1, 2) * 140;
+            if (now - lastXStep >= xInterval && p1 < 1) {
+              lastXStep = now;
+              const randG = availableGroups[Math.floor(Math.random() * availableGroups.length)];
+              el.valGroupX.textContent = `第 ${randG} 組`;
+            }
+
+            // Y spins fast concurrently across 1~5
+            if (now - lastYStep >= 60) {
+              lastYStep = now;
+              const randM = Math.floor(Math.random() * 5) + 1;
+              el.valMemberY.textContent = `${randM} 號`;
+              playSpinTick(80);
+            }
+
+            if (elapsed >= PHASE1_DURATION) {
+              xLocked = true;
+              el.reelGroupX.classList.remove('spinning');
+              el.reelGroupX.classList.add('locked');
+              el.valGroupX.textContent = `第 ${chosenGroup} 組`;
+              playStageLockSound();
+
+              el.slotStatusPill.className = 'slot-status-pill dramatic';
+              el.slotStatusPill.textContent = `⚡ 「第 ${chosenGroup} 組」已鎖定！3 秒後揭曉幾號同學...`;
+            }
+
+            requestAnimationFrame(frame);
+            return;
+          }
+
+          // Phase 2: X is locked, Y spins for ~3 seconds within chosenGroup's range
+          const p2Elapsed = elapsed - PHASE1_DURATION;
+          const p2 = Math.min(1, p2Elapsed / PHASE2_DURATION);
+          // Stay fast for the first 2 seconds, then dramatic deceleration in the last 1 second
+          const yInterval = p2 < 0.65
+            ? 65
+            : 65 + Math.pow((p2 - 0.65) / 0.35, 2) * 230;
+
+          if (now - lastYStep >= yInterval && p2 < 1) {
+            lastYStep = now;
+            const poolForDisplay = memberPool.length > 1
+              ? memberPool
+              : Array.from({ length: groupMaxCount }, (_, idx) => idx + 1);
+            const randM = poolForDisplay[Math.floor(Math.random() * poolForDisplay.length)];
+            el.valMemberY.textContent = `${randM} 號`;
+            playSpinTick(180 + p2 * 260);
+          }
+
+          if (p2 < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            el.reelMemberY.classList.remove('spinning');
+            el.reelMemberY.classList.add('locked');
+            el.valMemberY.textContent = `${chosenMember} 號`;
+
+            state.groupCurrent = { group: chosenGroup, member: chosenMember };
+            if (state.noRepeat) state.groupDrawn.add(`${chosenGroup}-${chosenMember}`);
+
+            el.slotStatusPill.className = 'slot-status-pill winner';
+            el.slotStatusPill.textContent = `🎊 揭曉！請「第 ${chosenGroup} 組 — ${chosenMember} 號」回答！`;
+            playWinnerFanfare();
+            launchConfetti(105);
+            setSpinUIState(false);
+            renderRoster();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      // ==================== TIMER LOGIC ====================
+      function formatTime(sec) {
+        const safe = Math.max(0, Math.ceil(sec));
+        const m = Math.floor(safe / 60);
+        const s = safe % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+
+      function updateTimerUI() {
+        const rem = Math.max(0, state.remainingSeconds);
+        el.timerDigits.textContent = formatTime(rem);
+
+        const pct = state.totalSeconds > 0 ? Math.min(100, (rem / state.totalSeconds) * 100) : 0;
+        el.progressFill.style.width = `${pct}%`;
+
+        el.timerDisplayBox.classList.remove('state-warning', 'state-danger');
+        if (rem > 0 && rem <= 10) {
+          el.timerDisplayBox.classList.add('state-danger');
+        } else if (rem > 10 && rem <= 30) {
+          el.timerDisplayBox.classList.add('state-warning');
+        }
+
+        el.btnTimerStart.classList.toggle('running', state.timerRunning);
+        el.timerCabinet.classList.toggle('is-active', state.timerRunning);
+        if (state.timerRunning) {
+          el.btnTimerStart.textContent = '⏸ 暫停討論';
+          el.timerBadge.textContent = '🔥 小組熱烈討論中...';
+        } else if (rem === 0) {
+          el.btnTimerStart.textContent = '▶ 重新開始';
+          el.timerBadge.textContent = '⏰ 討論時間結束';
+        } else if (rem < state.totalSeconds) {
+          el.btnTimerStart.textContent = '▶ 繼續倒數';
+          el.timerBadge.textContent = '⏸ 已暫停';
+        } else {
+          el.btnTimerStart.textContent = '▶ 開始倒數';
+          const mins = Math.round(state.presetSeconds / 60);
+          el.timerBadge.textContent = `準備倒數 · ${mins} 分鐘`;
+        }
+      }
+
+      function stopTimerInterval() {
+        if (state.timerInterval) {
+          clearInterval(state.timerInterval);
+          state.timerInterval = null;
+        }
+        state.timerRunning = false;
+      }
+
+      function setPresetTime(seconds) {
+        stopTimerInterval();
+        dismissAlarm();
+        state.presetSeconds = seconds;
+        state.totalSeconds = seconds;
+        state.remainingSeconds = seconds;
+        state.lastTickSecond = null;
+
+        el.btnPreset3.classList.toggle('selected', seconds === 180);
+        el.btnPreset5.classList.toggle('selected', seconds === 300);
+        updateTimerUI();
+      }
+
+      function startTimer() {
+        getAudioContext();
+        if (state.remainingSeconds <= 0) {
+          state.remainingSeconds = state.presetSeconds;
+          state.totalSeconds = state.presetSeconds;
+        }
+
+        state.timerRunning = true;
+        let lastTime = performance.now();
+        state.lastTickSecond = Math.ceil(state.remainingSeconds);
+
+        state.timerInterval = setInterval(() => {
+          const now = performance.now();
+          const dt = (now - lastTime) / 1000;
+          lastTime = now;
+
+          state.remainingSeconds = Math.max(0, state.remainingSeconds - dt);
+          const ceilSec = Math.ceil(state.remainingSeconds);
+
+          if (ceilSec !== state.lastTickSecond && ceilSec > 0 && ceilSec <= 10) {
+            state.lastTickSecond = ceilSec;
+            playCountdownBeep(ceilSec <= 3);
+          }
+
+          if (state.remainingSeconds <= 0) {
+            state.remainingSeconds = 0;
+            stopTimerInterval();
+            updateTimerUI();
+            triggerTimesUp();
+          } else {
+            updateTimerUI();
+          }
+        }, 100);
+
+        updateTimerUI();
+      }
+
+      function addOneMinute() {
+        getAudioContext();
+        dismissAlarm();
+        state.remainingSeconds += 60;
+        if (state.remainingSeconds > state.totalSeconds) {
+          state.totalSeconds = state.remainingSeconds;
+        }
+        state.lastTickSecond = Math.ceil(state.remainingSeconds);
+        playPlusOneSound();
+
+        // Trigger "+1 分鐘！" toast animation
+        el.plusToast.classList.remove('show');
+        void el.plusToast.offsetWidth;
+        el.plusToast.classList.add('show');
+
+        updateTimerUI();
+      }
+
+      function triggerTimesUp() {
+        el.timesupOverlay.classList.add('active');
+        launchConfetti(140);
+        playAlarmBurst();
+
+        if (state.alarmLoopTimer) clearInterval(state.alarmLoopTimer);
+        state.alarmLoopTimer = setInterval(() => {
+          if (!el.timesupOverlay.classList.contains('active')) return;
+          playAlarmBurst();
+          launchConfetti(60);
+        }, 1500);
+      }
+
+      function dismissAlarm() {
+        el.timesupOverlay.classList.remove('active');
+        if (state.alarmLoopTimer) {
+          clearInterval(state.alarmLoopTimer);
+          state.alarmLoopTimer = null;
+        }
+      }
+
+      // ==================== EVENT LISTENERS ====================
+      el.btnSoundToggle.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        el.btnSoundToggle.textContent = state.soundEnabled ? '🔊 音效：開啟' : '🔇 音效：靜音';
+        if (state.soundEnabled) {
+          getAudioContext();
+          playPlusOneSound();
+        }
+      });
+
+      el.btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().catch(() => {});
+        } else {
+          document.exitFullscreen?.().catch(() => {});
+        }
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        el.btnFullscreen.textContent = document.fullscreenElement ? '🗗 退出全螢幕' : '⛶ 全螢幕';
+      });
+
+      // Lottery Mode Switching
+      el.tabIndividual.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        state.mode = 'individual';
+        el.tabIndividual.classList.add('active');
+        el.tabGroup.classList.remove('active');
+        el.tabIndividual.setAttribute('aria-selected', 'true');
+        el.tabGroup.setAttribute('aria-selected', 'false');
+        el.slotStatusPill.className = 'slot-status-pill';
+        el.slotStatusPill.textContent = '✨ 個人抽籤模式（1～26 號）準備就緒';
+        renderRoster();
+      });
+
+      el.tabGroup.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        state.mode = 'group';
+        el.tabGroup.classList.add('active');
+        el.tabIndividual.classList.remove('active');
+        el.tabGroup.setAttribute('aria-selected', 'true');
+        el.tabIndividual.setAttribute('aria-selected', 'false');
+        el.slotStatusPill.className = 'slot-status-pill';
+        el.slotStatusPill.textContent = '✨ 小組抽籤模式：先停 X 組，3 秒後再停 Y 號！';
+        renderRoster();
+      });
+
+      el.btnSpin.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        getAudioContext();
+        if (state.mode === 'individual') runIndividualSpin();
+        else runGroupTwoStepSpin();
+      });
+
+      el.btnNoRepeat.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        state.noRepeat = !state.noRepeat;
+        saveState();
+        renderRoster();
+      });
+
+      el.btnResetDrawn.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        if (state.mode === 'individual') {
+          state.indivDrawn.clear();
+          state.indivCurrent = null;
+          el.reelIndividual.classList.remove('locked');
+          el.valIndividual.textContent = '? 號';
+        } else {
+          state.groupDrawn.clear();
+          state.groupCurrent = null;
+          el.reelGroupX.classList.remove('locked');
+          el.reelMemberY.classList.remove('locked');
+          el.valGroupX.textContent = '第 ? 組';
+          el.valMemberY.textContent = '? 號';
+        }
+        el.slotStatusPill.className = 'slot-status-pill';
+        el.slotStatusPill.textContent = '🔄 已重置抽籤紀錄，全員重新洗牌！';
+        renderRoster();
+      });
+
+      el.btnClearAbsent.addEventListener('click', () => {
+        if (state.isSpinning) return;
+        if (state.mode === 'individual') state.indivAbsent.clear();
+        else state.groupAbsent.clear();
+        saveState();
+        el.slotStatusPill.className = 'slot-status-pill';
+        el.slotStatusPill.textContent = '🙋 已將目前模式全部設為出席！';
+        renderRoster();
+      });
+
+      // Timer Controls
+      el.btnPreset3.addEventListener('click', () => setPresetTime(180));
+      el.btnPreset5.addEventListener('click', () => setPresetTime(300));
+
+      el.btnTimerStart.addEventListener('click', () => {
+        if (state.timerRunning) {
+          stopTimerInterval();
+          updateTimerUI();
+        } else {
+          startTimer();
+        }
+      });
+
+      el.btnTimerReset.addEventListener('click', () => {
+        setPresetTime(state.presetSeconds);
+      });
+
+      el.btnPlusOne.addEventListener('click', addOneMinute);
+
+      el.btnPreviewAlarm.addEventListener('click', () => {
+        getAudioContext();
+        playAlarmBurst();
+      });
+
+      el.bellChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          state.bellStyle = chip.dataset.bell;
+          el.bellChips.forEach(c => c.classList.toggle('active', c.dataset.bell === state.bellStyle));
+          saveState();
+          getAudioContext();
+          playAlarmBurst();
+        });
+      });
+
+      el.btnDismissAlarm.addEventListener('click', dismissAlarm);
+      el.timesupOverlay.addEventListener('click', (e) => {
+        if (e.target === el.timesupOverlay || e.target.closest('.timesup-content')) {
+          dismissAlarm();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && el.timesupOverlay.classList.contains('active')) {
+          dismissAlarm();
+        }
+      });
+
+      // ==================== INITIALIZE ====================
+      loadSavedState();
+      el.bellChips.forEach(c => c.classList.toggle('active', c.dataset.bell === state.bellStyle));
+      renderRoster();
+      updateTimerUI();
+    })();
+  </script>
+</body>
+</html>
